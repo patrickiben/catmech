@@ -86,3 +86,26 @@ test_that("prespecified scenarios and common data cannot be silently omitted", {
   expect_error(catmech_sensitivity(list(a=fit),outcome~lab_value,"lab_value",
                                   expected_scenarios="b"),"unplanned")
 })
+
+test_that("complete-data pooling uses the ordinary regression interval", {
+  d <- simulate_catmech_lab(90, seed=43, missing_rate=0, flag_rate=0)
+  result <- catmech_model(d,"lab_value",c("age","sex","inflammation","outcome"),m=4)
+  formula <- outcome ~ lab_value + age + sex + inflammation
+  expected <- lm(formula,data=d)
+  pooled <- catmech_pool_lm(result,formula)
+  expect_equal(pooled$df,rep(df.residual(expected),nrow(pooled)))
+  expect_equal(unname(as.matrix(pooled[c("lower","upper")])),unname(confint(expected)))
+  result$completed[[2]]$lab_value[1] <- result$completed[[2]]$lab_value[1]+1
+  expect_error(catmech_pool_lm(result,formula),"No-imputation metadata")
+})
+
+test_that("zero empirical between-imputation variance is not complete data", {
+  result <- analysis_fixture()
+  result$completed <- rep(result$completed[1],length(result$completed))
+  formula <- outcome ~ lab_value + age + sex + inflammation
+  pooled <- catmech_pool_lm(result,formula)
+  fit <- lm(formula,data=result$completed[[1]])
+  expect_true(all(pooled$df < df.residual(fit)))
+  result$manifest$engine <- "unregistered_future_engine"
+  expect_error(catmech_pool_lm(result,formula,allow_sensitivity=TRUE),"Unrecognized")
+})

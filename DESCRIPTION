@@ -1,15 +1,16 @@
 Package: catmech
 Title: Auditable Model-Based Imputation and Category Sensitivity
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: person("Patrick", "Iben", role = c("aut", "cre"),
     email = "295464172+patrickiben@users.noreply.github.com")
-Description: Auditable Gaussian imputation of a continuous measurement with
-    flagged values excluded and optional exact or fallible interval categories.
-    Provides posterior predictive draws, category-likelihood data augmentation,
-    convergence diagnostics, finite-scenario sensitivity comparisons and 'mice'
-    analysis adapters. Retains an explicitly separate experimental predictive
-    mean matching sensitivity engine. Does not identify individual latent truth,
-    estimate corruption probabilities, or guarantee coverage under misspecification.
+Description: Auditable completion of a continuous measurement using Gaussian
+    models, predictive mean matching, or an explicitly measured internal
+    reference subset. Supports flag masking, optional exact or fallible interval
+    categories, posterior draws, convergence and donor-support diagnostics,
+    finite-scenario sensitivity comparisons and 'mice' analysis adapters.
+    Retains a separate retain-or-replace sensitivity engine. Does not identify
+    measurement error without assumptions or reference information, estimate
+    corruption probabilities, or guarantee coverage under misspecification.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 4.1.0)

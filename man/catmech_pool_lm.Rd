@@ -7,7 +7,8 @@
 catmech_pool_lm(result, formula, conf_level = 0.95, allow_sensitivity = FALSE)
 }
 \arguments{
-\item{result}{A catmech_result from [catmech_model()] or [catmech_impute()].}
+\item{result}{A catmech_result from [catmech_model()], [catmech_pmm()],
+[catmech_reference()] or [catmech_impute()].}
 
 \item{formula}{A prespecified formula for [stats::lm()]. Missing analysis
 values are rejected rather than silently dropping records.}
@@ -26,4 +27,11 @@ Uses Rubin's scalar rules with the complete-data residual degrees of freedom.
 A result is conditional on the imputation/analysis models and their assumptions.
 Failed convergence is rejected. The legacy retain/replace sensitivity engine
 requires explicit opt-in and is labeled as sensitivity output.
+}
+\details{
+When the workflow declares that no target cells were imputed, all
+  completed analysis frames must agree and ordinary complete-data t intervals
+  are returned. A zero estimated between-imputation variance alone does not
+  activate this rule. Predictive matching and reference-subset results retain
+  distinct interpretation labels; none guarantees coverage under misspecification.
 }

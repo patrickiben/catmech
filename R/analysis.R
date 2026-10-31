@@ -4,12 +4,18 @@
 #' A result is conditional on the imputation/analysis models and their assumptions.
 #' Failed convergence is rejected. The legacy retain/replace sensitivity engine
 #' requires explicit opt-in and is labeled as sensitivity output.
-#' @param result A catmech_result from [catmech_model()] or [catmech_impute()].
+#' @param result A catmech_result from [catmech_model()], [catmech_pmm()],
+#'   [catmech_reference()] or [catmech_impute()].
 #' @param formula A prespecified formula for [stats::lm()]. Missing analysis
 #'   values are rejected rather than silently dropping records.
 #' @param conf_level Confidence level between zero and one.
 #' @param allow_sensitivity Explicitly allow pooled calculations for the legacy
 #'   sensitivity engine. This does not establish their inferential validity.
+#' @details When the workflow declares that no target cells were imputed, all
+#'   completed analysis frames must agree and ordinary complete-data t intervals
+#'   are returned. A zero estimated between-imputation variance alone does not
+#'   activate this rule. Predictive matching and reference-subset results retain
+#'   distinct interpretation labels; none guarantees coverage under misspecification.
 #' @return A data.frame with term, estimate, std.error, df, lower, upper,
 #'   within_variance, between_variance, m, n and interpretation.
 #' @export
@@ -22,10 +28,17 @@ catmech_pool_lm <- function(result, formula, conf_level = 0.95,
     stop("conf_level must be strictly between zero and one.", call. = FALSE)
   if (!is.logical(allow_sensitivity) || length(allow_sensitivity) != 1L || is.na(allow_sensitivity))
     stop("allow_sensitivity must be TRUE or FALSE.", call. = FALSE)
-  model_based <- identical(result$manifest$engine, "gaussian_model")
-  if (!model_based && !allow_sensitivity)
+  engine <- result$manifest$engine
+  labels <- c(gaussian_model = "conditional_model_based",
+    trusted_pmm = "conditional_predictive_matching",
+    reference_normal = "conditional_reference_model",
+    reference_pmm = "conditional_reference_matching")
+  recognized <- is.character(engine) && length(engine) == 1L && !is.na(engine) && engine %in% names(labels)
+  if (!is.null(engine) && !recognized)
+    stop("Unrecognized workflow engine; pooled inference is refused.", call. = FALSE)
+  if (!recognized && !allow_sensitivity)
     stop("This is a retain/replace sensitivity result. Set allow_sensitivity=TRUE only for explicitly labeled sensitivity calculations.", call. = FALSE)
-  if (model_based && !isTRUE(result$model_diagnostics$convergence_pass))
+  if (recognized && !isTRUE(result$model_diagnostics$convergence_pass))
     stop("Model convergence checks did not pass; pooled inference is refused.", call. = FALSE)
   if (length(result$completed) < 2L) stop("At least two completed datasets are required.", call. = FALSE)
   fits <- lapply(result$completed, function(d) stats::lm(formula, data = d,
@@ -40,10 +53,29 @@ catmech_pool_lm <- function(result, formula, conf_level = 0.95,
         any(!is.finite(stats::vcov(fit))))
       stop("Every coefficient must be estimable in every completed analysis.", call. = FALSE)
   }
+  # Missingness is workflow metadata, not inferred from coincidentally equal
+  # finite-imputation estimates (which can occur with small donor pools).
+  no_imputation <- FALSE
+  if (recognized) {
+    if (!is.null(result$manifest$imputed_rows)) {
+      no_imputation <- is.numeric(result$manifest$imputed_rows) &&
+        length(result$manifest$imputed_rows) == 0L
+    } else if (identical(engine, "gaussian_model")) {
+      requested <- result$diagnostics$requested
+      no_imputation <- is.numeric(requested) && length(requested) == length(fits) &&
+        all(is.finite(requested) & requested == 0)
+    }
+  }
+  if (no_imputation && !all(vapply(fits, function(f) {
+    identical(stats::model.frame(f), stats::model.frame(fits[[1]]))
+  }, logical(1))))
+    stop("No-imputation metadata conflicts with the completed analysis data.", call. = FALSE)
   output <- lapply(terms, function(term) {
     Q <- vapply(fits, function(f) unname(stats::coef(f)[term]), numeric(1))
     U <- vapply(fits, function(f) unname(stats::vcov(f)[term, term]), numeric(1))
-    pooled <- mice::pool.scalar(Q, U, n = ns[1], k = ns[1] - dfs[1])
+    pooled <- if (no_imputation) list(qbar = Q[1], t = U[1], ubar = U[1],
+                                      b = 0, df = dfs[1]) else
+      mice::pool.scalar(Q, U, n = ns[1], k = ns[1] - dfs[1])
     if (!is.finite(pooled$qbar) || !is.finite(pooled$t) || pooled$t <= 0 ||
         is.na(pooled$df) || pooled$df <= 0)
       stop("Pooled uncertainty is degenerate or nonfinite; a confidence interval cannot be reported.", call. = FALSE)
@@ -53,7 +85,7 @@ catmech_pool_lm <- function(result, formula, conf_level = 0.95,
       lower = pooled$qbar - critical*se, upper = pooled$qbar + critical*se,
       within_variance = pooled$ubar, between_variance = pooled$b,
       m = length(fits), n = ns[1],
-      interpretation = if (model_based) "conditional_model_based" else "sensitivity_only",
+      interpretation = if (recognized) unname(labels[engine]) else "sensitivity_only",
       stringsAsFactors = FALSE)
   })
   do.call(rbind, output)
