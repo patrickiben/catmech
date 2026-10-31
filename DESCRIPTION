@@ -1,0 +1,18 @@
+Package: catmech
+Title: Auditable Sensitivity Completion with Interval Categories
+Version: 0.1.0
+Authors@R: person("Patrick", "Iben", role = c("aut", "cre"),
+    email = "295464172+patrickiben@users.noreply.github.com")
+Description: Experimental sensitivity completion of a continuous measurement
+    using trusted interval categories and quality flags. Combines constrained
+    predictive mean matching, explicit retain-or-replace assumptions, strict
+    input validation, and per-cell audit records. Provides objects compatible
+    with 'mice' analysis tools. Does not identify latent truth, estimate
+    corruption probabilities, or guarantee calibrated inferential intervals.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends: R (>= 4.1.0)
+Imports: digest, jsonlite, mice (>= 3.16.0), stats, truncnorm, utils, yaml
+Suggests: testthat (>= 3.0.0), roxygen2, pkgload
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.1.1

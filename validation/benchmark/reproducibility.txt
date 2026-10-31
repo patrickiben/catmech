@@ -1,0 +1,23 @@
+Benchmark reproducibility verification, 2026-10-31
+
+Primary and fresh-temporary-directory repetition used:
+Rscript tools/benchmark.R 100 10 <new-output-directory>
+
+Five scenarios, 100 independent data sets per scenario, six methods, ten imputations.
+Both R processes exited successfully; both checked their source hashes before and after execution.
+Session records differ in timestamp and elapsed time, as expected; scientific files are compared below.
+
+IDENTICAL replicates.csv SHA256 088c95b16fb62621d3b3dd921d535d492aca4628c04e7e130a4d10af72b21400
+IDENTICAL summary.csv SHA256 1765a278703449a71aabbe6d9e7735118250b328aff87d4f62cafcd0ed92173d
+IDENTICAL paired_comparisons.csv SHA256 842509b8ec3bb9e82a612e5add80b6a444c1cd52c8d2c1f80977f0a8f8d4da6f
+IDENTICAL scenarios.csv SHA256 d242dbdd50d05d52badbd01a33f47f12b52ee2b6b1140088033648ca68e8fc2c
+IDENTICAL source-hashes.csv SHA256 9ce9303ecb8b571db3e68077667f926fb5a6a10d0ff43b68ca76bae9f038c88c
+IDENTICAL RESULTS.md SHA256 404da5ee6ffbde6d29da671ba003c4e0f9f3c24929e448a0327ddbf17e58cd4f
+
+All eight recorded source/metadata files also match the current repository.
+
+Final replicate-level outcomes are byte-identical to the preliminary run, before validation/reporting hardening.
+All 3000 method-by-replicate results succeeded.
+The 100 warning records all concern removal of the constant outlier_flag predictor by ordinary PMM in the missing_only scenario.
+
+This establishes repeatability in the same local environment, not independent implementation agreement or cross-platform validation.

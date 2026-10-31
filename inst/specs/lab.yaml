@@ -1,0 +1,13 @@
+version: "1"
+value: lab_value
+category: lab_category
+levels: [Low, Medium, High]
+thresholds: [-.inf, 5.5, 7.0, .inf]
+flag: outlier_flag
+flag_yes: "Yes"
+flag_no: "No"
+corruption_probability: 1
+conflict_policy: reconstruct
+min_donors: 1
+n_donors: 5
+fallback: error

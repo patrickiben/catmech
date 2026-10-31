@@ -1,0 +1,6 @@
+"scenario","missing_rate","flag_rate","corruption_probability","category_error_rate","error_distribution"
+"missing_only",0.2,0,1,0,"normal"
+"perfect_flags",0.2,0.1,1,0,"normal"
+"false_positive_flags",0.2,0.1,0.5,0,"normal"
+"category_error",0.2,0.1,1,0.1,"normal"
+"heavy_tails",0.2,0.1,1,0,"heavy_tailed"

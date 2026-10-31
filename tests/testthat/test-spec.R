@@ -1,0 +1,42 @@
+test_that("exact thresholds belong to exactly one interval", {
+  t <- c(-Inf, 3.5, 7, Inf)
+  lev <- c("Low", "Medium", "High")
+  b <- make_interval_bounds(t, lev)
+  x <- c(-10, 3.5, 3.5000000001, 7, 7.0000000001, 20)
+  cat <- catmech_derive_category(x, t, lev)
+  expect_equal(as.character(cat), c("Low", "Low", "Medium", "Medium", "High", "High"))
+  membership <- vapply(b, function(z) value_in_bounds(x,z), logical(length(x)))
+  expect_equal(rowSums(membership), rep(1, length(x)))
+  expect_false(value_in_bounds(Inf,b$High))
+  finite <- make_interval_bounds(c(0,1,2), c("A","B"))
+  expect_true(value_in_bounds(0,finite$A))
+  expect_false(value_in_bounds(1,finite$B))
+})
+
+test_that("canonical hash preserves meaning and does not collapse assumptions", {
+  a <- list(z=2, a=list(q=.8, thresholds=c(-Inf, 0, Inf)))
+  b <- list(a=list(thresholds=c(-Inf, 0, Inf),q=.8),z=2L)
+  expect_identical(catmech_hash(a),catmech_hash(b))
+  vals <- list(Inf, -Inf, NA_real_, NaN, "Inf", NULL, 1, 1+1e-12)
+  hashes <- vapply(vals, function(v) catmech_hash(list(value=v)), character(1))
+  expect_length(unique(hashes),length(vals))
+  expect_false(catmech_hash(list(x=c(1,2))) == catmech_hash(list(x=c(2,1))))
+  expect_false(catmech_hash(list(v=c(a=1,b=2))) == catmech_hash(list(v=c(c=1,d=2))))
+  expect_match(catmech_hash(a),"^[0-9a-f]{64}$")
+  s <- catmech_spec("v","c",c("a","b"),c(-Inf,0,Inf))
+  f <- tempfile(fileext=".yaml")
+  writeLines(c('version: "1"','value: v','category: c','levels: [a, b]',
+    'thresholds: [-.inf, 0, .inf]'), f)
+  expect_identical(catmech_hash(s),catmech_hash(read_catmech_spec(f)))
+})
+
+test_that("unsupported or malformed assumptions fail early", {
+  expect_error(catmech_spec("v","c",c("a","b"),c(-Inf,NA,Inf)),"missing")
+  expect_error(catmech_spec("v","c",c("a","a"),c(-Inf,0,Inf)),"unique")
+  expect_error(catmech_spec("v","c",c("a","b"),c(-Inf,Inf,Inf)),"increase")
+  expect_error(catmech_spec("v","c",c("a","b"),c(-Inf,0,Inf),corruption_probability=1.1),"finite scalar")
+  expect_error(catmech_spec("v","c",c("a","b"),c(-Inf,0,Inf),flag="f"),"explicitly")
+  s <- catmech_spec("v","c",c("a","b"),c(-Inf,0,Inf))
+  s$allow_true_extreme <- TRUE
+  expect_error(validate_spec(s),"Unsupported")
+})

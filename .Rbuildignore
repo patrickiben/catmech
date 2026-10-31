@@ -1,0 +1,12 @@
+^renv$
+^renv\.lock$
+^\.git$
+^\.github$
+^\.gitignore$
+^docs$
+^validation$
+^tools$
+^output$
+^LICENSE\.md$
+^CITATION\.cff$
+^CONTRIBUTING\.md$
