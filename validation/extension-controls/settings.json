@@ -1,0 +1,14 @@
+{
+  "mode": "controls",
+  "workers": 4,
+  "m": 20,
+  "donors": 5,
+  "synthetic_n": 300,
+  "reference_n": 600,
+  "primary_reps": 1000,
+  "support_reps": 250,
+  "noisy_gold_reps": 500,
+  "control_reps": 20,
+  "centered_bootstrap_reps": 400,
+  "fixture_master_seed": 390173
+}

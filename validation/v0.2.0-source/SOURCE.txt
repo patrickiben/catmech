@@ -1,0 +1,2 @@
+Frozen v0.2.0 numerical sources from commit d532467f77c0c2d449a39fa10efeb6b7e98f95f5.
+Historical validation hashes refer here after v0.3 changes.

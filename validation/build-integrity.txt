@@ -1,3 +1,3 @@
-Built archive R, Rd, NAMESPACE, README and examples match reviewed source byte for byte.
-DESCRIPTION original fields match after DCF whitespace normalization; R CMD build adds standard NeedsCompilation, Packaged, Author and Maintainer fields.
-SHA256 fcd2aa39ac233d51c27996fb866f7363b070288b7041a2c098f9cd29ee99a1d1  catmech_0.2.0.tar.gz
+R, Rd, NAMESPACE, README and installed examples match the reviewed source byte for byte.
+Original DESCRIPTION fields match after DCF whitespace normalization; only standard R CMD build fields are added.
+SHA256 47af98781d26a674c551ff3b2f7f435a5cacead71550dd1603e86407973b01aa  catmech_0.3.1.tar.gz

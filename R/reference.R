@@ -120,6 +120,16 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #' the same audited standard matching engine as `catmech_pmm`. Both require a
 #' full-rank reference design with positive residual degrees of freedom and
 #' variance. Complete reference data need no stochastic fit or donor support.
+#'
+#' Partial-reference PMM is experimental sensitivity output. A held-out package
+#' benchmark found substantial interval undercoverage even with a randomly
+#' selected, accurate reference subset. As a conservative package policy,
+#' `catmech_pool_lm` requires `allow_sensitivity = TRUE` whenever reference PMM
+#' imputes any target cells, and labels its calculations `sensitivity_only`.
+#' This policy is not a general theorem about PMM, and the opt-in does not
+#' establish inferential validity. `catmech_sensitivity` already supplies an
+#' explicit sensitivity context. Complete reference data remain eligible for
+#' ordinary complete-data pooling because no target cells are imputed.
 #' @export
 catmech_reference <- function(data, value, reference, predictors,
                               method = c("normal", "pmm"), donors = 5L,
@@ -191,7 +201,8 @@ catmech_reference <- function(data, value, reference, predictors,
     reference_fills = sum(known & is.na(data[[value]])), fallback_draws = 0L)))
   result <- catmech_reference_assemble(data, value, predictors, gold, draws, audits,
     diagnostics, spec, m, seed,
-    if (method == "normal") "conditional_reference_model" else "conditional_reference_matching",
+    if (method == "normal") "conditional_reference_model" else if (any(!known))
+      "sensitivity_only" else "conditional_reference_matching",
     model_diagnostics)
   result$manifest$reference_rows <- which(known)
   result$manifest$reference_column <- reference

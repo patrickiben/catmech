@@ -1,0 +1,18 @@
+support missed_flags_gold10 200 / 250 ; elapsed 6 seconds
+support missed_flags_gold10 250 / 250 ; elapsed 7 seconds
+support missed_flags_gold50 200 / 250 ; elapsed 12 seconds
+support missed_flags_gold50 250 / 250 ; elapsed 14 seconds
+support site_shift_gold10 200 / 250 ; elapsed 19 seconds
+support site_shift_gold10 250 / 250 ; elapsed 21 seconds
+support site_shift_gold50 200 / 250 ; elapsed 26 seconds
+support site_shift_gold50 250 / 250 ; elapsed 28 seconds
+stress nonignorable_selection 200 / 1000 ; elapsed 34 seconds
+stress nonignorable_selection 400 / 1000 ; elapsed 39 seconds
+stress nonignorable_selection 600 / 1000 ; elapsed 45 seconds
+stress nonignorable_selection 800 / 1000 ; elapsed 50 seconds
+stress nonignorable_selection 1000 / 1000 ; elapsed 56 seconds
+stress noisy_reference 200 / 500 ; elapsed 61 seconds
+stress noisy_reference 400 / 500 ; elapsed 67 seconds
+stress noisy_reference 500 / 500 ; elapsed 70 seconds
+Completed stress : 17500 requests; ok 17500 
+Output: /Users/patrickiben/Documents/catmech/validation/extension-stress 

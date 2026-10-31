@@ -1,136 +1,149 @@
-# Validation record: catmech 0.2.0
+# Validation record: catmech 0.3.1
 
-Date: 2026-10-31. This is a scoped software release and prespecified simulation
-assessment. It is not clinical validation, a universal coverage guarantee, a new
-method priority claim, or a completed manuscript-submission certification.
+Date: 2026-10-31. This is an experimental software release with independent
+implementation checks and prespecified synthetic studies. It is not clinical
+validation, a general coverage guarantee, or a claim to new imputation methodology.
 
-## Software and mathematical checks
+## Main findings
+
+The [extension synthesis](EXTENSION_SYNTHESIS.md) reports the full new study.
+The [four-panel evidence figure](extension-figures/extension-evidence.pdf) shows
+the main benefits, equal-information comparisons and failure conditions;
+[figure provenance and interpretation](extension-figures/README.md) accompany it.
+With a random, accurate 25% reference subset, default reference-normal MI covered
+95.2% of nominal 95% intervals (MCSE 0.68 percentage points). The old flag-masking
+workflow covered 58.1% under missed errors and 12.7% under the compound site/error
+stress. The reference method receives additional measured information; it does
+not identify missed errors from flags alone. Reference-only analysis covered
+95.3%, with mean interval width .3304 versus .2782 for reference-normal MI.
+Independent standard normal MI performed similarly.
+
+The study also exposed failures that remain visible:
+
+- Partial-reference PMM covered only 85.1% with random 25% references and exactly
+  matched its independent mice comparator. The release requires explicit sensitivity
+  opt-in for its pooled analysis. It remains an experimental completion option.
+- PMM improved heavy-tail coverage at equal information (.940 versus normal .917),
+  but worsened strong-MAR coverage (.911 versus normal .949). It is not a general
+  replacement for the normal default.
+- Reference-normal coverage fell to .055 under nonignorable reference selection
+  and .678 when the supplied reference had measurement error. Gold-standard status
+  and selection are assumptions, not something the API can establish.
+- Five of six Gaussian no-category normal settings passed the prespecified
+  Wilson-containment screen. Missing-only narrowly failed at .940, Wilson
+  [.9235,.9531]; the independent normal comparator gave the same result.
+
+All five primary clinical recording scenarios reuse the same cohorts, reference
+subsets and imputation seeds. Their reference results are identical by design.
+This is one paired 1,000-cohort reference experiment, not five independent
+replications of its coverage. Smaller reference-fraction stresses have 250 cohorts
+and explicitly wider Monte Carlo uncertainty.
+
+## Software and independent checks
 
 | Check | Result | Evidence |
 |---|---|---|
-| Unit suite | 206 assertions passed, no warnings or skips | `tests.log` |
-| Source package build and check | 0 errors, 0 warnings, 0 notes | `build.log`, `R-CMD-check.log` |
-| Fresh archive installation | Namespace-only APIs, flagged-cell completion, exact/noisy Gibbs, pooling, exports and both examples passed | `installed-smoke.log`, `tools/smoke-installed.R` |
-| Built archive correspondence | R, documentation, namespace, README and examples match source; original DESCRIPTION fields match after standard build formatting | `build-integrity.txt` |
-| Independent posterior oracle | Four moments within 1.19 MCSE of independent quadrature; closed-form and wrong-likelihood controls passed | `model-oracle-final/README.md` |
-| Sampler orientation and numerics | Asymmetric confusion matrix, exact endpoints, tail masses, trusted conflicts and impossible likelihoods checked | `tests/testthat/test-model.R` |
-| Pooling and scenario failure | Standard pooling comparison, degenerate uncertainty refusal, same-data enforcement and omitted/failed planned scenarios checked | `tests/testthat/test-analysis.R` |
-| Optimized benchmark analysis | Agreement with formula `lm` on 200 independent data sets, maximum coefficient/SE difference 2.11e-15 | `coverage-analysis-check.txt` |
-| Parallel execution | One-worker/four-worker pilots produced eight byte-identical scientific/report artifacts | `coverage-pilot-check.txt` |
-| Independent result correspondence | Python recomputation of summaries, Wilson intervals, paired MCSEs and bias-decomposition identities | `artifact-verification.log`, `tools/verify-artifacts.py` |
-| Dependencies | Exact installed package versions recorded | `renv.lock`; empty-environment restoration not exercised |
-| Original supplied draft | Retained unchanged, checked against its original hashes | `original-sha256.csv`, `artifact-verification.log` |
-| GitHub Actions | Three-platform workflow supplied, not run remotely | `.github/workflows/R-CMD-check.yaml` |
+| Unit suite | 318 assertions passed, no warnings or skips | `tests.log` |
+| Source build and installed package check | 0 errors, 0 warnings, 0 notes | `build.log`, `R-CMD-check.log` |
+| Fresh archive installation | Namespace-only APIs, all three examples, reference/PMM exports, mids alignment and pooling guards | `installed-smoke.log`, `tools/smoke-installed.R` |
+| Gaussian category posterior oracle | Four moments within 1.19 MCSE of independent quadrature; closed-form and wrong-likelihood controls passed | `model-oracle-final/README.md`, frozen v0.2 source |
+| Reference joint predictive oracle | 14 mean/covariance checks from 12,000 draws, largest discrepancy 1.91 MCSE; 12 contract controls passed | `reference-oracle/README.md` |
+| Reference negative controls | Incorrect zero cross-record covariance and plug-in variance detected | `reference-oracle/negative-controls.csv` |
+| Pooling patch equivalence | 54 supported scalar old/new comparisons bit-identical; 15 guard controls passed | `pooling-guards/README.md` |
+| Full/no-reference endpoints | Ordinary-lm targets/estimate/SE/df/CI agree to 2.66e-15; 40 expected refusals when no references exist | `extension-controls/replicates.csv` |
+| Engineering pilot | 805 requests; serial/parallel scientific files byte-identical; only expected no-reference refusals | `extension-pilot-check.txt` |
+| Exact PMM comparator | 23,500 new/independent PMM numerical pairs agree exactly | `extension-evidence-check.txt` |
+| Independent numeric correspondence | Python recomputes summaries, Wilson intervals, paired MCSEs and decomposition identities; requires every planned cell and seed | `artifact-verification.log`, `tools/verify-artifacts.py` |
+| Artifact negative controls | Corrupted bias and deletion of an entire planned scenario are detected | `artifact-verification.log` |
+| Scientific figure | All 21 plotted rows, Monte Carlo intervals and source hashes verified; PNG and rendered PDF inspected | `extension-figures/visual-QA.txt` |
+| Original supplied prototype | Original hashes unchanged | `original-sha256.csv`, `artifact-verification.log` |
+| Dependency record | Installed dependency versions retained; no new dependency added in v0.3 | `renv.lock` |
+| GitHub Actions | Three-platform workflow supplied; not run remotely | `.github/workflows/R-CMD-check.yaml` |
 
-The local environment is R 4.6.0 on Apple silicon macOS, with mice 3.19.0 and
-posterior 1.7.0. Exact session details accompany each simulation bundle. Other
-platforms and the minimum declared R version were not exercised locally.
+The local environment is R 4.6.0, mice 3.19.0 and posterior 1.7.0 on Apple silicon
+macOS. Exact session records accompany each study. Minimum-version R, other
+platforms and a fresh-container dependency restore have not been tested locally.
+The independent oracles check known examples and data contracts; they do not
+establish model adequacy or repeated-sampling coverage in an arbitrary application.
 
-The posterior oracle integrates an intercept-only normal/chi-square posterior
-weighted by interval likelihoods. It does not call the package likelihood or Gibbs
-update. Its fixed acceptance rule is five MCSE plus twice the last quadrature-order
-change. Passing this one example supports sampler implementation, not frequentist
-coverage under arbitrary designs. The first development run is retained separately;
-the final run's source hashes match the released implementation.
+## Frozen studies and the v0.3.1 guards
 
-## Held-out evaluation
+The [new protocol](EXTENSION_PLAN.md) preceded all new runs, with streams disjoint
+from prior studies and engineering pilots. The completed study has **132,580
+requests: 132,540 intervals, 40 expected no-reference refusals, zero other errors**:
 
-The [coverage plan](COVERAGE_PLAN.md) was written before execution. Data streams
-are disjoint from the historical benchmark and engineering pilots. The fixed
-study uses 1,000 data sets per primary synthetic setting, 20 imputations, and a
-250-replicate subset for applicable Gibbs models. Clinical-format stresses use
-250 data sets per setting. Source hashes were checked before and after execution;
-failed methods remain in requested denominators. The synthetic study completed
-44,750 requests: 43,749 intervals, 1,000 trusted-category conflict refusals and one
-heavy-tail exact-model convergence failure. All 7,500 clinical requests returned
-intervals. There were no other errors. No accuracy-based retuning or
-silent retry of failed MCMC is permitted by this plan.
+| Bundle | Requests | Scope |
+|---|---:|---|
+| `extension-distribution/` | 80,000 | Normal/PMM by category-information factorial, Gaussian, heavy-tail, null and strong-MAR settings |
+| `extension-reference/` | 35,000 | Random 25% accurate reference subsets, paired recording-error scenarios |
+| `extension-stress/` | 17,500 | 10%/50% reference fractions, nonignorable selection and noisy references |
+| `extension-controls/` | 80 | All-reference equality and no-reference refusal |
 
-The [synthetic report](coverage-confirmatory/RESULTS.md) and
-[clinical report](coverage-clinical/RESULTS.md) include all methods. The
-[interpretive synthesis](COVERAGE_SYNTHESIS.md) identifies the improvements and
-remaining failures; raw replicate rows and paired comparisons remain available. The
-[coverage figure](figures/coverage-comparison.pdf) displays both the repaired
-settings and the remaining missed-error failures, with Monte Carlo intervals.
-The default model is established normal imputation after masking flags, so its
-independent `mice.impute.norm` comparator is essential to interpretation.
+The numerical study used frozen v0.3.0 sources from commit `ea5ec6a`, preserved
+under `v0.3.0-source/`. Every run checked source hashes before and after execution.
+Version 0.3.1 subsequently added two scoped safeguards: explicit rejection of
+unsupported multivariate/empty-coefficient analyses, and sensitivity-only pooling
+for partial-reference PMM after its demonstrated failure. Neither change alters
+imputation values, scalar estimates or interval calculations when explicitly
+requested. The 54 paired scalar comparisons verify that claim, and the reference
+oracle was rerun against the released sources. The adverse study results were
+not retuned or rerun to obtain favorable estimates.
 
-In the two targeted failure settings, legacy coverage was .397 (uncertain flags)
-and .346 (wrong categories), versus .952 for the new ignored-category model in
-both settings (coverage MCSE .00676). Its primary four Gaussian settings satisfied
-the prespecified approximate-coverage criterion. Independent trusted normal MI
-performed essentially identically. The heavy-tail stress retained undercoverage:
-.925 with MCSE .00833 and Wilson interval [.907, .940]. Correct noisy-category
-Gibbs coverage was .932 in 250 replicates; that smaller study does not establish
-general calibration or an advantage over ignoring categories.
+Historical v0.1 and v0.2 results retain their original source snapshots and logs.
+The [v0.2 validation record](v0.2.0-VALIDATION.md) and
+[earlier coverage synthesis](v0.2.0-COVERAGE_SYNTHESIS.md) remain available. Source
+hash verification uses the appropriate frozen version rather than substituting
+current code into historical fingerprints. Large held-out studies were run once;
+serial/parallel exact reproducibility was checked on independent engineering pilots.
 
-Coverage means the proportion of returned intervals that include the known
-estimand. A refusal has no confidence interval; it is not counted as either a
-successful 95% interval or a zero-coverage fitted method. Report both interval
-return rate and conditional coverage. The Wilson containment criterion in the
-plan applies only to its primary 1,000-replicate settings, not to the smaller
-Gibbs/clinical subsets or deliberate misspecification stresses.
+Coverage is conditional on a returned interval. Refusals have no confidence
+interval and do not count as successful 95% inference. Report request yields and
+failures separately. Retrospective bias-centered coverage uses hidden truth and
+is diagnostic, not a real-data correction. The primary Wilson-containment criterion
+applies only to prespecified 1,000-replicate primary cells; descriptive stresses
+and smaller studies are not forced to pass it.
 
-Clinical-format results for the ignore-category model:
+## Evidence limits
 
-| Setting | Bias | Coverage | Coverage MCSE | Returned/requested |
-|---|---:|---:|---:|---:|
-| Clean | 0.0057 | .948 | .0140 | 250/250 |
-| Flagged errors | 0.0054 | .952 | .0135 | 250/250 |
-| Missed flags | -0.0728 | .644 | .0303 | 250/250 |
-| Site shift plus missed random errors | -0.1345 | .148 | .0225 | 250/250 |
-| Rounded records | 0.0054 | .948 | .0140 | 250/250 |
+Reference values must measure the same quantity, time and units and be sufficiently
+accurate for the stated model. Targeted verification, unsupported strata, nonlinear
+or heteroskedastic conditional models and unknown reference error remain important
+limits. Normal MI is not a general solution for survival models, interactions or
+cluster-correlated outcomes. Category-error matrices remain fixed assumptions;
+uncertainty in them is not automatically propagated by pooling separate scenarios.
+[Reference method](../docs/REFERENCE_METHOD.md) and [Gaussian method](../docs/METHOD.md)
+state the assumptions and established alternatives.
 
-The site-shift fixture also contains random recording errors and lowers flag
-sensitivity to 20%. Because the analysis includes SITEID, this compound stress
-does not isolate the incremental effect of a constant site shift.
-
-These persistent failures are principally residual measurement bias. The paired
-oracle decomposition separates it from selection of retained rows. Retrospective
-bias-centering uses hidden truth and is a diagnostic only; it is not an available
-correction for real data. Endpoint conventions, severe rounding, clinical BLQ/PK
-censoring, threshold-generated flags, informative selection, unknown H, and
-cluster-correlated outcomes remain outside the validated scope. A small rounding
-stress does not validate a general rounding-error model.
-
-The first engineering pilot failed its source-stability check because development
-edits occurred concurrently. It was retained as a development checkpoint, not
-promoted to evidence. Subsequent stable-source one/four-worker pilots passed.
-Full held-out runs were performed once at fixed settings. Their summaries are
-independently recomputed; the entire large study was not repeated a second time.
-
-## Scope of the research-validation process
-
-The author's validation skill and partially read personal master protocol informed
-these checks. The complete named gate system was not executed or certified. The
-adapted evidence covers a declared estimand, reproducibility, known-answer controls,
-strong alternatives, MCSEs, failure reporting, source correspondence and adversarial
-agent review. It does not constitute independent human refereeing, author sign-off,
-external clinical adjudication, a complete citation/retraction audit or a study of
-the harness's effectiveness. AI-assisted work is disclosed in `CONTRIBUTING.md`.
-
-The [v0.1 validation record](v0.1.0-VALIDATION.md), original check logs and original
-benchmark remain historical evidence. Their sources are frozen separately; the
-new implementation is not substituted into old hashes. Legacy sensitivity results
-retain their original inferential limitations.
+The author's research-validation skill and partially read master protocol informed
+these adapted checks. The complete named gate system was not executed or certified.
+Adversarial agent review is not independent human refereeing, author sign-off,
+clinical adjudication, a comprehensive retraction audit or a validation of the
+harness itself. AI-assisted work is disclosed in `CONTRIBUTING.md`.
 
 ## Reproduce
 
 ```sh
 Rscript -e 'testthat::test_local()'
 R CMD build .
-R CMD check --no-manual catmech_0.2.0.tar.gz
-Rscript tools/check-model-oracle.R validation/my-oracle
-Rscript tools/coverage-benchmark.R confirmatory validation/my-heldout
-Rscript tools/coverage-benchmark.R clinical validation/my-clinical
+R CMD check --no-manual catmech_0.3.1.tar.gz
+Rscript tools/check-reference-oracle.R validation/my-reference-oracle
+Rscript tools/check-pooling-guards.R validation/my-pooling-guards
+Rscript tools/extension-benchmark.R distribution validation/my-distribution
+Rscript tools/extension-benchmark.R reference validation/my-reference-study
+Rscript tools/extension-benchmark.R stress validation/my-stress
+Rscript tools/extension-benchmark.R controls validation/my-controls
+Rscript tools/plot-extension.R validation/my-extension-figures
 python3 tools/verify-artifacts.py
-Rscript tools/plot-coverage.R validation/coverage-confirmatory validation/coverage-clinical validation/my-figures
 ```
 
-Use new output directories. `CATMECH_BENCHMARK_WORKERS=1` uses sequential execution;
-Windows uses that path automatically. Same-environment seeded reproducibility is
-intended; exact cross-platform equality is not promised. To restore dependencies,
-use `renv::restore(lockfile="validation/renv.lock", prompt=FALSE)` in a disposable
-checkout with a compatible R version. This restoration route was not independently
-tested in an empty container. Source and repository release archives have separate
-checksums in the release directory.
+Use new output directories. To reproduce the exact historical source fingerprint,
+run the benchmark script from its frozen source directory. The verifier checks
+published bundle locations against their recorded source versions. Current scripts
+produce fresh runs whose environment/version fingerprints may differ.
+`CATMECH_BENCHMARK_WORKERS=1` uses the verified sequential path; Windows uses that
+path automatically. Exact cross-platform numerical equality is not promised.
+
+Dependency restoration is available through
+`renv::restore(lockfile="validation/renv.lock", prompt=FALSE)` in a disposable
+checkout with compatible R. Empty-container restoration was not independently
+exercised. Installable source and repository archives have separate release checksums.

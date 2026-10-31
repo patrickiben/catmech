@@ -1,0 +1,21 @@
+distribution: 80000 requests; {'ok': 80000, 'refused': 0, 'error': 0}; all 12 source/plan hashes match current files and other completed runs.
+  Anchor decomposition identity maximum residual: 5.2e-15
+reference: 35000 requests; {'ok': 35000, 'refused': 0, 'error': 0}; all 12 source/plan hashes match current files and other completed runs.
+  Anchor decomposition identity maximum residual: 4.16e-15
+stress: 17500 requests; {'ok': 17500, 'refused': 0, 'error': 0}; all 12 source/plan hashes match current files and other completed runs.
+  Anchor decomposition identity maximum residual: 5.16e-15
+controls: 80 requests; {'ok': 40, 'refused': 40, 'error': 0}; all 12 source/plan hashes match current files and other completed runs.
+  Anchor decomposition identity maximum residual: 0
+pmm_no_cat: exactly matches independent mice_pmm_no_cat on all 8000 complete pairs (estimate/SE/df/CI).
+pmm_cat: exactly matches independent mice_pmm_cat on all 8000 complete pairs (estimate/SE/df/CI).
+reference_pmm: exactly matches independent mice_reference_pmm on all 7500 complete pairs (estimate/SE/df/CI).
+oracle: identical across all 5 paired reference recording scenarios (1000 cohorts).
+gold_only: identical across all 5 paired reference recording scenarios (1000 cohorts).
+reference_normal: identical across all 5 paired reference recording scenarios (1000 cohorts).
+reference_pmm: identical across all 5 paired reference recording scenarios (1000 cohorts).
+mice_reference_normal: identical across all 5 paired reference recording scenarios (1000 cohorts).
+mice_reference_pmm: identical across all 5 paired reference recording scenarios (1000 cohorts).
+All-reference 40 target/analysis controls pass; max estimate/SE/df/CI absolute difference: 2.66e-15.
+No-reference 40/40 calls refused despite recorded W being available.
+This check ran against frozen v0.3.0 files before the planned v0.3.1 invalid-input guard; preserve its source snapshot for hash verification after that guard.
+After the scoped v0.3.1 guard began: all 12 hashes independently match validation/v0.3.0-source.

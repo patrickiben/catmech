@@ -21,6 +21,6 @@ analysis bundles from private data.
 The GitHub Actions workflow is included but cannot be reported as passing until it
 runs remotely. Local `R CMD check` evidence and platform limitations are recorded
 in `validation/VALIDATION.md`. A CRAN submission, DOI, independent scientific peer review and
-real-data validation are separate future steps. Version 0.2 includes a prespecified
-held-out synthetic evaluation; its remaining undercoverage must remain visible
+real-data validation are separate future steps. Versions 0.2 and 0.3 include prespecified
+held-out synthetic evaluations; the remaining undercoverage must remain visible
 in any release description.

@@ -1,0 +1,4 @@
+control all_reference 20 / 20 ; elapsed 0 seconds
+control no_reference 20 / 20 ; elapsed 0 seconds
+Completed controls : 80 requests; ok 40, refused 40 
+Output: /Users/patrickiben/Documents/catmech/validation/extension-controls 

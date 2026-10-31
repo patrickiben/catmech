@@ -109,3 +109,12 @@ test_that("zero empirical between-imputation variance is not complete data", {
   result$manifest$engine <- "unregistered_future_engine"
   expect_error(catmech_pool_lm(result,formula,allow_sensitivity=TRUE),"Unrecognized")
 })
+
+test_that("unsupported analysis shapes fail explicitly instead of returning NULL", {
+  result <- analysis_fixture()
+  expect_error(catmech_pool_lm(result,cbind(outcome,age)~lab_value),"univariate linear models")
+  expect_error(catmech_pool_lm(result,outcome~0),"at least one named coefficient")
+  expect_equal(catmech_pool_lm(result,outcome~1)$term,"(Intercept)")
+  expect_equal(catmech_pool_lm(result,cbind(outcome)~lab_value),
+               catmech_pool_lm(result,outcome~lab_value))
+})

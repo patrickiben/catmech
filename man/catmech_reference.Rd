@@ -64,4 +64,14 @@ with categories ignored and without a quality-flag policy. PMM delegates to
 the same audited standard matching engine as `catmech_pmm`. Both require a
 full-rank reference design with positive residual degrees of freedom and
 variance. Complete reference data need no stochastic fit or donor support.
+
+Partial-reference PMM is experimental sensitivity output. A held-out package
+benchmark found substantial interval undercoverage even with a randomly
+selected, accurate reference subset. As a conservative package policy,
+`catmech_pool_lm` requires `allow_sensitivity = TRUE` whenever reference PMM
+imputes any target cells, and labels its calculations `sensitivity_only`.
+This policy is not a general theorem about PMM, and the opt-in does not
+establish inferential validity. `catmech_sensitivity` already supplies an
+explicit sensitivity context. Complete reference data remain eligible for
+ordinary complete-data pooling because no target cells are imputed.
 }

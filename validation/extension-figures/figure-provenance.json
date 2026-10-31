@@ -1,0 +1,97 @@
+{
+  "description": "Four-panel static figure from completed, source-verified frozen v0.3 numerical studies",
+  "numerical_source": "validation/v0.3.0-source",
+  "frozen_source_files_verified": 12,
+  "nominal_coverage": 0.95,
+  "coverage_interval": "95% Wilson interval for Monte Carlo binomial uncertainty",
+  "width_interval": "mean +/- qnorm(.975) * MCSE of mean width",
+  "counts": "returned / requested; all plotted performance requests returned intervals",
+  "category_comparison": "Panel B excludes category predictors in both methods",
+  "reference_pairing": "Panel A reference rows shown once; same 1000 cohorts, gold subsets and imputation seeds across five recording settings",
+  "reference_information": "References are additional exact measured values on selected rows; W and categories are not used in reference imputation",
+  "site_stress": "Compound fixed site003 shift plus random errors and 20% flag sensitivity; SITEID included; no isolated site-effect attribution",
+  "panel_c_pairing": "10% and 50% use 250 cohorts, 25% uses 1000; reference subsets are nested within common cohorts",
+  "panel_d_stress": "MNAR selection uses hidden residuals and cohort-specific intercept; noisy gold adds independent assay error SD .08",
+  "reference_pmm": "Unchanged numerical evidence of undercoverage; v0.3.1 partial-reference pooling requires explicit sensitivity-only override",
+  "input_files": [
+    {
+      "path": "validation/extension-distribution/summary.csv",
+      "sha256": "51ad679c00bc49ddc18b2272b0fe610d9ed7f2c25171c32e9f1df46c6ced20fb"
+    },
+    {
+      "path": "validation/extension-distribution/RESULTS.md",
+      "sha256": "d1cd6364478329cabf6c4c22e6f717e640f6de20e3066a7e387c52cbdb7fda5f"
+    },
+    {
+      "path": "validation/extension-distribution/source-hashes.csv",
+      "sha256": "e9743385a58ae53bca3e6063fd094772ee884dd7f3c0de3c189e295a3f781958"
+    },
+    {
+      "path": "validation/extension-distribution/settings.json",
+      "sha256": "47723a01af2ffd71c7cd3e1aeb6735f9201009f8e929a1a9166f61b378a634f1"
+    },
+    {
+      "path": "validation/extension-distribution/session-info.txt",
+      "sha256": "89225efb6bd1cceb68b511b5ee34f3297da3937d54087a76ac8847115a5e7f6e"
+    },
+    {
+      "path": "validation/extension-reference/summary.csv",
+      "sha256": "1315e4831f003b1414ba71b47d3aa82d6d2f3c8dd2bedc083b70390fbdf2c613"
+    },
+    {
+      "path": "validation/extension-reference/RESULTS.md",
+      "sha256": "a42aceb4c0b67dc3743b189d93a7d5a32c8e09154925125f907dbad4b2ca644f"
+    },
+    {
+      "path": "validation/extension-reference/source-hashes.csv",
+      "sha256": "e9743385a58ae53bca3e6063fd094772ee884dd7f3c0de3c189e295a3f781958"
+    },
+    {
+      "path": "validation/extension-reference/settings.json",
+      "sha256": "3c9f50ac688ac6c4e6622d7ae0085c7254d6ddbd457f01843eee3b14d4436d60"
+    },
+    {
+      "path": "validation/extension-reference/session-info.txt",
+      "sha256": "dfb357eaa4fa25edc9568b4b864121aa33c9b94d12dc0e30ed1842e4cd4d9cfc"
+    },
+    {
+      "path": "validation/extension-stress/summary.csv",
+      "sha256": "a0989ef472240543d3c2bcc0a3398c5f8831f91a39a66d43fd4fa4ed6a0e4a50"
+    },
+    {
+      "path": "validation/extension-stress/RESULTS.md",
+      "sha256": "d1e7cab6366e9f23aaf66466a4527391ee48deb21714e00108c34a1bc07647f5"
+    },
+    {
+      "path": "validation/extension-stress/source-hashes.csv",
+      "sha256": "e9743385a58ae53bca3e6063fd094772ee884dd7f3c0de3c189e295a3f781958"
+    },
+    {
+      "path": "validation/extension-stress/settings.json",
+      "sha256": "b8be9294981d88133ca47d8bedafc75214c136f8375b662608729020929cfbd0"
+    },
+    {
+      "path": "validation/extension-stress/session-info.txt",
+      "sha256": "a19162ef0208bed6faff198508d05b966bc5e6143c6e0ff77b5a9c37431d2c81"
+    },
+    {
+      "path": "tools/plot-extension.R",
+      "sha256": "4e3ba3839818767c2760ab3b3b899ac800b07e8ce137826b88f825c3785cc723"
+    }
+  ],
+  "output_files": [
+    {
+      "path": "extension-evidence.pdf",
+      "sha256": "5f0bb81ad1c8cb17e27b739d361bb31a65ca12d57cf57416b8fb776f18d95ae0"
+    },
+    {
+      "path": "extension-evidence.png",
+      "sha256": "0a749e26be8b034b8da4a81159cbd4bdcf81373f49fb2bef443a7f4c883fb1e0"
+    },
+    {
+      "path": "plotted-data.csv",
+      "sha256": "0690ee01a252d4f1898c7a7c4223e2f3f47bc8a2cac8677fc763d0b638147071"
+    }
+  ],
+  "r_version": "R version 4.6.0 (2026-04-24)"
+}

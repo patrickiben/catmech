@@ -1,4 +1,4 @@
-# Research connections used in version 0.2
+# Research connections used in versions 0.2 and 0.3
 
 Reviewed 2026-10-31. These connections informed concrete changes; they do not
 transfer a validity theorem from another project.
@@ -23,3 +23,21 @@ could provide documented review flags, but its alerts would still need validatio
 Below-quantification records need a censored likelihood, not an ad hoc donor fallback.
 Repeated visits, random cluster errors and validation-sample uncertainty remain
 future work. No unimplemented topology, causal or calibration feature is advertised.
+
+## Additional transfers in v0.3
+
+The frozen-truth principle now becomes an explicit reference-measurement API:
+only measured reference rows are available to the imputer, and hidden synthetic
+truth stays in the evaluator. A non-reference cell is never declared trustworthy
+simply because its flag is absent. The stronger-baseline audit now holds category
+information constant when comparing normal MI and PMM, and includes reference-only
+analysis whenever additional reference measurements are supplied.
+
+The new [evaluation plan](../validation/EXTENSION_PLAN.md) separates random
+references, sparse support, nonignorable reference selection and noisy reference
+assays. An [independent predictive oracle](../validation/reference-oracle/README.md)
+checks joint uncertainty and the no/all-reference endpoints. The clinical fixture
+and earlier benchmarks remain unchanged; new seed streams are used.
+
+These are concrete uses of the author's validation approach. They do not make
+internal-validation MI or predictive mean matching new statistical methods.

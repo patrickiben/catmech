@@ -6,10 +6,10 @@
     GNU Fortran (GCC) 14.2.0
 * running under: macOS 27.0.1
 * using session charset: UTF-8
-* current time: 2026-10-31 22:05:40 UTC
+* current time: 2026-10-31 22:50:44 UTC
 * using option ‘--no-manual’
 * checking for file ‘catmech/DESCRIPTION’ ... OK
-* this is package ‘catmech’ version ‘0.2.0’
+* this is package ‘catmech’ version ‘0.3.1’
 * package encoding: UTF-8
 * checking package namespace information ... OK
 * checking package dependencies ... OK

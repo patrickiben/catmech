@@ -1,0 +1,230 @@
+# Completion from independently obtained reference measurements
+
+`catmech_reference()` addresses a different data situation from flag-based
+completion: a subset of records has a genuine, sufficiently accurate reference
+measurement of the target. The remaining true values are unavailable even when
+the original recorded values are present and unflagged. This can address errors
+missed by a flagging rule, provided the reference sample and imputation model
+support the intended analysis. A flag, a plausibility check, and agreement with
+a category are not themselves reference measurements.
+
+This is an implementation of established missing-data and measurement-error
+methods. Cole, Chu and Greenland described multiple imputation for measurement
+error using a validation substudy in 2006. The default below is the simpler
+special case that does not use the error-prone measurement as an auxiliary
+predictor. It does not estimate an error process or each record's probability
+of corruption. [Cole et al., 2006](https://doi.org/10.1093/ije/dyl097)
+
+## Data contract
+
+```r
+fit <- catmech_reference(
+  data,
+  value = "recorded_value",
+  reference = "reference_value",
+  predictors = c("outcome", "age", "site"),
+  method = "normal",
+  m = 20,
+  seed = 123
+)
+```
+
+The columns have distinct roles:
+
+| Input | Meaning and treatment |
+| --- | --- |
+| `value` | Original recorded target. The returned completions replace this column with reference or imputed values. The original remains in `fit$original`. |
+| `reference` | Finite numeric measurements only on genuinely referenced rows, with `NA` elsewhere. These values are copied exactly into the completed target. This column is preserved. |
+| `predictors` | Explicit, completely observed predictors of the true target. Include the analysis outcome and relevant analysis/selection covariates when appropriate. The target and reference columns cannot be predictors. |
+| Other columns | Preserved; neither flags nor category labels automatically affect imputation. |
+
+Every row without a reference value is imputed. An unflagged recorded target is
+not promoted to a reference. Conversely, an observed reference is used even
+when it differs from the recorded target. `fit$mids$data` represents the
+imputation problem with reference values observed and all other target values
+missing. The original data, completed data, and imputation inputs are therefore
+different, deliberately documented objects.
+
+Reference values must come from an independent measurement, adjudication, or
+verification process appropriate to the estimand. In a simulation, the analysis
+input must expose frozen truth only on the prespecified reference rows; the
+remaining truth belongs in the evaluator, not in the imputer's data frame.
+The function cannot establish that a supplied reference is scientifically valid.
+
+## Statistical model and assumptions
+
+Write the true target as `T`, selected complete predictors as `Z`, and the
+indicator of an available reference as `R`. The normal option fits
+`T | Z ~ Normal(Z beta, sigma^2)` to the reference rows, using the reference prior
+`p(beta, sigma^2) proportional to 1 / sigma^2`. Each completion draws regression
+parameters and then draws the unavailable targets. It propagates fitted-model
+and residual uncertainty; it does not substitute predicted means for every
+unavailable target. This is the standard Bayesian normal-imputation construction
+also documented by `mice`. [mice normal imputation](https://amices.org/mice/reference/mice.impute.norm.html)
+
+For partially referenced data, the reference design must have full column rank,
+positive residual degrees of freedom, and positive residual variance. These
+checks establish a usable fitted model, not representative sampling or
+adequate sample size. If all rows are referenced, completion is deterministic
+and no imputation model is needed.
+
+The key identifying assumption is `T independent of R given Z`: after
+conditioning on the selected predictors, reference availability does not
+depend on the unavailable true target. There must also be adequate reference
+support across the predictor space in which values are imputed. A random
+internal reference sample is a transparent design. A sample selected using
+observed outcome, site, recorded measurement, or flags requires those selection
+variables and suitable functional forms in the model, as well as overlap. The
+general internal-validation MI argument and its model requirements are described
+in the STRATOS guidance. [Shaw et al., 2020, section 2.4](https://pmc.ncbi.nlm.nih.gov/articles/PMC7272296/)
+
+Examples that violate or strain these assumptions include verification limited
+to one site, references collected only for extreme recorded values, and
+verification triggered by an unrecorded judgment correlated with the true
+target. Including a site variable does not create reference information for
+unsupported sites. Selection depending on the unobserved truth after
+conditioning on the predictors remains nonignorable.
+
+A noisy reference is not a gold standard. Treating a second error-prone
+measurement as exact changes the problem and can retain bias. Repeated-measure
+models are an established alternative when a suitable error model is credible;
+for example, `smcfcs` supports latent normal targets with classical-error
+replicates. This function does not implement that error model.
+[smcfcs measurement-error vignette](https://cran.r-project.org/web/packages/smcfcs/vignettes/coverror.html)
+
+## Optional use of the recorded measurement
+
+The default does not use the recorded target to predict its true value. This
+choice makes the resulting completions invariant to changes in that recorded
+column, conditional on fixed reference values, selected predictors, and seed.
+It sacrifices potentially useful information and cannot be assumed to improve
+precision over analysis restricted to the reference sample.
+
+To use a fully observed recorded measurement as an auxiliary predictor, supply
+a separately named copy and explicitly include it in `predictors`:
+
+```r
+data$recorded_aux <- data$recorded_value
+# This example requires recorded_aux to be complete.
+fit_with_aux <- catmech_reference(
+  data, "recorded_value", "reference_value",
+  predictors = c("recorded_aux", "outcome", "age", "site"),
+  method = "normal", m = 20, seed = 123
+)
+```
+
+This fits the predictive relationship between reference truth, the auxiliary
+measurement, and other predictors. That relationship may be nonlinear or
+heteroscedastic when errors are a mixture of correct values and occasional
+large defects. Merely adding the recorded measurement does not make a linear
+normal model correct. A recorded value can also be informative about reference
+selection, so omitting it is not automatically valid in a targeted audit.
+
+If the recorded measurement is missing, it cannot be passed as an incomplete
+predictor. The default can still run without it when the chosen predictors are
+complete and support the required missingness assumption. It does not
+automatically impute the auxiliary measurement, fill missing measurements with
+zero, or borrow a model across unsupported missingness patterns. Those choices
+need a prespecified joint or pattern-specific model and suitable reference
+information. A validation sample containing no references in a relevant
+missing-measurement subgroup cannot by itself verify extrapolation to that
+subgroup.
+
+## Predictive mean matching and analysis
+
+`method = "pmm"` uses the public `mice` predictive mean matching implementation,
+with donor values restricted to the reference rows and `donors = 5L` by
+default. This preserves observed reference support and can be useful when a
+normal residual model is doubtful. It does not guarantee calibrated inference
+under heavy tails, nonlinear relationships, sparse reference samples, or poor
+overlap. It cannot generate target values outside the reference donor support.
+Changing the donor pool changes the procedure and should be prespecified.
+
+In the new held-out random-25%-reference experiment, reference PMM covered only
+85.1% of nominal 95% intervals and exactly matched the independent mice PMM
+comparator. Version 0.3.1 therefore requires `allow_sensitivity = TRUE` when
+pooling a partial-reference PMM result, and labels it `sensitivity_only`. This
+is a conservative package policy based on adverse evidence in the tested regime,
+not a theorem against every PMM application. The normal reference method remains
+the default. Fully referenced data need no imputation and retain ordinary pooling.
+See the [full extension evidence](../validation/EXTENSION_SYNTHESIS.md).
+[mice PMM documentation](https://amices.org/mice/reference/mice.impute.pmm.html),
+[Morris et al., 2014](https://doi.org/10.1186/1471-2288-14-75)
+
+Use an analysis model compatible with the imputation model, and include the
+outcome in covariate imputation. Linear normal imputation is not a general
+solution for survival models, nonlinear effects, or interactions. Substantive
+model compatible MI is an established alternative when the analysis requires
+those structures. Its reference implementation includes an explicit internal
+validation example in which the error-prone measurement is an auxiliary
+predictor and the outcome enters through the substantive model.
+[smcfcs vignette](https://cran.r-project.org/web/packages/smcfcs/vignettes/coverror.html)
+
+Audit-based correction is not necessarily more efficient, or even necessary
+for every estimand. For example, the effect of a randomized treatment can remain
+unbiased in certain settings with covariate errors while the coefficient of
+the mismeasured covariate is biased. The target parameter, error process,
+reference sample size, and comparison analysis all matter.
+[Shepherd, Shaw and Dodd, 2012](https://pmc.ncbi.nlm.nih.gov/articles/PMC3728661/)
+
+## What the software and validation can establish
+
+The useful contribution is an explicit reference-data contract, preservation
+of original measurements, auditable completion decisions, and reproducible
+comparison of assumptions. Normal MI, PMM, internal-validation error correction,
+and Rubin pooling are established methods; this interface is not a new
+identification result or a guarantee of improved coverage.
+
+Implementation checks should verify reference preservation, independence from
+unused recorded values, absence of hidden truth outside the reference sample,
+and correct posterior predictive moments. For the normal model, with reference
+design `A`, unavailable-row design `A0`, residual sum of squares `SSE`, and
+`nu = n_reference - n_parameters`, the unavailable targets have a multivariate
+Student distribution with location `A0 beta_hat` and scale matrix
+`SSE / nu * (I + A0 %*% solve(t(A) %*% A) %*% t(A0))`. When `nu > 2`, its covariance is
+that matrix multiplied by `nu / (nu - 2)`. Checking cross-record covariance
+tests whether shared parameter uncertainty is propagated, beyond testing
+individual marginal means.
+
+The [independent reference oracle](../validation/reference-oracle/README.md)
+implements this calculation without the package's fitting or sampling helpers.
+Its 12,000-completion run passed all 14 mean/covariance checks and 12 data-contract
+controls, with fixed five-MCSE moment tolerances and unchanged runtime source
+hashes. Deliberately wrong zero cross-record covariance and plug-in variance
+answers were detected. This is implementation evidence, not a coverage study.
+
+Simulation comparisons should include reference-only analysis and standard
+`mice` methods using the same reference rows and predictors. Reference fraction,
+selection, reference noise, unsupported sites, and model misspecification
+should be varied separately. A synthetic improvement over a method that was
+given less information does not establish a superior imputation algorithm.
+Finite simulation coverage describes the simulated setting; it is not evidence
+from patients or a general clinical performance claim.
+
+## Research boundary: uncertain category confusion probabilities
+
+The existing noisy-category model takes a fixed matrix
+`H[true_category, observed_category]`. External gold-standard classification
+counts could support row-wise Dirichlet distributions with explicitly specified
+positive prior concentrations. This would quantify uncertainty about the
+category observation model, subject to transportability, rather than calibrate
+the legacy retain/replace probability or identify unflagged numeric corruption.
+Multinomial misclassification models with gold-standard information and
+Dirichlet priors are established prior art.
+[Wang, Wang and Swartz, 2020](https://doi.org/10.1002/cjs.11556)
+
+Drawing matrices from their external-data posterior and running each as a
+fixed scenario cuts feedback from the main study into the matrix. It therefore
+defines a modular uncertainty analysis, not the full joint posterior. A full
+joint model would update the matrix using the current trusted/latent true bins
+and observed labels, and would require additional diagnostics and an independent
+oracle. Cutting feedback is an explicit modeling choice, not a synonymous name
+for ordinary joint Bayesian inference.
+[Liu and Goudie, 2025](https://academic.oup.com/jrsssb/article/87/4/1171/8096422)
+
+This extension is not implemented here. It should follow, rather than obscure,
+validation of the reference workflow. If explored, retain distinct scenarios
+and external-count provenance; do not pool repeated batches under different
+matrices as if they were an ordinary single set of MI draws. Nested
+multiple-model imputation has its own combining rules and assumptions.
+[Siddique, Harel and Crespi, 2012](https://pmc.ncbi.nlm.nih.gov/articles/PMC3596844/)

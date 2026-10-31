@@ -1,0 +1,2 @@
+"family","scenario","method","comparator","complete_pairs","error_difference","error_mcse","mse_difference","mse_mcse","coverage_difference","coverage_difference_mcse","width_difference","width_difference_mcse"
+"control","all_reference","reference_pmm","reference_normal",20,0,0,0,0,0,0,0,0

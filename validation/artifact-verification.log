@@ -4,4 +4,15 @@ Known-wrong bias mutation detected: PASS
 coverage-confirmatory: 44750 unique requests, 50 recomputed groups, statuses and paired MCSEs: PASS
 coverage-clinical: 7500 unique requests, 30 recomputed groups, statuses and paired MCSEs: PASS
 Independent posterior oracle source hashes and moment checks: PASS
+extension-distribution: all 80000 prespecified requests, seeds and endpoint controls accounted for: PASS
+extension-distribution: 80000 unique requests, 80 recomputed groups, statuses and paired MCSEs: PASS
+extension-reference: all 35000 prespecified requests, seeds and endpoint controls accounted for: PASS
+extension-reference: 35000 unique requests, 35 recomputed groups, statuses and paired MCSEs: PASS
+extension-stress: all 17500 prespecified requests, seeds and endpoint controls accounted for: PASS
+extension-stress: 17500 unique requests, 42 recomputed groups, statuses and paired MCSEs: PASS
+extension-controls: all 80 prespecified requests, seeds and endpoint controls accounted for: PASS
+extension-controls: 80 unique requests, 4 recomputed groups, statuses and paired MCSEs: PASS
+Independent reference predictive oracle, contracts and negative controls: PASS
+Current pooling guards and frozen-v0.3 scalar numerical equivalence: PASS
+Known-wrong deletion of an entire planned scenario detected: PASS
 This verifies correspondence and repeatability, not inferential validity.

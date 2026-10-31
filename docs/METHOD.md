@@ -1,7 +1,10 @@
 # Model, assumptions and interpretation
 
-Version 0.2.0 introduces `catmech_model()`. The unchanged PMM retain/replace engine
-is documented separately in [LEGACY_METHOD.md](LEGACY_METHOD.md).
+Version 0.2 introduced `catmech_model()`. The unchanged PMM retain/replace engine
+is documented separately in [LEGACY_METHOD.md](LEGACY_METHOD.md). Version 0.3
+adds ordinary flag-masking PMM and an explicit reference-subset workflow, described
+in [REFERENCE_METHOD.md](REFERENCE_METHOD.md). They do not alter the Gaussian
+category likelihood described here.
 
 ## Target and trust policy
 
@@ -102,7 +105,13 @@ procedure rather than retrying them invisibly.
 Rubin pooling and Barnard-Rubin degrees of freedom. Missing analysis data,
 singular fits, nonfinite or degenerate uncertainty and failed sampler diagnostics
 are rejected. Legacy sensitivity results require an explicit opt-in and retain
-their sensitivity label. The `mids` object is an adapter for externally generated
+their sensitivity label. Standard PMM and reference workflows have separate
+interpretation labels. Partial-reference PMM requires explicit sensitivity opt-in
+after its adverse held-out coverage result; fully referenced PMM is an ordinary
+complete-data endpoint. When explicit workflow metadata establishes that no target
+was imputed, pooling returns the ordinary complete-data regression interval after
+checking that analysis data agree across completions. A coincidentally zero
+between-imputation variance alone does not trigger that rule. The `mids` object is an adapter for externally generated
 completions, not a fitted chained-equations process; never resume it.
 
 A coherent imputation likelihood does not establish compatibility with every

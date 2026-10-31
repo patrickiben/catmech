@@ -10,12 +10,17 @@
 #'   values are rejected rather than silently dropping records.
 #' @param conf_level Confidence level between zero and one.
 #' @param allow_sensitivity Explicitly allow pooled calculations for the legacy
-#'   sensitivity engine. This does not establish their inferential validity.
+#'   sensitivity engine or experimental partial-reference PMM. Results retain a
+#'   sensitivity-only label; this does not establish their inferential validity.
 #' @details When the workflow declares that no target cells were imputed, all
 #'   completed analysis frames must agree and ordinary complete-data t intervals
 #'   are returned. A zero estimated between-imputation variance alone does not
 #'   activate this rule. Predictive matching and reference-subset results retain
 #'   distinct interpretation labels; none guarantees coverage under misspecification.
+#'   Partial-reference PMM requires explicit sensitivity opt-in because held-out
+#'   studies found material undercoverage even with random accurate references.
+#'   This package policy does not assert that every PMM application is invalid.
+#'   Only univariate linear models with at least one named coefficient are supported.
 #' @return A data.frame with term, estimate, std.error, df, lower, upper,
 #'   within_variance, between_variance, m, n and interpretation.
 #' @export
@@ -43,6 +48,11 @@ catmech_pool_lm <- function(result, formula, conf_level = 0.95,
   if (length(result$completed) < 2L) stop("At least two completed datasets are required.", call. = FALSE)
   fits <- lapply(result$completed, function(d) stats::lm(formula, data = d,
                                                        na.action = stats::na.fail))
+  if (any(vapply(fits, function(f) {
+    coefficients <- stats::coef(f)
+    !is.null(dim(coefficients)) || !length(coefficients) || is.null(names(coefficients))
+  }, logical(1))))
+    stop("Only univariate linear models with at least one named coefficient are supported.", call. = FALSE)
   terms <- names(stats::coef(fits[[1]]))
   ns <- vapply(fits, stats::nobs, numeric(1))
   dfs <- vapply(fits, stats::df.residual, numeric(1))
@@ -70,6 +80,9 @@ catmech_pool_lm <- function(result, formula, conf_level = 0.95,
     identical(stats::model.frame(f), stats::model.frame(fits[[1]]))
   }, logical(1))))
     stop("No-imputation metadata conflicts with the completed analysis data.", call. = FALSE)
+  reference_pmm_sensitivity <- identical(engine, "reference_pmm") && !no_imputation
+  if (reference_pmm_sensitivity && !allow_sensitivity)
+    stop("Partial-reference PMM is experimental and showed undercoverage in validation. Set allow_sensitivity=TRUE only for sensitivity calculations.", call. = FALSE)
   output <- lapply(terms, function(term) {
     Q <- vapply(fits, function(f) unname(stats::coef(f)[term]), numeric(1))
     U <- vapply(fits, function(f) unname(stats::vcov(f)[term, term]), numeric(1))
@@ -85,7 +98,7 @@ catmech_pool_lm <- function(result, formula, conf_level = 0.95,
       lower = pooled$qbar - critical*se, upper = pooled$qbar + critical*se,
       within_variance = pooled$ubar, between_variance = pooled$b,
       m = length(fits), n = ns[1],
-      interpretation = if (recognized) unname(labels[engine]) else "sensitivity_only",
+      interpretation = if (recognized && !reference_pmm_sensitivity) unname(labels[engine]) else "sensitivity_only",
       stringsAsFactors = FALSE)
   })
   do.call(rbind, output)

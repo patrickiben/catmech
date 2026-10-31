@@ -3,7 +3,9 @@
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args)) .libPaths(c(args[1], .libPaths()))
 stopifnot(!"package:catmech" %in% search())
-stopifnot(utils::packageVersion("catmech") >= "0.2.0")
+stopifnot(utils::packageVersion("catmech") >= "0.3.1")
+stopifnot(all(c("catmech_pmm", "catmech_reference") %in%
+                getNamespaceExports("catmech")))
 
 d <- catmech::simulate_catmech_lab(200, seed = 7, corruption_probability = 0.5)
 d <- d[setdiff(names(d), c("lab_true", "corrupted"))]
@@ -111,7 +113,93 @@ stopifnot(all(legacy_pooled$interpretation == "sensitivity_only"))
 check_export(legacy, "legacy")
 cat("Installed namespace-only model, legacy, pooling and JSON/RDS checks: PASS\n")
 
-# Run both bundled examples. The main model example uses namespace calls;
+# Standard PMM, including category as an explicitly chosen ordinary predictor.
+trusted_pmm <- catmech::catmech_pmm(d, "lab_value", c(predictors, "lab_category"),
+  flag = "outlier_flag", donors = 5, m = 4, seed = 35)
+check_alignment(trusted_pmm, d)
+trusted_rows <- which(!is.na(d$lab_value) & as.character(d$outlier_flag) != "Yes")
+stopifnot(all(trusted_pmm$audit$eligible_donors == length(trusted_rows)),
+          all(trusted_pmm$audit$candidate_pool_size == 5L),
+          identical(trusted_pmm$manifest$engine, "trusted_pmm"))
+for (j in seq_along(trusted_pmm$completed)) {
+  stopifnot(all(trusted_pmm$completed[[j]]$lab_value[trusted_pmm$manifest$imputed_rows] %in%
+                  d$lab_value[trusted_rows]))
+}
+check_export(trusted_pmm, "trusted-pmm")
+
+# Reference measurements are exposed only in a randomly selected 25% subset.
+reference_raw <- catmech::simulate_catmech_lab(200, seed = 7, corruption_probability = 0.5)
+set.seed(36)
+gold_rows <- sort(sample.int(nrow(reference_raw), nrow(reference_raw) / 4))
+reference_data <- reference_raw[setdiff(names(reference_raw), c("lab_true", "corrupted"))]
+reference_data$gold_value <- NA_real_
+reference_data$gold_value[gold_rows] <- reference_raw$lab_true[gold_rows]
+rm(reference_raw)
+known <- !is.na(reference_data$gold_value)
+reference_fits <- lapply(c("normal", "pmm"), function(method) {
+  fit <- catmech::catmech_reference(reference_data, "lab_value", "gold_value", predictors,
+    method = method, m = 4, seed = 37)
+  check_alignment(fit, reference_data)
+  stopifnot(identical(fit$mids$data$lab_value, reference_data$gold_value),
+            identical(fit$manifest$imputed_rows, which(!known)),
+            identical(fit$manifest$reference_rows, which(known)),
+            all(fit$audit$reason[fit$audit$reference_observed] == "gold_reference"),
+            all(!fit$audit$reconstructed[fit$audit$reference_observed]),
+            all(fit$audit$reconstructed[!fit$audit$reference_observed]))
+  for (j in seq_along(fit$completed)) {
+    stopifnot(identical(fit$completed[[j]]$lab_value[known], reference_data$gold_value[known]),
+              identical(fit$completed[[j]]$gold_value, reference_data$gold_value))
+    if (method == "pmm")
+      stopifnot(all(fit$completed[[j]]$lab_value[!known] %in% reference_data$gold_value[known]))
+  }
+  if (method == "pmm") {
+    refused <- tryCatch(catmech::catmech_pool_lm(fit, analysis_formula), error = identity)
+    stopifnot(inherits(refused, "error"),
+              grepl("allow_sensitivity", conditionMessage(refused), fixed = TRUE))
+    analysis <- catmech::catmech_pool_lm(fit, analysis_formula, allow_sensitivity = TRUE)
+    stopifnot(all(analysis$interpretation == "sensitivity_only"),
+              identical(fit$manifest$claim_level, "sensitivity_only"))
+  } else analysis <- catmech::catmech_pool_lm(fit, analysis_formula)
+  stopifnot(all(is.finite(analysis$estimate)))
+  manifest <- check_export(fit, paste0("reference-", method))
+  stopifnot(identical(manifest$engine, paste0("reference_", method)),
+            "donors" %in% names(manifest$assumptions))
+  if (method == "normal") stopifnot(is.null(manifest$assumptions$donors))
+  else stopifnot(identical(manifest$claim_level, "sensitivity_only"))
+  fit
+})
+names(reference_fits) <- c("normal", "pmm")
+
+# A completely measured reference endpoint has no stochastic target cells.
+# The pooled coefficient, SE, df and t interval equal a direct gold-data lm.
+complete_reference <- catmech::simulate_catmech_lab(80, seed = 38)
+complete_reference$gold_value <- complete_reference$lab_true
+complete_reference[c("lab_true", "corrupted")] <- NULL
+gold_analysis <- complete_reference
+gold_analysis$lab_value <- gold_analysis$gold_value
+ordinary <- stats::lm(analysis_formula, data = gold_analysis)
+ordinary_ci <- stats::confint(ordinary)
+for (method in c("normal", "pmm")) {
+  fit <- catmech::catmech_reference(complete_reference, "lab_value", "gold_value", predictors,
+    method = method, m = 3, seed = 39)
+  pooled <- catmech::catmech_pool_lm(fit, analysis_formula)
+  ord <- match(pooled$term, names(stats::coef(ordinary)))
+  stopifnot(length(fit$manifest$imputed_rows) == 0L,
+            !any(pooled$interpretation == "sensitivity_only"),
+            identical(mice::complete(fit$mids, 2)$lab_value, complete_reference$gold_value),
+            isTRUE(all.equal(pooled$estimate, unname(stats::coef(ordinary)[ord]))),
+            isTRUE(all.equal(pooled$std.error, unname(sqrt(diag(stats::vcov(ordinary)))[ord]))),
+            all(pooled$df == stats::df.residual(ordinary)),
+            isTRUE(all.equal(pooled$lower, unname(ordinary_ci[ord, 1]))),
+            isTRUE(all.equal(pooled$upper, unname(ordinary_ci[ord, 2]))))
+  manifest <- check_export(fit, paste0("complete-reference-", method))
+  stopifnot("imputed_rows" %in% names(manifest),
+            is.list(manifest$imputed_rows), length(manifest$imputed_rows) == 0L)
+}
+stopifnot(!"package:catmech" %in% search())
+cat("Installed namespace-only PMM, reference, adapter, audit, export and complete-reference checks: PASS\n")
+
+# Run all bundled examples. The model/reference examples use namespace calls;
 # the older lab example intentionally attaches the package.
 model_example <- new.env(parent = globalenv())
 source(system.file("examples", "model.R", package = "catmech"), local = model_example)
@@ -119,5 +207,14 @@ stopifnot(!"package:catmech" %in% search(),
           inherits(model_example$scenarios$exact_categories, "error"),
           !model_example$comparison$complete,
           identical(model_example$comparison$status, "unresolved_incomplete_set"))
+reference_example <- new.env(parent = globalenv())
+source(system.file("examples", "reference.R", package = "catmech"), local = reference_example)
+stopifnot(!"package:catmech" %in% search(), reference_example$reference_comparison$complete,
+          !any(c("lab_true", "corrupted") %in% names(reference_example$reference_data)),
+          sum(!is.na(reference_example$reference_data$gold_value)) ==
+            nrow(reference_example$reference_data) / 4,
+          identical(names(reference_example$reference_scenarios), reference_example$reference_expected))
+stopifnot(identical(reference_example$reference_comparison$table$interpretation[
+  reference_example$reference_comparison$table$scenario == "reference_pmm"], "sensitivity_only"))
 source(system.file("examples", "lab.R", package = "catmech"), local = new.env(parent = globalenv()))
-cat("Bundled main-model and legacy examples: PASS\n")
+cat("Bundled main-model, reference and legacy examples: PASS\n")

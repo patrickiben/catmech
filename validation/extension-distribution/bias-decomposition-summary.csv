@@ -1,0 +1,9 @@
+"family","scenario","replicates","selection_difference","selection_mcse","residual_error_difference","residual_error_mcse"
+"distribution","category_error",1000,0.000796909474674629,0.00122423284727747,0,0
+"distribution","false_positive_flags",1000,0.000548684356241792,0.00116557446190156,0,0
+"distribution","heavy_category_error",1000,-0.00109450261032983,0.00134437767599632,0,0
+"distribution","heavy_tails",1000,-0.000275970875183854,0.00122785775796438,0,0
+"distribution","missing_only",1000,0.000628485593905463,0.000942572911376378,0,0
+"distribution","null_effect",1000,-0.00195665098895752,0.00120143781184455,0,0
+"distribution","perfect_flags",1000,-0.00325613951024347,0.00119445783971327,0,0
+"distribution","strong_mar",1000,0.00075528937399055,0.00185552149779559,0,0

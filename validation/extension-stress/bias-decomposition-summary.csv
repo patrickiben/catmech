@@ -1,0 +1,7 @@
+"family","scenario","replicates","selection_difference","selection_mcse","residual_error_difference","residual_error_mcse"
+"support","missed_flags_gold10",250,0.00414718756437917,0.0079574760173738,0,0
+"support","missed_flags_gold50",250,-0.000745970023224182,0.00250962888429821,0,0
+"stress","noisy_reference",500,0.00553100326948837,0.00322458875948622,-0.112721778177578,0.00173594695435704
+"stress","nonignorable_selection",1000,0.266576592868876,0.00262843308493709,0,0
+"support","site_shift_gold10",250,0.00414718756437917,0.0079574760173738,0,0
+"support","site_shift_gold50",250,-0.000745970023224182,0.00250962888429821,0,0

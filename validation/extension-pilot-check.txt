@@ -1,0 +1,16 @@
+replicates.csv: byte-identical=True
+summary.csv: byte-identical=True
+request-status.csv: byte-identical=True
+paired-comparisons.csv: byte-identical=True
+bias-decomposition.csv: byte-identical=True
+bias-decomposition-summary.csv: byte-identical=True
+source-hashes.csv: byte-identical=True
+pmm_no_cat versus independent mice_pmm_no_cat: numerical fields identical on all available pilot pairs
+pmm_cat versus independent mice_pmm_cat: numerical fields identical on all available pilot pairs
+reference_pmm versus independent mice_reference_pmm: numerical fields identical on all available pilot pairs
+805 requests; 795 intervals; 10 expected no-reference refusals; zero other errors.
+All-reference estimate, SE, df, CI and every completed target passed equivalence checks.
+Sources/plan stable before and after both runs. Pilot data are engineering-only and not used to choose settings.
+Engineering pilot locations: /tmp/catmech-extension-pilot-serial and /tmp/catmech-extension-pilot-parallel.
+Command: CATMECH_BENCHMARK_WORKERS=1 or 4 Rscript tools/extension-benchmark.R pilot OUTPUT.
+Full-held-out outputs are deliberately not substituted for this five-replicate engineering check.

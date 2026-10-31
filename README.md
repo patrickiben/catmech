@@ -1,13 +1,15 @@
 # catmech
 
 **An experimental R package for auditable imputation of continuous measurements
-with quality flags and optional interval categories. Version 0.2.0.**
+with quality flags and optional interval categories. Version 0.3.1.**
 
 `catmech_model()` masks every flagged measurement and fits a conditional Gaussian
 model using trusted observations. It can ignore categories, treat them as exact,
 or use an externally specified category-error matrix. It preserves original data,
 records assumptions and replacements, checks sampler diagnostics, and supports
 linear-model pooling and comparison of declared sensitivity scenarios.
+`catmech_reference()` uses genuinely measured reference values on an internal
+subset, and `catmech_pmm()` provides an audited standard predictive-matching option.
 
 The Gaussian model and data augmentation are established methods. The contribution
 is a small, inspectable workflow with explicit failure handling. The earlier
@@ -24,7 +26,7 @@ install.packages(".", repos = NULL, type = "source")
 ```
 
 Run the second command from the repository directory, or install the source archive
-with `R CMD INSTALL catmech_0.2.0.tar.gz`. R 4.1 or later is required. GitHub Actions
+with `R CMD INSTALL catmech_0.3.1.tar.gz`. R 4.1 or later is required. GitHub Actions
 is configured for Linux, macOS and Windows; local checks do not establish that
 the remote workflow has passed.
 
@@ -46,7 +48,7 @@ fit <- catmech_model(
 
 catmech_pool_lm(fit, outcome ~ lab_value + age + sex + inflammation)
 head(fit$audit)
-fit$model_diagnostics
+fit$model_diagnostics$summary
 completed_one <- fit$completed[[1]]
 
 # Use a new or empty directory; existing files are not overwritten.
@@ -59,6 +61,41 @@ positive flags. Unflagged observed values are trusted and preserved exactly;
 missing flags count as unflagged. This policy requires an ignorable trusted-data
 selection mechanism given the predictors. It does not detect missed errors or
 estimate whether any particular measurement was wrong.
+
+## When flags miss errors: use actual reference information
+
+Masking flagged values cannot identify errors among measurements still treated
+as trusted. If an independently measured reference subset is available, use it
+as the observed target and impute every unvalidated target:
+
+```r
+# reference_value contains actual reference measurements on selected rows,
+# with NA elsewhere. Do not manufacture reference values from flags or W.
+fit_reference <- catmech_reference(
+  dat_with_reference, value = "lab_value", reference = "reference_value",
+  predictors = c("age", "sex", "inflammation", "outcome"),
+  method = "normal", m = 20, seed = 123
+)
+catmech_pool_lm(fit_reference,
+  outcome ~ lab_value + age + sex + inflammation)
+```
+
+A random internal reference sample is a transparent design. Targeted verification
+requires a suitable selection model and overlap; noisy references cannot be treated
+as exact truth. The default omits recorded W as a predictor, sacrificing information
+rather than silently retaining unvalidated values. This requires additional reference measurements. Read the
+[reference method](docs/REFERENCE_METHOD.md) and
+[synthetic example](inst/examples/reference.R).
+
+For a donor-based alternative, `catmech_pmm(dat, "lab_value", predictors,
+flag = "outlier_flag")` masks all flags and delegates standard type-1 PMM to `mice`.
+`catmech_reference(..., method = "pmm")` restricts donors to reference rows, but
+showed substantial undercoverage in the held-out study. Its pooled analysis now
+requires `allow_sensitivity = TRUE` and remains labeled `sensitivity_only`. The
+reference default remains normal. Predictors must be complete. An observed category can be selected explicitly as
+an ordinary factor predictor; no interval constraint is then imposed. PMM cannot
+extrapolate beyond donor values and does not guarantee robustness or coverage.
+The new evaluation compares methods given the **same predictor information**.
 
 ## Use categories only under an explicit observation model
 
@@ -108,12 +145,15 @@ with a new coverage guarantee.
   normal MI, trusted PMM, naive and oracle analyses, and the legacy method. It
   reports bias, coverage, MCSE, failures, and deliberate wrong-model stresses.
 
-The [coverage protocol](validation/COVERAGE_PLAN.md) transfers useful controls from
+The [v0.2 coverage protocol](validation/COVERAGE_PLAN.md) transfers useful controls from
 the author's carryover, False Floor, calibration and assumption-audit research.
-An independent numerical posterior oracle checks the sampler. Clinical-format
+Independent numerical oracles check the category sampler and the reference
+model's joint predictive distribution, including shared parameter uncertainty. Clinical-format
 synthetic fixtures include missed flags, site shifts and rounded records.
 [Transfer details](docs/RESEARCH_TRANSFER_PLAN.md) state what does and does not
-carry over. These are simulation studies, not clinical validation or a general
+carry over. The [new extension study](validation/EXTENSION_SYNTHESIS.md)
+reports matched-information PMM comparisons, the value of actual reference
+measurements, and failures under selective or inaccurate references. These are simulation studies, not clinical validation or a general
 coverage theorem. Nonlinearity, missed contamination, informative selection,
 incompatible analysis models and dependent records remain limitations.
 
@@ -133,15 +173,23 @@ are not silently converted to the new model.
 Rscript -e 'install.packages(c("testthat", "pkgload", "roxygen2"))'
 Rscript -e 'testthat::test_local()'
 R CMD build .
-R CMD check --no-manual catmech_0.2.0.tar.gz
+R CMD check --no-manual catmech_0.3.1.tar.gz
 Rscript tools/check-model-oracle.R validation/my-model-oracle
 Rscript tools/coverage-benchmark.R confirmatory validation/my-heldout
 Rscript tools/coverage-benchmark.R clinical validation/my-clinical
+Rscript tools/check-reference-oracle.R validation/my-reference-oracle
+Rscript tools/check-pooling-guards.R validation/my-pooling-guards
+Rscript tools/extension-benchmark.R distribution validation/my-distribution
+Rscript tools/extension-benchmark.R reference validation/my-reference-study
+Rscript tools/extension-benchmark.R stress validation/my-reference-stress
+Rscript tools/extension-benchmark.R controls validation/my-reference-controls
 python3 tools/verify-artifacts.py
 ```
 
-Use new output directories. The archived v0.1 sources reproduce the historical
-benchmark; its hashes should not be compared to changed v0.2 sources. See
+Use new output directories. Archived v0.1, v0.2 and v0.3.0 sources retain the historical
+benchmark inputs; their hashes are checked against those frozen versions. The
+v0.3.1 guards reject unsupported analyses and gate experimental reference-PMM
+pooling; successful scalar estimates and intervals are unchanged. See
 [validation](validation/VALIDATION.md) for evidence, environment and remaining gaps.
 
 MIT license. Built on [mice](https://doi.org/10.18637/jss.v045.i03),

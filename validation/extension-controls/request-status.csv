@@ -1,0 +1,13 @@
+"family","scenario","method","status","count","requested","rate","mcse","lower","upper"
+"control","all_reference","reference_normal","ok",20,20,1,0,0.838874841947181,1
+"control","all_reference","reference_normal","refused",0,20,0,0,0,0.161125158052819
+"control","all_reference","reference_normal","error",0,20,0,0,0,0.161125158052819
+"control","no_reference","reference_normal","ok",0,20,0,0,0,0.161125158052819
+"control","no_reference","reference_normal","refused",20,20,1,0,0.838874841947181,1
+"control","no_reference","reference_normal","error",0,20,0,0,0,0.161125158052819
+"control","all_reference","reference_pmm","ok",20,20,1,0,0.838874841947181,1
+"control","all_reference","reference_pmm","refused",0,20,0,0,0,0.161125158052819
+"control","all_reference","reference_pmm","error",0,20,0,0,0,0.161125158052819
+"control","no_reference","reference_pmm","ok",0,20,0,0,0,0.161125158052819
+"control","no_reference","reference_pmm","refused",20,20,1,0,0.838874841947181,1
+"control","no_reference","reference_pmm","error",0,20,0,0,0,0.161125158052819

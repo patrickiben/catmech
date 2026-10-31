@@ -1,0 +1,6 @@
+"family","scenario","replicates","selection_difference","selection_mcse","residual_error_difference","residual_error_mcse"
+"reference","clean",1000,0.00312559776697468,0.00227825878386642,0,0
+"reference","flagged_errors",1000,0.00312559776697468,0.00227825878386642,0,0
+"reference","missed_flags",1000,0.00312559776697468,0.00227825878386642,0,0
+"reference","rounded_records",1000,0.00312559776697468,0.00227825878386642,0,0
+"reference","site_shift",1000,0.00312559776697468,0.00227825878386642,0,0

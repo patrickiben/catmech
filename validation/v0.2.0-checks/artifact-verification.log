@@ -1,0 +1,7 @@
+Original draft file hashes unchanged: PASS
+Frozen v0.1 source hashes and independently recomputed 30 summary rows: PASS
+Known-wrong bias mutation detected: PASS
+coverage-confirmatory: 44750 unique requests, 50 recomputed groups, statuses and paired MCSEs: PASS
+coverage-clinical: 7500 unique requests, 30 recomputed groups, statuses and paired MCSEs: PASS
+Independent posterior oracle source hashes and moment checks: PASS
+This verifies correspondence and repeatability, not inferential validity.

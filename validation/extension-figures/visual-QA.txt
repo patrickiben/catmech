@@ -1,0 +1,15 @@
+Figure integrity and visual QA: PASS
+
+- 21 plotted source rows exactly match their completed benchmark summaries (numerical tolerance 1e-11).
+- Coverage Wilson intervals and mean-width Monte Carlo intervals independently recomputed; tolerance 1e-12.
+- All plotted intervals/requested counts agree; no failures omitted from any plotted performance group.
+- Input/script and generated PNG/PDF/data SHA-256 hashes match figure-provenance.json.
+- The plotting script independently verified all 12 frozen numerical source/plan hashes against validation/v0.3.0-source.
+- PNG inspected in full at 3080 x 2310 pixels.
+- One-page 14 x 10.5 inch PDF rendered with Poppler at 120 dpi and visually inspected in full.
+- No clipped labels, overlapping annotations, unreadable legends or unsupported glyphs observed in either final rendering.
+- PDF text extraction confirms all headline percentages, sensitivity-only label and noisy-reference denominator after normalizing the PDF device's minus-sign encoding; no replacement characters.
+- Expanded panel-B axis is explicitly disclosed. Shared reference cohorts appear once in panel A. Additional measured information and experimental partial-reference PMM are explicit.
+- Width is not evidence of validity; the caption identifies reference-PMM undercoverage at each fraction.
+
+Rendered PDF preview used for QA: /tmp/catmech-extension-pdf-qa/extension-evidence.png

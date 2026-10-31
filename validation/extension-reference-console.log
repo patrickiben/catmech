@@ -1,0 +1,27 @@
+reference clean 200 / 1000 ; elapsed 6 seconds
+reference clean 400 / 1000 ; elapsed 11 seconds
+reference clean 600 / 1000 ; elapsed 17 seconds
+reference clean 800 / 1000 ; elapsed 22 seconds
+reference clean 1000 / 1000 ; elapsed 28 seconds
+reference flagged_errors 200 / 1000 ; elapsed 33 seconds
+reference flagged_errors 400 / 1000 ; elapsed 39 seconds
+reference flagged_errors 600 / 1000 ; elapsed 44 seconds
+reference flagged_errors 800 / 1000 ; elapsed 50 seconds
+reference flagged_errors 1000 / 1000 ; elapsed 56 seconds
+reference missed_flags 200 / 1000 ; elapsed 61 seconds
+reference missed_flags 400 / 1000 ; elapsed 67 seconds
+reference missed_flags 600 / 1000 ; elapsed 72 seconds
+reference missed_flags 800 / 1000 ; elapsed 78 seconds
+reference missed_flags 1000 / 1000 ; elapsed 83 seconds
+reference site_shift 200 / 1000 ; elapsed 89 seconds
+reference site_shift 400 / 1000 ; elapsed 94 seconds
+reference site_shift 600 / 1000 ; elapsed 100 seconds
+reference site_shift 800 / 1000 ; elapsed 105 seconds
+reference site_shift 1000 / 1000 ; elapsed 111 seconds
+reference rounded_records 200 / 1000 ; elapsed 117 seconds
+reference rounded_records 400 / 1000 ; elapsed 122 seconds
+reference rounded_records 600 / 1000 ; elapsed 128 seconds
+reference rounded_records 800 / 1000 ; elapsed 134 seconds
+reference rounded_records 1000 / 1000 ; elapsed 139 seconds
+Completed reference : 35000 requests; ok 35000 
+Output: /Users/patrickiben/Documents/catmech/validation/extension-reference 

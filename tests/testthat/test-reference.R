@@ -127,8 +127,40 @@ test_that("both PMM APIs restore RNG and retain public call provenance", {
   fit <- catmech_reference(d, "lab_value", "gold", c("age", "outcome"), method = "pmm", m = 2)
   expect_identical(.Random.seed, before)
   expect_identical(fit$mids$call[[1]], as.name("catmech_reference"))
-  expect_identical(fit$manifest$claim_level, "conditional_reference_matching")
+  expect_identical(fit$manifest$claim_level, "sensitivity_only")
   expect_identical(fit$spec$predictors, c("age", "outcome"))
+})
+
+test_that("partial reference PMM requires explicitly labeled sensitivity pooling", {
+  d <- reference_fixture()
+  fit <- catmech_reference(d, "lab_value", "gold", c("age", "outcome"),
+                           method = "pmm", m = 4, seed = 39)
+  expect_identical(fit$manifest$claim_level, "sensitivity_only")
+  expect_error(catmech_pool_lm(fit, outcome ~ lab_value + age), "allow_sensitivity")
+  pooled <- catmech_pool_lm(fit, outcome ~ lab_value + age, allow_sensitivity = TRUE)
+  expect_true(all(pooled$interpretation == "sensitivity_only"))
+  report <- catmech_sensitivity(list(reference_pmm = fit), outcome ~ lab_value + age,
+                                "lab_value", expected_scenarios = "reference_pmm")
+  expect_true(report$complete)
+  expect_identical(report$table$interpretation, "sensitivity_only")
+  normal <- catmech_reference(d, "lab_value", "gold", c("age", "outcome"), m = 4)
+  expect_true(all(catmech_pool_lm(normal, outcome ~ lab_value + age)$interpretation ==
+                    "conditional_reference_model"))
+})
+
+test_that("complete reference PMM permits ordinary complete-data pooling", {
+  d <- simulate_catmech_lab(80, seed = 48)
+  d$gold <- d$lab_true
+  d[c("lab_true", "corrupted")] <- NULL
+  fit <- catmech_reference(d, "lab_value", "gold", c("age", "outcome"),
+                           method = "pmm", m = 3)
+  expect_length(fit$manifest$imputed_rows, 0L)
+  expect_identical(fit$manifest$claim_level, "conditional_reference_matching")
+  pooled <- catmech_pool_lm(fit, outcome ~ lab_value + age)
+  expect_true(all(pooled$interpretation == "conditional_reference_matching"))
+  expected <- lm(outcome ~ lab_value + age, data = fit$completed[[1]])
+  expect_equal(pooled$df, rep(df.residual(expected), nrow(pooled)))
+  expect_equal(unname(as.matrix(pooled[c("lower", "upper")])), unname(confint(expected)))
 })
 
 test_that("reference input and support failures remain explicit", {

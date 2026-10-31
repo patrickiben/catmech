@@ -1,0 +1,86 @@
+* installing *source* package ‘catmech’ ...
+** this is package ‘catmech’ version ‘0.2.0’
+** using staged installation
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** testing if installed package can be loaded from temporary location
+** testing if installed package can be loaded from final location
+** testing if installed package keeps a record of temporary installation path
+* DONE (catmech)
+Installed namespace-only model, legacy, pooling and JSON/RDS checks: PASS
+       term  estimate std.error       df     lower     upper within_variance
+2 lab_value 0.6393485 0.1048552 56.93948 0.4293747 0.8493223     0.006929526
+  between_variance  m   n          interpretation
+2      0.003871514 20 160 conditional_model_based
+                scenario status  estimate  std.error     lower     upper
+1      ignore_categories     ok 0.6393485 0.10485521 0.4293747 0.8493223
+2 known_noisy_categories     ok 0.6548141 0.08820109 0.4795912 0.8300369
+3       exact_categories failed        NA         NA        NA        NA
+   direction          interpretation
+1      above conditional_model_based
+2      above conditional_model_based
+3 unresolved           not_available
+                                                                                    message
+1
+2
+3 A trusted value/category conflict has zero probability under the supplied category model.
+Scenario-set status: unresolved_incomplete_set
+Descriptive finite-scenario envelope; not a calibrated confidence interval for unknown assumptions.
+   imputation requested reconstructed changed threshold_conflicts
+1           1        86            86      28                  17
+2           2        86            86      28                  17
+3           3        86            86      28                  17
+4           4        86            86      28                  17
+5           5        86            86      28                  17
+6           6        86            86      28                  17
+7           7        86            86      28                  17
+8           8        86            86      28                  17
+9           9        86            86      28                  17
+10         10        86            86      28                  17
+11         11        86            86      28                  17
+12         12        86            86      28                  17
+13         13        86            86      28                  17
+14         14        86            86      28                  17
+15         15        86            86      28                  17
+16         16        86            86      28                  17
+17         17        86            86      28                  17
+18         18        86            86      28                  17
+19         19        86            86      28                  17
+20         20        86            86      28                  17
+   fallback_draws threshold_violations
+1               0                    0
+2               0                    0
+3               0                    0
+4               0                    0
+5               0                    0
+6               0                    0
+7               0                    0
+8               0                    0
+9               0                    0
+10              0                    0
+11              0                    0
+12              0                    0
+13              0                    0
+14              0                    0
+15              0                    0
+16              0                    0
+17              0                    0
+18              0                    0
+19              0                    0
+20              0                    0
+          term    estimate   std.error    statistic       df      p.value
+1  (Intercept) 0.003765168 0.431433314  0.008727115 265.3627 9.930434e-01
+2    lab_value 0.725906753 0.064548453 11.245920270 213.3933 2.410809e-23
+3          age 0.001327031 0.007602934  0.174541934 275.0646 8.615680e-01
+4         sexM 0.039813776 0.132762229  0.299887823 276.2394 7.644883e-01
+5 inflammation 0.191327503 0.069514573  2.752336594 268.0463 6.321139e-03
+     q  estimate  std.error mean_reconstructed
+2  0.0 0.2420381 0.03303066              75.00
+21 0.5 0.3360531 0.05961087              80.45
+22 0.8 0.4755443 0.12011046              83.45
+23 1.0 0.7259068 0.06454845              86.00
+Bundled main-model and legacy examples: PASS

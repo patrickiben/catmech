@@ -1,0 +1,8 @@
+Final documentation and figure checks: PASS
+
+64 local Markdown links checked; no missing targets.
+21 plotted rows agree with completed study summaries; Monte Carlo intervals independently recomputed.
+Figure input, script, PNG, PDF and data hashes match recorded provenance.
+Final PNG visually inspected by root reviewer; agent independently inspected PNG and rendered PDF.
+No repository evidence file exceeds 50 MiB.
+Production source, documentation and tools pass git diff --check.

@@ -41,3 +41,18 @@ are the proposed publication-facing explanation.
 
 The public package version is now `0.2.0`. Legacy API behavior remains available;
 new model assumptions require the new entry point. See [NEWS](../NEWS.md).
+
+## Version 0.3 extension
+
+| Addition | Reason |
+|---|---|
+| `catmech_reference()` | Treat independently measured reference values as anchors; impute every unvalidated true target |
+| `catmech_pmm()` | Expose ordinary flag-masking PMM without legacy retention or forced categories |
+| Honest donor identity audit | Distinguish an identified row from duplicate-value ambiguity; separate available donors from nearest-pool size |
+| Fully referenced analysis endpoint | Return ordinary regression intervals when explicit metadata confirms no imputation |
+| Predictive-t oracle | Check shared posterior parameter uncertainty through cross-record covariance |
+| Equal-information study | Separate PMM versus normal from the effect of additional category predictors |
+| Reference selection/noise stresses | Expose assumptions that additional measurements still cannot bypass |
+
+Version `0.3.0` retains the old engines and evidence. It adds no automatic
+corruption detector and no estimated category-confusion likelihood.

@@ -16,7 +16,8 @@ values are rejected rather than silently dropping records.}
 \item{conf_level}{Confidence level between zero and one.}
 
 \item{allow_sensitivity}{Explicitly allow pooled calculations for the legacy
-sensitivity engine. This does not establish their inferential validity.}
+sensitivity engine or experimental partial-reference PMM. Results retain a
+sensitivity-only label; this does not establish their inferential validity.}
 }
 \value{
 A data.frame with term, estimate, std.error, df, lower, upper,
@@ -34,4 +35,8 @@ When the workflow declares that no target cells were imputed, all
   are returned. A zero estimated between-imputation variance alone does not
   activate this rule. Predictive matching and reference-subset results retain
   distinct interpretation labels; none guarantees coverage under misspecification.
+  Partial-reference PMM requires explicit sensitivity opt-in because held-out
+  studies found material undercoverage even with random accurate references.
+  This package policy does not assert that every PMM application is invalid.
+  Only univariate linear models with at least one named coefficient are supported.
 }
