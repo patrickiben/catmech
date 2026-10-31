@@ -1,0 +1,5 @@
+Coverage benchmark analysis calculation check, 2026-10-31
+200 independently generated data sets with missing laboratory values.
+Optimized lm.fit path agreed with formula lm for coefficient, standard error, residual degrees of freedom and sample count.
+Maximum absolute coefficient/standard-error discrepancy: 2.109423746787797e-15
+Seed 773; this check uses no held-out evaluation seed.

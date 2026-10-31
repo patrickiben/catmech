@@ -1,0 +1,3 @@
+Source hashes and independently recomputed 30 summary rows: PASS
+Known-wrong bias mutation detected: PASS
+This verifies correspondence and repeatability, not inferential validity.

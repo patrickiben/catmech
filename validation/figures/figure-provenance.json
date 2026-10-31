@@ -1,0 +1,41 @@
+{
+  "description": "Descriptive static scientific coverage comparison from completed held-out runs",
+  "nominal": 0.95,
+  "point": "coverage conditional on returned intervals",
+  "interval": "95 percent Wilson interval for binomial Monte Carlo coverage uncertainty",
+  "mcse": "sqrt(coverage * (1 - coverage) / returned intervals); stored alongside points",
+  "legacy_comparison": "Same held-out cohort rerun, not historical pilot values",
+  "clinical_legacy": "Not evaluated because category-boundary conventions differ",
+  "clinical_site_stress": "Compound: fixed site003 shift plus random errors and 20 percent flag sensitivity; SITEID is in the analysis, so no isolated site-effect attribution",
+  "input_files": [
+    {
+      "path": "validation/coverage-confirmatory/summary.csv",
+      "sha256": "fffd1d1a4761e2fc7b0452431fa46ad6c4c0c0f8a3df889012b6432b9e77fc9d"
+    },
+    {
+      "path": "validation/coverage-confirmatory/source-hashes.csv",
+      "sha256": "b06d9e68bb07cc8c52249e2cec4282d3256b091d2308f307c23dc1dd2bc3f836"
+    },
+    {
+      "path": "validation/coverage-confirmatory/settings.json",
+      "sha256": "8cf864b8769cbb3a09525c2e4acd9615868c6a26ed634cdf64b3cd86be6e0f51"
+    },
+    {
+      "path": "validation/coverage-clinical/summary.csv",
+      "sha256": "373bf4ce729c39cb3f2b9303dc0d42fa6bdd1f4e79b0e1c450413780830e8180"
+    },
+    {
+      "path": "validation/coverage-clinical/source-hashes.csv",
+      "sha256": "b06d9e68bb07cc8c52249e2cec4282d3256b091d2308f307c23dc1dd2bc3f836"
+    },
+    {
+      "path": "validation/coverage-clinical/settings.json",
+      "sha256": "2ee6cb18a0b7c1edb84919a78e4e314ba2749e15914dc18edb31b781359467f9"
+    },
+    {
+      "path": "tools/plot-coverage.R",
+      "sha256": "92485dceed9ee3dd62479a644f5e7b79aecbbd79911d23028773c02f9bc6a6d9"
+    }
+  ],
+  "r_version": "R version 4.6.0 (2026-04-24)"
+}

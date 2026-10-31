@@ -1,118 +1,146 @@
-# Method, assumptions and interpretation
+# Model, assumptions and interpretation
 
-## What is being generated
+Version 0.2.0 introduces `catmech_model()`. The unchanged PMM retain/replace engine
+is documented separately in [LEGACY_METHOD.md](LEGACY_METHOD.md).
 
-For each participant i, let Y_i be an underlying continuous measurement, W_i its
-possibly missing or corrupted recorded value, C_i an observed interval category,
-and F_i a quality flag. X_i contains completely observed predictors selected by the
-analyst. The package generates alternative completed measurements conditional on
-declared assumptions. It does not estimate an identified individual truth.
+## Target and trust policy
 
-The example downstream estimand is the coefficient of Y in a linear regression
-for an outcome. Its units are outcome units per measurement unit. A completed
-dataset is an input to that analysis, not a guarantee of its validity.
+Let Y be the latent continuous measurement, W its recorded value, F a quality
+flag, C an optional category, and X complete selected predictors including an
+intercept. The downstream estimand must be stated separately; the examples use
+the coefficient of Y in a linear outcome regression.
 
-## Required assumptions
+All missing W and all flagged W are treated as unavailable. Observed unflagged W
+are treated as exact Y and preserved. Missing flags are treated as unflagged.
+False positive flags cost information but do not result in arbitrary retention
+of suspect values. Missed flags leave residual contamination and can invalidate
+inference. This is a masking policy, not a fitted probability of corruption.
 
-1. Each category is an exact coarsening of Y at the supplied thresholds. Rounded,
-   stale, independently miscoded, or corrupted categories do not meet this premise.
-2. Unflagged observed values that agree with their category are sufficiently
-   trustworthy to serve as original donors. Missing flags are treated as unflagged.
-3. The predictor model and trusted donor selection transport to the missing or
-   reconstructed records. Informative selection, unmeasured effects and poor
-   overlap may violate this premise. No MAR or MNAR mechanism is estimated.
-4. An explicitly chosen probability q defines a sensitivity replacement policy for
-   flagged, observed, category-compatible values. It is not learned from the data.
-5. If conflicts are reconstructed, the analyst grants the category authority over
-   the continuous value. Default behavior instead rejects a conflict.
+The model assumes `Y | X, beta, sigma² ~ Normal(X beta, sigma²)` independently
+across records, with reference prior `p(beta, sigma²) ∝ 1/sigma²`. Selection into
+the trusted set must be ignorable conditional on X. The trusted design must have
+full column rank, more observations than coefficients and positive residual
+variance. Constants, aliases, incomplete predictors and unsupported levels are
+rejected. The trusted posterior provides a proper anchor before categories are used.
+For example, flags created by thresholding the measurement itself can remove
+genuine extremes and violate ignorability. Masking is not automatically conservative;
+the primary random-flag simulations do not validate that selection mechanism.
 
-The unrestricted first and last intervals do not bound extreme errors. A very
-large corrupted value can still be compatible with the highest category. The
-retention policy can preserve that error, as the uncertain-flag benchmark shows.
+## Optional category likelihood
 
-## Algorithm
+Let `b(Y)` denote the interval containing Y and let `H[k,c] = Pr(C=c | b(Y)=k)`.
+Rows of H are true bins and columns observed bins. The supplied likelihood assumes
+category errors depend on Y only through its bin, given the modeled information.
+The endpoints must span `(-Inf, Inf)`; finite outer bounds would require additional
+truncation normalization incompatible with this conjugate parameter update.
+Intervals are right closed: `(a,b]`, with the first interval including its lower
+endpoint. Finite clinical reference boundaries may follow a different convention.
 
-Validate the complete specification and input labels. Resolve missing categories
-only from unflagged, observed, in-domain values. Detect conflicts on every row,
-including unflagged observations. Preserve original inputs separately.
+- `ignore`: categories have no likelihood and are not used to repair numeric data.
+- `exact`: H is the identity matrix. Trusted-value contradictions are errors.
+- `noisy`: a named nonnegative row-stochastic H is supplied externally. A trusted
+  disagreement is allowed only if its likelihood is positive.
 
-For each independent completion:
+Missing categories contribute no likelihood. Observed categories with zero
+probability in every bin are rejected. Trusted numeric values and recorded category
+labels are never changed to make them agree. The category likelihood for a trusted
+Y is a constant with respect to beta and sigma, so it does not change their posterior.
 
-- Missing values and authorized conflicts require reconstruction.
-- A flagged, observed, in-bound value is reconstructed with Bernoulli probability
-  q; otherwise it remains exactly unchanged.
-- Fit the continuous target on X using only original trusted observations.
-  Use QR reduction for globally redundant columns and reject nonestimable
-  recipient predictions. With n trusted rows and design rank r, draw residual
-  variance as SSE / chi-squared(n-r), then regression coefficients from the
-  corresponding normal distribution. Positive residual variance and degrees of
-  freedom are required.
-- For each reconstruction, restrict original donors to the recipient's category.
-  Compare fitted donor predictions to the drawn recipient prediction (type-1 PMM).
-  Break distance ties randomly, choose the nearest available donors up to
-  `n_donors`, and sample one. A singleton pool always returns that sole donor.
-- If support is below `min_donors`, fail by default. The optional normal fallback
-  draws from the regression predictive normal restricted to the interval. It is
-  a stronger assumption, records its use, and is not a validated interval-likelihood
-  or measurement-error model.
-- Verify all completed values against the interval convention and record decisions.
+H must come from external validation or explicitly declared sensitivity assumptions.
+It is not fitted here; uncertainty in H is not integrated out. Categories measured
+at another time, in different units, or derived from the same erroneous W need a
+different observation model. A noisy H does not automatically solve those problems.
 
-The regression excludes the category and flag as covariates in the high-level
-API. Categories restrict donor eligibility. For the direct low-level `mice`
-method, the analyst controls the predictor matrix and must supply the immutable
-original response in `original_y`. The high-level API is the supported audited
-workflow; a low-level invocation does not automatically create its provenance.
+## Posterior computation
 
-Complete predictors and one incomplete target make repeated chain iterations
-unnecessary in this implementation. An independent parameter draw is shared across
-recipients in each completion. The `mids` adapter stores the completions for `with`,
-`complete` and pooling. It does not provide MCMC convergence diagnostics.
+Ignoring categories gives ordinary Bayesian normal imputation. If n trusted rows
+and p coefficients give least-squares estimate beta-hat and residual sum of squares
+SSE, draw `sigma² = SSE / chi-squared(n-p)`, then
+`beta ~ Normal(beta-hat, sigma² (X'X)^(-1))` using a QR factorization.
+Draw each unavailable Y from its normal predictive conditional on this shared
+parameter draw. Each completion has an independent parameter draw. These are
+established calculations, also implemented in
+[mice.impute.norm](https://amices.org/mice/reference/mice.impute.norm.html).
 
-## q is a policy, not a corruption model
+With informative categories on masked records, Gibbs data augmentation alternates:
 
-For an observed flagged row that already agrees with its category, the completion
-rule is a point mass at W with weight 1-q, and a donor-based reconstruction with
-weight q. No corruption density p(W|Y,F), validation sample, or posterior update
-is fitted. The value of q can be varied to explore assumptions, but it should not
-be called the estimated probability that a record is wrong.
+1. Draw regression parameters using the full currently completed data and the same
+   reference-prior conjugate update. The degrees of freedom are n_total - p, not the number of trusted records
+   minus p.
+2. For each masked row with observed category c, sample bin k with weight
+   `H[k,c] * {Phi((upper[k]-X beta)/sigma) - Phi((lower[k]-X beta)/sigma)}`.
+   Then sample Y from the corresponding truncated normal. Rows with missing
+   categories have unrestricted normal draws.
 
-If fraction f of the observed flagged rows conflicts with its category and those
-conflicts are authorized for reconstruction, the expected reconstruction fraction
-is f + (1-f)q for a scalar q. The realized fraction fluctuates. The actual changed
-fraction can be smaller because a replacement can equal the observed value.
-Missing target values are not part of this observed-flagged denominator.
+The marginal category likelihood is thus included in the posterior. Merely fitting
+trusted data and clipping draws to bins would generally omit category information
+from the parameter posterior. Exactly uninformative likelihood columns reduce to
+the independent engine. Log interval probabilities are evaluated in the nearer
+normal tail to reduce cancellation. Unrepresentable draws cause explicit failure.
+This is conventional [data augmentation](https://doi.org/10.1080/01621459.1987.10478458),
+not a new sampling algorithm.
 
-Even when half of the flags truly indicate corruption, setting q=0.5 for every
-compatible flagged record does not recover the appropriate posterior. Observed
-magnitude, category and predictors may carry additional information. The benchmark
-deliberately exposes this failure rather than tuning q to remove it.
+By default, four chains start with separate trusted-posterior draws. Defaults discard 200 steps
+per chain and retain 400. Parameter traces and the mean latent value are screened
+using rank-normalized split/folded R-hat and bulk/tail ESS from `posterior`. Every
+screened variable must have R-hat <= 1.05 and both ESS values >= 100 times the number
+of chains. Nonfinite diagnostics also fail. A `catmech_convergence_error` retains
+traces and summaries; it does not return a successful analysis. These are finite
+screens, not proof of convergence, exploration of every mode, or coverage.
+[Diagnostic reference](https://mc-stan.org/rstan/reference/Rhat.html).
 
-## Inference boundary
+Requested completions are spaced through retained iterations and balanced across
+chains. They are not claimed independent. More imputations can reduce imputation
+Monte Carlo error, but cannot repair an incorrect model. Increase sampling effort
+when needed based on diagnostics, and retain failed runs when evaluating a fixed
+procedure rather than retrying them invisibly.
 
-Gaussian coefficient draws do not, by themselves, make the entire PMM and
-retain/replace scheme proper multiple imputation. The optional fallback has no
-general compatibility proof with the downstream model. Standard Rubin pooling is
-available through mice as an analysis calculation; its variance and coverage need
-separate validation for the intended setting.
+## Pooling and assumption comparisons
 
-The exploratory benchmark includes clean missingness, actual corruption, false
-positive flags, heavy tails and category miscoding. It establishes neither broad
-robustness nor clinical suitability. In particular, visibly constraint-consistent
-completions can yield badly biased inference when the category premise is false.
-An audit trail makes those assumptions inspectable; it cannot make them true.
+`catmech_pool_lm()` fits the requested model to each completion and uses
+`mice::pool.scalar()` with complete-data sample size and coefficient count for
+Rubin pooling and Barnard-Rubin degrees of freedom. Missing analysis data,
+singular fits, nonfinite or degenerate uncertainty and failed sampler diagnostics
+are rejected. Legacy sensitivity results require an explicit opt-in and retain
+their sensitivity label. The `mids` object is an adapter for externally generated
+completions, not a fitted chained-equations process; never resume it.
 
-## Provenance and reproducibility
+A coherent imputation likelihood does not establish compatibility with every
+analysis. Linear transformations, interactions, nonlinearity, selection, residual
+distribution and dependent observations need appropriate modeling and validation.
+The tested linear-Gaussian settings do not cover all estimands or clinical designs.
 
-The assumption hash uses canonical typed JSON, preserving list order, signed
-infinities, missing values and numeric precision while sorting named maps. Null
-fields are preserved; integer and equivalent double values intentionally share
-the same numeric encoding. Equivalent YAML and R specifications are normalized
-before hashing. This hash covers declared assumptions, not every execution input.
+`catmech_sensitivity()` takes a named list of results or caught error conditions
+from the same original data. `expected_scenarios` catches omitted prespecified
+cases and rejects extras. Errors and missing scenarios remain visible and make the
+overall conclusion unresolved. Successful intervals are classified relative to a
+declared reference; the smallest lower and largest upper bound form a descriptive
+envelope. Agreement over a finite set is not robustness over all plausible models,
+and the envelope has no claimed confidence level. A caller must supply its complete
+prespecified scenario list for this omission check to be meaningful.
 
-The manifest separately records the original-data fingerprint, selected predictors,
-seed, imputation count, RNG kinds and R/package versions. The data fingerprint is
-based on R serialization version 2 and can depend on data classes and environment;
-it is not a portable semantic-data identifier. A canonical assumption hash is not
-a full execution hash. The benchmark adds source-file hashes and environment records.
-Seeded runs are reproducible in the same software and numerical environment; exact
-cross-platform equality is not promised.
+## What this change repairs, and what it cannot
+
+The v0.1 uncertain-flag failure retained some severely corrupted values under an
+arbitrary q. Its intervals were already wide, so the main remedy is removal of
+that bias source, not interval inflation. Wrong categories caused a second failure
+when treated as authoritative. Ignoring them avoids that premise; an appropriate
+H uses them probabilistically. Incorrect H remains a deliberate stress condition.
+
+Unflagged contamination, informative trusted-data selection, heteroskedastic or
+nonlinear regressions, category-error dependence, uncertainty in H
+and repeated/clustered outcomes remain outside the fitted model. Clinical BLQ/PK
+censoring is outside the validated scope, even where a single censoring interval
+is mathematically representable by the category likelihood. The laboratory site-shift fixture also includes random errors and reduced flag
+detection, so its failure cannot be attributed to the shift alone. It diagnoses
+residual error; it does not validate random-effects or cluster-robust inference. No individual latent truth is identified by the model.
+
+## Provenance
+
+Original data, target-cell changes, assumptions, seeds, RNG kinds, versions and
+sampler traces are retained. Assumption hashes use canonical typed JSON, including
+signed infinities and nulls. The model specification stores H as named rows/columns.
+Data hashes use R serialization version 2 and are environment-dependent fingerprints,
+not portable semantic identifiers. Benchmarks additionally record source hashes
+before and after execution. Equal hashes establish correspondence, not correctness.
+Exact cross-platform numerical equality is not promised.

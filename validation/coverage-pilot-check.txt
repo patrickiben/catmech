@@ -1,0 +1,14 @@
+Engineering pilot worker-independence check, 2026-10-31
+
+One-worker and four-worker runs used the same independent development seeds.
+Both source-stability checks passed. Both runs returned 314 intervals and 5 expected exact-category refusals.
+No coverage or bias result was used for parameter or seed selection. Only API, numerical and scheduling behavior were checked.
+
+IDENTICAL replicates.csv SHA256 0427d8553b4b3f2f4e5f1f0d5016fb14187c71cfc5c79c9502506e48355bb8e4
+IDENTICAL summary.csv SHA256 858274a0e5450b9c85113849a8a8121c9cc00dc56880ed033c745c3aea07abb1
+IDENTICAL paired-comparisons.csv SHA256 3ef063d2ad357b4745c74da1402cdfe4bc50f6ce65447ed4504d5fa12ffd4ea8
+IDENTICAL request-status.csv SHA256 621220f1e5ae9b7e80a4d67835d8e4fd88692ee2a8fb56e3d1028650b2919e1a
+IDENTICAL bias-decomposition.csv SHA256 e5358e958542d78c16e79ff93b23d13ded8119f4ea61c5d348cf05d5c9a6039f
+IDENTICAL bias-decomposition-summary.csv SHA256 11ea6be52e780bd1aa31fd7d46f3a86f975247d362853be81a194c396e764cb2
+IDENTICAL source-hashes.csv SHA256 b06d9e68bb07cc8c52249e2cec4282d3256b091d2308f307c23dc1dd2bc3f836
+IDENTICAL RESULTS.md SHA256 fd87dddde3f0c111822779bc0114619cead0608485994140c7cf8f5c45047d9e

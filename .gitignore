@@ -6,3 +6,5 @@
 *.tar.gz
 output/
 .Rproj.user/
+__pycache__/
+*.pyc

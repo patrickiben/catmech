@@ -20,9 +20,24 @@ software package. It contains no patient data; examples and benchmarks are synth
 | Saved `violation_rate` actually measuring compliance | Count of verified threshold violations | Correct diagnostic meaning |
 | Single-seed smoke comparison | Repeated paired benchmark with stronger baselines | Measure bias, RMSE, coverage and Monte Carlo uncertainty |
 | Source-only tests | Standard package tests, source build, R CMD check and CI | Test installed behavior and reproducible entry points |
-| Broad speculative roadmap | Narrow experimental scope | No unimplemented topology, causal intervention, MNAR or category-error features |
+| Broad speculative roadmap | Narrow experimental scope | No unimplemented topology, causal intervention or MNAR features |
 
-The new package version is `0.1.0`; the old `0.9` label described a prototype and
+The initial refined package version was `0.1.0`; the old `0.9` label described a prototype and
 is not a claim of package maturity. No manuscript source was supplied, so there
 are no proposed paper-text replacements. The new assessment and method document
 are the proposed publication-facing explanation.
+
+## Version 0.2 strengthening
+
+| Addition | Reason |
+|---|---|
+| `catmech_model()` | Replace arbitrary retention with a declared Gaussian model; use optional exact/noisy category likelihoods |
+| Trusted values remain unchanged | Category contradictions cannot silently override numeric truth assumptions |
+| R-hat and bulk/tail ESS refusal | Unresolved MCMC does not become a successful analysis |
+| `catmech_pool_lm()` | Explicit pooling checks and separate legacy-sensitivity interpretation |
+| `catmech_sensitivity()` | Same-data comparisons, planned-scenario completeness and retained failures |
+| Independent posterior quadrature | Verify one full sampler posterior without reusing Gibbs code |
+| Held-out coverage and clinical fixtures | Strong baselines, residual-bias diagnosis and explicit remaining undercoverage |
+
+The public package version is now `0.2.0`. Legacy API behavior remains available;
+new model assumptions require the new entry point. See [NEWS](../NEWS.md).

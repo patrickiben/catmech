@@ -1,0 +1,7 @@
+Frozen v0.1.0 benchmark sources from local commit 2fc21bd175faf4d6ca310843f41feb574a019834.
+These are historical inputs, not the active implementation.
+
+This subset contains all hashed benchmark inputs, not the complete release package.
+It loads successfully with pkgload. From the repository root, reproduce with:
+Rscript validation/v0.1.0-source/tools/benchmark.R 100 10 validation/my-v010-reproduction
+Use a new output directory.

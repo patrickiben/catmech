@@ -1,0 +1,14 @@
+{
+  "mode": "clinical",
+  "workers": 4,
+  "m": 20,
+  "chains": 4,
+  "burnin": 200,
+  "iterations": 400,
+  "primary_reps": 1000,
+  "gibbs_reps": 250,
+  "clinical_reps": 250,
+  "synthetic_n": 300,
+  "clinical_n": 600,
+  "centered_bootstrap_reps": 400
+}

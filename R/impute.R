@@ -173,8 +173,16 @@ write_catmech <- function(result, directory) {
   utils::write.csv(result$audit, file.path(directory, "audit.csv"), row.names = FALSE)
   utils::write.csv(result$diagnostics, file.path(directory, "diagnostics.csv"), row.names = FALSE)
   manifest <- result$manifest
-  manifest$assumptions$thresholds <- lapply(manifest$assumptions$thresholds,
-    function(x) if (is.infinite(x)) if (x > 0) "Inf" else "-Inf" else x)
+  json_safe <- function(x) {
+    if (is.list(x)) return(lapply(x, json_safe))
+    if (is.numeric(x) && any(!is.finite(x))) return(lapply(x, function(z) {
+      if (is.na(z)) return(NULL)
+      if (is.infinite(z)) return(if (z > 0) "Inf" else "-Inf")
+      z
+    }))
+    x
+  }
+  manifest <- json_safe(manifest)
   jsonlite::write_json(manifest, file.path(directory, "manifest.json"), auto_unbox=TRUE,
     pretty=TRUE, null="null", digits=NA)
   writeLines(canonical_json(result$spec), file.path(directory, "assumptions.canonical.json"))

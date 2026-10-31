@@ -1,0 +1,15 @@
+Completed coverage evidence verification, 2026-10-31
+
+confirmatory: {'ok': 43749, 'refused': 1000, 'convergence_failure': 1, 'error': 0}
+All 11 source/metadata hashes match current files.
+Bias decomposition sum identity max discrepancy: 5.02e-15
+Source-integrity completion check passed; no unfinished checkpoint remains.
+
+clinical: {'ok': 7500, 'refused': 0, 'convergence_failure': 0, 'error': 0}
+All 11 source/metadata hashes match current files.
+Bias decomposition sum identity max discrepancy: 1.33e-15
+Source-integrity completion check passed; no unfinished checkpoint remains.
+
+Both held-out studies used byte-identical source fingerprints.
+The public numeric conclusions must distinguish scientific failure, requested refusal, and computational nonconvergence.
+Repeatability across worker schedules was checked in the independent engineering pilot; the full held-out study was not rerun to select results.

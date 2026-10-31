@@ -1,5 +1,5 @@
 * installing *source* package ‘catmech’ ...
-** this is package ‘catmech’ version ‘0.1.0’
+** this is package ‘catmech’ version ‘0.2.0’
 ** using staged installation
 ** R
 ** inst
@@ -11,7 +11,25 @@
 ** testing if installed package can be loaded from final location
 ** testing if installed package keeps a record of temporary installation path
 * DONE (catmech)
-Installed, namespace-only API and analysis/export smoke checks: PASS
+Installed namespace-only model, legacy, pooling and JSON/RDS checks: PASS
+       term  estimate std.error       df     lower     upper within_variance
+2 lab_value 0.6393485 0.1048552 56.93948 0.4293747 0.8493223     0.006929526
+  between_variance  m   n          interpretation
+2      0.003871514 20 160 conditional_model_based
+                scenario status  estimate  std.error     lower     upper
+1      ignore_categories     ok 0.6393485 0.10485521 0.4293747 0.8493223
+2 known_noisy_categories     ok 0.6548141 0.08820109 0.4795912 0.8300369
+3       exact_categories failed        NA         NA        NA        NA
+   direction          interpretation
+1      above conditional_model_based
+2      above conditional_model_based
+3 unresolved           not_available
+                                                                                    message
+1
+2
+3 A trusted value/category conflict has zero probability under the supplied category model.
+Scenario-set status: unresolved_incomplete_set
+Descriptive finite-scenario envelope; not a calibrated confidence interval for unknown assumptions.
    imputation requested reconstructed changed threshold_conflicts
 1           1        86            86      28                  17
 2           2        86            86      28                  17
@@ -65,3 +83,4 @@ Installed, namespace-only API and analysis/export smoke checks: PASS
 21 0.5 0.3360531 0.05961087              80.45
 22 0.8 0.4755443 0.12011046              83.45
 23 1.0 0.7259068 0.06454845              86.00
+Bundled main-model and legacy examples: PASS
