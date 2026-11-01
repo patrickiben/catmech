@@ -1,0 +1,2 @@
+Frozen copy of catmech 0.3.1 sources from commit dca0a091cebfdb8750b31afaafbd409c546e26f6.
+The reference-oracle and pooling-guards evidence bundles were produced from these files.

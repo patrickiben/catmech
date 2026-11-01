@@ -1,6 +1,6 @@
-# Research connections used in versions 0.2 and 0.3
+# Research connections used in versions 0.2 to 0.4
 
-Reviewed 2026-10-31. These connections informed concrete changes; they do not
+Reviewed 2026-11-01. These connections informed concrete changes; they do not
 transfer a validity theorem from another project.
 
 | Source | Implemented transfer | Boundary |
@@ -41,3 +41,15 @@ and earlier benchmarks remain unchanged; new seed streams are used.
 
 These are concrete uses of the author's validation approach. They do not make
 internal-validation MI or predictive mean matching new statistical methods.
+
+## Additional transfers in v0.4
+
+| Source | Transfer | Boundary |
+|---|---|---|
+| A False Floor | Linear MI and generalized raking as strong comparators, which then beat the new model on real data | Comparators are simple forms, and robust proxies were not tested. |
+| Calibrated clinical ML | Scoring error probabilities with Brier scores and discrimination | The earlier boundary against converting anomaly scores still holds; these probabilities come from a declared model calibrated on references. |
+| Anchor Audit | `selection_delta` and `reference_sd` as declared assumptions compared through `catmech_sensitivity()` | The comparison is descriptive over a finite set. |
+| Carryover study | Oracle baselines and paired contrasts in every study | Its estimators are not imported. |
+| [CRT](https://github.com/patrickiben/crt-design-demo) and [contagion](https://github.com/patrickiben/directed-asymmetry-contagion) manuscripts | A [go/no-go test](../validation/merged-audit-pilot/README.md) of audits that follow the direction of spillover | **NO-GO.** Neither manuscript was changed, and no such feature was added. |
+
+A possible next use is checking AI-extracted numbers, where values tend to be exactly right or wrong and tools such as numguard could supply strata. That is untested here, and prediction-powered inference would be a necessary comparator.

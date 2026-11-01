@@ -1,0 +1,51 @@
+{
+  "retrieved_utc": "2026-11-01T15:56:49+00:00",
+  "nhanes": {
+    "DEMO_J": {
+      "url": "https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public/2017/DataFiles/DEMO_J.xpt",
+      "bytes": 3412720,
+      "sha256": "c0b46e0345ea19404928656277c8b0d10b0cca348a9b2fe4fc3c67e8b7ee73ec"
+    },
+    "BMX_J": {
+      "url": "https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public/2017/DataFiles/BMX_J.xpt",
+      "bytes": 1466000,
+      "sha256": "8d675e42d8826ac98714b2c3dd4c5138a5e353fb4424f7eff5e6db4a01ce838a"
+    },
+    "WHQ_J": {
+      "url": "https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public/2017/DataFiles/WHQ_J.xpt",
+      "bytes": 1829600,
+      "sha256": "7e1037070a4cc89d29a0f083e21f2ded15003d3d2dfbcf182dfd1df7282ea3d4"
+    },
+    "BPX_J": {
+      "url": "https://wwwn.cdc.gov/Nchs/Data/Nhanes/Public/2017/DataFiles/BPX_J.xpt",
+      "bytes": 1466000,
+      "sha256": "f98f1d9a4c18173e715c749b4294f6f1525140d5ad5751316bb17cc038fb3423"
+    }
+  },
+  "ctgov": {
+    "api": "https://clinicaltrials.gov/api/v2/studies",
+    "filter": "AREA[HasResults]true AND AREA[StudyType]INTERVENTIONAL AND AREA[CompletionDate]RANGE[2015-01-01,2022-12-31]",
+    "fields": "NCTId|EnrollmentCount|EnrollmentType|Phase|LeadSponsorClass|LocationFacility|StartDate|PrimaryCompletionDate|ParticipantFlowModule",
+    "total_matching": 35494,
+    "records_read": 35494,
+    "rows_retained": 34084,
+    "excluded": {
+      "nonpositive_count": 85,
+      "no_location": 1244,
+      "nonpositive_duration": 59,
+      "no_started_total": 21,
+      "enrollment_not_actual": 1
+    },
+    "bytes_streamed": 122556068,
+    "pool_sha256": "c2e02ea2542b8291dff54799a9f0dfecfdbcadb71ebf28e90aa798764e0a91ca"
+  },
+  "nhanes_pool": {
+    "participants": 9254,
+    "adults_20_plus": 5569,
+    "not_pregnant": 5514,
+    "complete_analysis_values": 4884,
+    "self_report_missing": 76,
+    "rows_retained": 4884,
+    "pool_sha256": "948360dfa9baf8d71b1b4a1fcaf01cfb9d13511ff12c20ec33ac200b8ec500ed"
+  }
+}

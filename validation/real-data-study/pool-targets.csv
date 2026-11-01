@@ -1,0 +1,3 @@
+"dataset","split","pool_rows","target_coefficient","target_se"
+"ctgov","evaluation",27208,0.0356573180537594,0.00359610894869665
+"nhanes","evaluation",3908,0.126827165716837,0.0138937474350621

@@ -1,0 +1,5 @@
+"dataset","column","levels","p_value"
+"ctgov","phase",4,0.000144771373805695
+"ctgov","sponsor",2,2.78200074924302e-06
+"nhanes","sex",2,1.02870557017981e-06
+"nhanes","race",5,0.000249937515621095

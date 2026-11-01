@@ -1,0 +1,10 @@
+{
+  "description": "Four-panel static figure from the completed frozen v0.4 study",
+  "study_summary_sha256": "12a35586dd62f11f38484dcc2e4041aba8c1904c387958d93441287e50fa99d8",
+  "plot_script_sha256": "4a426d4d36eb6c24ad67b6a24fbca9f72d59a14535ec6ddde1568afdba2b22c3",
+  "source_files_recorded": 14,
+  "plotted_rows": 63,
+  "coverage_interval": "95% Wilson interval for Monte Carlo binomial uncertainty, conditional on returned intervals",
+  "width_interval": "mean +/- qnorm(.975) * MCSE of mean width",
+  "r_version": "R version 4.6.0 (2026-04-24)"
+}

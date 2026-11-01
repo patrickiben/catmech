@@ -3,7 +3,8 @@
 Version 0.2 introduced `catmech_model()`. The unchanged PMM retain/replace engine
 is documented separately in [LEGACY_METHOD.md](LEGACY_METHOD.md). Version 0.3
 adds ordinary flag-masking PMM and an explicit reference-subset workflow, described
-in [REFERENCE_METHOD.md](REFERENCE_METHOD.md). They do not alter the Gaussian
+in [REFERENCE_METHOD.md](REFERENCE_METHOD.md). Version 0.4 adds a recording-error model,
+described in [CONTAMINATION_METHOD.md](CONTAMINATION_METHOD.md). They do not alter the Gaussian
 category likelihood described here.
 
 ## Target and trust policy

@@ -1,0 +1,10 @@
+Engineering pilot, development stream, 2 replicates per cell, workers 1 versus 14.
+identical replicates.csv
+identical summary.csv
+identical corruption-scores.csv
+identical holdout-checks.csv
+identical paired-comparisons.csv
+identical request-status.csv
+identical source-hashes.csv
+Elapsed seconds: 167
+Elapsed seconds: 117.1

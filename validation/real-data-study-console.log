@@ -1,0 +1,32 @@
+ctgov audit_25pct 140 / 1000 ; elapsed 84 seconds
+ctgov audit_25pct 280 / 1000 ; elapsed 161 seconds
+ctgov audit_25pct 420 / 1000 ; elapsed 247 seconds
+ctgov audit_25pct 560 / 1000 ; elapsed 327 seconds
+ctgov audit_25pct 700 / 1000 ; elapsed 403 seconds
+ctgov audit_25pct 840 / 1000 ; elapsed 477 seconds
+ctgov audit_25pct 980 / 1000 ; elapsed 558 seconds
+ctgov audit_25pct 1000 / 1000 ; elapsed 582 seconds
+ctgov audit_10pct 140 / 200 ; elapsed 752 seconds
+ctgov audit_10pct 200 / 200 ; elapsed 828 seconds
+ctgov audit_50pct 140 / 200 ; elapsed 869 seconds
+ctgov audit_50pct 200 / 200 ; elapsed 887 seconds
+ctgov audit_05pct 140 / 200 ; elapsed 1155 seconds
+ctgov audit_05pct 200 / 200 ; elapsed 1287 seconds
+ctgov targeted_audit 140 / 200 ; elapsed 1335 seconds
+ctgov targeted_audit 200 / 200 ; elapsed 1360 seconds
+nhanes audit_25pct 140 / 1000 ; elapsed 1492 seconds
+nhanes audit_25pct 280 / 1000 ; elapsed 1593 seconds
+nhanes audit_25pct 420 / 1000 ; elapsed 1690 seconds
+nhanes audit_25pct 560 / 1000 ; elapsed 1807 seconds
+nhanes audit_25pct 700 / 1000 ; elapsed 1905 seconds
+nhanes audit_25pct 840 / 1000 ; elapsed 2029 seconds
+nhanes audit_25pct 980 / 1000 ; elapsed 2160 seconds
+nhanes audit_25pct 1000 / 1000 ; elapsed 2177 seconds
+nhanes audit_10pct 140 / 200 ; elapsed 2312 seconds
+nhanes audit_10pct 200 / 200 ; elapsed 2397 seconds
+nhanes audit_50pct 140 / 200 ; elapsed 2445 seconds
+nhanes audit_50pct 200 / 200 ; elapsed 2467 seconds
+nhanes targeted_audit 140 / 200 ; elapsed 2518 seconds
+nhanes targeted_audit 200 / 200 ; elapsed 2542 seconds
+Completed study : 33800 requests; convergence_failure 83, error 28, ok 33613, refused 76 
+Output: /Users/patrickiben/Documents/catmech/validation/real-data-study 

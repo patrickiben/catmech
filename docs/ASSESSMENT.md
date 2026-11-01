@@ -1,135 +1,47 @@
 # Assessment and release decision
 
-Assessed 2026-10-31. Version 0.3.1 is worth releasing as an **experimental,
-auditable implementation of established imputation models**, with explicit
-assumptions and visible failures. It does not yet support a novel-methods or
-broad clinical-validity claim.
+Assessed 2026-11-01. Version 0.4.0 is worth releasing as an **experimental, auditable toolkit for data with recorded values and a
+reference subset**, built from established methods. Real-data testing narrowed its recommended use. It does not support a novel-method
+or clinical-validity claim. Earlier assessments are preserved for [v0.1](ASSESSMENT_V0.1.md), [v0.2](ASSESSMENT_V0.2.md) and [v0.3](ASSESSMENT_V0.3.md).
 
-## What changed after the original assessment
+## What changed in v0.4
 
-The [v0.1 assessment](ASSESSMENT_V0.1.md) preserves the original novelty review,
-confirmed prototype defects and prior-art sources. Its starting judgment remains:
-`mice`, interval imputation including `hmi`, and multiple overimputation already
-cover much of this statistical territory. A targeted search cannot prove priority.
-The Gaussian likelihood, Gibbs augmentation and reference-subset MI do not
-change that conclusion. The [v0.2 assessment](ASSESSMENT_V0.2.md) is preserved
-with its original scope.
+Version 0.3 treated recorded values as unavailable once references existed, which cost a great deal of precision. Version 0.4 adds
+two ways to use them, plus two checks that work on real data.
 
-The useful software contribution is a unified trust policy, explicit category
-likelihood, preservation of inputs, machine-readable assumptions, sampler refusal,
-analysis helpers and failure-aware sensitivity reporting. It is small enough to
-inspect, test and extend. This is a defensible package niche even without a novel
-estimator or a performance advantage over established normal imputation.
+The [synthetic study](../validation/CONTAMINATION_SYNTHESIS.md) favored the new contamination model, with the caveat that its primary cells use the error form it assumes:
+intervals 30% to 38% narrower than the v0.3 default, and coverage within the screen in three of four cells. It failed narrowly in the fourth, and clearly under heavy-tailed targets, selection on
+the true value with errors present, and undeclared reference noise.
 
-## The undercoverage diagnosis
+The [real-data audit](../validation/REAL_DATA_SYNTHESIS.md) was less favorable, and it is the more important result. On ClinicalTrials.gov, linear imputation given the recorded value and generalized raking had lower bias and error
+than the contamination model. On NHANES they roughly tied. The model could not identify which records were wrong (AUC 0.54 and 0.50). The gain against discarding recorded values held, at about 48% narrower intervals, but
+linear imputation gets it with fewer assumptions. That option is now supported as `catmech_reference(use_recorded = TRUE)` and is the recommended starting point.
 
-Two failures in the historical benchmark motivated a change in the model:
+## Current judgment
 
-- **Retained contamination:** q=.5 randomly retained some badly corrupted flagged
-  values. A marginal fraction of corrupt flags is not a conditional posterior
-  corruption probability. Coverage was .43 in the 100-replicate exploratory run,
-  with large attenuation and already wide intervals.
-- **Incorrect hard categories:** forced bin consistency treated miscoded categories
-  as truth. Coverage was .37 in the historical category-error setting. Visibly
-  consistent completions did not imply valid regression inference.
-
-Version 0.2 masks every flagged value and adds a coherent Gaussian model. Ignoring
-categories avoids the second premise; exact mode rejects trusted contradictions;
-noisy mode uses a declared category likelihood. A fixed, wrong confusion matrix
-can still fail. This is a change in assumptions and likelihood, not a post hoc
-adjustment to confidence-interval width.
-
-The [held-out protocol](../validation/COVERAGE_PLAN.md) uses disjoint seeds,
-strong trusted-PMM and independent normal-MI comparators, a null control, oracle
-bias decomposition and explicit failure denominators. See the
-[synthetic results](../validation/coverage-confirmatory/RESULTS.md) and
-[clinical-format stresses](../validation/coverage-clinical/RESULTS.md). The latter
-expose severe residual bias from missed flags and site errors. No settings were
-retuned to conceal those failures.
-
-An [independent quadrature oracle](../validation/model-oracle-final/README.md)
-checks posterior moments for one category example. It supports implementation
-correctness there; coverage requires the separate repeated-simulation evidence.
-
-## Reference information and fair comparisons in v0.3
-
-`catmech_reference()` changes what is observed: independently measured reference
-values are supplied on a subset, and every other true target is missing even
-when recorded W is present. A random accurate reference subset can identify a
-missing-data model under adequate regression assumptions. No reference data means
-no such information; the API refuses that case. Selection and reference accuracy
-remain substantive assumptions. This is established internal-validation MI, not
-a new method for detecting corruption from flags.
-
-`catmech_pmm()` adds an audited ordinary donor method that masks every flag,
-without q retention or forced bins. The earlier heavy-tail comparator had also
-received category covariates, so its difference from default Gaussian imputation
-could not be attributed to PMM alone. The [new study plan](../validation/EXTENSION_PLAN.md)
-compares the complete normal/PMM by category-information factorial, including
-strong MAR and incorrect-category stresses. It also compares reference methods
-with reference-only analysis and independent implementations given the same data.
-
-The [reference method](REFERENCE_METHOD.md) documents the additional data contract,
-primary sources and the distinction between known references and a second noisy
-measurement. The new [predictive oracle](../validation/reference-oracle/README.md)
-checks means, variances and cross-record covariance independently. These checks
-verify implementation properties; the held-out study supplies separate operating
-characteristics.
-
-The [completed study](../validation/EXTENSION_SYNTHESIS.md) gives a qualified
-positive result: with 25% random, accurate reference measurements, normal MI
-covered 95.2% of nominal 95% intervals, versus 58.1% for flag masking with missed
-errors and 12.7% under compound site/error stress. These paired comparisons use
-the same 1,000 cohorts, and the reference method has additional measured
-information. Reference-only analysis covered 95.3%; normal MI reduced mean
-interval width from .3304 to .2782. Independent standard normal MI performed
-similarly, supporting the established model rather than a proprietary advantage.
-
-Reference PMM covered only 85.1%, exactly matching the independent mice PMM
-comparator. Version 0.3.1 therefore makes partial-reference PMM pooled analysis
-explicitly sensitivity-only. The normal reference method also failed with
-nonignorable selection (5.5% coverage) and noisy references (67.8%). Ordinary
-PMM helped the tested heavy-tail example but hurt strong-MAR coverage at equal
-predictor information. These failures rule out a general robustness claim and
-remain in the released evidence; they were not tuned away.
-
-## Novelty, usefulness and validity
-
-| Question | Current judgment |
+| Question | Judgment |
 |---|---|
-| New statistical methodology? | Not demonstrated. Normal MI, data augmentation, interval likelihoods and overimputation are established. |
-| Useful software? | Yes: explicit assumptions, conflict handling, diagnostics, provenance and finite sensitivity comparisons. |
-| Does it estimate individual corruption probabilities? | No. Flags define a masking policy; H is fixed externally or varied as an assumption. |
-| Does it solve the original retain/replace bias mechanism? | It removes that policy from the principal model; held-out comparisons test its inferential consequences. |
-| Can it repair missed errors with no new information? | No. The reference path requires genuine reference measurements and an appropriate selection/model assumption. |
-| Generally valid confidence intervals? | No. Coverage is conditional on trust, selection, outcome-model compatibility and distributional assumptions. |
-| Stronger than ordinary trusted normal MI? | The default is the same established model class. No novel-estimator advantage should be claimed. |
-| Ready for a GitHub research release? | Yes, subject to the recorded package checks and prominent limitations. |
-| Ready for a methods paper or clinical use? | No. External validation, broader model comparisons and independent scientific review remain needed. |
+| New statistical methodology? | Not demonstrated. Contamination models, validation-subsample imputation, raking and approximate Bayesian bootstrap are established. Their combination here may be uncommon, but no full literature review was done. |
+| Useful software? | Yes, for data with recorded values and an audit subset: the audit summary, hold-out check, linear MI option, explicit assumptions and visible refusals. |
+| Does it estimate individual corruption probabilities? | Under a declared model, yes. They worked when errors were large and separable. On both real datasets the error count was calibrated, but they could not identify which records were wrong. |
+| Is the contamination model the best default? | No. Linear MI is the better starting point. The model's niche is large or gross errors, and fallible references with a credible declared SD. |
+| Does it repair missed errors with no new information? | No. It requires genuine reference measurements. |
+| Generally valid confidence intervals? | No. Failures are recorded for each workflow, and real-data oracle coverage was itself below nominal on one dataset. |
+| Real-data evidence? | Two public datasets with real recording differences. Neither is a clinical source-data audit, and the ClinicalTrials.gov reference is not independent truth. |
+| Ready for a GitHub research release? | Yes, subject to Patrick's review and the recorded limitations. |
+| Ready for a methods paper or clinical use? | No. A short software paper may be realistic after review. A methods claim is not supported. |
 
-## Relevant research transfers
+## The merged-method idea
 
-The carryover work contributes a decomposition into selection and retained error;
-False Floor contributes strong alternatives and a null that cannot conceal bias
-under nonzero effects; calibrated clinical ML contributes held-out evaluation and
-known-answer controls; Anchor Audit contributes explicit unresolved assumption
-paths. A local CDISC simulation workflow contributes frozen truth and separately
-injected defects. [Transfer details](RESEARCH_TRANSFER_PLAN.md) document sources
-and boundaries. No topology or interference estimator is imported.
+A prespecified [go/no-go simulation](../validation/merged-audit-pilot/README.md) tested whether audits in a cluster trial with spillover should follow the direction of spread, combining this package with the CRT and contagion manuscripts.
+It returned **NO-GO**: audits helped, but network targeting did not beat auditing the most suspicious records, and direction added nothing. A merged paper on that thesis is not recommended. The test covered one input and one estimator, so it does not rule out
+every connection among those methods.
 
 ## Next scientific steps
 
-The new reference path makes independently obtained validation measurements usable;
-it does not supply or scientifically validate them. Before claims beyond the tested
-settings, obtain suitable real reference measurements or repeated measures that
-identify missed contamination and category-error rates.
-Model uncertainty in H when estimated, and consider an explicit observation-error
-likelihood for W rather than treating all unflagged W as exact. Test nonlinear,
-heteroskedastic, informative-selection, censored and dependent-record designs.
-An external interval/measurement-error implementation remains a valuable comparator;
-`hmi` was reviewed but not executed in this assessment.
+1. Obtain record-level audit data from a real source-data verification, likely through a collaborator. Public data cannot replace this.
+2. Check simulated error rates and sizes against published audits. The main fixture uses 8% wrong records, which may be high for transcription errors.
+3. Test the hold-out advice prospectively, since it comes from the real-data study that suggested it.
+4. Consider non-constant variance, which affected every method on ClinicalTrials.gov, and clustered records, which remain out of scope.
 
-The [validation record](../validation/VALIDATION.md) separates software checks,
-posterior verification and simulation evidence. Neither reproducibility nor the
-research-validation process is itself proof of inferential validity. AI-assisted
-review is disclosed; no independent human peer review is implied.
+Neither reproducibility nor these validation checks are proof of inferential validity. AI-assisted review is disclosed, and no independent human peer review is implied.

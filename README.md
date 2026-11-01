@@ -1,7 +1,7 @@
 # catmech
 
 **An experimental R package for auditable imputation of continuous measurements
-with quality flags and optional interval categories. Version 0.3.1.**
+with quality flags, reference subsets and optional interval categories. Version 0.4.0.**
 
 `catmech_model()` masks every flagged measurement and fits a conditional Gaussian
 model using trusted observations. It can ignore categories, treat them as exact,
@@ -10,6 +10,9 @@ records assumptions and replacements, checks sampler diagnostics, and supports
 linear-model pooling and comparison of declared sensitivity scenarios.
 `catmech_reference()` uses genuinely measured reference values on an internal
 subset, and `catmech_pmm()` provides an audited standard predictive-matching option.
+`catmech_contamination()` models recording errors using those references, and
+`catmech_recording_audit()` and `catmech_holdout_check()` report what the references
+show on your own data.
 
 The Gaussian model and data augmentation are established methods. The contribution
 is a small, inspectable workflow with explicit failure handling. The earlier
@@ -26,7 +29,7 @@ install.packages(".", repos = NULL, type = "source")
 ```
 
 Run the second command from the repository directory, or install the source archive
-with `R CMD INSTALL catmech_0.3.1.tar.gz`. R 4.1 or later is required. GitHub Actions
+with `R CMD INSTALL catmech_0.4.0.tar.gz`. R 4.1 or later is required. GitHub Actions
 is configured for Linux, macOS and Windows; local checks do not establish that
 the remote workflow has passed.
 
@@ -90,12 +93,54 @@ rather than silently retaining unvalidated values. This requires additional refe
 For a donor-based alternative, `catmech_pmm(dat, "lab_value", predictors,
 flag = "outlier_flag")` masks all flags and delegates standard type-1 PMM to `mice`.
 `catmech_reference(..., method = "pmm")` restricts donors to reference rows, but
-showed substantial undercoverage in the held-out study. Its pooled analysis now
-requires `allow_sensitivity = TRUE` and remains labeled `sensitivity_only`. The
-reference default remains normal. Predictors must be complete. An observed category can be selected explicitly as
+showed substantial undercoverage in the synthetic held-out study. Its pooled analysis
+requires `allow_sensitivity = TRUE` and remains labeled `sensitivity_only`. `method = "pmm_abb"`
+resamples donors for each imputation. That raised synthetic coverage from 86.7% to 95.9%, but it
+overcovered on real data with intervals up to 52% wider, and standard PMM did not repeat its failure
+there. The reference default remains normal. Predictors must be complete. An observed category can be selected explicitly as
 an ordinary factor predictor; no interval constraint is then imposed. PMM cannot
 extrapolate beyond donor values and does not guarantee robustness or coverage.
 The new evaluation compares methods given the **same predictor information**.
+
+## With references and recorded values: which workflow
+
+Read what the references show before choosing a model. `catmech_recording_audit()` fits no
+model. It reports disagreement rates and error sizes, tests whether rates differ across groups
+such as site or flag, and compares referenced with unreferenced rows.
+
+```r
+catmech_recording_audit(dat_with_reference, "lab_value", "reference_value",
+                        by = c("outlier_flag", "site"))
+```
+
+| Situation | Start with | Evidence and limit |
+| --- | --- | --- |
+| Most cases, especially errors small relative to the spread of the target | `catmech_reference(..., use_recorded = TRUE)`: linear imputation given the recorded value. Consider generalized raking when selection probabilities are known; the package does not implement raking. | Best or tied among reference-using methods on both real datasets at 25% audits. It failed under synthetic gross errors. |
+| Large or gross errors, or a fallible reference with a credible declared SD | `catmech_contamination()` | Strongest in synthetic cells with these errors. Worse than linear MI and raking on ClinicalTrials.gov. It failed with heavy-tailed targets and with selection on the true value when errors were present. |
+| Target residuals doubtful and precision not critical | `catmech_reference()` (default) | Assumes least about recorded values, with intervals about twice as wide on the real data. It failed with selective or noisy references. |
+
+```r
+fit <- catmech_contamination(
+  dat_with_reference, "lab_value", "reference_value",
+  predictors = c("age", "sex", "inflammation", "outcome"),
+  corruption_strata = "outlier_flag", m = 20, seed = 125
+)
+catmech_pool_lm(fit, outcome ~ lab_value + age + sex + inflammation)
+fit$contamination$corruption    # per-record posterior error probabilities
+catmech_holdout_check(fit)      # scores unseen references, using no simulation truth
+```
+
+Here "contamination" means recording error, the usage in the selective-editing literature. It is
+not treatment spillover between trial arms.
+
+Selection into the audit may depend on recorded values, so a targeted audit is supported. Selection
+on the true value beyond what the recorded value shows is not. `selection_delta` and `reference_sd`
+are declared sensitivity assumptions to compare with `catmech_sensitivity()`. If the hold-out check shows
+no skill against the recorded value or the stratum error rate, prefer linear MI or raking. On both real
+datasets the model could not tell which records were wrong (AUC 0.54 and 0.50), so do not read its per-record
+probabilities as labels on data like those. See the [method](docs/CONTAMINATION_METHOD.md),
+[synthetic evidence](validation/CONTAMINATION_SYNTHESIS.md), [real-data evidence](validation/REAL_DATA_SYNTHESIS.md)
+and [example](inst/examples/contamination.R).
 
 ## Use categories only under an explicit observation model
 
@@ -144,6 +189,9 @@ with a new coverage guarantee.
 - A prespecified held-out study compares the new workflow with ordinary trusted
   normal MI, trusted PMM, naive and oracle analyses, and the legacy method. It
   reports bias, coverage, MCSE, failures, and deliberate wrong-model stresses.
+- Version 0.4 adds a synthetic study with linear MI and generalized raking as strong
+  comparators, and a [real-data audit](validation/REAL_DATA_SYNTHESIS.md) on ClinicalTrials.gov and
+  NHANES with real recording differences. Neither dataset is a clinical source-data audit.
 
 The [v0.2 coverage protocol](validation/COVERAGE_PLAN.md) transfers useful controls from
 the author's carryover, False Floor, calibration and assumption-audit research.
@@ -173,7 +221,7 @@ are not silently converted to the new model.
 Rscript -e 'install.packages(c("testthat", "pkgload", "roxygen2"))'
 Rscript -e 'testthat::test_local()'
 R CMD build .
-R CMD check --no-manual catmech_0.3.1.tar.gz
+R CMD check --no-manual catmech_0.4.0.tar.gz
 Rscript tools/check-model-oracle.R validation/my-model-oracle
 Rscript tools/coverage-benchmark.R confirmatory validation/my-heldout
 Rscript tools/coverage-benchmark.R clinical validation/my-clinical
@@ -183,12 +231,18 @@ Rscript tools/extension-benchmark.R distribution validation/my-distribution
 Rscript tools/extension-benchmark.R reference validation/my-reference-study
 Rscript tools/extension-benchmark.R stress validation/my-reference-stress
 Rscript tools/extension-benchmark.R controls validation/my-reference-controls
+Rscript tools/check-contamination-oracle.R validation/my-contamination-oracle
+Rscript tools/contamination-benchmark.R study validation/my-contamination-study
+python3 -I tools/real-data-fetch.py my-raw-directory validation/my-real-data
+Rscript tools/real-data-prepare.R my-raw-directory validation/my-real-data
+Rscript tools/real-data-benchmark.R study validation/my-real-data-study
 python3 tools/verify-artifacts.py
 ```
 
-Use new output directories. Archived v0.1, v0.2 and v0.3.0 sources retain the historical
-benchmark inputs; their hashes are checked against those frozen versions. The
-v0.3.1 guards reject unsupported analyses and gate experimental reference-PMM
+Use new output directories. Archived v0.1 to v0.4 sources retain the historical
+benchmark inputs; their hashes are checked against those frozen versions. A fresh
+ClinicalTrials.gov download will differ from the dated pool because the registry changes.
+The v0.3.1 guards reject unsupported analyses and gate experimental reference-PMM
 pooling; successful scalar estimates and intervals are unchanged. See
 [validation](validation/VALIDATION.md) for evidence, environment and remaining gaps.
 

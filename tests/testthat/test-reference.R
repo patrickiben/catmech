@@ -193,3 +193,54 @@ test_that("reference audit distinguishes known corrections from imputations", {
     digest::digest(serialize(d, NULL, version = 2), algo = "sha256", serialize = FALSE))
   expect_equal(fit$manifest$assumption_hash, catmech_hash(fit$spec))
 })
+
+test_that("use_recorded imputes from recorded values and handles every pattern", {
+  d <- reference_fixture()
+  predictors <- c("age", "outcome")
+  set.seed(12)
+  before <- .Random.seed
+  fit <- catmech_reference(d, "lab_value", "gold", predictors, use_recorded = TRUE, m = 4, seed = 31)
+  expect_identical(.Random.seed, before)
+  known <- !is.na(d$gold)
+  for (j in 1:4) {
+    expect_equal(fit$completed[[j]]$lab_value[known], d$gold[known])
+    expect_true(all(is.finite(fit$completed[[j]]$lab_value)))
+    expect_equal(mice::complete(fit$mids, j)$lab_value, fit$completed[[j]]$lab_value)
+  }
+  expect_identical(fit$manifest$engine, "reference_normal_recorded")
+  expect_identical(fit$spec$recorded_fit, "linear_given_recorded")
+  expect_identical(fit$manifest$imputed_rows, which(!known))
+  expect_true(all(catmech_pool_lm(fit, outcome ~ lab_value + age)$interpretation == "conditional_reference_model"))
+  # The recorded value informs the imputation, so changing it changes the result.
+  altered <- d
+  altered$lab_value[!known & !is.na(d$lab_value)] <- altered$lab_value[!known & !is.na(d$lab_value)] + 5
+  other <- catmech_reference(altered, "lab_value", "gold", predictors, use_recorded = TRUE, m = 4, seed = 31)
+  expect_false(identical(fit$completed[[1]]$lab_value, other$completed[[1]]$lab_value))
+  # The plain workflow is unchanged by the new argument's existence.
+  plain <- catmech_reference(d, "lab_value", "gold", predictors, m = 4, seed = 31)
+  expect_null(plain$spec$use_recorded)
+  expect_identical(plain$manifest$engine, "reference_normal")
+})
+
+test_that("use_recorded keeps recorded values when calibration rows all agree", {
+  d <- simulate_catmech_lab(120L, seed = 44, flag_rate = 0, corruption_probability = 0)
+  d$gold <- NA_real_
+  d$gold[seq(1L, 120L, 3L)] <- d$lab_true[seq(1L, 120L, 3L)]
+  d[c("lab_true", "corrupted")] <- NULL
+  fit <- catmech_reference(d, "lab_value", "gold", c("age", "outcome"), use_recorded = TRUE, m = 3, seed = 2)
+  open <- is.na(d$gold) & !is.na(d$lab_value)
+  expect_identical(fit$spec$recorded_fit, "recorded_kept_all_calibration_rows_agree")
+  expect_equal(fit$completed[[2]]$lab_value[open], d$lab_value[open])
+  # Records with no recorded value are still imputed.
+  expect_true(all(is.finite(fit$completed[[2]]$lab_value)))
+  expect_false(anyNA(fit$completed[[2]]$lab_value))
+})
+
+test_that("use_recorded refuses unsupported requests", {
+  d <- reference_fixture()
+  expect_error(catmech_reference(d, "lab_value", "gold", "age", method = "pmm", use_recorded = TRUE), "only to method")
+  expect_error(catmech_reference(d, "lab_value", "gold", "age", use_recorded = NA), "TRUE or FALSE")
+  apart <- d
+  apart$gold <- ifelse(is.na(d$lab_value), 1 + d$age / 50, NA_real_)
+  expect_error(catmech_reference(apart, "lab_value", "gold", "age", use_recorded = TRUE), "both recorded and reference")
+})

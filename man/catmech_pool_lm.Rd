@@ -8,7 +8,7 @@ catmech_pool_lm(result, formula, conf_level = 0.95, allow_sensitivity = FALSE)
 }
 \arguments{
 \item{result}{A catmech_result from [catmech_model()], [catmech_pmm()],
-[catmech_reference()] or [catmech_impute()].}
+[catmech_reference()], [catmech_contamination()] or [catmech_impute()].}
 
 \item{formula}{A prespecified formula for [stats::lm()]. Missing analysis
 values are rejected rather than silently dropping records.}

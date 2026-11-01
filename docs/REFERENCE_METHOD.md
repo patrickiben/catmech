@@ -100,18 +100,21 @@ column, conditional on fixed reference values, selected predictors, and seed.
 It sacrifices potentially useful information and cannot be assumed to improve
 precision over analysis restricted to the reference sample.
 
-To use a fully observed recorded measurement as an auxiliary predictor, supply
-a separately named copy and explicitly include it in `predictors`:
+To use the recorded measurement as a linear predictor, set `use_recorded = TRUE`:
 
 ```r
-data$recorded_aux <- data$recorded_value
-# This example requires recorded_aux to be complete.
-fit_with_aux <- catmech_reference(
+fit_with_recorded <- catmech_reference(
   data, "recorded_value", "reference_value",
-  predictors = c("recorded_aux", "outcome", "age", "site"),
-  method = "normal", m = 20, seed = 123
+  predictors = c("outcome", "age", "site"),
+  method = "normal", use_recorded = TRUE, m = 20, seed = 123
 )
 ```
+
+Records with a recorded value are imputed from a model fitted on references that also have one.
+Records without one are imputed from a model on the predictors alone, fitted on all references. If every
+calibration row agrees exactly, there is no residual variance to model and those records keep their recorded
+value, as the manifest notes. This was the strong comparator in the version 0.4 studies, and it was best or
+tied among reference-using methods on both real datasets at 25% audits. See [the real-data evidence](../validation/REAL_DATA_SYNTHESIS.md).
 
 This fits the predictive relationship between reference truth, the auxiliary
 measurement, and other predictors. That relationship may be nonlinear or
@@ -140,7 +143,11 @@ under heavy tails, nonlinear relationships, sparse reference samples, or poor
 overlap. It cannot generate target values outside the reference donor support.
 Changing the donor pool changes the procedure and should be prespecified.
 
-In the new held-out random-25%-reference experiment, reference PMM covered only
+`method = "pmm_abb"` resamples donors with replacement for each imputation before the same
+matching. It addresses attenuated between-imputation variance and raised synthetic coverage from 86.7% to 95.9%
+in version 0.4. On real data it overcovered with wider intervals, so it is not a default.
+
+In the held-out random-25%-reference experiment of version 0.3, reference PMM covered only
 85.1% of nominal 95% intervals and exactly matched the independent mice PMM
 comparator. Version 0.3.1 therefore requires `allow_sensitivity = TRUE` when
 pooling a partial-reference PMM result, and labels it `sensitivity_only`. This

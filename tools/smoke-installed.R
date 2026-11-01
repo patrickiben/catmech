@@ -217,4 +217,8 @@ stopifnot(!"package:catmech" %in% search(), reference_example$reference_comparis
 stopifnot(identical(reference_example$reference_comparison$table$interpretation[
   reference_example$reference_comparison$table$scenario == "reference_pmm"], "sensitivity_only"))
 source(system.file("examples", "lab.R", package = "catmech"), local = new.env(parent = globalenv()))
-cat("Bundled main-model, reference and legacy examples: PASS\n")
+contamination_example <- new.env(parent = baseenv())
+source(system.file("examples", "contamination.R", package = "catmech"), local = contamination_example)
+stopifnot(inherits(contamination_example$contamination_fit, "catmech_result"),
+          identical(contamination_example$contamination_fit$manifest$engine, "reference_contamination"))
+cat("Bundled main-model, reference, legacy and contamination examples: PASS\n")

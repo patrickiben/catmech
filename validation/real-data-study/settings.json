@@ -1,0 +1,16 @@
+{
+  "mode": "study",
+  "workers": 14,
+  "m": 20,
+  "n": 600,
+  "primary_reps": 1000,
+  "other_reps": 200,
+  "holdout_reps": 40,
+  "holdout_folds": 5,
+  "holdout_m": 40,
+  "split": "evaluation",
+  "cohort_base": 200100000,
+  "selection_base": 210100000,
+  "imputation_base": 220000000,
+  "nhanes_offset": 5000000
+}

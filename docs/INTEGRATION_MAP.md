@@ -56,3 +56,14 @@ new model assumptions require the new entry point. See [NEWS](../NEWS.md).
 
 Version `0.3.0` retains the old engines and evidence. It adds no automatic
 corruption detector and no estimated category-confusion likelihood.
+
+## Version 0.4 extension
+
+| Addition | Reason |
+|---|---|
+| `catmech_contamination()` | Use recorded values without trusting them, calibrated by references |
+| `catmech_reference(use_recorded = TRUE)` | Support the method that was best or tied among reference-using methods on real data at 25% audits |
+| `catmech_recording_audit()` | Report what references show before any model is chosen |
+| `catmech_holdout_check()` | Score imputations on hidden references without simulation truth |
+| `catmech_reference(method = "pmm_abb")` | Address attenuated between-imputation variance in reference matching |
+| Real-data audit and go/no-go simulation | Test the work on real recording differences, and test a proposed merger of methods before writing about it |

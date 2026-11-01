@@ -1,0 +1,9 @@
+missed_flags done; elapsed 211 seconds
+reference_05pct done; elapsed 308 seconds
+reference_10pct done; elapsed 375 seconds
+reference_50pct done; elapsed 388 seconds
+heavy_tail_target done; elapsed 488 seconds
+nonlinear_target done; elapsed 569 seconds
+Recovered 1731 corruption-score records and 120 hold-out records.
+Every contamination estimate matched the frozen main study to within 1e-9, and every refused request was refused again.
+Elapsed seconds: 568.7

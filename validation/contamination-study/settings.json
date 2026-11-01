@@ -1,0 +1,14 @@
+{
+  "mode": "study",
+  "workers": 14,
+  "m": 20,
+  "n": 600,
+  "primary_reps": 1000,
+  "stress_reps": 150,
+  "holdout_reps": 40,
+  "holdout_folds": 5,
+  "holdout_m": 40,
+  "centered_bootstrap_reps": 400,
+  "fixture_master_seed": 410273,
+  "phase": "heldout"
+}

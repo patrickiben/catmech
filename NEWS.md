@@ -1,3 +1,22 @@
+# catmech 0.4.0
+
+- Add `catmech_contamination()`, a recording-error model calibrated on reference rows. It uses recorded values without
+  trusting them and gives per-record error probabilities. Options cover strata, agreement tolerance, a declared reference
+  SD and a selection shift. It is an established contamination model used with validation data, not a new estimator.
+- Add `catmech_reference(use_recorded = TRUE)`, linear imputation given the recorded value. It was best or tied among reference-using
+  methods at 25% audits on two real datasets and is the recommended starting point in most cases.
+- Add `catmech_recording_audit()`, a model-free summary of what references show, and `catmech_holdout_check()`, which
+  scores imputations on hidden references without simulation truth and reports when a model shows no skill.
+- Add `catmech_reference(method = "pmm_abb")`, resampling donors for each imputation. Synthetic coverage rose from 86.7% to 95.9%, but it
+  overcovered on real data. `method = "pmm"` is unchanged and stays gated.
+- Existing workflows are numerically unchanged: all 18 comparison runs match frozen v0.3.1 exactly.
+
+Evidence, including failures, is in `validation/CONTAMINATION_SYNTHESIS.md` and `validation/REAL_DATA_SYNTHESIS.md`. The model failed
+under heavy-tailed targets, selection on the true value with errors present and undeclared reference noise, and one primary screen failed
+narrowly. On real data, linear MI and raking matched or beat it, and it could not identify which records were wrong. `use_recorded` and the hold-out advice
+were added after the frozen studies, so those studies did not run them directly; `use_recorded` was checked against the study's linear MI on
+the same real-data cohorts.
+
 # catmech 0.3.1
 
 - Require explicit sensitivity opt-in for pooled inference from partial-reference

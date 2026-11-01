@@ -98,11 +98,18 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #'   A raw measurement may be used only through a separate explicitly selected,
 #'   complete auxiliary column. No missing proxy is filled automatically.
 #' @param method `"normal"` (default) for conditional Gaussian posterior draws,
-#'   or `"pmm"` for standard predictive mean matching using reference donors.
-#' @param donors Nearest-donor count for PMM, default five; ignored by the normal
-#'   method. Fewer reference observations than donors is an error when needed.
+#'   `"pmm"` for standard predictive mean matching using reference donors, or
+#'   `"pmm_abb"` for the same matching on a fresh bootstrap of the donors at each
+#'   imputation. See details.
+#' @param donors Nearest-donor count for matching, default five; ignored by the
+#'   normal method. Fewer reference observations than donors is an error when needed.
 #' @param m Number of completions, at least two.
 #' @param seed Nonnegative integer seed, with caller RNG restored.
+#' @param use_recorded For `method = "normal"`, also use the recorded value as a linear
+#'   predictor. Records with a recorded value are imputed from a model fitted on
+#'   references that also have one, and records without one from a model on the
+#'   predictors fitted on all references. It needs rows with both values. If every such row
+#'   agrees exactly, those records keep their recorded value, as `spec$recorded_fit` notes.
 #' @return A `catmech_result`. Its completed target contains exact gold references
 #'   or imputations; the original reference column is unchanged. The `mids`
 #'   observed target is the reference values with other rows missing. The manifest
@@ -130,11 +137,29 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #' establish inferential validity. `catmech_sensitivity` already supplies an
 #' explicit sensitivity context. Complete reference data remain eligible for
 #' ordinary complete-data pooling because no target cells are imputed.
+#'
+#' The likely cause of that undercoverage is that standard matching conditions on
+#' one fixed set of donor values, which attenuates between-imputation variance
+#' (Gaffert, Meinfelder and Bosch). `"pmm_abb"` resamples donors with replacement
+#' for each imputation, an approximate Bayesian bootstrap (Rubin and Schenker, 1986;
+#' Siddique and Belin, 2008), before the same delegated type-1 matching. It targets
+#' that variance and is not gated. It still cannot leave donor support, and it does
+#' not make matching more precise than the normal method when the normal model holds.
+#'
+#' With `use_recorded = TRUE`, reference selection may depend on the recorded value, and
+#' linearity in the recorded value becomes an assumption. It was best or tied among
+#' reference-using methods at 25% audits on two real datasets, and failed under synthetic
+#' gross errors, which distort a linear fit;
+#' [catmech_contamination()] is the alternative there.
 #' @export
 catmech_reference <- function(data, value, reference, predictors,
-                              method = c("normal", "pmm"), donors = 5L,
-                              m = 20L, seed = 1L) {
+                              method = c("normal", "pmm", "pmm_abb"), donors = 5L,
+                              m = 20L, seed = 1L, use_recorded = FALSE) {
   method <- match.arg(method)
+  if (!is.logical(use_recorded) || length(use_recorded) != 1L || is.na(use_recorded))
+    stop("use_recorded must be TRUE or FALSE.", call. = FALSE)
+  if (use_recorded && method != "normal")
+    stop("use_recorded applies only to method = 'normal'.", call. = FALSE)
   catmech_reference_inputs(data, value, predictors, m, seed, donors,
                            excluded = c(value, reference))
   if (!is.character(reference) || length(reference) != 1L || is.na(reference) ||
@@ -145,13 +170,19 @@ catmech_reference <- function(data, value, reference, predictors,
     stop("reference must contain independently measured finite numeric values or NA.", call. = FALSE)
   known <- !is.na(gold)
   if (!any(known)) stop("At least one independently observed reference value is required.", call. = FALSE)
-  X <- if (all(known)) NULL else catmech_model_matrix(data, predictors)
+  X <- if (all(known) || use_recorded) NULL else catmech_model_matrix(data, predictors)
+  recorded_fit <- NULL
   restore <- preserve_rng()
   on.exit(restore(), add = TRUE)
   set.seed(as.integer(seed))
   if (all(known)) {
     draws <- matrix(rep(gold, m), nrow = nrow(data), ncol = m)
     model_diagnostics <- catmech_reference_independent_diagnostics("reference_complete")
+  } else if (use_recorded) {
+    sampled <- catmech_reference_recorded_draws(data, value, gold, predictors, m, seed)
+    draws <- sampled$draws
+    recorded_fit <- sampled$note
+    model_diagnostics <- catmech_reference_independent_diagnostics("reference_normal_recorded")
   } else if (method == "normal") {
     work <- data
     work[[value]] <- gold
@@ -160,26 +191,33 @@ catmech_reference <- function(data, value, reference, predictors,
     draws <- vapply(fitted$completed, function(z) z[[value]], numeric(nrow(data)))
     model_diagnostics <- fitted$model_diagnostics
   } else {
-    draws <- catmech_reference_pmm_draws(gold, X, donors, m)
-    model_diagnostics <- catmech_reference_independent_diagnostics("reference_mice_pmm")
+    draws <- catmech_reference_pmm_draws(gold, X, donors, m, bootstrap = method == "pmm_abb")
+    model_diagnostics <- catmech_reference_independent_diagnostics(paste0("reference_mice_", method))
   }
-  engine <- paste0("reference_", method)
+  engine <- if (use_recorded) "reference_normal_recorded" else paste0("reference_", method)
   spec <- structure(list(version = "reference1", engine = engine, value = value,
     predictors = predictors,
     reference = reference, reference_policy = "observed_gold_only_all_others_unavailable",
     raw_target_policy = "never_trusted_automatically",
     reference_selection_assumption = "ignorable_given_complete_selected_predictors",
     reference_measurement_assumption = "exact_same_quantity_time_and_units",
-    method = method, donors = if (method == "pmm") as.integer(donors) else NULL,
-    matchtype = if (method == "pmm") 1L else NULL,
-    ridge = if (method == "pmm") 1e-5 else NULL,
+    method = method, donors = if (method != "normal") as.integer(donors) else NULL,
+    matchtype = if (method != "normal") 1L else NULL,
+    ridge = if (method != "normal") 1e-5 else NULL,
     prior = if (method == "normal") "p(beta,sigma_squared) proportional to 1/sigma_squared" else NULL),
     class = "catmech_reference_spec")
+  if (method == "pmm_abb") spec$donor_resampling <- "approximate_bayesian_bootstrap_each_imputation"
+  if (use_recorded) {
+    spec$use_recorded <- TRUE
+    spec$raw_target_policy <- "linear_predictor_never_trusted_automatically"
+    spec$reference_selection_assumption <- "ignorable_given_complete_selected_predictors_and_recorded_value"
+    spec$recorded_fit <- recorded_fit
+  }
   audits <- lapply(seq_len(m), function(j) {
     row <- catmech_reference_audit(data[[value]], draws[, j], seq_len(nrow(data)), j,
       ifelse(known, "gold_reference", "reference_missing"), reconstructed = !known)
     row$reference_observed <- known
-    if (method == "pmm") {
+    if (method != "normal") {
       info <- catmech_reference_donor_audit(row[!known, , drop = FALSE], gold, draws[!known, j], donors)
       row$donor_row <- NA_integer_
       row$eligible_donors <- ifelse(known, NA_integer_, sum(known))
@@ -201,7 +239,7 @@ catmech_reference <- function(data, value, reference, predictors,
     reference_fills = sum(known & is.na(data[[value]])), fallback_draws = 0L)))
   result <- catmech_reference_assemble(data, value, predictors, gold, draws, audits,
     diagnostics, spec, m, seed,
-    if (method == "normal") "conditional_reference_model" else if (any(!known))
+    if (method == "normal") "conditional_reference_model" else if (method == "pmm" && any(!known))
       "sensitivity_only" else "conditional_reference_matching",
     model_diagnostics)
   result$manifest$reference_rows <- which(known)
@@ -240,7 +278,7 @@ catmech_reference_inputs <- function(data, value, predictors, m, seed, donors, e
   invisible(TRUE)
 }
 
-catmech_reference_pmm_draws <- function(observed, X, donors, m) {
+catmech_reference_pmm_draws <- function(observed, X, donors, m, bootstrap = FALSE) {
   trusted <- !is.na(observed)
   masked <- !trusted
   n <- length(observed)
@@ -253,13 +291,67 @@ catmech_reference_pmm_draws <- function(observed, X, donors, m) {
   x <- X[, -1L, drop = FALSE]
   for (j in seq_len(m)) {
     out <- observed
-    out[masked] <- mice::mice.impute.pmm(observed, trusted, x, wy = masked,
-      donors = donors, matchtype = 1L, ridge = 1e-5)
+    out[masked] <- if (bootstrap) catmech_reference_abb_draw(observed, trusted, x, masked, donors) else
+      mice::mice.impute.pmm(observed, trusted, x, wy = masked, donors = donors, matchtype = 1L, ridge = 1e-5)
     if (any(!is.finite(out)) || any(!out[masked] %in% observed[trusted]))
       stop("PMM produced a nonfinite value or a value outside trusted donor support.", call. = FALSE)
     draws[, j] <- out
   }
   draws
+}
+
+catmech_reference_recorded_draws <- function(data, value, gold, predictors, m, seed) {
+  W <- data[[value]]
+  known <- !is.na(gold)
+  recorded <- !is.na(W)
+  calibration <- known & recorded
+  if (!any(calibration))
+    stop("use_recorded requires rows with both recorded and reference values.", call. = FALSE)
+  draws <- matrix(rep(gold, m), nrow = nrow(data), ncol = m)
+  note <- "linear_given_recorded"
+  complete_with <- function(rows, extra, fit_seed) {
+    work <- data[rows, predictors, drop = FALSE]
+    work[[value]] <- gold[rows]
+    names_all <- predictors
+    if (!is.null(extra)) {
+      auxiliary <- ".catmech_recorded"
+      while (auxiliary %in% c(names(data), value)) auxiliary <- paste0(auxiliary, "_")
+      work[[auxiliary]] <- extra[rows]
+      names_all <- c(predictors, auxiliary)
+    }
+    fit <- catmech_model(work, value, names_all, category_mode = "ignore", m = m, seed = fit_seed)
+    vapply(fit$completed, function(z) z[[value]], numeric(sum(rows)))
+  }
+  if (any(recorded & !known)) {
+    if (all(catmech_contamination_agreement(W[calibration], gold[calibration], 0))) {
+      draws[recorded & !known, ] <- W[recorded & !known]
+      note <- "recorded_kept_all_calibration_rows_agree"
+    } else {
+      draws[recorded, ] <- complete_with(recorded, W, as.integer(seed))
+    }
+  }
+  if (any(!recorded & !known)) {
+    rows <- known | !recorded
+    completed <- complete_with(rows, NULL, as.integer(seed) + 1L)
+    draws[!recorded & !known, ] <- completed[!recorded[rows] & !known[rows], , drop = FALSE]
+  }
+  list(draws = draws, note = note)
+}
+
+# Type-1 matching on a bootstrap of the donors. A resample that loses design support
+# is redrawn, which conditions on estimability rather than changing the donor rule.
+catmech_reference_abb_draw <- function(observed, trusted, x, masked, donors) {
+  pool <- which(trusted)
+  recipients <- sum(masked)
+  for (attempt in seq_len(100L)) {
+    chosen <- pool[sample.int(length(pool), length(pool), replace = TRUE)]
+    x_chosen <- x[chosen, , drop = FALSE]
+    if (length(unique(observed[chosen])) < 2L || qr(cbind(1, x_chosen), tol = 1e-7)$rank != ncol(x) + 1L) next
+    ry <- c(rep(TRUE, length(chosen)), rep(FALSE, recipients))
+    return(mice::mice.impute.pmm(c(observed[chosen], rep(NA_real_, recipients)), ry,
+      rbind(x_chosen, x[masked, , drop = FALSE]), wy = !ry, donors = donors, matchtype = 1L, ridge = 1e-5))
+  }
+  stop("Bootstrap donor samples repeatedly lost design support; obtain more references or reduce predictors.", call. = FALSE)
 }
 
 catmech_reference_audit <- function(original, completed, rows, imputation, reason, reconstructed) {

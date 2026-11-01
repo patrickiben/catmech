@@ -1,0 +1,2 @@
+Frozen v0.3.0 numerical study inputs from commit ea5ec6ae4688c5ff8a2f2086cc6f45e69cb5f21c.
+Coverage results use these exact sources. Subsequent v0.3.1 changes guard unsupported analysis inputs and restrict reference-PMM pooling after observed undercoverage; estimators are unchanged.

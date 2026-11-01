@@ -1,0 +1,4 @@
+"case","wrong_likelihood","largest_abs_z","detected"
+"exact","omit_error_variance",12.0880240814091,TRUE
+"exact","omit_error_mean",65.8864278837094,TRUE
+"exact","drop_known_errors",151.218763922098,TRUE

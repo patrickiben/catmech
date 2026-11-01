@@ -14,6 +14,7 @@ This initial revision used OpenAI Codex for code drafting, literature search,
 adversarial review, test construction, and simulation orchestration. Runtime
 validation uses ordinary R code and synthetic data, not an AI model. Human authors
 retain responsibility for scientific claims, intended-use decisions and release.
-No AI system is listed as an author. This is a software assessment and exploratory
+Version 0.4 used Anthropic Claude Code for the same kinds of drafting, search, review and
+simulation orchestration. No AI system is listed as an author. This is a software assessment and exploratory
 validation record, not external peer review or a completed manuscript submission
 certification.

@@ -1,0 +1,2 @@
+Frozen catmech 0.4.0 numerical sources used by the contamination study and oracle.
+Uncommitted branch v0.4-contamination at the time of the runs; hashes are in each bundle.

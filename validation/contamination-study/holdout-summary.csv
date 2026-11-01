@@ -1,0 +1,6 @@
+"family","scenario","replicates","detected","unresolved","detection_rate","mean_coverage"
+"primary","clean",40,0,0,0,0.969254597841429
+"wrong_model","differential_outcome",40,1,0,0.025,0.954900694912271
+"wrong_model","error_bimodal",40,1,1,0.025,0.946019513725447
+"wrong_model","flag_from_recorded",36,1,6,0.0277777777777778,0.936789411085997
+"support","site_shift_undeclared",40,18,0,0.45,0.851816678175654

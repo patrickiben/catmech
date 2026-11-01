@@ -5,7 +5,7 @@
 #' Failed convergence is rejected. The legacy retain/replace sensitivity engine
 #' requires explicit opt-in and is labeled as sensitivity output.
 #' @param result A catmech_result from [catmech_model()], [catmech_pmm()],
-#'   [catmech_reference()] or [catmech_impute()].
+#'   [catmech_reference()], [catmech_contamination()] or [catmech_impute()].
 #' @param formula A prespecified formula for [stats::lm()]. Missing analysis
 #'   values are rejected rather than silently dropping records.
 #' @param conf_level Confidence level between zero and one.
@@ -37,7 +37,10 @@ catmech_pool_lm <- function(result, formula, conf_level = 0.95,
   labels <- c(gaussian_model = "conditional_model_based",
     trusted_pmm = "conditional_predictive_matching",
     reference_normal = "conditional_reference_model",
-    reference_pmm = "conditional_reference_matching")
+    reference_pmm = "conditional_reference_matching",
+    reference_pmm_abb = "conditional_reference_matching",
+    reference_normal_recorded = "conditional_reference_model",
+    reference_contamination = "conditional_contamination_model")
   recognized <- is.character(engine) && length(engine) == 1L && !is.na(engine) && engine %in% names(labels)
   if (!is.null(engine) && !recognized)
     stop("Unrecognized workflow engine; pooled inference is refused.", call. = FALSE)

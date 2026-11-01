@@ -1,0 +1,4 @@
+"family","scenario","replicates","detected","unresolved","detection_rate","mean_coverage"
+"wrong_model","heavy_tail_target",40,1,6,0.025,0.956717421340425
+"primary","missed_flags",40,0,1,0,0.951907954402418
+"wrong_model","nonlinear_target",40,0,1,0,0.952895075963623

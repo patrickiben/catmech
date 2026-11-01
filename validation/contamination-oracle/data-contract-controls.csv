@@ -1,0 +1,16 @@
+"case","check","pass"
+"exact","references_preserved_or_modeled",TRUE
+"exact","retained_rows_equal_recorded",TRUE
+"exact","replaced_rows_differ",TRUE
+"exact","original_unchanged",TRUE
+"exact","rhat_at_most_1.01",TRUE
+"strata_delta","references_preserved_or_modeled",TRUE
+"strata_delta","retained_rows_equal_recorded",TRUE
+"strata_delta","replaced_rows_differ",TRUE
+"strata_delta","original_unchanged",TRUE
+"strata_delta","rhat_at_most_1.01",TRUE
+"noisy","references_preserved_or_modeled",TRUE
+"noisy","retained_rows_equal_recorded",TRUE
+"noisy","replaced_rows_differ",TRUE
+"noisy","original_unchanged",TRUE
+"noisy","rhat_at_most_1.01",TRUE

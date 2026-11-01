@@ -1,0 +1,12 @@
+{
+  "mode": "reproduce",
+  "reps": 1000,
+  "workers": 3,
+  "effect": -0.6931,
+  "c": 0.35,
+  "wave_one": 8,
+  "wave_two": 8,
+  "m": 20,
+  "directions": [0, 0.5, 1],
+  "base_seed": 500100000
+}

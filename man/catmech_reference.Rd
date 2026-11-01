@@ -9,10 +9,11 @@ catmech_reference(
   value,
   reference,
   predictors,
-  method = c("normal", "pmm"),
+  method = c("normal", "pmm", "pmm_abb"),
   donors = 5L,
   m = 20L,
-  seed = 1L
+  seed = 1L,
+  use_recorded = FALSE
 )
 }
 \arguments{
@@ -30,14 +31,22 @@ A raw measurement may be used only through a separate explicitly selected,
 complete auxiliary column. No missing proxy is filled automatically.}
 
 \item{method}{`"normal"` (default) for conditional Gaussian posterior draws,
-or `"pmm"` for standard predictive mean matching using reference donors.}
+`"pmm"` for standard predictive mean matching using reference donors, or
+`"pmm_abb"` for the same matching on a fresh bootstrap of the donors at each
+imputation. See details.}
 
-\item{donors}{Nearest-donor count for PMM, default five; ignored by the normal
-method. Fewer reference observations than donors is an error when needed.}
+\item{donors}{Nearest-donor count for matching, default five; ignored by the
+normal method. Fewer reference observations than donors is an error when needed.}
 
 \item{m}{Number of completions, at least two.}
 
 \item{seed}{Nonnegative integer seed, with caller RNG restored.}
+
+\item{use_recorded}{For `method = "normal"`, also use the recorded value as a linear
+predictor. Records with a recorded value are imputed from a model fitted on
+references that also have one, and records without one from a model on the
+predictors fitted on all references. It needs rows with both values. If every such row
+agrees exactly, those records keep their recorded value, as `spec$recorded_fit` notes.}
 }
 \value{
 A `catmech_result`. Its completed target contains exact gold references
@@ -74,4 +83,18 @@ This policy is not a general theorem about PMM, and the opt-in does not
 establish inferential validity. `catmech_sensitivity` already supplies an
 explicit sensitivity context. Complete reference data remain eligible for
 ordinary complete-data pooling because no target cells are imputed.
+
+The likely cause of that undercoverage is that standard matching conditions on
+one fixed set of donor values, which attenuates between-imputation variance
+(Gaffert, Meinfelder and Bosch). `"pmm_abb"` resamples donors with replacement
+for each imputation, an approximate Bayesian bootstrap (Rubin and Schenker, 1986;
+Siddique and Belin, 2008), before the same delegated type-1 matching. It targets
+that variance and is not gated. It still cannot leave donor support, and it does
+not make matching more precise than the normal method when the normal model holds.
+
+With `use_recorded = TRUE`, reference selection may depend on the recorded value, and
+linearity in the recorded value becomes an assumption. It was best or tied among
+reference-using methods at 25% audits on two real datasets, and failed under synthetic
+gross errors, which distort a linear fit;
+[catmech_contamination()] is the alternative there.
 }
