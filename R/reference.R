@@ -110,6 +110,14 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #'   references that also have one, and records without one from a model on the
 #'   predictors fitted on all references. It needs rows with both values. If every such row
 #'   agrees exactly, those records keep their recorded value, as `spec$recorded_fit` notes.
+#' @param cluster With `use_recorded = TRUE`, the name of a complete column identifying
+#'   audit clusters, such as a site or facility. Each imputation then resamples audited
+#'   clusters with replacement, fits the regression to that resample, and imputes from its
+#'   prediction plus normal noise with its residual variance, instead of drawing from a
+#'   posterior that treats rows as independent. See details.
+#' @param cluster_strata Optional names of categorical columns within which audited
+#'   clusters are resampled, usually the strata of the audit. Every cluster must sit in one
+#'   stratum. A stratum with a single audited cluster keeps it in every resample.
 #' @return A `catmech_result`. Its completed target contains exact gold references
 #'   or imputations; the original reference column is unchanged. The `mids`
 #'   observed target is the reference values with other rows missing. The manifest
@@ -151,10 +159,19 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #' reference-using methods at 25% audits on two real datasets, and failed under synthetic
 #' gross errors, which distort a linear fit;
 #' [catmech_contamination()] is the alternative there.
+#'
+#' With `cluster`, parameter uncertainty comes from resampling audited clusters, which
+#' allows for errors and residuals that are correlated within a cluster. Imputed noise is
+#' still independent across rows. Fewer than five audited clusters are refused, and a
+#' resample that loses design support is redrawn, then refused if that keeps happening.
+#' Pool with [catmech_pool_lm()], which uses a cluster-robust variance for such a fit.
+#' The approach combines established ideas (von Hippel and Bartlett, 2021; Cameron and
+#' Miller, 2015). It is not a claim of a new method.
 #' @export
 catmech_reference <- function(data, value, reference, predictors,
                               method = c("normal", "pmm", "pmm_abb"), donors = 5L,
-                              m = 20L, seed = 1L, use_recorded = FALSE) {
+                              m = 20L, seed = 1L, use_recorded = FALSE,
+                              cluster = NULL, cluster_strata = NULL) {
   method <- match.arg(method)
   if (!is.logical(use_recorded) || length(use_recorded) != 1L || is.na(use_recorded))
     stop("use_recorded must be TRUE or FALSE.", call. = FALSE)
@@ -162,6 +179,10 @@ catmech_reference <- function(data, value, reference, predictors,
     stop("use_recorded applies only to method = 'normal'.", call. = FALSE)
   catmech_reference_inputs(data, value, predictors, m, seed, donors,
                            excluded = c(value, reference))
+  if (!is.null(cluster) || !is.null(cluster_strata)) {
+    if (!use_recorded) stop("cluster applies only with use_recorded = TRUE.", call. = FALSE)
+    catmech_reference_check_cluster(data, cluster, cluster_strata, c(value, reference, predictors))
+  }
   if (!is.character(reference) || length(reference) != 1L || is.na(reference) ||
       !nzchar(reference) || !reference %in% names(data) || reference == value)
     stop("reference must name an existing column different from the target.", call. = FALSE)
@@ -179,7 +200,8 @@ catmech_reference <- function(data, value, reference, predictors,
     draws <- matrix(rep(gold, m), nrow = nrow(data), ncol = m)
     model_diagnostics <- catmech_reference_independent_diagnostics("reference_complete")
   } else if (use_recorded) {
-    sampled <- catmech_reference_recorded_draws(data, value, gold, predictors, m, seed)
+    sampled <- if (is.null(cluster)) catmech_reference_recorded_draws(data, value, gold, predictors, m, seed) else
+      catmech_reference_clustered_draws(data, value, gold, predictors, m, cluster, cluster_strata)
     draws <- sampled$draws
     recorded_fit <- sampled$note
     model_diagnostics <- catmech_reference_independent_diagnostics("reference_normal_recorded")
@@ -212,6 +234,12 @@ catmech_reference <- function(data, value, reference, predictors,
     spec$raw_target_policy <- "linear_predictor_never_trusted_automatically"
     spec$reference_selection_assumption <- "ignorable_given_complete_selected_predictors_and_recorded_value"
     spec$recorded_fit <- recorded_fit
+  }
+  if (!is.null(cluster)) {
+    spec$cluster <- cluster
+    spec$cluster_strata <- cluster_strata
+    spec$cluster_uncertainty <- "audited_cluster_bootstrap_each_imputation"
+    spec$audited_clusters <- length(unique(data[[cluster]][known]))
   }
   audits <- lapply(seq_len(m), function(j) {
     row <- catmech_reference_audit(data[[value]], draws[, j], seq_len(nrow(data)), j,
@@ -335,6 +363,80 @@ catmech_reference_recorded_draws <- function(data, value, gold, predictors, m, s
     completed <- complete_with(rows, NULL, as.integer(seed) + 1L)
     draws[!recorded & !known, ] <- completed[!recorded[rows] & !known[rows], , drop = FALSE]
   }
+  list(draws = draws, note = note)
+}
+
+catmech_reference_check_cluster <- function(data, cluster, cluster_strata, excluded) {
+  if (!is.character(cluster) || length(cluster) != 1L || is.na(cluster) || !cluster %in% names(data))
+    stop("cluster must name an existing column.", call. = FALSE)
+  if (cluster %in% excluded)
+    stop("cluster must differ from the target, reference and predictor columns.", call. = FALSE)
+  if (anyNA(data[[cluster]])) stop("cluster must not contain missing values.", call. = FALSE)
+  if (is.null(cluster_strata)) return(invisible(TRUE))
+  if (!is.character(cluster_strata) || !length(cluster_strata) || anyNA(cluster_strata) ||
+      !all(cluster_strata %in% names(data)) || cluster %in% cluster_strata)
+    stop("cluster_strata must name existing columns other than cluster.", call. = FALSE)
+  if (anyNA(data[cluster_strata])) stop("cluster_strata must not contain missing values.", call. = FALSE)
+  key <- interaction(data[cluster_strata], drop = TRUE)
+  if (any(tapply(key, data[[cluster]], function(z) length(unique(z))) > 1L))
+    stop("Every cluster must sit in one stratum of cluster_strata.", call. = FALSE)
+  invisible(TRUE)
+}
+
+# One draw per imputation: resample audited clusters, refit, predict and add noise. A
+# resample that loses design support is redrawn, which conditions on estimability.
+catmech_reference_cluster_fill <- function(x, y, fit_rows, fill_rows, ids, strata, m) {
+  if (qr(x[fit_rows, , drop = FALSE], tol = 1e-7)$rank != ncol(x) || length(fit_rows) <= ncol(x))
+    stop("The trusted regression design must have full column rank; remove aliased or unsupported predictors.", call. = FALSE)
+  by_cluster <- split(fit_rows, as.character(ids[fit_rows]))
+  if (length(by_cluster) < 5L)
+    stop("Fewer than five audited clusters: cluster resampling is refused.", call. = FALSE)
+  groups <- if (is.null(strata)) list(names(by_cluster)) else
+    split(names(by_cluster), as.character(strata[vapply(by_cluster, `[`, integer(1), 1L)]))
+  out <- matrix(NA_real_, length(fill_rows), m)
+  for (j in seq_len(m)) {
+    draw <- NULL
+    for (attempt in seq_len(100L)) {
+      picked <- unlist(lapply(groups, function(u) if (length(u) == 1L) u else u[sample.int(length(u), length(u), replace = TRUE)]), use.names = FALSE)
+      rows <- unlist(by_cluster[picked], use.names = FALSE)
+      fit <- stats::lm.fit(x[rows, , drop = FALSE], y[rows])
+      if (fit$rank != ncol(x) || length(rows) <= ncol(x)) next
+      variance <- sum(fit$residuals^2) / (length(rows) - ncol(x))
+      if (!is.finite(variance) || variance <= 0) next
+      draw <- as.vector(x[fill_rows, , drop = FALSE] %*% fit$coefficients) + stats::rnorm(length(fill_rows), 0, sqrt(variance))
+      break
+    }
+    if (is.null(draw))
+      stop("Audited clusters lost design support in resampling; supply cluster_strata or audit more clusters.", call. = FALSE)
+    out[, j] <- draw
+  }
+  out
+}
+
+catmech_reference_clustered_draws <- function(data, value, gold, predictors, m, cluster, cluster_strata) {
+  W <- data[[value]]
+  known <- !is.na(gold)
+  recorded <- !is.na(W)
+  calibration <- known & recorded
+  if (!any(calibration))
+    stop("use_recorded requires rows with both recorded and reference values.", call. = FALSE)
+  draws <- matrix(rep(gold, m), nrow = nrow(data), ncol = m)
+  note <- "linear_given_recorded"
+  ids <- data[[cluster]]
+  strata <- if (is.null(cluster_strata)) NULL else interaction(data[cluster_strata], drop = TRUE)
+  X <- catmech_model_matrix(data, predictors)
+  if (any(recorded & !known)) {
+    if (all(catmech_contamination_agreement(W[calibration], gold[calibration], 0))) {
+      draws[recorded & !known, ] <- W[recorded & !known]
+      note <- "recorded_kept_all_calibration_rows_agree"
+    } else {
+      with_recorded <- cbind(X, .catmech_recorded = ifelse(recorded, W, 0))
+      draws[recorded & !known, ] <- catmech_reference_cluster_fill(with_recorded, gold, which(calibration),
+        which(recorded & !known), ids, strata, m)
+    }
+  }
+  if (any(!recorded & !known))
+    draws[!recorded & !known, ] <- catmech_reference_cluster_fill(X, gold, which(known), which(!recorded & !known), ids, strata, m)
   list(draws = draws, note = note)
 }
 

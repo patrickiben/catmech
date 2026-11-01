@@ -4,7 +4,13 @@
 \alias{catmech_pool_lm}
 \title{Pool a prespecified linear analysis of completed datasets}
 \usage{
-catmech_pool_lm(result, formula, conf_level = 0.95, allow_sensitivity = FALSE)
+catmech_pool_lm(
+  result,
+  formula,
+  conf_level = 0.95,
+  allow_sensitivity = FALSE,
+  cluster = NULL
+)
 }
 \arguments{
 \item{result}{A catmech_result from [catmech_model()], [catmech_pmm()],
@@ -18,10 +24,17 @@ values are rejected rather than silently dropping records.}
 \item{allow_sensitivity}{Explicitly allow pooled calculations for the legacy
 sensitivity engine or experimental partial-reference PMM. Results retain a
 sensitivity-only label; this does not establish their inferential validity.}
+
+\item{cluster}{Optional name of a complete column in the completed data identifying
+clusters. Each completed analysis then uses a CR1 cluster-robust variance, pooled
+by Rubin's rules with complete-data degrees of freedom of clusters minus one. A fit
+from `catmech_reference(cluster = )` uses its own column by default. With few
+clusters these intervals can be too narrow.}
 }
 \value{
 A data.frame with term, estimate, std.error, df, lower, upper,
-  within_variance, between_variance, m, n and interpretation.
+  within_variance, between_variance, m, n and interpretation, plus clusters
+  when a cluster-robust variance was used.
 }
 \description{
 Uses Rubin's scalar rules with the complete-data residual degrees of freedom.

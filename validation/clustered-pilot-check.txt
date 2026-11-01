@@ -1,0 +1,16 @@
+Engineering pilot for validation/CLUSTERED_PLAN.md: 14 cohorts per cell, pilot seeds for the held-out and simulated cells. Statuses and timing only; no held-out or simulated estimate was read.
+Requests 4144.
+  development  linear_mi            ok       112
+  development  linear_mi_clustered  ok       112
+  development  oracle               ok       112
+  development  recorded             ok       112
+  held_out     linear_mi            ok       140
+  held_out     linear_mi_clustered  ok       140
+  held_out     oracle               ok       140
+  held_out     recorded             ok       140
+  simulation   linear_mi            ok       784
+  simulation   linear_mi_clustered  ok       784
+  simulation   oracle               ok       784
+  simulation   recorded             ok       784
+Development cells, which share the earlier study's seeds, matched its oracle, recorded and linear MI estimates and clustered standard errors on 336 requests; largest difference 9.99e-16.
+No change followed from the pilot.

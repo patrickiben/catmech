@@ -13,7 +13,9 @@ catmech_reference(
   donors = 5L,
   m = 20L,
   seed = 1L,
-  use_recorded = FALSE
+  use_recorded = FALSE,
+  cluster = NULL,
+  cluster_strata = NULL
 )
 }
 \arguments{
@@ -47,6 +49,16 @@ predictor. Records with a recorded value are imputed from a model fitted on
 references that also have one, and records without one from a model on the
 predictors fitted on all references. It needs rows with both values. If every such row
 agrees exactly, those records keep their recorded value, as `spec$recorded_fit` notes.}
+
+\item{cluster}{With `use_recorded = TRUE`, the name of a complete column identifying
+audit clusters, such as a site or facility. Each imputation then resamples audited
+clusters with replacement, fits the regression to that resample, and imputes from its
+prediction plus normal noise with its residual variance, instead of drawing from a
+posterior that treats rows as independent. See details.}
+
+\item{cluster_strata}{Optional names of categorical columns within which audited
+clusters are resampled, usually the strata of the audit. Every cluster must sit in one
+stratum. A stratum with a single audited cluster keeps it in every resample.}
 }
 \value{
 A `catmech_result`. Its completed target contains exact gold references
@@ -97,4 +109,12 @@ linearity in the recorded value becomes an assumption. It was best or tied among
 reference-using methods at 25% audits on two real datasets, and failed under synthetic
 gross errors, which distort a linear fit;
 [catmech_contamination()] is the alternative there.
+
+With `cluster`, parameter uncertainty comes from resampling audited clusters, which
+allows for errors and residuals that are correlated within a cluster. Imputed noise is
+still independent across rows. Fewer than five audited clusters are refused, and a
+resample that loses design support is redrawn, then refused if that keeps happening.
+Pool with [catmech_pool_lm()], which uses a cluster-robust variance for such a fit.
+The approach combines established ideas (von Hippel and Bartlett, 2021; Cameron and
+Miller, 2015). It is not a claim of a new method.
 }

@@ -687,7 +687,8 @@ catmech_holdout_check <- function(fit, folds = 5L, m = 40L, level = 0.9, seed = 
         chains = spec$chains)
     } else {
       catmech_reference(train, spec$value, spec$reference, spec$predictors, method = "normal",
-                        m = m, seed = fold_seed, use_recorded = identical(engine, "reference_normal_recorded"))
+                        m = m, seed = fold_seed, use_recorded = identical(engine, "reference_normal_recorded"),
+                        cluster = spec[["cluster"]], cluster_strata = spec[["cluster_strata"]])
     }
   }
   results <- list()
