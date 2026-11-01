@@ -1,0 +1,17 @@
+"kind","cell","status","Freq"
+"target","ctgov","ok",1094
+"target","error_gross_and_small","ok",160
+"target","missed_flags","ok",160
+"target","nhanes","ok",1099
+"target","ctgov","refused",26
+"target","error_gross_and_small","refused",0
+"target","missed_flags","refused",0
+"target","nhanes","refused",21
+"plan","ctgov","ok",557
+"plan","error_gross_and_small","ok",80
+"plan","missed_flags","ok",80
+"plan","nhanes","ok",558
+"plan","ctgov","refused",3
+"plan","error_gross_and_small","refused",0
+"plan","missed_flags","refused",0
+"plan","nhanes","refused",2

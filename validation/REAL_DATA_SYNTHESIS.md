@@ -92,7 +92,7 @@ That reading comes from this study and has not been tested prospectively.
 | NHANES, 25% | -0.0055, 92.6%, 0.293, 0.0781 | -0.0034, 96.9%, 0.380, 0.0795 | -0.0063, 94.2%, 0.297, 0.0785 |
 | NHANES, 50% | +0.0041, 94.0%, 0.202, 0.0527 | +0.0031, 95.0%, 0.228, 0.0550 | +0.0044, 91.5%, 0.199, 0.0538 |
 
-Standard PMM did not repeat its synthetic failure here: its coverage is within about 2 points of the normal method, with similar width. The bootstrap version overcovered (96.5% to 98.0% in five of six cells) with intervals up to 52% wider. The synthetic repair is therefore
+Standard PMM did not repeat its synthetic failure here: its coverage is within about 2 points of the normal method, with similar width. The bootstrap version overcovered (96.5% to 98.0% in five of six cells) with intervals up to 51% wider. The synthetic repair is therefore
 conservative on these data, and the reason to prefer it over the normal method is weak.
 
 ## Predictions, scored

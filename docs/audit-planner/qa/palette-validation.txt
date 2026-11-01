@@ -1,0 +1,39 @@
+Palette check, run with the dataviz skill's validate_palette.js on 2026-11-01. Chart series only: linear MI and discarding recorded values. All-pairs, since scatter marks can be neighbors.
+
+$ validate_palette.js "#00897a,#d9622b" --mode light --surface "#ffffff" --pairs all
+
+Palette (light, surface #ffffff, categorical): 2 slots
+  [PASS] Lightness band         all 2 inside L 0.43–0.77
+  [PASS] Chroma floor           all 2 >= 0.1
+  [PASS] CVD separation         worst all-pairs #d9622b↔#00897a ΔE 9.9 (protan) · tritan 30.9
+  [PASS] Normal-vision floor    worst all-pairs #d9622b↔#00897a ΔE 25.9 (normal)
+  [PASS] Contrast vs surface    all 2 >= 3:1
+
+  → ALL CHECKS PASS  (CVD in the 6–8 floor band is legal ONLY with secondary encoding: direct labels, gaps, or texture)
+  scope: categorical palettes only. For a lone status/text color check text contrast with this script's apca() or contrast(); for a sequential ramp, lightness monotonicity.
+
+$ validate_palette.js "#14a899,#e0702f" --mode dark --surface "#111721" --pairs all
+
+Palette (dark, surface #111721, categorical): 2 slots
+  [PASS] Lightness band         all 2 inside L 0.48–0.67
+  [PASS] Chroma floor           all 2 >= 0.1
+  [PASS] CVD separation         worst all-pairs #e0702f↔#14a899 ΔE 14.3 (protan) · tritan 30.8
+  [PASS] Normal-vision floor    worst all-pairs #e0702f↔#14a899 ΔE 25.4 (normal)
+  [PASS] Contrast vs surface    all 2 >= 3:1
+
+  → ALL CHECKS PASS  (CVD in the 6–8 floor band is legal ONLY with secondary encoding: direct labels, gaps, or texture)
+  scope: categorical palettes only. For a lone status/text color check text contrast with this script's apca() or contrast(); for a sequential ramp, lightness monotonicity.
+
+Single-color contrast on the card surface (WCAG 2 ratio, APCA):
+  neutral bars, light    #8794a4 on #ffffff 3.09:1 APCA 58
+  neutral bars, dark     #66758a on #111721 3.83:1 APCA 28
+  muted text, light      #4d5a69 on #ffffff 7.04:1 APCA 84
+  muted text, dark       #98a5b8 on #111721 7.20:1 APCA 52
+  faint text, light      #5b6878 on #ffffff 5.68:1 APCA 78
+  faint text, dark       #8593a8 on #111721 5.77:1 APCA 43
+  status red, light      #b42318 on #ffffff 6.57:1 APCA 81
+  status red, dark       #ff7a7a on #111721 7.12:1 APCA 52
+  status amber, light    #8a5300 on #ffffff 6.33:1 APCA 81
+  status amber, dark     #f0b450 on #111721 9.71:1 APCA 67
+  status green, light    #1d6b3c on #ffffff 6.52:1 APCA 82
+  status green, dark     #4fd394 on #111721 9.48:1 APCA 66

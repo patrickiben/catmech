@@ -1,0 +1,32 @@
+{
+  "mode": "study",
+  "workers": 14,
+  "m": 20,
+  "n": 600,
+  "bootstrap": 500,
+  "real_reps": 1500,
+  "synthetic_reps": 300,
+  "retest_reps": 200,
+  "split": "evaluation",
+  "target_records": [30, 60, 150, 300],
+  "pilot_records": [60, 150],
+  "target_ratio": 1.25,
+  "cohort_base": 600100000,
+  "order_base": 610100000,
+  "imputation_base": 620000000,
+  "plan_10_base": 630000000,
+  "plan_25_base": 640000000,
+  "retest_base": 650000000,
+  "offsets": {
+    "ctgov": 0,
+    "nhanes": 2000000,
+    "missed_flags": 4000000,
+    "error_gross_and_small": 6000000
+  },
+  "fixture_master_seed": 430271,
+  "fixture_phase": "heldout",
+  "fixture_selection_base": 670100000,
+  "fixture_noise_base": 676100000,
+  "fixture_mechanism_base": 678100000,
+  "fixture_imputation_base": 690000000
+}

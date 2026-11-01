@@ -1,0 +1,3 @@
+Frozen catmech 0.4.1 numerical sources used by the audit-plan study.
+Uncommitted branch v0.4-contamination at the time of the run; hashes are in validation/audit-plan-study/source-hashes.csv.
+The frozen pools stay in validation/real-data/.

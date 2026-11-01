@@ -1,0 +1,45 @@
+catmech_audit_plan() on qa/example-pilot-nhanes.csv
+$k
+  approach   estimate      lower      upper  classical rubin_check
+1 recorded 0.06234918 0.03624336 0.08563569 0.00527194   0.0420158
+2  discard 0.71250758 0.45309074 0.92440991 1.00069944   1.0800917
+
+$table
+  fraction records additional_records relative_width relative_lower
+1     0.05      15                  0       1.478051       1.299471
+2     0.10      30                  0       1.249457       1.151603
+3     0.25      75                 15       1.089517       1.052963
+4     0.50     150                 90       1.030703       1.017960
+5     0.75     225                165       1.010338       1.006022
+  relative_upper predictive_lower predictive_upper discard_relative_width
+1       1.620826         1.172693         2.509737               3.812826
+2       1.330684         1.092345         1.617959               2.722603
+3       1.121119         1.037851         1.211387               1.771305
+4       1.041938         1.013217         1.064741               1.308628
+5       1.014172         1.004430         1.021907               1.112431
+
+$answer
+  target_ratio   fraction records records_lower records_upper
+1         1.25 0.09978277      30            19            40
+  smallest_grid_fraction
+1                    0.1
+
+$flags
+[1] "small_pilot"
+
+$pilot
+  records reference_rows calibration_rows disagreements
+1     300             60               60            60
+  largest_discrepancy_ratio largest_recorded_z selection_z bootstrap_usable
+1                 0.5797084           6.672708     1.25404              475
+
+
+catmech_audit_plan() on the synthetic gross-error CSV built inside browser-check.js (120 rows, 60 audited). Browser run of the same rows: k 0.9345 (0.6921 to 3.5580), discard 0.9487 (0.8050 to 1.0789), classical 132594.5, flags small_pilot and gross_errors, 75 records.
+  approach  estimate     lower    upper    classical
+1 recorded 0.9344928 0.6659923 3.321429 1.325945e+05
+2  discard 0.9487424 0.8047787 1.080695 1.053018e+00
+[1] "small_pilot"  "gross_errors"
+   fraction records records_lower records_upper
+1 0.6242467      75            66           103
+  disagreements largest_discrepancy_ratio largest_recorded_z bootstrap_usable
+1            41                   21.5837           21.41178              500

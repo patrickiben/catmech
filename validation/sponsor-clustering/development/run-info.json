@@ -1,0 +1,19 @@
+{
+ "split": "development",
+ "use": "engineering only",
+ "finished_utc": "2026-11-01T20:13:19+00:00",
+ "elapsed_seconds": 21.7,
+ "python": "3.14.7",
+ "numpy": "2.5.1",
+ "seeds": {
+  "permute": 20261101,
+  "reveal": 20261102,
+  "bootstrap": 20261103,
+  "audit": 20261104,
+  "bootstrap_audit": 20261105
+ },
+ "permutations": 2000,
+ "bootstraps": 2000,
+ "audit_seeds": 200,
+ "verdict": "WEAK"
+}

@@ -1,0 +1,216 @@
+{
+ "retrieved_utc": "2026-11-01T20:02:26+00:00",
+ "api": "https://clinicaltrials.gov/api/v2/studies",
+ "filter": "AREA[HasResults]true AND AREA[StudyType]INTERVENTIONAL AND AREA[CompletionDate]RANGE[2015-01-01,2022-12-31]",
+ "fields": "NCTId|LeadSponsorName",
+ "page_size": 1000,
+ "total_matching": 35494,
+ "records_read": 35494,
+ "records_without_name": 0,
+ "duplicate_records": 0,
+ "bytes_streamed": 5402663,
+ "pages": 36,
+ "raw_directory_note": "Raw pages were kept outside the repository; hashes are listed here.",
+ "pool_sha256": "c2e02ea2542b8291dff54799a9f0dfecfdbcadb71ebf28e90aa798764e0a91ca",
+ "pool_rows": 34084,
+ "pool_rows_matched": 34084,
+ "match_rate": 1.0,
+ "match_by_split": {
+  "development": {
+   "pool_rows": 6876,
+   "matched": 6876,
+   "rate": 1.0
+  },
+  "evaluation": {
+   "pool_rows": 27208,
+   "matched": 27208,
+   "rate": 1.0
+  }
+ },
+ "api_records_not_in_pool": 1410,
+ "distinct_raw_names_in_pool": 5488,
+ "distinct_normalized_names_in_pool": 5488,
+ "sponsor_map_sha256": "31a223e87de063d0def6d6befc5f9a4626ddfba9a6fe55291dca56144f46ec81",
+ "raw_pages": [
+  {
+   "file": "page-0001.json",
+   "bytes": 152456,
+   "sha256": "82472b157a7a2bf427f20263297c6e521af41054b5dcc3d70d4a0ed201716e12"
+  },
+  {
+   "file": "page-0002.json",
+   "bytes": 152437,
+   "sha256": "d8405689373565e54e13091b9bafa712b0e71ba157da598c5c4bb6b16c3ea383"
+  },
+  {
+   "file": "page-0003.json",
+   "bytes": 151809,
+   "sha256": "1d13b0a1f0ee8838c849e17af46a926b6136f03bcea77793f341403367e12e4d"
+  },
+  {
+   "file": "page-0004.json",
+   "bytes": 152552,
+   "sha256": "2949cc216ca202a885269c4248e2dd17c476d252beafaf0db97f0beb2eb7dfe9"
+  },
+  {
+   "file": "page-0005.json",
+   "bytes": 152073,
+   "sha256": "dce83107c01eaf64076033bc4b87fd10961980fdec0127a1a0894047d3253cbc"
+  },
+  {
+   "file": "page-0006.json",
+   "bytes": 152511,
+   "sha256": "9054664b5ca6d14478340739dedcab931e0ac46d855920f57f600223edf24b76"
+  },
+  {
+   "file": "page-0007.json",
+   "bytes": 152052,
+   "sha256": "02785c81d0c3d1380026473fd146b9ed19e92732e455e87d064436e4d23ab4a2"
+  },
+  {
+   "file": "page-0008.json",
+   "bytes": 152095,
+   "sha256": "39046ec90db57d32dbc4a087b5a45b7a3091a74ae9dadd99ace2aa69f8b2c0dc"
+  },
+  {
+   "file": "page-0009.json",
+   "bytes": 152376,
+   "sha256": "35231ca5333ee1ff75e928e69d82d446b18f870560c37cfdb963ed12c3a72b06"
+  },
+  {
+   "file": "page-0010.json",
+   "bytes": 152528,
+   "sha256": "3357703c78f2293baf9a305a2beb81aaf21838f5473be7967e6c6df84ee65b07"
+  },
+  {
+   "file": "page-0011.json",
+   "bytes": 153129,
+   "sha256": "c4a0d6dd12daa32a3c1c4f462ade92012056a2f0c3fbf019090bd672f41fc328"
+  },
+  {
+   "file": "page-0012.json",
+   "bytes": 152300,
+   "sha256": "e591354e961203a6ab87df067e73c8511259cbd1c1d6a059ab62c3bfce276aab"
+  },
+  {
+   "file": "page-0013.json",
+   "bytes": 151903,
+   "sha256": "1211a562d04aa657d2daa7c9659a66add2002018c78f8611a5c53ac700c60a60"
+  },
+  {
+   "file": "page-0014.json",
+   "bytes": 152486,
+   "sha256": "420632787aec5f912b2f3b8746bf9d2f7eba657fc616d280263da9168e2e1c19"
+  },
+  {
+   "file": "page-0015.json",
+   "bytes": 152266,
+   "sha256": "491af88033887462fa64fa23d4dfc08d6e091fb31d899f4eff8bcaa5904c386a"
+  },
+  {
+   "file": "page-0016.json",
+   "bytes": 151976,
+   "sha256": "3f3212df74b0aef6f869dd7391ae75f831dcda44b5f99fdc64759786b59c57fe"
+  },
+  {
+   "file": "page-0017.json",
+   "bytes": 152503,
+   "sha256": "b7f5aeb08392fe11e76aa49729cd479b139cd59e19342d941534053cef143661"
+  },
+  {
+   "file": "page-0018.json",
+   "bytes": 152328,
+   "sha256": "82740c02e906423cfded3a42873e244fd547dc1691e244119ca4553b34fe6168"
+  },
+  {
+   "file": "page-0019.json",
+   "bytes": 152054,
+   "sha256": "ac6ce1b785873ee7e094f83682cd00bbb30ff39c47ac926d06ba2373e2cd3ed0"
+  },
+  {
+   "file": "page-0020.json",
+   "bytes": 152116,
+   "sha256": "9d5eda3671dead44a4c4ddbb90c6ea68a0571844bab78d4b02420b9323bfc9bc"
+  },
+  {
+   "file": "page-0021.json",
+   "bytes": 151815,
+   "sha256": "1ac0a9d0c517a7c35cd3bb526126fd1054d21ef7ab56c98a5b109f1d15984b4d"
+  },
+  {
+   "file": "page-0022.json",
+   "bytes": 152592,
+   "sha256": "1b48e84b70a6c03c4ffcaf4f380c3263a1d837c0d1f7bac6f2de7271b97c5874"
+  },
+  {
+   "file": "page-0023.json",
+   "bytes": 151905,
+   "sha256": "b7629d3448779c9e58492accc3d1241de8cd99c395d8dd42e35b668a35cc5d36"
+  },
+  {
+   "file": "page-0024.json",
+   "bytes": 152519,
+   "sha256": "c9b2f43a12f14b3bd9394cef459877f389b77218230c369f69f536b7cc44a782"
+  },
+  {
+   "file": "page-0025.json",
+   "bytes": 152399,
+   "sha256": "e0a1538f482bc37ea2c219d3247e1a6fcd484ce3135039b2b763dd27457257d7"
+  },
+  {
+   "file": "page-0026.json",
+   "bytes": 152257,
+   "sha256": "ce45257d41490e4cde94e748e2b9a70635fa9a126b7a4357a383fe9c199c198d"
+  },
+  {
+   "file": "page-0027.json",
+   "bytes": 152903,
+   "sha256": "5e0b36197ed059306edd079966259842bf433e0d7ba1f9b298b8cf11932d5060"
+  },
+  {
+   "file": "page-0028.json",
+   "bytes": 152051,
+   "sha256": "87c1d5878d43affe305dbfc305c08269c3142faec771e96250ffa2aac1ddb22b"
+  },
+  {
+   "file": "page-0029.json",
+   "bytes": 152794,
+   "sha256": "2a2e9772d49a328762ba5bcd861c4c1ffd14e0a5215fbbd27ca5a447faab4305"
+  },
+  {
+   "file": "page-0030.json",
+   "bytes": 151347,
+   "sha256": "833a6fab0162fd349d00dd832a31fcfaf972832574b0964896b3d5fde4aaf91b"
+  },
+  {
+   "file": "page-0031.json",
+   "bytes": 151631,
+   "sha256": "5fd29813e78a5a3afd36569bcdff8e4450b73eab988dd6def49b51f757917719"
+  },
+  {
+   "file": "page-0032.json",
+   "bytes": 151175,
+   "sha256": "46f9e5c5bfc363ac6ab30b489023fd4bbbcbe35f33f2bf28b62b33d86d4cacfc"
+  },
+  {
+   "file": "page-0033.json",
+   "bytes": 152498,
+   "sha256": "fbefbabf50448954f2e79c16f1c909a66262762ff902c1e60fcea0e7718db021"
+  },
+  {
+   "file": "page-0034.json",
+   "bytes": 151308,
+   "sha256": "09a58d356782106e98d7ee81aa573b1f35599cb43184f8675ec70168c3480ab4"
+  },
+  {
+   "file": "page-0035.json",
+   "bytes": 151980,
+   "sha256": "cef70390e9d1275613e1b6e8862bd1a3210d0cc2ebf75154a3446d59155839d9"
+  },
+  {
+   "file": "page-0036.json",
+   "bytes": 75539,
+   "sha256": "83ef54fd61795f710a8ded85d0e2f8ba5588dad6962ab13c17084688d6ae4e41"
+  }
+ ]
+}

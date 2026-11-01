@@ -1,3 +1,11 @@
+# catmech 0.4.1
+
+- Add `catmech_audit_plan()`, which estimates from a random pilot how much narrower one coefficient's interval would be at each audit fraction, keeping or discarding the recorded value, and how
+  many records reach a chosen width. It applies classical two-phase theory, evaluated in closed form under the working models. This is not a new result.
+- A prospective test on held-out real data returned **NO-GO** under a rule fixed in advance. Median error in predicting width was within 10% at target audits of 10%, 25% and 50% (7.8% at worst), and 11.3% to 16.8% at a 5% audit. A 30-record audit's width
+  is too noisy to predict that closely. The bootstrap interval for `k` undercovered the pool value, and small pilots estimated `k` poorly. The planner should not be described as validated. See `validation/AUDIT_PLAN_SYNTHESIS.md` and `docs/AUDIT_PLANNING.md`.
+- Existing workflows are numerically unchanged: 18 of 18 runs match frozen v0.3.1, and 12 of 12 match frozen v0.4.0. No package dependency was added.
+
 # catmech 0.4.0
 
 - Add `catmech_contamination()`, a recording-error model calibrated on reference rows. It uses recorded values without

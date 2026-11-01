@@ -1,0 +1,12 @@
+Split evaluation. Hashes match.
+Test 1 done, 7 s
+D bootstrap 500/2000, 4 s
+D bootstrap 1000/2000, 8 s
+D bootstrap 1500/2000, 12 s
+D bootstrap 2000/2000, 15 s
+D2 bootstrap 500/2000, 3 s
+D2 bootstrap 1000/2000, 7 s
+D2 bootstrap 1500/2000, 10 s
+D2 bootstrap 2000/2000, 14 s
+Tests 2 and 3 done, 37 s
+Verdict on D (confirmatory): WEAK. Elapsed 37 s.

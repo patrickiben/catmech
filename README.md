@@ -1,7 +1,87 @@
 # catmech
 
-**An experimental R package for auditable imputation of continuous measurements
-with quality flags, reference subsets and optional interval categories. Version 0.4.0.**
+**An experimental R package for regression when every record has a recorded value and only an audited subset has a checked reference value. Version 0.4.1.**
+
+**The question:** can you keep error-prone recorded values for precision without trusting them, and which method should you try first?
+
+**The finding:** on real data, simple linear multiple imputation (MI) given the recorded value matched or beat `catmech_contamination()`, the recording-error model this package added. Start with linear MI.
+
+- **Real data, 25% audits.** Linear MI had lower RMSE than the model on ClinicalTrials.gov (0.0286 against 0.0308) and less bias (+0.0001 against +0.0068). They tied on NHANES (0.0409 against 0.0408). The model's largest edge, at the 10% NHANES audit (0.0435 against 0.0490), was within Monte Carlo noise, and 14 of 200 requests returned no interval there. It could not tell which records were wrong (AUC 0.54 and 0.50).
+- **What held up.** Keeping the recorded value pays. Linear MI's intervals were about half as wide as those from discarding it (0.102 against 0.205, and 0.154 against 0.297), with coverage near the all-references oracle (91.8% against 91.2%, and 93.9% against 94.9%).
+- **Where linear MI fails.** Under synthetic gross errors it covered 64.7%, against 94.0% for the model.
+- **Audit planning: not validated.** `catmech_audit_plan()` returned **NO-GO** under a rule fixed in advance. Its median error in predicting interval width missed the 10% limit at a 5% audit (11.3% to 16.8%). Larger targets stayed within 7.8%, but that pattern was not the test. It is a documented calculation, not a validated tool, so it is left out of the example below.
+
+## Which method to start with
+
+| Situation | Start with | Evidence and limit |
+| --- | --- | --- |
+| Most cases, especially errors small relative to the spread of the target | `catmech_reference(..., use_recorded = TRUE)`: linear imputation given the recorded value. Consider generalized raking when selection probabilities are known; the package does not implement raking. | Best or tied among reference-using methods on both real datasets at 25% audits. Failed under synthetic gross errors (64.7% coverage). |
+| Large or gross errors, or a fallible reference with a credible declared SD | `catmech_contamination()` | Strongest in synthetic cells with these errors (coverage 94.0% under gross errors, 91.8% with a declared reference SD). Worse than linear MI and raking on ClinicalTrials.gov. Failed with heavy-tailed targets (87.3%) and with selection on the true value when errors were present (79.3%). |
+| Target residuals doubtful and precision not critical | `catmech_reference()` (default) | Assumes least about recorded values, with intervals about twice as wide on the real data. Failed with selective references (7.3%) and noisy ones (52.7%). |
+
+"Contamination" here means recording error, not treatment spillover between trial arms.
+
+## Try it
+
+```r
+install.packages(c("digest", "jsonlite", "mice", "posterior", "truncnorm", "yaml"))
+install.packages(".", repos = NULL, type = "source")   # from the repository directory
+```
+
+```r
+library(catmech)
+
+# Public NHANES data: self-reported and measured weight. Keep measured weight
+# only on a random 25% of rows, as an audit would.
+d <- read.csv("validation/real-data/nhanes-pool.csv")
+d <- d[d$split == "evaluation", ]
+set.seed(1)
+audited <- sample(nrow(d), nrow(d) / 4)
+d$audit_kg <- NA_real_
+d$audit_kg[audited] <- d$reference_kg[audited]
+
+# 1. Read what the audit shows. This fits no model.
+catmech_recording_audit(d, "recorded_kg", "audit_kg", by = "sex", agreement_tol = 1)
+
+# 2. Start with linear MI given the recorded value.
+fit <- catmech_reference(
+  d, "recorded_kg", "audit_kg",
+  predictors = c("age", "sex", "race", "height", "sbp"),
+  use_recorded = TRUE, m = 20, seed = 123
+)
+catmech_pool_lm(fit, sbp ~ recorded_kg + age + sex + race + height)
+# recorded_kg: 0.126, 95% interval 0.097 to 0.155. With every measured weight: 0.127.
+head(fit$audit)   # for each record and imputation: what was replaced, and why
+```
+
+This one audit of the whole evaluation pool is an illustration. It is not part of the frozen study.
+
+## The evidence
+
+[![Dot plots for two public datasets at a 25% audit. Linear MI and the contamination model have similar coverage and interval width, close to the all-references oracle. The v0.3 default, which discards recorded values, has intervals about twice as wide. On ClinicalTrials.gov the model has higher RMSE than linear MI.](validation/real-data-figures/real-data-evidence.png)](validation/real-data-figures/real-data-evidence.pdf)
+
+Random 25% audit, 1,000 cohorts of 600 from each evaluation pool. "Reference normal (v0.3)" discards recorded values. Select the figure for its PDF.
+
+## Limits
+
+- **Not clinical.** Neither real dataset is a clinical source-data audit. On ClinicalTrials.gov both values are sponsor-entered, so the reference is not independent truth. Two public datasets say nothing about transport.
+- **Synthetic simulations.** All simulation data are synthetic, and the primary cells use the error form the model assumes, which favors it.
+- **No novelty or guarantee.** The methods are established, and no new statistical method is claimed. Even the oracle covered only 91.2% on ClinicalTrials.gov.
+- **No outside review.** Not on CRAN, with no outside peer review or clinical validation. AI-assisted work is [disclosed](CONTRIBUTING.md).
+
+## Read next
+
+[Assessment](docs/ASSESSMENT.md) | [Real-data evidence](validation/REAL_DATA_SYNTHESIS.md) | [Synthetic evidence](validation/CONTAMINATION_SYNTHESIS.md) | [Audit planner test](validation/AUDIT_PLAN_SYNTHESIS.md) | [Merged-paper go/no-go](validation/merged-audit-pilot/README.md) | [Validation record](validation/VALIDATION.md) | [Case study](docs/case-study/CASE_STUDY.md)
+
+<!-- front-page-end: docs/case-study/fact_check.py checks every number above this line. -->
+
+---
+
+**Details below:** [package overview](#package-overview) | [install](#install) | [flags with no references](#flags-with-no-references-declare-a-trust-policy) | [reference subsets](#when-flags-miss-errors-use-actual-reference-information) | [recording audit and contamination model](#with-references-and-recorded-values-workflow-details) | [audit planning](#planning-an-audit-not-validated) | [categories](#use-categories-only-under-an-explicit-observation-model) | [scope and evidence](#scope-and-evidence) | [legacy API](#legacy-api) | [reproduce](#reproduce) | [license, credits and AI use](#license-credits-and-ai-use)
+
+## Package overview
+
+catmech does auditable imputation of continuous measurements with quality flags, reference subsets and optional interval categories.
 
 `catmech_model()` masks every flagged measurement and fits a conditional Gaussian
 model using trusted observations. It can ignore categories, treat them as exact,
@@ -23,17 +103,13 @@ and [validation record](validation/VALIDATION.md).
 
 ## Install
 
-```r
-install.packages(c("digest", "jsonlite", "mice", "posterior", "truncnorm", "yaml"))
-install.packages(".", repos = NULL, type = "source")
-```
-
-Run the second command from the repository directory, or install the source archive
-with `R CMD INSTALL catmech_0.4.0.tar.gz`. R 4.1 or later is required. GitHub Actions
+The [commands above](#try-it) install the dependencies and then the package. Run the second
+command from the repository directory, or build the source archive with `R CMD build .` and
+install it with `R CMD INSTALL catmech_0.4.1.tar.gz`. R 4.1 or later is required. GitHub Actions
 is configured for Linux, macOS and Windows; local checks do not establish that
 the remote workflow has passed.
 
-## Start with a declared trust policy
+## Flags with no references: declare a trust policy
 
 ```r
 library(catmech)
@@ -96,15 +172,19 @@ flag = "outlier_flag")` masks all flags and delegates standard type-1 PMM to `mi
 showed substantial undercoverage in the synthetic held-out study. Its pooled analysis
 requires `allow_sensitivity = TRUE` and remains labeled `sensitivity_only`. `method = "pmm_abb"`
 resamples donors for each imputation. That raised synthetic coverage from 86.7% to 95.9%, but it
-overcovered on real data with intervals up to 52% wider, and standard PMM did not repeat its failure
+overcovered on real data with intervals up to 51% wider than the normal method, and standard PMM did not repeat its failure
 there. The reference default remains normal. Predictors must be complete. An observed category can be selected explicitly as
 an ordinary factor predictor; no interval constraint is then imposed. PMM cannot
 extrapolate beyond donor values and does not guarantee robustness or coverage.
-The new evaluation compares methods given the **same predictor information**.
+The extension study compares methods given the **same predictor information**.
 
-## With references and recorded values: which workflow
+## With references and recorded values: workflow details
 
-Read what the references show before choosing a model. `catmech_recording_audit()` fits no
+Here "contamination" means recording error, the usage in the selective-editing literature. It is
+not treatment spillover between trial arms.
+
+Read what the references show before choosing a model, then pick a method from
+[the table above](#which-method-to-start-with). `catmech_recording_audit()` fits no
 model. It reports disagreement rates and error sizes, tests whether rates differ across groups
 such as site or flag, and compares referenced with unreferenced rows.
 
@@ -113,11 +193,7 @@ catmech_recording_audit(dat_with_reference, "lab_value", "reference_value",
                         by = c("outlier_flag", "site"))
 ```
 
-| Situation | Start with | Evidence and limit |
-| --- | --- | --- |
-| Most cases, especially errors small relative to the spread of the target | `catmech_reference(..., use_recorded = TRUE)`: linear imputation given the recorded value. Consider generalized raking when selection probabilities are known; the package does not implement raking. | Best or tied among reference-using methods on both real datasets at 25% audits. It failed under synthetic gross errors. |
-| Large or gross errors, or a fallible reference with a credible declared SD | `catmech_contamination()` | Strongest in synthetic cells with these errors. Worse than linear MI and raking on ClinicalTrials.gov. It failed with heavy-tailed targets and with selection on the true value when errors were present. |
-| Target residuals doubtful and precision not critical | `catmech_reference()` (default) | Assumes least about recorded values, with intervals about twice as wide on the real data. It failed with selective or noisy references. |
+When the table points to the contamination model:
 
 ```r
 fit <- catmech_contamination(
@@ -130,9 +206,6 @@ fit$contamination$corruption    # per-record posterior error probabilities
 catmech_holdout_check(fit)      # scores unseen references, using no simulation truth
 ```
 
-Here "contamination" means recording error, the usage in the selective-editing literature. It is
-not treatment spillover between trial arms.
-
 Selection into the audit may depend on recorded values, so a targeted audit is supported. Selection
 on the true value beyond what the recorded value shows is not. `selection_delta` and `reference_sd`
 are declared sensitivity assumptions to compare with `catmech_sensitivity()`. If the hold-out check shows
@@ -141,6 +214,17 @@ datasets the model could not tell which records were wrong (AUC 0.54 and 0.50), 
 probabilities as labels on data like those. See the [method](docs/CONTAMINATION_METHOD.md),
 [synthetic evidence](validation/CONTAMINATION_SYNTHESIS.md), [real-data evidence](validation/REAL_DATA_SYNTHESIS.md)
 and [example](inst/examples/contamination.R).
+
+## Planning an audit: not validated
+
+`catmech_audit_plan()` estimates from a random pilot how much narrower one coefficient's interval would be at each
+audit fraction, keeping or discarding the recorded value, and how many records reach a chosen width. It applies classical
+two-phase theory, so this is not a new result. Its prospective test on two public datasets returned **NO-GO** under a rule
+fixed in advance, and it should not be described as validated. Small pilots estimated its key quantity `k` poorly, and the
+interval for `k` undercovered. By formula, using each whole pool's `k`, keeping the recorded value cuts the audit needed to come within 25%
+of the full-audit width from about 380 of 600 records to about 40 to 70 on these data. Read the
+[planning guide](docs/AUDIT_PLANNING.md), the [test results](validation/AUDIT_PLAN_SYNTHESIS.md) and the
+[example](inst/examples/audit-plan.R) before using it.
 
 ## Use categories only under an explicit observation model
 
@@ -192,6 +276,8 @@ with a new coverage guarantee.
 - Version 0.4 adds a synthetic study with linear MI and generalized raking as strong
   comparators, and a [real-data audit](validation/REAL_DATA_SYNTHESIS.md) on ClinicalTrials.gov and
   NHANES with real recording differences. Neither dataset is a clinical source-data audit.
+- Version 0.4.1 adds the [audit planner test](validation/AUDIT_PLAN_SYNTHESIS.md), which returned NO-GO, and
+  changes no existing function.
 
 The [v0.2 coverage protocol](validation/COVERAGE_PLAN.md) transfers useful controls from
 the author's carryover, False Floor, calibration and assumption-audit research.
@@ -199,7 +285,7 @@ Independent numerical oracles check the category sampler and the reference
 model's joint predictive distribution, including shared parameter uncertainty. Clinical-format
 synthetic fixtures include missed flags, site shifts and rounded records.
 [Transfer details](docs/RESEARCH_TRANSFER_PLAN.md) state what does and does not
-carry over. The [new extension study](validation/EXTENSION_SYNTHESIS.md)
+carry over. The [extension study](validation/EXTENSION_SYNTHESIS.md)
 reports matched-information PMM comparisons, the value of actual reference
 measurements, and failures under selective or inaccurate references. These are simulation studies, not clinical validation or a general
 coverage theorem. Nonlinearity, missed contamination, informative selection,
@@ -221,7 +307,7 @@ are not silently converted to the new model.
 Rscript -e 'install.packages(c("testthat", "pkgload", "roxygen2"))'
 Rscript -e 'testthat::test_local()'
 R CMD build .
-R CMD check --no-manual catmech_0.4.0.tar.gz
+R CMD check --no-manual catmech_0.4.1.tar.gz
 Rscript tools/check-model-oracle.R validation/my-model-oracle
 Rscript tools/coverage-benchmark.R confirmatory validation/my-heldout
 Rscript tools/coverage-benchmark.R clinical validation/my-clinical
@@ -236,15 +322,19 @@ Rscript tools/contamination-benchmark.R study validation/my-contamination-study
 python3 -I tools/real-data-fetch.py my-raw-directory validation/my-real-data
 Rscript tools/real-data-prepare.R my-raw-directory validation/my-real-data
 Rscript tools/real-data-benchmark.R study validation/my-real-data-study
+Rscript tools/merged-audit-pilot.R study validation/merged-audit-pilot/my-study 400
+Rscript tools/audit-plan-benchmark.R study validation/my-audit-plan-study
 python3 tools/verify-artifacts.py
 ```
 
-Use new output directories. Archived v0.1 to v0.4 sources retain the historical
+Use new output directories. Archived v0.1 to v0.4.1 sources retain the historical
 benchmark inputs; their hashes are checked against those frozen versions. A fresh
 ClinicalTrials.gov download will differ from the dated pool because the registry changes.
 The v0.3.1 guards reject unsupported analyses and gate experimental reference-PMM
 pooling; successful scalar estimates and intervals are unchanged. See
 [validation](validation/VALIDATION.md) for evidence, environment and remaining gaps.
+
+## License, credits and AI use
 
 MIT license. Built on [mice](https://doi.org/10.18637/jss.v045.i03),
 [data augmentation](https://doi.org/10.1080/01621459.1987.10478458), interval imputation

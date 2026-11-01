@@ -1,6 +1,6 @@
 # Assessment and release decision
 
-Assessed 2026-11-01. Version 0.4.0 is worth releasing as an **experimental, auditable toolkit for data with recorded values and a
+Assessed 2026-11-01. Version 0.4.1 is worth releasing as an **experimental, auditable toolkit for data with recorded values and a
 reference subset**, built from established methods. Real-data testing narrowed its recommended use. It does not support a novel-method
 or clinical-validity claim. Earlier assessments are preserved for [v0.1](ASSESSMENT_V0.1.md), [v0.2](ASSESSMENT_V0.2.md) and [v0.3](ASSESSMENT_V0.3.md).
 
@@ -17,6 +17,9 @@ The [real-data audit](../validation/REAL_DATA_SYNTHESIS.md) was less favorable, 
 than the contamination model. On NHANES they roughly tied. The model could not identify which records were wrong (AUC 0.54 and 0.50). The gain against discarding recorded values held, at about 48% narrower intervals, but
 linear imputation gets it with fewer assumptions. That option is now supported as `catmech_reference(use_recorded = TRUE)` and is the recommended starting point.
 
+Version 0.4.1 adds `catmech_audit_plan()`, which estimates from a pilot how many records to audit. Its [prospective test](../validation/AUDIT_PLAN_SYNTHESIS.md) returned **NO-GO** under a rule fixed in advance: predictions were within 10% at target audits of 10% or more,
+and missed at a 5% audit, whose width is too noisy to predict that closely. Small pilots also estimated `k` poorly, and its interval undercovered. The planner is documented, with that limit stated, and is not validated.
+
 ## Current judgment
 
 | Question | Judgment |
@@ -25,6 +28,7 @@ linear imputation gets it with fewer assumptions. That option is now supported a
 | Useful software? | Yes, for data with recorded values and an audit subset: the audit summary, hold-out check, linear MI option, explicit assumptions and visible refusals. |
 | Does it estimate individual corruption probabilities? | Under a declared model, yes. They worked when errors were large and separable. On both real datasets the error count was calibrated, but they could not identify which records were wrong. |
 | Is the contamination model the best default? | No. Linear MI is the better starting point. The model's niche is large or gross errors, and fallible references with a credible declared SD. |
+| Can it say how many records to audit? | Not validated. The planner gave a NO-GO, failing only at the 5% target. It is a documented calculation, built on classical theory. |
 | Does it repair missed errors with no new information? | No. It requires genuine reference measurements. |
 | Generally valid confidence intervals? | No. Failures are recorded for each workflow, and real-data oracle coverage was itself below nominal on one dataset. |
 | Real-data evidence? | Two public datasets with real recording differences. Neither is a clinical source-data audit, and the ClinicalTrials.gov reference is not independent truth. |

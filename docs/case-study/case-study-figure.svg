@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 75" width="352" height="75" role="img" aria-label="Typical error at a 25% audit, by method and dataset" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif" font-size="10">
+<text x="106" y="24" text-anchor="end" fill="#46555f">Discard recorded value</text>
+<text x="106" y="39" text-anchor="end" fill="#14242f" font-weight="700">New model</text>
+<text x="106" y="54" text-anchor="end" fill="#14242f" font-weight="700">Simple linear MI</text>
+<text x="106" y="69" text-anchor="end" fill="#46555f">All references</text>
+<text x="112" y="10" fill="#14242f" font-weight="700">ClinicalTrials.gov</text>
+<line x1="112" x2="112" y1="14" y2="72" stroke="#d9dcd9"/>
+<path d="M112 16h52.6a4 4 0 0 1 4 4a4 4 0 0 1 -4 4h-52.6z" fill="#898781"/>
+<text x="172.6" y="24" fill="#14242f">0.0539</text>
+<path d="M112 31h28.4a4 4 0 0 1 4 4a4 4 0 0 1 -4 4h-28.4z" fill="#eb6834"/>
+<text x="148.4" y="39" fill="#14242f" font-weight="700">0.0308</text>
+<path d="M112 46h26.0a4 4 0 0 1 4 4a4 4 0 0 1 -4 4h-26.0z" fill="#2a78d6"/>
+<text x="146.0" y="54" fill="#14242f" font-weight="700">0.0286</text>
+<path d="M112 61h24.9a4 4 0 0 1 4 4a4 4 0 0 1 -4 4h-24.9z" fill="#898781"/>
+<text x="144.9" y="69" fill="#14242f">0.0275</text>
+<text x="232" y="10" fill="#14242f" font-weight="700">NHANES</text>
+<line x1="232" x2="232" y1="14" y2="72" stroke="#d9dcd9"/>
+<path d="M232 16h78.5a4 4 0 0 1 4 4a4 4 0 0 1 -4 4h-78.5z" fill="#898781"/>
+<text x="318.5" y="24" fill="#14242f">0.0785</text>
+<path d="M232 31h38.9a4 4 0 0 1 4 4a4 4 0 0 1 -4 4h-38.9z" fill="#eb6834"/>
+<text x="278.9" y="39" fill="#14242f" font-weight="700">0.0408</text>
+<path d="M232 46h38.9a4 4 0 0 1 4 4a4 4 0 0 1 -4 4h-38.9z" fill="#2a78d6"/>
+<text x="278.9" y="54" fill="#14242f" font-weight="700">0.0409</text>
+<path d="M232 61h33.5a4 4 0 0 1 4 4a4 4 0 0 1 -4 4h-33.5z" fill="#898781"/>
+<text x="273.5" y="69" fill="#14242f">0.0357</text>
+</svg>

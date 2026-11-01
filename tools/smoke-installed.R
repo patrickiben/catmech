@@ -221,4 +221,10 @@ contamination_example <- new.env(parent = baseenv())
 source(system.file("examples", "contamination.R", package = "catmech"), local = contamination_example)
 stopifnot(inherits(contamination_example$contamination_fit, "catmech_result"),
           identical(contamination_example$contamination_fit$manifest$engine, "reference_contamination"))
-cat("Bundled main-model, reference, legacy and contamination examples: PASS\n")
+audit_plan_example <- new.env(parent = baseenv())
+source(system.file("examples", "audit-plan.R", package = "catmech"), local = audit_plan_example)
+stopifnot(identical(audit_plan_example$audit_plan$status, "no_flags"),
+          identical(audit_plan_example$audit_plan$k$approach, c("recorded", "discard")),
+          all(diff(audit_plan_example$audit_plan$table$relative_width) < 0),
+          audit_plan_example$audit_plan$answer$records <= nrow(audit_plan_example$audit_data))
+cat("Bundled main-model, reference, legacy, contamination and audit-plan examples: PASS\n")

@@ -1,0 +1,1370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Record Audit Planner</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="How many records to audit and which method to use, from a prospective test on two public datasets. The planner's verdict was NO-GO, so the calculator is an unvalidated illustration.">
+<link rel="icon" href="data:,">
+<style>
+/* Layout concept: a Mission Control readout. Verdict and comparison results first, the calculator as a labeled illustration below them.
+   Palette from the portfolio's tokens (assets/theme/tokens.css). Series hues validated with validate_palette.js: see qa/palette-validation.txt. */
+:root {
+  --bg: #f4f6f9; --bg-2: #eef1f5; --surface: #ffffff; --surface-2: #eef2f6; --surface-3: #e4e9ef;
+  --line: #d7dee7; --line-2: #c3ccd8; --control: #7d8a9b;
+  --ink: #121a24; --text: #1f2a37; --muted: #4d5a69; --faint: #5b6878;
+  --accent: #0b7268; --accent-ink: #075b53; --accent-soft: rgba(11,114,104,.08); --accent-ring: rgba(11,114,104,.30); --on-accent: #ffffff;
+  --green: #1d6b3c; --amber: #8a5300; --red: #b42318;
+  --green-soft: rgba(29,107,60,.10); --amber-soft: rgba(138,83,0,.10); --red-soft: rgba(180,35,24,.10);
+  --grid: rgba(18,26,36,.035); --glow: rgba(11,114,104,.06); --bar-bg: rgba(244,246,249,.85);
+  --shadow-1: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08);
+  --s-mi: #00897a; --s-disc: #d9622b; --s-neutral: #8794a4;
+  --zone: rgba(180,35,24,.07);
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --wrap: 1200px; --bar-h: 56px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b0f15; --bg-2: #080b10; --surface: #111721; --surface-2: #161e2a; --surface-3: #1c2533;
+  --line: #222c3b; --line-2: #2e3a4d; --control: #62718a;
+  --ink: #e8eef6; --text: #c9d3e1; --muted: #98a5b8; --faint: #8593a8;
+  --accent: #3ad7c8; --accent-ink: #8ff0e6; --accent-soft: rgba(58,215,200,.12); --accent-ring: rgba(58,215,200,.35); --on-accent: #06231f;
+  --green: #4fd394; --amber: #f0b450; --red: #ff7a7a;
+  --green-soft: rgba(79,211,148,.14); --amber-soft: rgba(240,180,80,.14); --red-soft: rgba(255,122,122,.14);
+  --grid: rgba(58,215,200,.022); --glow: rgba(122,164,255,.10); --bar-bg: rgba(11,15,21,.82);
+  --shadow-1: inset 0 1px 0 rgba(255,255,255,.035), 0 1px 2px rgba(0,0,0,.45);
+  --s-mi: #14a899; --s-disc: #e0702f; --s-neutral: #66758a;
+  --zone: rgba(255,122,122,.08);
+  color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #0b0f15; --bg-2: #080b10; --surface: #111721; --surface-2: #161e2a; --surface-3: #1c2533;
+  --line: #222c3b; --line-2: #2e3a4d; --control: #62718a;
+  --ink: #e8eef6; --text: #c9d3e1; --muted: #98a5b8; --faint: #8593a8;
+  --accent: #3ad7c8; --accent-ink: #8ff0e6; --accent-soft: rgba(58,215,200,.12); --accent-ring: rgba(58,215,200,.35); --on-accent: #06231f;
+  --green: #4fd394; --amber: #f0b450; --red: #ff7a7a;
+  --green-soft: rgba(79,211,148,.14); --amber-soft: rgba(240,180,80,.14); --red-soft: rgba(255,122,122,.14);
+  --grid: rgba(58,215,200,.022); --glow: rgba(122,164,255,.10); --bar-bg: rgba(11,15,21,.82);
+  --shadow-1: inset 0 1px 0 rgba(255,255,255,.035), 0 1px 2px rgba(0,0,0,.45);
+  --s-mi: #14a899; --s-disc: #e0702f; --s-neutral: #66758a;
+  --zone: rgba(255,122,122,.08);
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-padding-top: 72px; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/1.55 var(--sans); }
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: radial-gradient(1100px 520px at 50% -8%, var(--glow), transparent 62%),
+    linear-gradient(var(--grid) 1px, transparent 1px) 0 0 / 44px 44px,
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0 / 44px 44px; }
+body::after { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 60; background: var(--bg); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+[tabindex="-1"]:focus { outline: none; }
+a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:hover { color: var(--accent-ink); }
+h1, h2, h3 { margin: 0; color: var(--ink); text-wrap: balance; }
+h1 { font-size: clamp(28px, 1.1rem + 2.2vw, 40px); line-height: 1.12; font-weight: 700; letter-spacing: -.015em; }
+h3 { font-size: 17px; line-height: 1.3; font-weight: 650; }
+p { margin: 0; }
+code { font: 500 .88em var(--mono); color: var(--ink); overflow-wrap: anywhere; }
+.skip { position: absolute; left: 8px; top: -60px; z-index: 100; padding: 10px 16px; border-radius: 6px; background: var(--surface); color: var(--ink); border: 1px solid var(--accent); font-weight: 600; }
+.skip:focus { top: 8px; }
+.wrap { max-width: var(--wrap); margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.mono-k { font: 600 12px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+
+/* top bar */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; background: var(--bar-bg); -webkit-backdrop-filter: saturate(140%) blur(10px); backdrop-filter: saturate(140%) blur(10px); border-bottom: 1px solid var(--line-2); box-shadow: 0 1px 0 var(--accent-soft); }
+.top .wrap { display: flex; align-items: center; gap: 8px 12px; min-height: var(--bar-h); }
+.top .name { display: inline-flex; align-items: center; gap: 10px; margin-right: auto; font: 700 13px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--ink); text-decoration: none; white-space: nowrap; }
+.top .mark { width: 10px; height: 10px; flex: none; background: var(--accent); clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+.top .nav { display: flex; align-items: center; gap: 2px; }
+.top .nav a { padding: 8px 10px; border-radius: 6px; font: 500 12px/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); text-decoration: none; white-space: nowrap; }
+.top .nav a:hover { color: var(--ink); background: var(--surface-3); }
+.btn-t { display: inline-flex; align-items: center; justify-content: center; height: 36px; min-width: 36px; padding: 0 10px; border: 1px solid var(--control); border-radius: 6px; background: transparent; color: var(--text); font: 600 13px/1 var(--sans); cursor: pointer; }
+.btn-t:hover { color: var(--ink); background: var(--surface-3); }
+.menu-t { display: none; }
+@media (max-width: 899.98px) {
+  .js .menu-t { display: inline-flex; }
+  .js .top .nav { display: none; position: absolute; left: 0; right: 0; top: 100%; flex-direction: column; align-items: stretch; padding: 8px 16px 14px; background: var(--surface); border-bottom: 1px solid var(--line-2); box-shadow: 0 18px 32px rgba(0,0,0,.25); }
+  .js .top.open .nav { display: flex; }
+  .js .top .nav a { min-height: 44px; display: flex; align-items: center; font-size: 13px; }
+  .top .name { letter-spacing: .1em; font-size: 12px; }
+}
+
+/* hero */
+.hero { display: grid; gap: 18px; padding-block: 32px 8px; }
+.eyebrow { font: 600 12px/1.3 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--amber); }
+.eyebrow::before { content: "// "; }
+.lede { font-size: 18px; line-height: 1.55; max-width: 72ch; color: var(--muted); }
+.verdict { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 18px; align-items: start; padding: 16px 18px; border: 1px solid color-mix(in srgb, var(--red) 45%, var(--line-2)); border-left-width: 4px; border-left-color: var(--red); border-radius: 8px; background: var(--surface); box-shadow: var(--shadow-1); }
+.verdict .flag { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 6px; background: var(--red-soft); color: var(--red); font: 750 20px/1 var(--mono); letter-spacing: .04em; white-space: nowrap; }
+.verdict p { font-size: 15px; line-height: 1.55; max-width: 92ch; }
+.verdict p + p { margin-top: 6px; color: var(--muted); }
+.verdict strong { color: var(--ink); }
+@media (max-width: 639.98px) { .verdict { grid-template-columns: minmax(0, 1fr); } .verdict .flag { justify-self: start; } }
+.qprow { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 12px; }
+.qp { display: block; padding: 14px 18px; border: 1px solid var(--line-2); border-left: 3px solid var(--accent); border-radius: 8px; background: var(--surface); color: var(--text); text-decoration: none; box-shadow: var(--shadow-1); }
+.qp:hover { background: var(--surface-2); color: var(--text); }
+.qp .qe { font: 600 11.5px/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.qp .qt { margin-top: 4px; font-size: 17px; font-weight: 650; line-height: 1.3; color: var(--ink); }
+.qp .qd { margin-top: 4px; font-size: 14px; line-height: 1.5; color: var(--muted); }
+.strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 1px; overflow: hidden; border: 1px solid var(--line-2); border-radius: 12px; background: var(--line); box-shadow: var(--shadow-1); }
+.readout { display: flex; flex-direction: column; gap: 3px; min-width: 0; padding: 12px 16px 13px; background: var(--surface); }
+.readout .v { font: 700 21px/1.2 var(--sans); letter-spacing: -.01em; color: var(--ink); }
+.readout .s { font-size: 13px; line-height: 1.4; color: var(--muted); }
+.c-red { color: var(--red) !important; } .c-amber { color: var(--amber) !important; } .c-green { color: var(--green) !important; }
+
+/* sections and panels */
+.sec { padding-block: 30px 4px; display: grid; gap: 14px; }
+.sec > h2, .h2 { display: flex; align-items: baseline; gap: 10px; margin: 0; font: 700 13.5px/1.3 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--ink); }
+.sec > h2::before { content: ""; flex: none; align-self: center; width: 0; height: 0; border-left: 7px solid var(--accent); border-top: 4px solid transparent; border-bottom: 4px solid transparent; }
+.sec > p { max-width: 74ch; color: var(--muted); }
+.panel { position: relative; min-width: 0; padding: 16px 18px 18px; border: 1px solid var(--line-2); border-radius: 12px; background: var(--surface); box-shadow: var(--shadow-1); }
+.panel::before, .panel::after { content: ""; position: absolute; width: 14px; height: 14px; pointer-events: none; }
+.panel::before { left: 7px; top: 7px; border-left: 1px solid var(--accent-ring); border-top: 1px solid var(--accent-ring); }
+.panel::after { right: 7px; bottom: 7px; border-right: 1px solid var(--line-2); border-bottom: 1px solid var(--line-2); }
+.panel-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 14px; margin-bottom: 8px; }
+.fig-id { font: 500 11.5px/1.3 var(--mono); letter-spacing: .08em; color: var(--faint); }
+.panel p, .panel li { font-size: 14px; line-height: 1.55; }
+.note { color: var(--muted); font-size: 13px; line-height: 1.5; max-width: 90ch; }
+.panel p.note, .sec > p.note { font-size: 13px; color: var(--muted); }
+.cols-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 14px; }
+.cols-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+.test-grid { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 14px; }
+@media (max-width: 899.98px) { .test-grid { grid-template-columns: minmax(0, 1fr); } }
+.calc-grid { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 14px; align-items: start; }
+@media (max-width: 979.98px) { .calc-grid { grid-template-columns: minmax(0, 1fr); } }
+.stack { display: grid; gap: 14px; min-width: 0; }
+
+/* chips */
+.st { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border: 1px solid currentColor; border-radius: 999px; font: 600 12px/1.35 var(--mono); letter-spacing: .02em; white-space: normal; }
+.st-red { color: var(--red); background: var(--red-soft); border-color: color-mix(in srgb, var(--red) 40%, transparent); }
+.st-amber { color: var(--amber); background: var(--amber-soft); border-color: color-mix(in srgb, var(--amber) 40%, transparent); }
+.st-green { color: var(--green); background: var(--green-soft); border-color: color-mix(in srgb, var(--green) 40%, transparent); }
+.st-plain { color: var(--muted); border-color: var(--line-2); }
+
+/* result tiles */
+.duel { display: grid; gap: 10px; }
+.duel .big { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+.duel-row { display: grid; grid-template-columns: minmax(0, 1fr) 76px; align-items: center; gap: 10px; }
+.duel-row .lbl { grid-column: 1 / -1; font-size: 13px; color: var(--muted); }
+.track { height: 12px; border-radius: 0 4px 4px 0; background: var(--surface-2); overflow: hidden; }
+.track i { display: block; height: 100%; border-radius: 0 4px 4px 0; }
+.duel-row b { font: 700 22px/1 var(--sans); color: var(--ink); text-align: right; white-space: nowrap; }
+.duel-row b small { font: 500 12px var(--sans); color: var(--muted); }
+.fill-mi { background: var(--s-mi); } .fill-disc { background: var(--s-disc); } .fill-n { background: var(--s-neutral); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 10px; }
+.tile { min-width: 0; padding: 12px 14px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface-2); }
+.tile .v { display: block; margin-top: 4px; font: 700 28px/1.1 var(--sans); color: var(--ink); }
+.tile .v small { font: 500 14px var(--sans); color: var(--muted); }
+.tile .s { display: block; margin-top: 4px; font-size: 13px; line-height: 1.4; color: var(--muted); }
+#audit-note .st { border-radius: 8px; }
+@media (max-width: 559.98px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tiles .tile:last-child { grid-column: 1 / -1; } .tile { padding: 10px 12px; } .tile .v { font-size: 24px; } }
+.ribbon { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 10px 14px; border: 1px solid color-mix(in srgb, var(--amber) 45%, var(--line-2)); border-left: 4px solid var(--amber); border-radius: 8px; background: var(--amber-soft); font-size: 14px; line-height: 1.45; color: var(--text); }
+.ribbon b { font: 700 12.5px/1.3 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--amber); }
+
+/* controls */
+.field { display: grid; gap: 4px; min-width: 0; }
+.field label, .field .lab { font-size: 13px; font-weight: 600; color: var(--text); }
+.field .hint { font-size: 12.5px; line-height: 1.4; color: var(--muted); }
+select { font-family: var(--sans) !important; }
+input[type="number"], select, textarea { width: 100%; min-width: 0; min-height: 38px; padding: 7px 10px; border: 1px solid var(--control); border-radius: 6px; background: var(--bg); color: var(--ink); font: 500 14px/1.3 var(--mono); }
+textarea { min-height: 150px; resize: vertical; font-size: 12.5px; line-height: 1.45; white-space: pre; overflow: auto; }
+input[type="range"] { width: 100%; min-width: 0; accent-color: var(--accent); }
+.pair { display: grid; grid-template-columns: minmax(0, 1fr) 86px; gap: 10px; align-items: center; }
+.four { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.form { display: grid; gap: 14px; }
+.seg { display: flex; flex-wrap: wrap; gap: 0; border: 1px solid var(--control); border-radius: 6px; overflow: hidden; width: fit-content; max-width: 100%; }
+.seg button { min-height: 36px; padding: 6px 12px; border: 0; border-left: 1px solid var(--line-2); background: transparent; color: var(--muted); font: 600 12.5px/1.2 var(--mono); cursor: pointer; }
+.seg button:first-child { border-left: 0; }
+.seg button:hover { color: var(--ink); background: var(--surface-3); }
+.seg button[aria-selected="true"], .seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.seg button:disabled { opacity: .45; cursor: not-allowed; }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 8px 16px; border: 1px solid var(--accent); border-radius: 6px; background: var(--accent); color: var(--on-accent); font: 650 14px/1.2 var(--sans); cursor: pointer; }
+.btn:hover { background: var(--accent-ink); border-color: var(--accent-ink); }
+.btn:disabled { opacity: .6; cursor: progress; }
+.cov-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.cov-list label { display: inline-flex; align-items: center; gap: 6px; padding: 3px 8px; border: 1px solid var(--line-2); border-radius: 6px; font: 500 12.5px var(--mono); }
+.alert { padding: 10px 12px; border: 1px solid color-mix(in srgb, var(--red) 45%, transparent); border-radius: 6px; background: var(--red-soft); color: var(--text); font-size: 13.5px; line-height: 1.45; }
+.okline { font-size: 13.5px; line-height: 1.5; color: var(--muted); }
+.flags { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.flags li { display: grid; gap: 4px; font-size: 13px; line-height: 1.45; color: var(--muted); }
+
+/* charts */
+.chart { width: 100%; min-width: 0; }
+.chart svg { display: block; width: 100%; height: auto; touch-action: pan-y; overflow: visible; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0 0 6px; padding: 0; list-style: none; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
+.legend li { display: inline-flex; align-items: center; gap: 6px; }
+.legend svg { flex: none; }
+.gl { stroke: var(--line); stroke-width: 1; }
+.axis { stroke: var(--line-2); stroke-width: 1; }
+.t { font: 500 11.5px var(--mono); fill: var(--muted); }
+.t-b { font: 650 11.5px var(--mono); fill: var(--ink); }
+.t-halo { paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; }
+.t-red { fill: var(--red); } .t-green { fill: var(--green); }
+.c-mi { stroke: var(--s-mi); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.c-disc { stroke: var(--s-disc); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.b-mi { fill: var(--s-mi); opacity: .16; } .b-disc { fill: var(--s-disc); opacity: .14; }
+.m-mi { fill: var(--s-mi); stroke: var(--surface); stroke-width: 2; } .m-disc { fill: var(--s-disc); stroke: var(--surface); stroke-width: 2; }
+.m-hollow { fill: var(--surface); stroke: var(--s-mi); stroke-width: 2; }
+.m-ink { fill: var(--ink); stroke: var(--surface); stroke-width: 2; }
+.m-n { fill: var(--muted); }
+.w-mi { stroke: var(--s-mi); stroke-width: 1.5; } .w-ink { stroke: var(--muted); stroke-width: 1; }
+.iqr { fill: var(--s-mi); opacity: .38; }
+.med { stroke: var(--ink); stroke-width: 2; stroke-linecap: round; }
+.floor { stroke: var(--muted); stroke-width: 2; stroke-linecap: round; }
+.limit { stroke: var(--red); stroke-width: 1.25; }
+.target { stroke: var(--ink); stroke-width: 1; opacity: .75; }
+.zone { fill: var(--zone); }
+.drop { stroke-width: 1; opacity: .8; }
+.hit { fill: transparent; cursor: pointer; }
+.mark:focus-visible { outline: none; }
+.mark:focus-visible .hit { stroke: var(--accent); stroke-width: 1.5; }
+.hover-ov { fill: transparent; }
+.xh { stroke: var(--ink); stroke-width: 1; opacity: .45; pointer-events: none; }
+#tip { position: fixed; z-index: 70; max-width: min(320px, calc(100vw - 24px)); padding: 9px 11px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface-3); color: var(--text); box-shadow: 0 10px 24px rgba(0,0,0,.28); font-size: 12.5px; line-height: 1.4; pointer-events: none; }
+#tip .h { margin-bottom: 4px; font-weight: 650; color: var(--ink); }
+#tip .r { display: grid; grid-template-columns: 14px auto minmax(0, 1fr); gap: 6px; align-items: baseline; }
+#tip .r i { display: block; width: 12px; height: 2px; align-self: center; }
+#tip .r b { font: 650 12.5px var(--mono); color: var(--ink); white-space: nowrap; }
+#tip .r span { color: var(--muted); }
+
+/* tables */
+.tw { overflow-x: auto; min-width: 0; background:
+  linear-gradient(to right, var(--surface) 40%, transparent) left center / 28px 100% no-repeat local,
+  linear-gradient(to left, var(--surface) 40%, transparent) right center / 28px 100% no-repeat local,
+  linear-gradient(to right, var(--line-2), transparent) left center / 10px 100% no-repeat scroll,
+  linear-gradient(to left, var(--line-2), transparent) right center / 10px 100% no-repeat scroll; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; line-height: 1.4; font-variant-numeric: tabular-nums; }
+th, td { padding: 7px 9px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: top; }
+th { font: 600 11.5px/1.3 var(--mono); letter-spacing: .03em; color: var(--muted); }
+th:first-child, td:first-child { text-align: left; }
+tr.hl td { background: var(--accent-soft); }
+td .bar { display: block; height: 8px; min-width: 2px; margin-top: 3px; border-radius: 0 4px 4px 0; }
+td.w-cell { min-width: 96px; text-align: left; }
+td small { display: block; color: var(--muted); font-size: 12px; }
+details.tv { margin-top: 10px; border-top: 1px solid var(--line); padding-top: 8px; }
+details.tv > summary, details.more > summary { cursor: pointer; font: 600 12.5px var(--mono); color: var(--accent); }
+details.tv[open] > summary { margin-bottom: 8px; }
+details.more > summary { font-size: 13.5px; }
+details.more[open] > summary { margin-bottom: 10px; }
+.rows { display: grid; gap: 0; }
+.rowi { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 4px 20px; padding: 12px 0; border-top: 1px solid var(--line); }
+.rowi:first-child { border-top: 0; padding-top: 2px; }
+.rowi h3 { font-size: 15px; }
+.rowi .use { color: var(--ink); font-weight: 600; font-size: 14px; }
+.rowi p { color: var(--muted); }
+.rowi .why { margin-top: 3px; font-size: 13px; color: var(--muted); }
+.rowi.primary { background: linear-gradient(90deg, var(--accent-soft), transparent 70%); margin-inline: -18px; padding-inline: 18px; border-radius: 6px; }
+@media (max-width: 719.98px) { .rowi { grid-template-columns: minmax(0, 1fr); } }
+.card-t { font-size: 15px; font-weight: 650; color: var(--ink); margin-bottom: 4px; }
+pre { margin: 8px 0 0; padding: 12px 14px; overflow-x: auto; border: 1px solid var(--line-2); border-radius: 8px; background: var(--bg); font: 500 12.5px/1.5 var(--mono); color: var(--text); }
+ol.steps { margin: 6px 0 0; padding-left: 20px; display: grid; gap: 4px; }
+footer { margin-top: 34px; border-top: 1px solid var(--line-2); padding-block: 16px 28px; font-size: 13px; line-height: 1.5; color: var(--muted); }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 24px; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+@media (max-width: 479.98px) { th, td { padding: 6px; } td.w-cell { min-width: 72px; } .panel { padding: 14px 14px 16px; } .rowi.primary { margin-inline: -14px; padding-inline: 14px; } }
+</style>
+<script>document.documentElement.classList.add('js');try{var t=localStorage.getItem('bp-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="top" id="topbar"><div class="wrap">
+  <a class="name" href="#main"><span class="mark" aria-hidden="true"></span>Record audit planner</a>
+  <nav class="nav" aria-label="Page sections">
+    <a href="#results">Results</a><a href="#test">Test</a><a href="#method">Method</a><a href="#calculator">Calculator</a><a href="#fit">Fit</a><a href="#limits">Limits</a>
+  </nav>
+  <button class="btn-t menu-t" id="menu-toggle" type="button" aria-expanded="false">Menu</button>
+  <button class="btn-t" id="theme-toggle" type="button" aria-label="Switch color theme">Theme</button>
+</div></div>
+
+<main id="main" class="wrap" tabindex="-1">
+<header class="hero">
+  <div class="eyebrow">Record audits · for working biostatisticians</div>
+  <h1>How many records should we audit, and which method should I use?</h1>
+  <p class="lede">Start with linear multiple imputation that keeps the recorded value. On two public datasets it came close to a full audit with far fewer audited records than discarding those values. No tested rule tells you the exact audit size yet, because a planner for predicting a specific audit's interval width failed its prespecified test.</p>
+  <div class="verdict" id="verdict">
+    <div class="flag"><span aria-hidden="true">✕</span> NO-GO</div>
+    <div>
+      <p><strong>The planner is not validated.</strong> The rule, fixed before the run, needed a median error of at most 10% in predicted width at every target fraction in both datasets. The 5% target (30 of 600 records) failed with both pilots in both datasets: 11.3% on ClinicalTrials.gov and 13.9% on NHANES with a 60-record pilot, 16.8% and 15.5% with a 150-record pilot. Nothing was retried or retuned. The calculator on this page is an unvalidated illustration.</p>
+      <p>Neither dataset is a clinical source-data audit. The calculation assumes a random pilot and linear MI. It is the classical two-phase variance formula, not a new statistical result.</p>
+    </div>
+  </div>
+  <div class="qprow">
+    <a class="qp" href="#method"><div class="qe">Which method</div><div class="qt">Linear MI that keeps the recorded value, first →</div><div class="qd">On ClinicalTrials.gov it had lower bias and error than the contamination model, and on NHANES they roughly tied. Keep the contamination model for large or gross errors, or a fallible reference with a declared SD.</div></a>
+    <a class="qp" href="#results"><div class="qe">How many records</div><div class="qt">About 40 to 70 of 600 on these data, against about 380 →</div><div class="qd">Those are the counts that reach within 25% of a full audit's width by formula, keeping or discarding recorded values. Across pilots the answer ran from 2 to 117 records, 5th to 95th percentile, so treat these counts as the size of the tradeoff.</div></a>
+  </div>
+  <div class="strip" aria-label="Status">
+    <div class="readout"><span class="mono-k">Planner test</span><span class="v c-red">NO-GO</span><span class="s">5% target failed in 4 of 4 cells</span></div>
+    <div class="readout"><span class="mono-k">Targets 10% to 50%</span><span class="v" id="ro-max">≤ 7.8%</span><span class="s">Median error in 8 of 8 cells. Descriptive, since the rule failed.</span></div>
+    <div class="readout"><span class="mono-k">Evidence</span><span class="v">2 datasets</span><span class="s">Public, in cohorts of 600. No clinical source-data audit.</span></div>
+    <div class="readout"><span class="mono-k">Calculator</span><span class="v c-amber">Unvalidated</span><span class="s">Illustration of the formula only</span></div>
+    <div class="readout"><span class="mono-k">k port, live check</span><span class="v" id="ro-port">Checking</span><span class="s" id="ro-port-s">R test vectors, run in this browser</span></div>
+    <div class="readout"><span class="mono-k">Your data</span><span class="v">Stays here</span><span class="s">A pasted CSV is parsed in this browser. Nothing is uploaded.</span></div>
+  </div>
+</header>
+
+<section class="sec" id="results" aria-labelledby="h-results">
+  <h2 id="h-results">Comparison results</h2>
+  <p>Discarding recorded values is expensive. These are the audit sizes that come within 25% of a full audit's interval width, by formula from each pool's own values.</p>
+  <div class="cols-2" id="duels"></div>
+  <div class="panel">
+    <div class="panel-head"><h3>Method comparison on real recording differences</h3><span class="fig-id">FIG-01 · frozen study</span></div>
+    <div class="seg" id="audit-seg" role="group" aria-label="Audit size"></div>
+    <div class="cols-2" id="method-tables" style="margin-top:12px"></div>
+    <p class="note" style="margin-top:10px">Cohorts of 600 drawn from each pool, with the pool's own coefficient as the target. Coverage is judged against the oracle, which itself reached only 91.2% on ClinicalTrials.gov at 25% because residual variance is not constant. Each row is conditional on returned intervals, with the count shown when some were not returned. The targeted audit was selective and symmetric in the recorded value. Source: <a href="../../validation/REAL_DATA_SYNTHESIS.md">real-data synthesis</a>.</p>
+  </div>
+</section>
+
+<section class="sec" id="test" aria-labelledby="h-test">
+  <h2 id="h-test">The prespecified test</h2>
+  <div class="test-grid">
+    <div class="panel">
+      <div class="panel-head"><h3>Error in predicted width, by target audit</h3><span class="fig-id">FIG-02 · 1,500 cohorts per dataset, before refusals</span></div>
+      <ul class="legend" id="fig2-legend"></ul>
+      <div class="chart" id="fig2"></div>
+      <details class="tv"><summary>Table of plotted numbers</summary><div class="tw" id="fig2-table"></div></details>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h3>Reading the result</h3></div>
+      <p><strong>The rule.</strong> Median absolute error of predicted against actual width at most 10%, at every target, in both datasets. A pass with the 60-record pilot would have been GO and a pass with the 150-record pilot PARTIAL.</p>
+      <p style="margin-top:8px"><strong>Why 5% fails.</strong> Predictions there are nearly centered, with signed median errors of −3.9% to +1.6%. The width of one 30-record audit is itself very noisy. A predictor that knew the cell's median actual width still missed by 17.4% and 16.1%, and refitting the same audit with another imputation seed moved it by 3.7% and 9.3%. Better estimates of <code>k</code> alone would not close that gap.</p>
+      <p style="margin-top:8px"><strong>Above 5%.</strong> Widths at 10% or more were predicted within 7.8% at the median and 20.6% at the 90th percentile. That pattern was not the prespecified test, so any narrower claim would need new data.</p>
+      <p class="note" style="margin-top:8px">The closest failure's 95% interval, 10.2% to 12.4%, lies above the limit. Refused fits: 236 of 14,400 target fits and 19 of 7,200 plans, all because a category had no row with both values. Source: <a href="../../validation/AUDIT_PLAN_SYNTHESIS.md">test synthesis</a>, <a href="../../validation/AUDIT_PLAN_PLAN.md">plan</a>.</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="method" aria-labelledby="h-method">
+  <h2 id="h-method">Which method</h2>
+  <div class="panel">
+    <div class="rows">
+      <div class="rowi primary">
+        <div><h3>Default: errors are modest and references are exact</h3><p>Differences on the scale seen in these two datasets, with no gross errors in the pilot.</p></div>
+        <div><p class="use">Linear MI with the recorded value: <code>catmech_reference(use_recorded = TRUE)</code></p><p class="why">ClinicalTrials.gov at 25%: bias +0.0001 and RMSE 0.0286, against +0.0068 and 0.0308 for the contamination model. On NHANES the two roughly tied. Generalized raking is also well grounded when selection probabilities are known.</p></div>
+      </div>
+      <div class="rowi">
+        <div><h3>The pilot raises the gross-error warning</h3><p>A pilot discrepancy above 5 robust SDs of the reference, or a recorded value above 10 robust SDs from the median.</p></div>
+        <div><p class="use">Stop and review <code>catmech_recording_audit()</code>. Consider <code>catmech_contamination()</code>.</p><p class="why" id="gross-why"></p></div>
+      </div>
+      <div class="rowi">
+        <div><h3>The reference itself is fallible</h3><p>You can declare a credible SD for reference error, and you are willing to vary it as an assumption.</p></div>
+        <div><p class="use">Contamination model with <code>reference_sd</code></p><p class="why">The model's niche is narrower than the synthetic study implied: errors large relative to the target's conditional spread, gross errors that would corrupt a linear proxy, or a fallible reference with a credible declared SD.</p></div>
+      </div>
+      <div class="rowi">
+        <div><h3>Choices the evidence argues against</h3></div>
+        <div><p class="why" style="margin-top:0"><strong>Discarding recorded values.</strong> Intervals were about twice as wide at a 25% audit: 0.205 against 0.102 on ClinicalTrials.gov, 0.297 against 0.154 on NHANES.<br><strong>Treating recorded values as truth.</strong> On NHANES at 25% the bias was −0.0180, about 14% of the target, with coverage 2.2 points below the oracle.<br><strong>Per-record error probabilities.</strong> AUC for finding which record was wrong was 0.543 and 0.500. Do not use them on data like these.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="calculator" aria-labelledby="h-calc">
+  <h2 id="h-calc">Calculator</h2>
+  <div class="ribbon" id="calc-ribbon"><b>Unvalidated illustration</b><span>This shows what the formula says. It failed its test at 30 records, and its evidence is two public datasets in cohorts of 600. Do not use it alone to justify an audit size.</span></div>
+  <div class="calc-grid">
+    <form class="panel form" id="calc-form" autocomplete="off">
+      <div class="field"><label for="in-n">Cohort size, in records</label><input id="in-n" type="number" min="10" max="10000000" step="1" value="600" inputmode="numeric"></div>
+      <div class="field"><label for="in-dist">Target: within this distance of a full audit's width</label>
+        <div class="pair"><input id="in-dist" type="range" min="5" max="100" step="1" value="25"><input id="in-dist-n" type="number" min="5" max="100" step="1" value="25" aria-label="Target distance in percent"></div>
+        <span class="hint" id="dist-hint">Target width ratio 1.25</span></div>
+      <div class="field"><label for="in-audit">Planned audit, in records</label>
+        <div class="pair"><input id="in-audit" type="range" min="1" max="600" step="1" value="150"><input id="in-audit-n" type="number" min="1" max="600" step="1" value="150" aria-label="Planned audit in records"></div></div>
+      <div class="field"><span class="lab" id="src-lab">Where k comes from</span>
+        <div class="seg" role="tablist" aria-labelledby="src-lab"><button type="button" role="tab" id="tab-type" aria-selected="true" aria-controls="pane-type">Type k</button><button type="button" role="tab" id="tab-csv" aria-selected="false" aria-controls="pane-csv">Paste pilot CSV</button></div></div>
+      <div id="pane-type" role="tabpanel" aria-labelledby="tab-type" class="form">
+        <div class="field"><label for="in-preset">Start from the study: pool k, with the spread across pilots of this size</label>
+          <select id="in-preset">
+            <option value="nhanes60">NHANES, 60-record pilots</option>
+            <option value="nhanes150">NHANES, 150-record pilots</option>
+            <option value="ctgov60">ClinicalTrials.gov, 60-record pilots</option>
+            <option value="ctgov150">ClinicalTrials.gov, 150-record pilots</option>
+            <option value="custom">Your own values</option>
+          </select></div>
+        <div class="four">
+          <div class="field"><label for="in-k">k, keeping recorded</label><input id="in-k" type="number" min="0" max="2" step="0.001"></div>
+          <div class="field"><label for="in-k0">k, discarding recorded</label><input id="in-k0" type="number" min="0" max="2" step="0.001"></div>
+          <div class="field"><label for="in-klo">k range, low</label><input id="in-klo" type="number" min="0" max="2" step="0.001"></div>
+          <div class="field"><label for="in-khi">k range, high</label><input id="in-khi" type="number" min="0" max="2" step="0.001"></div>
+        </div>
+        <span class="hint okline">k is the share of the analysis variance that recorded values and other complete variables cannot recover. Near 0, a small audit loses little. Near 1, every unaudited record costs almost its full information.</span>
+        <div class="alert" id="type-err" role="alert" hidden></div>
+      </div>
+      <div id="pane-csv" role="tabpanel" aria-labelledby="tab-csv" class="form" hidden>
+        <div class="field"><label for="in-example">Load an example pilot (synthetic, from the R test vectors)</label>
+          <select id="in-example"><option value="1">Exact or different: about 20% off</option><option value="0">Noisy recording on every row</option><option value="2">Noisy, 15% of recorded values missing</option></select></div>
+        <div class="field"><label for="in-csv">Pilot CSV: recorded, reference, outcome and covariate columns</label>
+          <textarea id="in-csv" spellcheck="false" wrap="off"></textarea>
+          <span class="hint">One row per record, with a header row. Leave reference blank (or NA, or a SAS dot) on unaudited rows. Text columns become category indicators. Stays in this browser.</span></div>
+        <div id="map-wrap" class="form" hidden>
+          <div class="four">
+            <div class="field"><label for="map-rec">Recorded</label><select id="map-rec"></select></div>
+            <div class="field"><label for="map-ref">Reference</label><select id="map-ref"></select></div>
+            <div class="field" style="grid-column:1/-1"><label for="map-out">Analysis outcome</label><select id="map-out"></select></div>
+          </div>
+          <div class="field"><span class="lab">Covariates</span><div class="cov-list" id="map-cov"></div></div>
+        </div>
+        <button class="btn" type="button" id="run-csv">Compute k from this pilot</button>
+        <div id="csv-status" class="okline" role="status"></div>
+        <div class="alert" id="csv-err" role="alert" hidden></div>
+        <ul class="flags" id="csv-flags"></ul>
+      </div>
+    </form>
+    <div class="stack">
+      <div class="panel" id="out-panel">
+        <div class="panel-head"><h3 id="out-title">Result</h3><span class="fig-id">FIG-03 · illustration</span></div>
+        <p class="note" id="out-source" style="margin-bottom:10px"></p>
+        <div class="tiles">
+          <div class="tile"><span class="mono-k" id="t-target-k">Within 25%, linear MI</span><span class="v" id="t-mi"></span><span class="s" id="t-mi-s"></span></div>
+          <div class="tile"><span class="mono-k" id="t-target-k0">Within 25%, discarding</span><span class="v" id="t-disc"></span><span class="s" id="t-disc-s"></span></div>
+          <div class="tile"><span class="mono-k" id="t-audit-k">Audit of 150</span><span class="v" id="t-audit"></span><span class="s" id="t-audit-s"></span></div>
+        </div>
+        <div id="audit-note" style="margin:10px 0 2px"></div>
+        <ul class="legend" id="fig3-legend" style="margin-top:10px"></ul>
+        <div class="chart" id="fig3"></div>
+        <p class="note" style="margin-top:6px">Width ratio 1× means the interval from a full audit of this cohort. Curves use the k values at left. Color marks the method and shape the dataset. Points are observed: mean width at each audit size over the mean full-audit width, from the frozen study, nudged sideways so they do not overlap. Each dataset has its own k, so <a href="#fit">FIG-04</a> compares each dataset with its own curve.</p>
+        <details class="tv"><summary>Table of plotted numbers</summary><div class="tw" id="fig3-table"></div><div class="tw" id="fig3-obs" style="margin-top:12px"></div></details>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>How far a pilot's k strays</h3><span class="fig-id">FIG-05 · 1,490 to 1,500 pilots per row</span></div>
+        <ul class="legend" id="fig5-legend"></ul>
+        <div class="chart" id="fig5"></div>
+        <p class="note" style="margin-top:6px">The bootstrap interval for k contained the pool value in only 53.7% to 74.3% of pilots, against a nominal 95%. It contained the actual width ratio of one audit in 35.2% to 67.9%, and the predictive range did so in 60.3% to 92.3%. Plan on the upper limit, as a guide and not a guarantee. A pilot also cannot see rare errors it missed, which shows up as pilot k below pool k.</p>
+        <details class="tv"><summary>Table of plotted numbers</summary><div class="tw" id="fig5-table"></div></details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="fit" aria-labelledby="h-fit">
+  <h2 id="h-fit">How well the curve fits</h2>
+  <p>The curve tracks mean width well from 10% up. It says little about one small audit. Discarding recorded values fits worst at small audits, where the formula understates the frozen widths by up to 19.0%.</p>
+  <div class="panel">
+    <div class="panel-head"><h3>Linear MI: each dataset against its own curve</h3><span class="fig-id">FIG-04 · real data</span></div>
+    <ul class="legend" id="fig4-legend"></ul>
+    <div class="cols-2"><div><div class="mono-k" id="fig4a-t" style="margin-bottom:4px"></div><div class="chart" id="fig4a"></div></div><div><div class="mono-k" id="fig4b-t" style="margin-bottom:4px"></div><div class="chart" id="fig4b"></div></div></div>
+    <p class="note" id="fig4-note" style="margin-top:8px"></p>
+    <details class="tv"><summary>Table of plotted numbers</summary><div class="tw" id="fig4-table"></div></details>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><h3>Formula against the frozen study's mean widths</h3><span class="fig-id">Table 1</span></div>
+    <div class="tw" id="fit-table"></div>
+    <p class="note" style="margin-top:8px">A positive gap means the formula understates the observed width. The 10% and 5% bands are for reading only; the test itself is in FIG-02. The direction of the comparison survives the misfit: keeping the recorded value stays far ahead.</p>
+  </div>
+</section>
+
+<section class="sec" id="limits" aria-labelledby="h-limits">
+  <h2 id="h-limits">Limits</h2>
+  <div class="cols-3">
+    <div class="panel"><div class="card-t">Not a clinical audit</div><p>Neither dataset is a trial's source-data verification. ClinicalTrials.gov compares enrollment with participant-flow Started, both entered by sponsors. NHANES 2017-18 compares self-reported with measured weight. No public record-level clinical source-data audit was found.</p></div>
+    <div class="panel"><div class="card-t">Random pilot, linear MI</div><p>The formula assumes a simple random pilot, a random later audit, an exact reference and linear MI with Rubin's rules. A targeted pilot breaks it, and the check for selection looks only at the recorded value, so it cannot prove randomness.</p></div>
+    <div class="panel"><div class="card-t">Not a new result</div><p>The width formula is classical two-phase theory. It addresses precision for one coefficient at a time. It says nothing about bias or coverage, or about whether an audit will find a problem. It does not handle clustered records or targeted audits.</p></div>
+    <div class="panel"><div class="card-t">One cohort size</div><p>Every test used cohorts of 600 and <code>m = 20</code>. Other cohort sizes on this page are extrapolation. Resampling a pool says nothing about transport to other data.</p></div>
+    <div class="panel"><div class="card-t">Gross errors break it</div><p>Linear MI failed in the synthetic gross-error cell. The warning fires, but nothing repairs the plan. Rare errors a pilot happened to miss raise no warning at all.</p></div>
+    <div class="panel"><div class="card-t">Not fully blind</div><p>The test is prospective for the planner's code. Its cohorts come from the same pools as the frozen study, whose tables had been seen. The development split shares their source, so choices made on it could still be tuned to these two datasets.</p></div>
+  </div>
+  <div class="panel">
+    <details class="more"><summary>How k is calculated, and what this page ports</summary>
+      <p>With audit fraction f, the expected width is <code>width(f) = width_full × sqrt(1 + k × (1 − f) / f)</code>. To come within ratio r of the full-audit width, <code>f = k / (r² − 1 + k)</code> and <code>records = min(n, ceiling(f × n))</code>.</p>
+      <ol class="steps">
+        <li>Regress the reference on [1, covariates, outcome, recorded] over pilot rows with a recorded value. If every such row agrees, use the recorded value with zero variance.</li>
+        <li>Regress the reference on [1, covariates, outcome] over all pilot rows. Records with no recorded value use this model. So does every record when recorded values are discarded.</li>
+        <li>Each record gets a mean μ and a variance t from its model.</li>
+        <li>Fit the analysis outcome ~ y + covariates, with y the reference on pilot rows and μ elsewhere, and t added to the [term, term] cell on unaudited rows.</li>
+        <li>From that fit take s², the weight row w = n × C[term, ], a = w[term] and c = −b[term].</li>
+        <li>Over every record, using μ: u = D(μ)·w, v = outcome − D(μ)·b, and var = t (u c + v a)² + 2 (a c)² t².</li>
+        <li>k = mean(var) / (s² a).</li>
+      </ol>
+      <p style="margin-top:8px"><strong>Ported to this page:</strong> <code>k</code>, <code>discard_k</code>, <code>classical</code>, the plan table, the answer and every pilot warning that can arise here, plus seeded bootstrap limits (bias-corrected and accelerated) and the predictive range. <strong>Different from R:</strong> the random stream, so bootstrap limits vary a little from R's. <strong>Not ported:</strong> the multiple-imputation fits, so this page gives width ratios only, with no widths in coefficient units and no <code>rubin_check</code>. The analysis here is always <code>outcome ~ recorded + covariates</code>, with the term being the recorded value. <code>catmech_audit_plan()</code> refuses data where every row has a reference. This page runs the pool-level calculation on such data and says so.</p>
+      <pre><code>plan &lt;- catmech_audit_plan(
+  data, value = "recorded", reference = "reference",
+  predictors = c("age", "site", "outcome"),
+  formula = outcome ~ recorded + age + site, term = "recorded",
+  fractions = c(.10, .25, .50, .75), target_ratio = 1.25, seed = 1
+)</code></pre>
+      <p class="note" style="margin-top:8px">Sources: <a href="../AUDIT_PLANNING.md">planning guide</a>, <a href="../CONTAMINATION_METHOD.md">contamination method</a>, <a href="../../validation/audit-plan-study/planner-data.json">planner-data.json</a>, <a href="../../validation/audit-plan-study/summary.csv">summary.csv</a>. Verification records are in the qa folder next to this page.</p>
+    </details>
+  </div>
+</section>
+</main>
+<footer><div class="wrap"><span>catmech 0.4.1. Planner test verdict: NO-GO. Evidence: two public datasets, neither a clinical source-data audit.</span><span>Built by Patrick Iben</span></div></footer>
+<div id="tip" role="tooltip" hidden></div>
+<script id="study-data" type="application/json">{"verdict":"NO-GO","package_version":"0.4.1","datasets":{"ctgov":{"short":"ClinicalTrials.gov","label":"ClinicalTrials.gov: enrollment against participant-flow Started, log scale; slope of log duration on log size","pool_rows":27208,"pool_k":0.0417956452176635,"pool_discard_k":0.992824848939551,"pool_classical":0.0283613467560308,"pool_discard_classical":0.971421618576247,"frozen":[{"f":0.05,"mi":0.13334359,"ref":0.52850901,"oracle":0.095999326,"cohorts":200},{"f":0.1,"mi":0.1126829,"ref":0.34667876,"oracle":0.095999326,"cohorts":200},{"f":0.25,"mi":0.10210836,"ref":0.20500274,"oracle":0.095933286,"cohorts":1000},{"f":0.5,"mi":0.098109029,"ref":0.14061299,"oracle":0.095999326,"cohorts":200}],"pilots":{"60":{"pilot_records":60,"plans_returned":1491,"k_mean":0.039646834,"k_median":0.019724379,"k_q05":0.0011520523,"k_q25":0.0073833042,"k_q75":0.046227569,"k_q95":0.13113913,"interval_covers_pool":0.53655265,"median_interval_lower":0.0013252268,"median_interval_upper":0.048622448,"discard_k_median":0.97787575,"discard_k_q05":0.8229573,"discard_k_q95":0.9998162},"150":{"pilot_records":150,"plans_returned":1500,"k_mean":0.040614008,"k_median":0.028476487,"k_q05":0.0067117778,"k_q25":0.015967071,"k_q75":0.047255045,"k_q95":0.12686323,"interval_covers_pool":0.71133333,"median_interval_lower":0.0076284159,"median_interval_upper":0.06980394,"discard_k_median":0.98946563,"discard_k_q05":0.92042379,"discard_k_q95":0.99990743}},"answers":{"60":{"med":21.0,"q05":2.0,"q95":114.0,"plans":1491},"150":{"med":29.0,"q05":8.0,"q95":111.04999999999995,"plans":1500}},"single":[{"f":0.05,"records":30,"ok":1400,"q05":1.0042,"q25":1.0486,"q50":1.20111,"q75":1.57383,"q95":2.56584,"mean":1.42822},{"f":0.1,"records":60,"ok":1491,"q05":1.00934,"q25":1.0481,"q50":1.11522,"q75":1.26108,"q95":1.64109,"mean":1.19564},{"f":0.25,"records":150,"ok":1500,"q05":1.00811,"q25":1.02723,"q50":1.04974,"q75":1.08381,"q95":1.19411,"mean":1.06851},{"f":0.5,"records":300,"ok":1500,"q05":1.00079,"q25":1.00985,"q50":1.0185,"q75":1.03003,"q95":1.0568,"mean":1.0223}]},"nhanes":{"short":"NHANES","label":"NHANES 2017-18: self-reported against measured weight, kg; slope of systolic pressure on weight","pool_rows":3908,"pool_k":0.0698179910375213,"pool_discard_k":0.959121821687825,"pool_classical":0.0880055873126626,"pool_discard_classical":0.99596796206092,"frozen":[{"f":0.1,"mi":0.17988825,"ref":0.49940917,"oracle":0.13976579,"cohorts":200},{"f":0.25,"mi":0.15352654,"ref":0.29694006,"oracle":0.13988234,"cohorts":1000},{"f":0.5,"mi":0.14453899,"ref":0.19912485,"oracle":0.13976579,"cohorts":200}],"pilots":{"60":{"pilot_records":60,"plans_returned":1490,"k_mean":0.068175707,"k_median":0.059773085,"k_q05":0.031342948,"k_q25":0.045427005,"k_q75":0.082155716,"k_q95":0.13531243,"interval_covers_pool":0.71275168,"median_interval_lower":0.032678413,"median_interval_upper":0.097309078,"discard_k_median":0.96080248,"discard_k_q05":0.7596556,"discard_k_q95":0.9996269},"150":{"pilot_records":150,"plans_returned":1500,"k_mean":0.069121243,"k_median":0.065802803,"k_q05":0.039233931,"k_q25":0.051709097,"k_q75":0.083445982,"k_q95":0.11046,"interval_covers_pool":0.74266667,"median_interval_lower":0.043688893,"median_interval_upper":0.099343495,"discard_k_median":0.96141209,"discard_k_q05":0.84751972,"discard_k_q95":0.99922255}},"answers":{"60":{"med":58.0,"q05":32.0,"q95":116.54999999999995,"plans":1490},"150":{"med":63.0,"q05":40.0,"q95":99.04999999999995,"plans":1500}},"single":[{"f":0.05,"records":30,"ok":1383,"q05":1.14274,"q25":1.32173,"q50":1.52507,"q75":1.82394,"q95":2.58256,"mean":1.65426},{"f":0.1,"records":60,"ok":1490,"q05":1.075,"q25":1.16083,"q50":1.2345,"q75":1.35633,"q95":1.67088,"mean":1.28711},{"f":0.25,"records":150,"ok":1500,"q05":1.02476,"q25":1.05609,"q50":1.08607,"q75":1.12201,"q95":1.19836,"mean":1.09502},{"f":0.5,"records":300,"ok":1500,"q05":1.00282,"q25":1.01919,"q50":1.03176,"q75":1.04645,"q95":1.06864,"mean":1.03339}]}},"accuracy":[{"d":"ctgov","pilot":60,"f":0.05,"compared":1400,"med":0.112924,"lo":0.1016,"hi":0.123997,"p90":0.388406,"signed":-0.0357736,"floor":0.173566,"retest":0.0369225,"kcov":0.603288,"pcov":0.830593},{"d":"nhanes","pilot":60,"f":0.05,"compared":1383,"med":0.139188,"lo":0.131209,"hi":0.147828,"p90":0.353263,"signed":-0.0392105,"floor":0.160813,"retest":0.0932189,"kcov":0.485177,"pcov":0.838756},{"d":"ctgov","pilot":150,"f":0.05,"compared":1400,"med":0.167609,"lo":0.152943,"hi":0.178043,"p90":0.438296,"signed":0.0161179,"floor":0.173566,"retest":0.0369225,"kcov":0.467143,"pcov":0.83},{"d":"nhanes","pilot":150,"f":0.05,"compared":1383,"med":0.154866,"lo":0.146957,"hi":0.16449,"p90":0.375195,"signed":-0.0190228,"floor":0.160813,"retest":0.0932189,"kcov":0.352133,"pcov":0.825018},{"d":"ctgov","pilot":150,"f":0.1,"compared":1491,"med":0.066285,"lo":0.062482,"hi":0.0709246,"p90":0.206031,"signed":-0.00500658,"floor":0.0907792,"retest":0.0231913,"kcov":0.678739,"pcov":0.922871},{"d":"nhanes","pilot":150,"f":0.1,"compared":1490,"med":0.0783052,"lo":0.0728631,"hi":0.0826095,"p90":0.195949,"signed":0.0145989,"floor":0.0929563,"retest":0.0513696,"kcov":0.44094,"pcov":0.879195},{"d":"ctgov","pilot":60,"f":0.25,"compared":1500,"med":0.0238988,"lo":0.0222622,"hi":0.0256347,"p90":0.084626,"signed":-0.00868939,"floor":0.0496323,"retest":0.0122455,"kcov":0.627096,"pcov":0.694836},{"d":"nhanes","pilot":60,"f":0.25,"compared":1500,"med":0.0342152,"lo":0.0320996,"hi":0.0366153,"p90":0.096194,"signed":-0.00262911,"floor":0.0511891,"retest":0.02099,"kcov":0.60604,"pcov":0.842282},{"d":"ctgov","pilot":60,"f":0.5,"compared":1500,"med":0.0149086,"lo":0.0141978,"hi":0.0159636,"p90":0.0483029,"signed":-0.00477312,"floor":0.0410441,"retest":0.00522369,"kcov":0.54326,"pcov":0.602951},{"d":"nhanes","pilot":60,"f":0.5,"compared":1500,"med":0.0278051,"lo":0.0264148,"hi":0.0293426,"p90":0.0716432,"signed":-0.00627121,"floor":0.0437657,"retest":0.00884826,"kcov":0.533557,"pcov":0.74094},{"d":"ctgov","pilot":150,"f":0.5,"compared":1500,"med":0.00896566,"lo":0.00829741,"hi":0.00969825,"p90":0.0264183,"signed":-0.00188069,"floor":0.0410441,"retest":0.00522369,"kcov":0.67,"pcov":0.772667},{"d":"nhanes","pilot":150,"f":0.5,"compared":1500,"med":0.0155684,"lo":0.0145359,"hi":0.0166752,"p90":0.0377353,"signed":-0.000953592,"floor":0.0437657,"retest":0.00884826,"kcov":0.476667,"pcov":0.767333}],"methods":{"ctgov":{"audit_05pct":{"cole_mi":{"bias":0.0062349,"cov":0.945,"width":0.13334,"rmse":0.035552,"ret":200,"req":200},"contamination":{"bias":0.01589,"cov":0.90854,"width":0.13739,"rmse":0.042334,"ret":164,"req":200},"naive_recorded":{"bias":0.0054334,"cov":0.93,"width":0.096659,"rmse":0.027231,"ret":200,"req":200},"oracle":{"bias":0.00074526,"cov":0.93,"width":0.095999,"rmse":0.026788,"ret":200,"req":200},"raking":{"bias":0.0039274,"cov":0.90857,"width":0.13259,"rmse":0.033698,"ret":175,"req":200},"reference_normal":{"bias":-0.020021,"cov":0.93478,"width":0.52851,"rmse":0.12588,"ret":184,"req":200}},"audit_10pct":{"cole_mi":{"bias":0.0031472,"cov":0.94,"width":0.11268,"rmse":0.029427,"ret":200,"req":200},"contamination":{"bias":0.014499,"cov":0.90206,"width":0.12545,"rmse":0.037598,"ret":194,"req":200},"naive_recorded":{"bias":0.0054334,"cov":0.93,"width":0.096659,"rmse":0.027231,"ret":200,"req":200},"oracle":{"bias":0.00074526,"cov":0.93,"width":0.095999,"rmse":0.026788,"ret":200,"req":200},"raking":{"bias":0.0021762,"cov":0.885,"width":0.10631,"rmse":0.030411,"ret":200,"req":200},"reference_normal":{"bias":-0.0022441,"cov":0.945,"width":0.34668,"rmse":0.082934,"ret":200,"req":200}},"audit_25pct":{"cole_mi":{"bias":9.5604e-05,"cov":0.918,"width":0.10211,"rmse":0.028612,"ret":1000,"req":1000},"contamination":{"bias":0.0068473,"cov":0.91165,"width":0.10567,"rmse":0.030829,"ret":996,"req":1000},"naive_recorded":{"bias":0.0042887,"cov":0.914,"width":0.096613,"rmse":0.028168,"ret":1000,"req":1000},"oracle":{"bias":-0.00030471,"cov":0.912,"width":0.095933,"rmse":0.027537,"ret":1000,"req":1000},"raking":{"bias":8.484e-05,"cov":0.911,"width":0.1032,"rmse":0.028693,"ret":1000,"req":1000},"reference_normal":{"bias":-0.0002625,"cov":0.923,"width":0.205,"rmse":0.053898,"ret":1000,"req":1000}},"audit_50pct":{"cole_mi":{"bias":0.0010773,"cov":0.945,"width":0.098109,"rmse":0.02692,"ret":200,"req":200},"contamination":{"bias":0.0047917,"cov":0.925,"width":0.099601,"rmse":0.028106,"ret":200,"req":200},"naive_recorded":{"bias":0.0054334,"cov":0.93,"width":0.096659,"rmse":0.027231,"ret":200,"req":200},"oracle":{"bias":0.00074526,"cov":0.93,"width":0.095999,"rmse":0.026788,"ret":200,"req":200},"raking":{"bias":0.00096274,"cov":0.93,"width":0.10298,"rmse":0.026914,"ret":200,"req":200},"reference_normal":{"bias":-0.0042563,"cov":0.94,"width":0.14061,"rmse":0.036784,"ret":200,"req":200}},"targeted_audit":{"cole_mi":{"bias":0.003414,"cov":0.92,"width":0.10182,"rmse":0.028452,"ret":200,"req":200},"contamination":{"bias":0.0070927,"cov":0.915,"width":0.10031,"rmse":0.028843,"ret":200,"req":200},"naive_recorded":{"bias":0.0054334,"cov":0.93,"width":0.096659,"rmse":0.027231,"ret":200,"req":200},"oracle":{"bias":0.00074526,"cov":0.93,"width":0.095999,"rmse":0.026788,"ret":200,"req":200},"raking":{"bias":0.0023173,"cov":0.95477,"width":0.10751,"rmse":0.028417,"ret":199,"req":200},"reference_normal":{"bias":0.0019126,"cov":0.92,"width":0.16242,"rmse":0.041406,"ret":200,"req":200}}},"nhanes":{"audit_10pct":{"cole_mi":{"bias":7.62e-05,"cov":0.945,"width":0.17989,"rmse":0.049007,"ret":200,"req":200},"contamination":{"bias":-0.0018634,"cov":0.94086,"width":0.16465,"rmse":0.043538,"ret":186,"req":200},"naive_recorded":{"bias":-0.015063,"cov":0.93,"width":0.14906,"rmse":0.04221,"ret":200,"req":200},"oracle":{"bias":0.0038977,"cov":0.945,"width":0.13977,"rmse":0.036536,"ret":200,"req":200},"raking":{"bias":0.0021427,"cov":0.89394,"width":0.16842,"rmse":0.050999,"ret":198,"req":200},"reference_normal":{"bias":-0.011422,"cov":0.91919,"width":0.49941,"rmse":0.13338,"ret":198,"req":200}},"audit_25pct":{"cole_mi":{"bias":-0.002539,"cov":0.939,"width":0.15353,"rmse":0.040851,"ret":1000,"req":1000},"contamination":{"bias":-0.0065751,"cov":0.945,"width":0.15516,"rmse":0.040836,"ret":1000,"req":1000},"naive_recorded":{"bias":-0.017996,"cov":0.927,"width":0.14912,"rmse":0.042224,"ret":1000,"req":1000},"oracle":{"bias":9.567e-05,"cov":0.949,"width":0.13988,"rmse":0.035717,"ret":1000,"req":1000},"raking":{"bias":-0.0021651,"cov":0.926,"width":0.14936,"rmse":0.041525,"ret":1000,"req":1000},"reference_normal":{"bias":-0.006261,"cov":0.942,"width":0.29694,"rmse":0.07853,"ret":1000,"req":1000}},"audit_50pct":{"cole_mi":{"bias":0.0024942,"cov":0.94,"width":0.14454,"rmse":0.038175,"ret":200,"req":200},"contamination":{"bias":-0.00073858,"cov":0.945,"width":0.14874,"rmse":0.039284,"ret":200,"req":200},"naive_recorded":{"bias":-0.015063,"cov":0.93,"width":0.14906,"rmse":0.04221,"ret":200,"req":200},"oracle":{"bias":0.0038977,"cov":0.945,"width":0.13977,"rmse":0.036536,"ret":200,"req":200},"raking":{"bias":0.003321,"cov":0.93,"width":0.14492,"rmse":0.037979,"ret":200,"req":200},"reference_normal":{"bias":0.0043852,"cov":0.915,"width":0.19912,"rmse":0.053791,"ret":200,"req":200}},"targeted_audit":{"cole_mi":{"bias":0.0057055,"cov":0.955,"width":0.15594,"rmse":0.040469,"ret":200,"req":200},"contamination":{"bias":-0.0026947,"cov":0.945,"width":0.15352,"rmse":0.040371,"ret":200,"req":200},"naive_recorded":{"bias":-0.015063,"cov":0.93,"width":0.14906,"rmse":0.04221,"ret":200,"req":200},"oracle":{"bias":0.0038977,"cov":0.945,"width":0.13977,"rmse":0.036536,"ret":200,"req":200},"raking":{"bias":0.0040846,"cov":0.93,"width":0.15093,"rmse":0.043042,"ret":200,"req":200},"reference_normal":{"bias":0.0027379,"cov":0.955,"width":0.22958,"rmse":0.059565,"ret":200,"req":200}}}},"boundary":{"gross_warning":{"ctgov":[28,2991],"nhanes":[0,2990],"missed_flags":[0,600],"error_gross_and_small":[600,600]},"gross_cell_slope_coverage":{"0.05":0.32,"0.1":0.53667,"0.25":0.83,"0.5":0.90667},"error":[{"cell":"error_gross_and_small","pilot":60,"f":0.05,"med":0.136826,"p90":12.3405},{"cell":"missed_flags","pilot":60,"f":0.05,"med":0.215172,"p90":0.6152},{"cell":"error_gross_and_small","pilot":150,"f":0.05,"med":7.41923,"p90":14.7475},{"cell":"missed_flags","pilot":150,"f":0.05,"med":0.238987,"p90":0.738257},{"cell":"error_gross_and_small","pilot":150,"f":0.1,"med":0.204835,"p90":9.45774},{"cell":"missed_flags","pilot":150,"f":0.1,"med":0.143392,"p90":0.31183},{"cell":"error_gross_and_small","pilot":60,"f":0.25,"med":0.164069,"p90":0.87059},{"cell":"missed_flags","pilot":60,"f":0.25,"med":0.0873596,"p90":0.201553},{"cell":"error_gross_and_small","pilot":60,"f":0.5,"med":0.194283,"p90":0.823116},{"cell":"missed_flags","pilot":60,"f":0.5,"med":0.0599235,"p90":0.148557},{"cell":"error_gross_and_small","pilot":150,"f":0.5,"med":0.0707456,"p90":0.245641},{"cell":"missed_flags","pilot":150,"f":0.5,"med":0.0369215,"p90":0.0934866}]},"vectors":[{"name":"noisy_recording","description":"Every recorded value has small normal noise.","formula":"outcome ~ recorded + x1 + x2","term":"recorded","target_ratio":1.25,"outcome":[1.4808,2.1101,2.0832,2.3584,1.7129,2.06,1.4188,2.8718,2.6577,2.846,2.6193,1.5753,3.352,2.4983,2.0382,3.9669,2.1536,2.9497,1.994,1.3803,2.6705,2.0292,3.1976,3.4624,2.2989,2.7531,4.0568,2.9881,2.3334,3.864,2.7968,1.6391,0.9836,2.4532,3.2807,1.6284,2.1293,2.15,5.4681,3.2233,2.7859,1.5278,2.0451,2.8423,2.7912,2.3255,1.8553,2.4923,3.6813,1.5633,2.8166,2.9432,3.1089,1.094,2.6369,2.2154,2.6897,3.7044,4.6387,4.4459],"recorded":[-0.3716,1.0113,0.5942,0.2046,-0.0399,-0.0049,0.5619,0.673,0.7957,1.5671,1.1511,0.8657,1.5982,0.5439,0.4904,2.4614,0.8695,0.6681,0.7863,0.6349,1.0459,1.273,1.4684,2.4137,0.6137,-0.0478,3.3399,0.6721,1.144,2.0956,1.8955,-0.2028,0.5078,0.8077,2.6383,1.5896,-0.025,-0.3003,3.5215,0.3136,0.6342,1.7269,-0.2332,0.6078,1.0712,0.8887,0.9767,1.6562,1.6978,0.2924,1.7023,2.9675,2.1657,0.7599,1.0547,0.8706,0.1301,2.5803,2.3902,3.8433],"reference":[-0.3386,0.6497,0.6569,null,0.2454,0.0042,0.6095,0.6562,0.9261,null,null,null,1.4604,0.7245,0.5806,2.3112,0.6786,null,null,null,null,null,1.8638,null,0.7741,null,null,null,0.8768,2.3258,null,null,0.2666,null,null,1.8192,null,-0.0478,null,null,null,1.3335,-0.2241,null,1.2898,1.1152,1.0784,null,null,null,null,null,2.5473,0.5049,null,0.7929,0.4462,null,2.3964,null],"covariates":[[-1.2466,0],[-1.4841,0],[0.1324,1],[-0.3958,0],[0.5799,0],[-1.7061,0],[-0.9712,1],[-0.006,0],[0.5162,1],[0.2455,0],[-0.7553,0],[-0.7687,1],[-0.7147,1],[-0.1017,0],[0.0935,0],[-0.457,0],[1.0634,1],[1.1402,1],[-1.1469,1],[-1.094,0],[0.7612,1],[-0.4689,1],[1.2129,1],[0.0424,1],[-0.4303,0],[-0.0247,0],[1.9489,0],[0.7936,0],[0.1704,0],[1.0428,0],[0.6576,0],[-0.4431,0],[-1.0058,0],[-0.2419,0],[1.0861,0],[-0.8667,0],[-0.2183,0],[-1.2155,0],[1.6391,0],[-0.1512,0],[-0.4962,0],[0.0956,0],[-0.5087,0],[-0.0298,0],[0.6784,0],[-1.1783,0],[-0.1231,0],[-0.3965,0],[0.4807,1],[0.2481,1],[0.1565,0],[-0.3779,0],[0.9079,0],[-1.0011,1],[0.1009,1],[-0.6425,0],[0.7087,0],[0.1376,1],[1.5135,0],[3.29,1]],"r_seed":810001,"expected":{"k":0.0996217879790377,"discard_k":0.610982711551809,"classical":0.204080521715198,"table":[{"fraction":0.05,"records":3,"additional_records":0,"relative_width":1.70082743733799,"discard_relative_width":3.55086912170589},{"fraction":0.1,"records":6,"additional_records":0,"relative_width":1.37716959442595,"discard_relative_width":2.54928311569474},{"fraction":0.25,"records":15,"additional_records":0,"relative_width":1.13967774565318,"discard_relative_width":1.68313639811378},{"fraction":0.5,"records":30,"additional_records":0,"relative_width":1.04862852716252,"discard_relative_width":1.26924493757187},{"fraction":0.75,"records":45,"additional_records":15,"relative_width":1.01646803326995,"discard_relative_width":1.09711480887399}],"answer":{"target_ratio":1.25,"fraction":0.150458404764339,"records":10,"smallest_grid_fraction":0.25},"flags":["small_pilot"],"r_bootstrap_only":{"note":"These depend on R's random stream, so a port should not expect them to match exactly.","k_lower":0.0533591066570362,"k_upper":0.160340287834235,"discard_k_lower":0.249922123810663,"discard_k_upper":1.08808038645726}}},{"name":"exact_or_different","description":"Most recorded values are exact; about 20% are off by a moderate amount.","formula":"outcome ~ recorded + x1 + x2","term":"recorded","target_ratio":1.25,"outcome":[1.9025,4.0032,3.0885,2.9167,2.9615,0.9852,3.8323,1.9989,3.2786,3.5999,3.1896,2.9414,1.3726,0.7664,2.8936,1.8284,3.4347,2.4175,2.1994,3.2222,2.7967,1.1974,2.6475,1.9478,3.0987,3.6642,2.5464,2.5017,1.2789,1.9542,1.4029,1.8384,2.5727,3.1834,1.9868,2.7884,3.3773,3.1711,3.3554,2.2481,4.9418,3.1461,2.4784,3.8846,2.8584,4.6416,2.9973,1.6242,2.1885,2.9697,3.3693,2.708,2.7171,3.6813,2.0627,2.1048,4.3265,2.3381,3.4142,3.633,1.7269,2.8214,3.2719,0.0929,2.8899,2.1148,0.9105,2.8383,4.0033,1.4213,3.4689,0.8782,2.1944,3.5594,2.5194,1.6463,2.4976,2.1617,2.6953,2.1298],"recorded":[0.9171,2.5016,2.0895,2.1645,1.5799,-0.7075,2.292,1.0666,0.4459,1.4376,1.7262,0.9469,-0.3331,-0.8968,1.5454,0.5178,0.9732,1.5396,1.1632,1.683,0.738,0.3256,0.439,0.2532,2.2354,1.9146,1.0629,-0.025,0.1205,1.2653,0.9193,1.1103,1.7015,2.3175,-0.0838,1.8222,0.5617,2.4908,2.0353,2.169,1.7881,1.4308,1.017,1.8213,1.2613,3.4614,2.1245,1.2102,2.3402,1.1412,3.2771,1.756,1.3307,2.5175,0.7661,0.7967,1.784,0.7395,1.5976,1.1959,1.5168,1.9564,0.5764,-0.7229,2.6368,1.409,0.7115,0.8452,1.0917,1.7582,1.9167,-0.4356,1.8132,1.788,0.0661,-0.1489,0.4298,1.3737,0.3411,0.263],"reference":[0.9171,null,2.0895,2.3114,1.5799,null,2.292,1.0666,0.4459,null,null,null,null,null,null,0.5178,null,null,1.2152,1.683,0.7479,null,0.439,-0.0874,null,null,null,null,0.1205,null,0.9193,1.1103,1.7015,2.3175,null,null,0.5617,1.741,2.0353,null,1.7881,1.4308,1.017,1.8213,null,null,2.1245,1.2102,null,null,3.2206,null,null,null,null,null,null,0.7395,null,1.6957,null,1.9954,null,null,null,1.409,0.7115,0.8452,1.0917,null,1.9167,-0.4356,null,null,0.0354,-0.1489,null,null,0.3411,null],"covariates":[[-1.3494,0],[1.0956,1],[0.0383,1],[1.7161,1],[0.7254,0],[0.4568,1],[0.2323,1],[-1.8384,0],[-0.0037,0],[1.0522,0],[0.4403,0],[-0.6523,0],[-0.0469,0],[-2.1797,1],[1.8786,0],[-2.0607,0],[0.2165,0],[-0.2743,0],[0.8172,0],[-0.4448,0],[-1.141,1],[-1.1149,1],[-1.3064,0],[-0.347,1],[-1.4652,1],[0.1893,0],[1.1017,1],[0.5961,0],[-0.6215,1],[-0.6521,1],[-0.6231,0],[1.2272,1],[0.2124,1],[0.6441,0],[-0.4675,0],[-0.7688,1],[0.2414,0],[0.2361,1],[0.5476,1],[0.297,1],[1.8672,0],[1.0371,0],[0.2907,1],[-0.8673,0],[0.9717,0],[0.4601,0],[-0.5762,0],[-1.0313,1],[0.0688,1],[2.3668,0],[2.0854,1],[-0.7218,0],[0.2412,0],[0.6023,1],[0.1828,0],[-0.1629,1],[-1.5421,1],[-1.6364,0],[0.5771,0],[1.1297,0],[0.3344,0],[0.3312,1],[-0.2117,0],[-1.4655,1],[-0.9405,1],[0.7955,1],[0.2521,1],[-0.7788,0],[1.3106,0],[-0.9091,1],[-1.0663,1],[-1.0072,1],[0.1476,1],[0.8008,0],[-0.3291,1],[-1.1518,0],[-0.9255,0],[0.7334,1],[0.312,0],[-0.6851,0]],"r_seed":810002,"expected":{"k":0.0607328745046604,"discard_k":0.597929550073229,"classical":0.0492029752914698,"table":[{"fraction":0.05,"records":4,"additional_records":0,"relative_width":1.46762550250006,"discard_relative_width":3.51577323662823},{"fraction":0.1,"records":8,"additional_records":0,"relative_width":1.24362207705635,"discard_relative_width":2.52613656611416},{"fraction":0.25,"records":20,"additional_records":0,"relative_width":1.08728957666023,"discard_relative_width":1.67146302687786},{"fraction":0.5,"records":40,"additional_records":0,"relative_width":1.02991886792342,"discard_relative_width":1.26409238193782},{"fraction":0.75,"records":60,"additional_records":20,"relative_width":1.01007142891063,"discard_relative_width":1.09513006078018}],"answer":{"target_ratio":1.25,"fraction":0.0974481241107994,"records":8,"smallest_grid_fraction":0.1},"flags":["small_pilot","few_disagreements"],"r_bootstrap_only":{"note":"These depend on R's random stream, so a port should not expect them to match exactly.","k_lower":0.00922631901222059,"k_upper":0.152466884327458,"discard_k_lower":0.345665731576049,"discard_k_upper":0.874049681648434}}},{"name":"missing_recorded","description":"Noisy recording, with about 15% of recorded values missing.","formula":"outcome ~ recorded + x1 + x2","term":"recorded","target_ratio":1.25,"outcome":[0.754,2.6937,3.3905,4.5687,4.0283,1.8643,4.6983,2.2932,2.2954,1.9112,3.2208,3.0511,2.629,1.3833,2.22,1.6036,2.3176,1.7008,3.3638,0.9687,2.597,2.3714,2.9544,2.3144,2.8328,2.0766,1.7004,0.6789,2.12,2.6291,2.8834,0.8353,4.0909,0.8708,3.0877,2.4277,3.7198,1.2265,3.1545,1.3782,1.7187,3.5556,2.0181,1.1832,2.6644,2.0421,2.7279,0.7505,1.9184,2.8008,3.4273,1.516,3.8225,2.6974,1.98,1.6441,4.0394,2.995,2.3944,1.9087,3.8472,2.235,1.3782,3.5743,3.2386,2.5055,3.8051,1.2649,3.9203,2.3449],"recorded":[0.4594,2.2754,2.7294,2.113,2.0823,1.2319,2.3599,1.1772,0.887,0.622,0.9361,0.055,0.9725,null,1.3951,1.4998,null,null,null,-0.2199,1.4066,null,1.3045,0.0402,null,-0.7989,1.562,0.3819,-0.8484,0.8153,1.0306,-0.3394,2.7789,-0.8626,1.423,0.0825,1.297,null,0.453,0.007,1.1381,1.0872,1.014,0.2337,0.4198,1.498,2.0941,0.1602,0.8872,0.8474,1.784,0.0857,2.2145,0.7905,-0.0059,null,2.7649,0.9447,0.1736,0.1876,2.9078,1.2834,0.2856,2.8433,-0.1313,0.7458,1.1548,null,1.4954,0.1269],"reference":[-0.4651,null,2.1883,2.1132,null,1.1893,null,null,0.9553,1.1772,1.042,null,0.7092,0.9531,null,1.0936,0.6446,0.5676,2.2026,null,null,null,1.6864,null,1.1234,-0.4437,null,0.1665,-0.7101,null,1.2047,-0.2298,2.5081,-0.5125,1.6831,null,1.3929,-0.0362,null,null,null,1.0586,null,0.1722,1.0283,1.7925,1.7541,-0.1882,null,0.4872,null,-0.1426,2.3074,null,0.1214,0.3607,2.8448,0.3118,0.6195,-0.3924,2.5952,null,null,null,null,0.2582,1.528,null,1.6534,0.5153],"covariates":[[-2.602,1],[0.4977,1],[1.0421,1],[2.9308,0],[0.2915,0],[-1.8897,1],[0.7576,0],[-0.1891,1],[-0.2317,0],[2.0673,1],[0.5568,0],[-1.6446,0],[-0.3783,1],[-1.1775,0],[-0.5843,1],[-0.7067,1],[-0.5722,1],[-1.4796,1],[-0.0171,0],[-2.5773,1],[-0.3651,0],[0.3293,1],[-1.3148,0],[-0.5455,1],[-1.883,0],[0.4167,0],[-1.4472,1],[-0.8556,1],[-0.6731,0],[0.0407,0],[-0.0489,0],[-0.6891,0],[0.5989,0],[-2.4496,1],[0.8289,1],[0.5657,0],[0.0682,0],[-0.5038,1],[0.8799,1],[-2.4562,1],[-0.9447,1],[-0.0014,0],[-0.2353,0],[-2.2514,0],[-0.7944,1],[0.1467,1],[-0.1516,0],[-1.5838,0],[-0.8675,0],[-0.8786,0],[-0.5627,1],[-2.0299,0],[0.9716,0],[-1.3205,1],[0.9451,0],[-0.7658,0],[-0.0065,1],[0.9478,1],[-1.0547,0],[-0.3389,0],[0.0729,0],[0.7212,0],[-0.0842,1],[1.3396,1],[1.07,0],[-0.4141,1],[-0.405,1],[-0.636,1],[0.6598,0],[-0.4667,1]],"r_seed":810003,"expected":{"k":0.302417401634977,"discard_k":0.530894501356346,"classical":0.3134931221945,"table":[{"fraction":0.05,"records":4,"additional_records":0,"relative_width":2.59729294286658,"discard_relative_width":3.32971403062944},{"fraction":0.1,"records":7,"additional_records":0,"relative_width":1.92918547960397,"discard_relative_width":2.4037575818304},{"fraction":0.25,"records":18,"additional_records":0,"relative_width":1.38103302093213,"discard_relative_width":1.61018120224683},{"fraction":0.5,"records":35,"additional_records":0,"relative_width":1.14123503347688,"discard_relative_width":1.23729321559457},{"fraction":0.75,"records":53,"additional_records":8,"relative_width":1.04919292818099,"discard_relative_width":1.08488010111046}],"answer":{"target_ratio":1.25,"fraction":0.349648880995236,"records":25,"smallest_grid_fraction":0.5},"flags":["small_pilot"],"r_bootstrap_only":{"note":"These depend on R's random stream, so a port should not expect them to match exactly.","k_lower":0.185534947621243,"k_upper":0.429325646687996,"discard_k_lower":0.313706454910969,"discard_k_upper":0.762330781576764}}}]}</script>
+<script id="k-engine">
+/* k engine: a port of R/audit-plan.R, following the steps in validation/audit-plan-study/planner-data.json.
+   No DOM use, so qa/check-k-port.js runs this exact text under Node. */
+(function (root) {
+  'use strict';
+  var AuditK = {};
+  function dot(a, b) { var s = 0; for (var i = 0; i < a.length; i++) s += a[i] * b[i]; return s; }
+  function agrees(w, y) { return Math.abs(w - y) <= 1e-8 * Math.max(1, Math.abs(y)); }
+  function mean(v) { var s = 0; for (var i = 0; i < v.length; i++) s += v[i]; return s / v.length; }
+  function sortedNum(v) { return Array.prototype.slice.call(v).sort(function (a, b) { return a - b; }); }
+  function quantile7(sorted, p) { var h = (sorted.length - 1) * p, lo = Math.floor(h), hi = Math.min(lo + 1, sorted.length - 1); return sorted[lo] + (h - lo) * (sorted[hi] - sorted[lo]); }
+  function median(v) { return quantile7(sortedNum(v), 0.5); }
+  function sdSample(v) { var m = mean(v), s = 0; for (var i = 0; i < v.length; i++) s += (v[i] - m) * (v[i] - m); return Math.sqrt(s / (v.length - 1)); }
+  function mad(v) { var c = median(v), d = []; for (var i = 0; i < v.length; i++) d.push(Math.abs(v[i] - c)); return 1.4826 * median(d); }
+
+  /* Least squares with the rank test of R's qr(X, tol = 1e-7): Gram-Schmidt with two passes. */
+  function ols(X, y, wantHat) {
+    var n = X.length, p = n ? X[0].length : 0, Q = [], R = [], i, j, t, r, pass;
+    if (n <= p) return null;
+    for (j = 0; j < p; j++) {
+      var v = new Float64Array(n), orig = 0, rj = new Float64Array(p), nv = 0;
+      for (t = 0; t < n; t++) { v[t] = X[t][j]; orig += v[t] * v[t]; }
+      for (pass = 0; pass < 2; pass++) for (i = 0; i < j; i++) {
+        r = 0; for (t = 0; t < n; t++) r += Q[i][t] * v[t];
+        for (t = 0; t < n; t++) v[t] -= r * Q[i][t];
+        rj[i] += r;
+      }
+      for (t = 0; t < n; t++) nv += v[t] * v[t];
+      orig = Math.sqrt(orig); nv = Math.sqrt(nv);
+      if (!(orig > 0) || nv < 1e-7 * orig) return null;
+      rj[j] = nv; for (t = 0; t < n; t++) v[t] /= nv;
+      Q.push(v); R.push(rj);
+    }
+    var beta = new Float64Array(p), qty = new Float64Array(p);
+    for (j = 0; j < p; j++) { r = 0; for (t = 0; t < n; t++) r += Q[j][t] * y[t]; qty[j] = r; }
+    for (j = p - 1; j >= 0; j--) { var s = qty[j]; for (i = j + 1; i < p; i++) s -= R[i][j] * beta[i]; beta[j] = s / R[j][j]; }
+    var residuals = new Float64Array(n), rss = 0;
+    for (t = 0; t < n; t++) { residuals[t] = y[t] - dot(X[t], beta); rss += residuals[t] * residuals[t]; }
+    var out = { beta: beta, residuals: residuals, df: n - p, rss: rss, variance: rss / (n - p) };
+    if (wantHat) { out.hat = new Float64Array(n); for (t = 0; t < n; t++) { var h = 0; for (j = 0; j < p; j++) h += Q[j][t] * Q[j][t]; out.hat[t] = h; } }
+    return out;
+  }
+  function spdInverse(M) {
+    var p = M.length, L = [], i, j, m, s;
+    for (i = 0; i < p; i++) { L.push(new Float64Array(p)); }
+    for (i = 0; i < p; i++) for (j = 0; j <= i; j++) {
+      s = M[i][j]; for (m = 0; m < j; m++) s -= L[i][m] * L[j][m];
+      if (i === j) { if (!(s > 0)) return null; L[i][i] = Math.sqrt(s); } else L[i][j] = s / L[j][j];
+    }
+    var Li = [];
+    for (i = 0; i < p; i++) { Li.push(new Float64Array(p)); }
+    for (i = 0; i < p; i++) { Li[i][i] = 1 / L[i][i]; for (j = 0; j < i; j++) { s = 0; for (m = j; m < i; m++) s -= L[i][m] * Li[m][j]; Li[i][j] = s / L[i][i]; } }
+    var C = [];
+    for (i = 0; i < p; i++) { C.push(new Float64Array(p)); for (j = 0; j < p; j++) { s = 0; for (m = Math.max(i, j); m < p; m++) s += Li[m][i] * Li[m][j]; C[i][j] = s; } }
+    return C;
+  }
+
+  /* Inputs: outcome, recorded and reference (NaN or null when missing), covariates (rows of numbers). */
+  AuditK.prepare = function (input) {
+    var n = input.outcome.length, q = n ? input.covariates[0].length : 0, i;
+    var ctx = { n: n, O: new Float64Array(n), W: new Float64Array(n), gold: new Float64Array(n), known: [], recorded: [], D0: [], G0: [], G: [], rows: [] };
+    var both = 0;
+    for (i = 0; i < n; i++) {
+      var o = input.outcome[i], w = input.recorded[i], y = input.reference[i], z = input.covariates[i];
+      if (o === null || !isFinite(o)) throw new Error('The outcome is missing on data row ' + (i + 1) + '. Analysis variables must be complete.');
+      for (var c = 0; c < q; c++) if (z[c] === null || !isFinite(z[c])) throw new Error('A covariate is missing on data row ' + (i + 1) + '. Analysis variables must be complete.');
+      var hasW = w !== null && isFinite(w), hasY = y !== null && isFinite(y);
+      ctx.O[i] = o; ctx.W[i] = hasW ? w : 0; ctx.gold[i] = hasY ? y : NaN;
+      ctx.known.push(hasY); ctx.recorded.push(hasW);
+      ctx.D0.push([1, 0].concat(z));
+      var g0 = [1].concat(z, [o]);
+      ctx.G0.push(g0); ctx.G.push(g0.concat([hasW ? w : 0]));
+      if (hasY) ctx.rows.push(i);
+      if (hasY && hasW) both++;
+    }
+    if (!ctx.rows.length) throw new Error('At least one reference value is required. Fill in the reference column on the audited rows.');
+    if (!ctx.recorded.some(Boolean)) throw new Error('No record has a recorded value.');
+    ctx.p = q + 2; ctx.allRecorded = ctx.recorded.every(Boolean); ctx.poolMode = ctx.rows.length === n; ctx.calibration = both;
+    ctx.needed = Math.max(30, q + 3 + 20);
+    if (both < ctx.needed) throw new Error('The pilot has ' + both + ' rows with both values and needs at least ' + ctx.needed + ' to estimate k: 30, and 20 more than the ' + (q + 3) + ' imputation coefficients. Audit more random records.');
+    if (n <= ctx.p) throw new Error('The analysis has no residual degrees of freedom.');
+    return ctx;
+  };
+
+  /* Imputation means and variances for every record, from the given reference rows. */
+  function imputation(ctx, rows, useRecorded, bootstrap) {
+    var n = ctx.n, mu = new Float64Array(n), tau2 = new Float64Array(n), residuals = null, i;
+    function spread(fit, cols) { return bootstrap ? fit.rss / Math.max(fit.df - cols, 1) : fit.variance; }
+    function take(list, from) { var o = new Array(list.length); for (var j = 0; j < list.length; j++) o[j] = from[list[j]]; return o; }
+    if (!useRecorded || !ctx.allRecorded) {
+      var plain = ols(take(rows, ctx.G0), take(rows, ctx.gold));
+      if (!plain) return null;
+      var tp = spread(plain, ctx.G0[0].length);
+      for (i = 0; i < n; i++) { mu[i] = dot(ctx.G0[i], plain.beta); tau2[i] = tp; }
+      residuals = plain.residuals;
+    }
+    if (useRecorded) {
+      var use = rows.filter(function (r) { return ctx.recorded[r]; });
+      if (!use.length) return null;
+      if (use.every(function (r) { return agrees(ctx.W[r], ctx.gold[r]); })) {
+        for (i = 0; i < n; i++) if (ctx.recorded[i]) { mu[i] = ctx.W[i]; tau2[i] = 0; }
+        residuals = new Float64Array(use.length);
+      } else {
+        var fit = ols(take(use, ctx.G), take(use, ctx.gold));
+        if (!fit) return null;
+        var tf = spread(fit, ctx.G[0].length);
+        for (i = 0; i < n; i++) if (ctx.recorded[i]) { mu[i] = dot(ctx.G[i], fit.beta); tau2[i] = tf; }
+        residuals = fit.residuals;
+      }
+    }
+    return { mu: mu, tau2: tau2, residuals: residuals };
+  }
+
+  /* k under the working models: steps 4 to 7 of the published recipe. */
+  function kValue(ctx, imp, detail) {
+    var n = ctx.n, p = ctx.p, M = [], rhs = new Float64Array(p), sumE = 0, i, a, b, d = new Array(p);
+    for (a = 0; a < p; a++) M.push(new Float64Array(p));
+    for (i = 0; i < n; i++) {
+      var y = ctx.known[i] ? ctx.gold[i] : imp.mu[i], src = ctx.D0[i];
+      for (a = 0; a < p; a++) d[a] = src[a];
+      d[1] = y;
+      if (!ctx.known[i]) sumE += imp.tau2[i];
+      for (a = 0; a < p; a++) { rhs[a] += d[a] * ctx.O[i]; for (b = 0; b <= a; b++) M[a][b] += d[a] * d[b]; }
+    }
+    M[1][1] += sumE;
+    for (a = 0; a < p; a++) for (b = a + 1; b < p; b++) M[a][b] = M[b][a];
+    var C = spdInverse(M);
+    if (!C) return detail ? null : NaN;
+    var beta = new Float64Array(p), sse = 0;
+    for (a = 0; a < p; a++) beta[a] = dot(C[a], rhs);
+    for (i = 0; i < n; i++) {
+      var yi = ctx.known[i] ? ctx.gold[i] : imp.mu[i], src2 = ctx.D0[i], fit = 0;
+      for (a = 0; a < p; a++) fit += (a === 1 ? yi : src2[a]) * beta[a];
+      sse += (ctx.O[i] - fit) * (ctx.O[i] - fit);
+    }
+    sse += beta[1] * beta[1] * sumE;
+    var s2 = sse / (n - p), w = new Float64Array(p);
+    for (a = 0; a < p; a++) w[a] = n * C[1][a];
+    var A1 = w[1], E1 = -beta[1], total = 0, A0 = detail ? new Float64Array(n) : null, E0 = detail ? new Float64Array(n) : null;
+    for (i = 0; i < n; i++) {
+      var d0 = ctx.D0[i], u0 = 0, e0 = ctx.O[i];
+      for (a = 0; a < p; a++) { u0 += d0[a] * w[a]; e0 -= d0[a] * beta[a]; }
+      var u = u0 + A1 * imp.mu[i], v = e0 + E1 * imp.mu[i], t = imp.tau2[i];
+      total += t * (u * E1 + v * A1) * (u * E1 + v * A1) + 2 * (A1 * E1) * (A1 * E1) * t * t;
+      if (detail) { A0[i] = u0; E0[i] = e0; }
+    }
+    var value = (total / n) / (s2 * w[1]);
+    return detail ? { k: value, A0: A0, A1: A1, E0: E0, E1: E1, s2: s2 } : value;
+  }
+
+  /* The same ratio with empirical variances on pilot rows, using leave-one-out imputation means. */
+  function classical(ctx, useRecorded, point) {
+    var parts = kValue(ctx, point, true), rows = ctx.rows, loo = {}, i;
+    if (!parts) return NaN;
+    function take(list, from) { var o = new Array(list.length); for (var j = 0; j < list.length; j++) o[j] = from[list[j]]; return o; }
+    function leaveOut(X, use) {
+      var f = ols(take(use, X), take(use, ctx.gold), true), out = {};
+      if (!f) return null;
+      for (var j = 0; j < use.length; j++) out[use[j]] = ctx.gold[use[j]] - f.residuals[j] / Math.max(1 - f.hat[j], 1e-8);
+      return out;
+    }
+    if (!useRecorded) { loo = leaveOut(ctx.G0, rows); if (!loo) return NaN; }
+    else {
+      var use = rows.filter(function (r) { return ctx.recorded[r]; }), withW = leaveOut(ctx.G, use);
+      if (!withW) return NaN;
+      loo = withW;
+      if (use.length < rows.length) { var plain = leaveOut(ctx.G0, rows); if (!plain) return NaN; rows.forEach(function (r) { if (!ctx.recorded[r]) loo[r] = plain[r]; }); }
+    }
+    var num = 0, den = 0;
+    for (i = 0; i < rows.length; i++) {
+      var r = rows[i], y = ctx.gold[r], m = loo[r];
+      var psi = (parts.A0[r] + parts.A1 * y) * (parts.E0[r] + parts.E1 * y);
+      var exp = (parts.A0[r] + parts.A1 * m) * (parts.E0[r] + parts.E1 * m) + parts.A1 * parts.E1 * point.tau2[r];
+      num += (psi - exp) * (psi - exp); den += psi * psi;
+    }
+    return (num / rows.length) / (den / rows.length);
+  }
+
+  function selection(ctx) {
+    var x = [], pilot = [], np = 0, i;
+    for (i = 0; i < ctx.n; i++) if (ctx.recorded[i]) { x.push(ctx.W[i]); pilot.push(ctx.known[i]); if (ctx.known[i]) np++; }
+    if (np < 2 || x.length - np < 2) return NaN;
+    function z(v) {
+      var sd = sdSample(v), spread = sd * sd / np * (1 - np / v.length), mp = 0;
+      if (!isFinite(spread) || spread <= 0) return 0;
+      for (var j = 0; j < v.length; j++) if (pilot[j]) mp += v[j];
+      return Math.abs(mp / np - mean(v)) / Math.sqrt(spread);
+    }
+    var mx = mean(x);
+    return Math.max(z(x), z(x.map(function (a) { return (a - mx) * (a - mx); })));
+  }
+  function gross(ctx) {
+    function scale(v) { var s = mad(v); if (!isFinite(s) || s <= 0) s = sdSample(v); return (!isFinite(s) || s <= 0) ? NaN : s; }
+    var gold = [], rec = [], maxGap = 0, i;
+    for (i = 0; i < ctx.n; i++) {
+      if (ctx.known[i]) gold.push(ctx.gold[i]);
+      if (ctx.recorded[i]) rec.push(ctx.W[i]);
+      if (ctx.known[i] && ctx.recorded[i]) maxGap = Math.max(maxGap, Math.abs(ctx.W[i] - ctx.gold[i]));
+    }
+    var sg = scale(gold), sr = scale(rec), mr = median(rec), maxRec = 0;
+    rec.forEach(function (v) { maxRec = Math.max(maxRec, Math.abs(v - mr)); });
+    return { pilotRatio: isNaN(sg) ? 0 : maxGap / sg, recordedZ: isNaN(sr) ? 0 : maxRec / sr };
+  }
+  function sig2(x) { return Number(x.toPrecision(2)); }
+
+  /* Point values and every pilot warning except the one that needs the bootstrap. */
+  AuditK.point = function (ctx) {
+    var point = imputation(ctx, ctx.rows, true, false), point0 = imputation(ctx, ctx.rows, false, false);
+    if (!point) throw new Error("The pilot's imputation design is rank deficient, for example a category with no row that has both values. Drop or merge that covariate.");
+    if (!point0) throw new Error("The pilot's imputation design without the recorded value is rank deficient. Drop or merge the covariate that causes it.");
+    var k = kValue(ctx, point, false), k0 = kValue(ctx, point0, false), disagree = 0, i, flags = [];
+    if (!isFinite(k) || !isFinite(k0)) throw new Error('The analysis fit is singular for these columns. Check for a constant or duplicated covariate.');
+    for (i = 0; i < ctx.n; i++) if (ctx.known[i] && ctx.recorded[i] && !agrees(ctx.W[i], ctx.gold[i])) disagree++;
+    function flag(name, message) { flags.push({ name: name, message: message }); }
+    if (ctx.calibration < 100) flag('small_pilot', 'Small pilot: k rests on ' + ctx.calibration + ' rows, so its interval is wide. Below 100 rows, plan on the upper limit.');
+    if (disagree === 0) flag('no_disagreements', 'No pilot row disagrees, so k is estimated as zero. With ' + ctx.calibration + ' rows, the disagreement rate could still be as high as about ' + sig2(3 / ctx.calibration) + '.');
+    else if (disagree < 10) flag('few_disagreements', 'Only ' + disagree + ' pilot rows disagree, so k depends heavily on them.');
+    var sel = selection(ctx);
+    if (isFinite(sel) && sel > 3.29) flag('pilot_looks_selective', 'Recorded values on pilot rows differ from those on other rows (largest z = ' + sel.toFixed(1) + '). The planner assumes a simple random pilot.');
+    var g = gross(ctx);
+    if (g.pilotRatio > 5 || g.recordedZ > 10) flag('gross_errors', 'Possible gross errors: the largest pilot discrepancy is ' + g.pilotRatio.toFixed(1) + ' robust SDs of the reference, and the most extreme recorded value is ' + g.recordedZ.toFixed(1) + ' robust SDs from the median. These can distort a linear fit, and linear MI failed in the synthetic gross-error cell. Do not rely on this plan until catmech_recording_audit() has been reviewed; catmech_contamination() is the alternative.');
+    return { k: k, discardK: k0, classical: classical(ctx, true, point), discardClassical: classical(ctx, false, point0), disagreements: disagree, referenceRows: ctx.rows.length, calibrationRows: ctx.calibration, selectionZ: sel, gross: g, flags: flags };
+  };
+
+  AuditK.relative = function (k, f) { return Math.sqrt(1 + k * (1 - f) / f); };
+  AuditK.required = function (k, r) { return k / (r * r - 1 + k); };
+  AuditK.recordsAt = function (f, n) { return Math.min(n, Math.ceil(f * n - 1e-8)); };
+  AuditK.recordsFor = function (k, r, n) { return Math.max(0, AuditK.recordsAt(AuditK.required(k, r), n)); };
+  AuditK.table = function (k, k0, n, pilotRows, needed, fractions) {
+    return fractions.map(function (f) {
+      var records = AuditK.recordsAt(f, n);
+      return { fraction: f, records: records, additional_records: Math.max(0, records - pilotRows), small_audit: records < needed, relative_width: AuditK.relative(k, f), discard_relative_width: AuditK.relative(k0, f) };
+    });
+  };
+  AuditK.answer = function (k, r, n, fractions) {
+    var reach = fractions.filter(function (f) { return AuditK.relative(k, f) <= r; });
+    return { target_ratio: r, fraction: AuditK.required(k, r), records: AuditK.recordsFor(k, r, n), smallest_grid_fraction: reach.length ? Math.min.apply(null, reach) : null };
+  };
+
+  function rngFrom(seed) { var a = (seed >>> 0) || 1; return function () { a = (a + 0x6D2B79F5) | 0; var t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  function normalFrom(rng) { var spare = null; return function () { if (spare !== null) { var s = spare; spare = null; return s; } var u = 0, v = 0; while (u === 0) u = rng(); v = rng(); var m = Math.sqrt(-2 * Math.log(u)); spare = m * Math.sin(2 * Math.PI * v); return m * Math.cos(2 * Math.PI * v); }; }
+  /* Normal CDF (Hart, double precision) and quantile (Wichura AS241). */
+  function pnorm(z) {
+    var x = Math.abs(z), c, e, b;
+    if (x > 37) c = 0; else {
+      e = Math.exp(-x * x / 2);
+      if (x < 7.07106781186547) {
+        b = 3.52624965998911e-02 * x + 0.700383064443688; b = b * x + 6.37396220353165; b = b * x + 33.912866078383; b = b * x + 112.079291497871; b = b * x + 221.213596169931; b = b * x + 220.206867912376;
+        c = e * b;
+        b = 8.83883476483184e-02 * x + 1.75566716318264; b = b * x + 16.064177579207; b = b * x + 86.7807322029461; b = b * x + 296.564248779674; b = b * x + 637.333633378831; b = b * x + 793.826512519948; b = b * x + 440.413735824752;
+        c = c / b;
+      } else { b = x + 0.65; b = x + 4 / b; b = x + 3 / b; b = x + 2 / b; b = x + 1 / b; c = e / b / 2.506628274631; }
+    }
+    return z > 0 ? 1 - c : c;
+  }
+  function qnorm(p) {
+    var q = p - 0.5, r, v;
+    if (Math.abs(q) <= 0.425) { r = 0.180625 - q * q;
+      return q * (((((((r * 2509.0809287301226727 + 33430.575583588128105) * r + 67265.770927008700853) * r + 45921.953931549871457) * r + 13731.693765509461125) * r + 1971.5909503065514427) * r + 133.14166789178437745) * r + 3.387132872796366608) /
+        (((((((r * 5226.495278852854561 + 28729.085735721942674) * r + 39307.89580009271061) * r + 21213.794301586595867) * r + 5394.1960214247511077) * r + 687.1870074920579083) * r + 42.313330701600911252) * r + 1); }
+    r = q < 0 ? p : 1 - p; r = Math.sqrt(-Math.log(r));
+    if (r <= 5) { r -= 1.6;
+      v = (((((((r * 7.7454501427834140764e-4 + 0.0227238449892691845833) * r + 0.24178072517745061177) * r + 1.27045825245236838258) * r + 3.64784832476320460504) * r + 5.7694972214606914055) * r + 4.6303378461565452959) * r + 1.42343711074968357734) /
+        (((((((r * 1.05075007164441684324e-9 + 5.475938084995344946e-4) * r + 0.0151986665636164571966) * r + 0.14810397642748007459) * r + 0.68976733498510000455) * r + 1.6763848301838038494) * r + 2.05319162663775882187) * r + 1);
+    } else { r -= 5;
+      v = (((((((r * 2.01033149563228e-7 + 2.71155556874348757815e-5) * r + 0.0012426609473880784386) * r + 0.026532189526576123093) * r + 0.29656057182850489123) * r + 1.7848265399172913358) * r + 5.4637849111641143699) * r + 6.6579046435011037772) /
+        (((((((r * 2.04426310338993978564e-15 + 1.4215117583164458887e-7) * r + 1.8463183175100546818e-5) * r + 7.868691311456132591e-4) * r + 0.0148753612908506148525) * r + 0.13692988092273580531) * r + 0.59983220655588793769) * r + 1);
+    }
+    return q < 0 ? -v : v;
+  }
+  function bca(draws, point, rows, estimate, limits, rng) {
+    var usable = draws.filter(function (d) { return isFinite(d); });
+    if (!usable.length || !isFinite(point) || new Set(usable).size < 2) return [point, point];
+    var shuffled = rows.slice(), i, j;
+    for (i = shuffled.length - 1; i > 0; i--) { j = Math.floor(rng() * (i + 1)); var tmp = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = tmp; }
+    var nGroups = Math.min(rows.length, 200), groups = [];
+    for (i = 0; i < nGroups; i++) groups.push(new Set());
+    shuffled.forEach(function (r, s) { groups[s % nGroups].add(r); });
+    var jack = groups.map(function (out) { return estimate(rows.filter(function (r) { return !out.has(r); })); }).filter(function (v) { return isFinite(v); });
+    var mj = mean(jack), s2 = 0, s3 = 0;
+    jack.forEach(function (v) { var g = mj - v; s2 += g * g; s3 += g * g * g; });
+    var denom = 6 * Math.pow(s2, 1.5), acc = denom > 0 ? s3 / denom : 0, below = 0;
+    usable.forEach(function (d) { if (d < point) below++; });
+    var bias = qnorm(Math.min(Math.max(below / usable.length, 1e-4), 1 - 1e-4)), sorted = sortedNum(usable);
+    return limits.map(function (l) { var z = qnorm(l); return quantile7(sorted, pnorm(bias + (bias + z) / (1 - acc * (bias + z)))); });
+  }
+
+  /* Seeded bootstrap of k with bias-corrected and accelerated limits. The stream differs from R's. */
+  AuditK.interval = async function (ctx, point, opts) {
+    opts = opts || {};
+    var B = opts.bootstrap || 500, seed = opts.seed === undefined ? 1 : opts.seed, conf = opts.conf || 0.95, rng = rngFrom(seed + 3), rows = ctx.rows, r = rows.length;
+    var kd = new Array(B), k0d = new Array(B), resid = new Array(B), b;
+    for (b = 0; b < B; b++) {
+      var sampled = new Array(r);
+      for (var s = 0; s < r; s++) sampled[s] = rows[Math.floor(rng() * r)];
+      var p = imputation(ctx, sampled, true, true);
+      kd[b] = p ? kValue(ctx, p, false) : NaN;
+      resid[b] = p && isFinite(kd[b]) ? p.residuals : null;
+      var p0 = imputation(ctx, sampled, false, true);
+      k0d[b] = p0 ? kValue(ctx, p0, false) : NaN;
+      if (b % 25 === 24) { if (opts.onProgress) opts.onProgress(b + 1, B); await new Promise(function (res) { setTimeout(res, 0); }); }
+    }
+    var limits = [(1 - conf) / 2, (1 + conf) / 2], usable = kd.filter(function (d) { return isFinite(d); }).length;
+    var ki = bca(kd, point.k, rows, function (x) { var q = imputation(ctx, x, true, false); return q ? kValue(ctx, q, false) : NaN; }, limits, rng);
+    await new Promise(function (res) { setTimeout(res, 0); });
+    var k0i = bca(k0d, point.discardK, rows, function (x) { var q = imputation(ctx, x, false, false); return q ? kValue(ctx, q, false) : NaN; }, limits, rng);
+    return { kLower: ki[0], kUpper: ki[1], discardLower: k0i[0], discardUpper: k0i[1], usable: usable, bootstrap: B, kDraws: kd, residuals: resid, lostSupport: usable < 0.8 * B, seed: seed, conf: conf };
+  };
+  /* A range for the width of one audit of each size: audit noise from the residuals, plus the fit's own posterior and Rubin noise. */
+  AuditK.predictive = function (ctx, iv, fractions, n, m) {
+    m = m || 20;
+    var rng = rngFrom(iv.seed + 11), norm = normalFrom(rng), cols = ctx.G[0].length;
+    var records = fractions.map(function (f) { return AuditK.recordsAt(f, n); }), out = fractions.map(function () { return []; });
+    iv.kDraws.forEach(function (kb, b) {
+      if (!isFinite(kb)) return;
+      var res = iv.residuals[b], rl = res.length, total = 0, i;
+      for (i = 0; i < rl; i++) total += res[i] * res[i];
+      var mr = total / rl;
+      records.forEach(function (size, j) {
+        var scale = 0, f = fractions[j];
+        if (total > 0) { var s = 0; for (i = 0; i < size; i++) { var e = res[Math.floor(rng() * rl)]; s += e * e; } scale = (s / size) / mr; }
+        var chi = 0; for (i = 0; i < m - 1; i++) { var g = norm(); chi += g * g; }
+        var nu = Math.max(size - cols, 3), inflation = (1 + 1 / m) * nu / (nu - 2);
+        out[j].push(Math.sqrt(1 + kb * scale * (chi / (m - 1)) * inflation * (1 - f) / f));
+      });
+    });
+    var limits = [(1 - iv.conf) / 2, (1 + iv.conf) / 2];
+    return fractions.map(function (f, j) { var s = sortedNum(out[j]); return { fraction: f, records: records[j], lower: quantile7(s, limits[0]), upper: quantile7(s, limits[1]) }; });
+  };
+
+  /* Compare the port with one R test vector from planner-data.json. */
+  AuditK.checkVector = function (v) {
+    var ctx = AuditK.prepare({ outcome: v.outcome, recorded: v.recorded, reference: v.reference, covariates: v.covariates }), pt = AuditK.point(ctx), e = v.expected, worst = 0, fails = [];
+    var grid = e.table.map(function (t) { return t.fraction; }), tb = AuditK.table(pt.k, pt.discardK, ctx.n, ctx.rows.length, ctx.needed, grid), an = AuditK.answer(pt.k, v.target_ratio, ctx.n, grid);
+    function near(name, got, want) { var d = Math.abs(got - want) / Math.max(Math.abs(want), 1e-300); if (d > worst) worst = d; if (!(d <= 1e-8)) fails.push(name + ': got ' + got + ', R ' + want); }
+    function same(name, got, want) { if (got !== want) fails.push(name + ': got ' + got + ', R ' + want); }
+    near('k', pt.k, e.k); near('discard_k', pt.discardK, e.discard_k); near('classical', pt.classical, e.classical);
+    e.table.forEach(function (row, i) { near('relative_width[' + i + ']', tb[i].relative_width, row.relative_width); near('discard_relative_width[' + i + ']', tb[i].discard_relative_width, row.discard_relative_width); same('records[' + i + ']', tb[i].records, row.records); same('additional_records[' + i + ']', tb[i].additional_records, row.additional_records); });
+    near('answer.fraction', an.fraction, e.answer.fraction); same('answer.records', an.records, e.answer.records); same('answer.grid', an.smallest_grid_fraction, e.answer.smallest_grid_fraction);
+    same('flags', pt.flags.map(function (f) { return f.name; }).join(','), e.flags.join(','));
+    return { name: v.name, pass: fails.length === 0, worstRelativeDifference: worst, fails: fails, k: pt.k, discardK: pt.discardK, classical: pt.classical };
+  };
+  AuditK.qnorm = qnorm; AuditK.pnorm = pnorm;
+  root.AuditK = AuditK;
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script id="page-ui">
+(function () {
+  'use strict';
+  var DATA = JSON.parse(document.getElementById('study-data').textContent), K = window.AuditK, NS = 'http://www.w3.org/2000/svg';
+  var NAMES = ['ctgov', 'nhanes'], SHAPE = { ctgov: 'circle', nhanes: 'diamond' }, GRID = [0.05, 0.1, 0.25, 0.5, 0.75];
+  function $(id) { return document.getElementById(id); }
+  function s(tag, attrs, parent, text) { var e = document.createElementNS(NS, tag); for (var a in attrs) e.setAttribute(a, attrs[a]); if (text !== undefined) e.textContent = text; if (parent) parent.appendChild(e); return e; }
+  function h(tag, cls, text, parent) { var e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; if (parent) parent.appendChild(e); return e; }
+  function ratio(x) { return x.toFixed(2) + '×'; }
+  function pct(x, d) { return (x * 100).toFixed(d === undefined ? 1 : d) + '%'; }
+  function num(x) { return Math.round(x).toLocaleString('en-US'); }
+  function kf(x) { return x.toFixed(4); }
+  function signed(x, d) { var a = Math.abs(x).toFixed(d); return (Number(a) === 0 ? '' : x < 0 ? '−' : '+') + a; }
+  function logS(d0, d1, r0, r1) { var a = Math.log(d0), b = Math.log(d1); return function (v) { return r0 + (Math.log(v) - a) / (b - a) * (r1 - r0); }; }
+  function linS(d0, d1, r0, r1) { return function (v) { return r0 + (v - d0) / (d1 - d0) * (r1 - r0); }; }
+  function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
+
+  /* tooltip: one element, filled with textContent because CSV headers are untrusted */
+  var tip = $('tip'), tipTimer = null, tipFocus = null;
+  function placeTip(x, y) { var w = tip.offsetWidth, ht = tip.offsetHeight, left = x + 14; if (left + w > window.innerWidth - 12) left = x - w - 14; if (left < 12) left = 12; var top = y - ht - 12; if (top < 8) top = y + 18; if (top + ht > window.innerHeight - 8) top = window.innerHeight - ht - 8; tip.style.left = left + 'px'; tip.style.top = top + 'px'; }
+  function showTip(x, y, d) {
+    clearTimeout(tipTimer); tip.textContent = ''; h('div', 'h', d.head, tip);
+    d.rows.forEach(function (r) { var row = h('div', 'r', undefined, tip), key = h('i', '', undefined, row); if (r.color) key.style.background = 'var(' + r.color + ')'; h('b', '', r.value, row); h('span', '', r.label, row); });
+    tip.hidden = false; placeTip(x, y);
+  }
+  function hideTip() { tip.hidden = true; }
+  function bindMark(g, fn) {
+    g.setAttribute('tabindex', '0'); g.setAttribute('class', 'mark'); g.setAttribute('role', 'img');
+    var d0 = fn(); g.setAttribute('aria-label', d0.head + ': ' + d0.rows.map(function (r) { return r.label + ' ' + r.value; }).join(', '));
+    g.addEventListener('pointerenter', function (e) { showTip(e.clientX, e.clientY, fn()); });
+    g.addEventListener('pointermove', function (e) { placeTip(e.clientX, e.clientY); });
+    g.addEventListener('pointerleave', function (e) { if (e.pointerType === 'touch') tipTimer = setTimeout(hideTip, 2600); else hideTip(); });
+    g.addEventListener('focus', function () { tipFocus = g; var r = g.getBoundingClientRect(); showTip(r.left + r.width / 2, r.top, fn()); });
+    g.addEventListener('blur', function () { tipFocus = null; hideTip(); });
+  }
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') hideTip(); });
+  window.addEventListener('scroll', function () { if (tipFocus && tipFocus.isConnected && !tip.hidden) { var r = tipFocus.getBoundingClientRect(); placeTip(r.left + r.width / 2, r.top); } else hideTip(); }, { passive: true });
+
+  function marker(p, shape, x, y, cls, size) { size = size || 5; if (shape === 'diamond') { var d = size * 1.25; return s('path', { d: 'M' + x + ' ' + (y - d) + 'L' + (x + d) + ' ' + y + 'L' + x + ' ' + (y + d) + 'L' + (x - d) + ' ' + y + 'Z', 'class': cls }, p); } return s('circle', { cx: x, cy: y, r: size, 'class': cls }, p); }
+  function mount(el, W, H, label) { el.textContent = ''; return s('svg', { viewBox: '0 0 ' + W + ' ' + H, width: W, height: H, role: 'group', 'aria-label': label }, el); }
+  function legend(el, items) {
+    el.textContent = '';
+    items.forEach(function (it) {
+      var li = h('li', '', undefined, el), k = s('svg', { width: it.w || 20, height: 12, 'aria-hidden': 'true' }, li), w = it.w || 20;
+      if (it.type === 'line') s('line', { x1: 1, x2: w - 1, y1: 6, y2: 6, 'class': it.cls }, k);
+      if (it.type === 'point') marker(k, it.shape, w / 2, 6, it.cls, 4);
+      if (it.type === 'band') s('rect', { x: 1, y: 2, width: w - 2, height: 8, 'class': it.cls }, k);
+      if (it.type === 'range') { s('line', { x1: 1, x2: w - 1, y1: 6, y2: 6, 'class': 'w-mi' }, k); s('rect', { x: 6, y: 2, width: w - 12, height: 8, rx: 2, 'class': 'iqr' }, k); s('line', { x1: w / 2, x2: w / 2, y1: 2, y2: 10, 'class': 'med' }, k); }
+      if (it.type === 'whisker') { s('line', { x1: w / 2, x2: w / 2, y1: 1, y2: 11, 'class': it.cls }, k); s('line', { x1: w / 2 - 3, x2: w / 2 + 3, y1: 1, y2: 1, 'class': it.cls }, k); }
+      h('span', '', it.label, li);
+    });
+  }
+  function table(el, caption, heads, rows, hl) {
+    el.textContent = ''; var t = h('table', '', undefined, el);
+    if (caption) { var c = h('caption', '', caption, t); c.style.cssText = 'caption-side:top;text-align:left;padding:0 0 6px;color:var(--muted);font-size:13px'; }
+    var tr = h('tr', '', undefined, h('thead', '', undefined, t)); heads.forEach(function (x, i) { var th = h('th', '', x, tr); th.scope = 'col'; if (i === 0) th.style.textAlign = 'left'; });
+    var tb = h('tbody', '', undefined, t);
+    rows.forEach(function (r, i) { var row = h('tr', hl && hl(i) ? 'hl' : '', undefined, tb); r.forEach(function (c) { var td = h('td', '', undefined, row); if (c && c.node) td.appendChild(c.node); else td.textContent = c; }); });
+    return t;
+  }
+  function chip(cls, text) { return { node: h('span', 'st ' + cls, text) }; }
+
+  /* comparison tiles */
+  function renderDuels() {
+    var host = $('duels'), notes = { ctgov: 'Enrollment against participant-flow Started, log scale. Slope of log duration on log size.', nhanes: 'Self-reported against measured weight, kg. Slope of systolic pressure on weight.' };
+    NAMES.forEach(function (name) {
+      var d = DATA.datasets[name], p = h('div', 'panel duel', undefined, host), head = h('div', 'panel-head', undefined, p);
+      h('h3', '', d.short, head); h('span', 'fig-id', num(d.pool_rows) + ' rows · pool k ' + d.pool_k.toFixed(4), head);
+      [['Keep the recorded value (linear MI)', d.pool_k, 'fill-mi'], ['Discard the recorded value', d.pool_discard_k, 'fill-disc']].forEach(function (row) {
+        var rec = K.recordsFor(row[1], 1.25, 600), r = h('div', 'duel-row', undefined, p);
+        h('span', 'lbl', row[0] + ', k = ' + row[1].toFixed(row[1] > 0.5 ? 3 : 4), r);
+        var track = h('div', 'track', undefined, r), fill = h('i', row[2], undefined, track); fill.style.width = (rec / 600 * 100) + '%';
+        var b = h('b', '', String(rec), r); h('small', '', ' of 600', b); b.id = 'duel-' + name + '-' + (row[2] === 'fill-mi' ? 'mi' : 'disc');
+      });
+      h('p', 'note', notes[name], p);
+    });
+    var note = h('p', 'note', 'Counts round up, as catmech_audit_plan() does, so each is one above the 41, 66, 383 and 378 in the study write-up, which rounded 41.5, 66.3, 383.0 and 378.2 to the nearest record. Single pilots of 60 or 150 records gave a median of 21 and 29 on ClinicalTrials.gov (5th to 95th percentile 2 to 114 and 8 to 111), and 58 and 63 on NHANES (32 to 117 and 40 to 99).');
+    note.style.gridColumn = '1 / -1'; host.appendChild(note);
+  }
+
+  /* FIG-01 */
+  var SCENARIOS = [['audit_05pct', '5%'], ['audit_10pct', '10%'], ['audit_25pct', '25%'], ['audit_50pct', '50%'], ['targeted_audit', 'Targeted']];
+  var METHOD_ORDER = [['cole_mi', 'Linear MI', 'keeps recorded value', 'fill-mi'], ['reference_normal', 'Reference normal', 'discards recorded value', 'fill-disc'], ['contamination', 'Contamination model', '', 'fill-n'], ['raking', 'Generalized raking', '', 'fill-n'], ['naive_recorded', 'Recorded as truth', '', 'fill-n'], ['oracle', 'Oracle', 'every record audited', 'fill-n']];
+  var scenario = 'audit_25pct';
+  function renderMethods() {
+    var seg = $('audit-seg'); seg.textContent = '';
+    SCENARIOS.forEach(function (x) { var b = h('button', '', x[1] === 'Targeted' ? 'Targeted' : x[1] + ' audit', seg); b.type = 'button'; b.setAttribute('aria-pressed', String(x[0] === scenario)); b.dataset.s = x[0]; b.addEventListener('click', function () { scenario = x[0]; renderMethods(); }); });
+    var host = $('method-tables'); host.textContent = '';
+    NAMES.forEach(function (name) {
+      var wrap = h('div', 'tw', undefined, host), block = DATA.methods[name][scenario], d = DATA.datasets[name];
+      wrap.id = 'method-' + name;
+      if (!block) { h('div', 'mono-k', d.short, wrap); h('p', 'note', 'This audit size was not run on NHANES in the frozen study.', wrap).style.marginTop = '6px'; return; }
+      var maxW = Math.max.apply(null, METHOD_ORDER.map(function (m) { return block[m[0]].width; }));
+      var rows = METHOD_ORDER.map(function (m) {
+        var r = block[m[0]], name2 = h('span', ''); name2.textContent = m[1];
+        if (m[2]) h('small', '', m[2], name2);
+        if (r.ret < r.req) h('small', '', num(r.ret) + ' of ' + num(r.req) + ' returned', name2);
+        var wc = h('span', ''); wc.textContent = r.width.toFixed(3); var bar = h('span', 'bar ' + m[3], undefined, wc); bar.style.width = (r.width / maxW * 100) + '%';
+        return [{ node: name2 }, { node: wc }, pct(r.cov), signed(r.bias, 4), r.rmse.toFixed(4)];
+      });
+      var label = SCENARIOS.filter(function (x) { return x[0] === scenario; })[0][1];
+      var t = table(wrap, d.short + ', ' + (label === 'Targeted' ? 'targeted audit' : label + ' audit') + ', ' + num(block.cole_mi.req) + ' cohorts', ['Method', 'Mean width', 'Coverage', 'Bias', 'RMSE'], rows, function (i) { return i === 0; });
+      Array.prototype.forEach.call(t.querySelectorAll('tbody tr'), function (tr) { tr.children[1].className = 'w-cell'; });
+      t.querySelector('thead tr').children[1].style.textAlign = 'left';
+    });
+  }
+
+  /* FIG-02 */
+  function drawTest() {
+    var el = $('fig2'), W = el.clientWidth; if (W < 200) return;
+    var narrow = W < 520, H = narrow ? 310 : 350, m = { l: 36, r: 6, t: 24, b: 40 }, svg = mount(el, W, H, 'Median error of predicted width by target audit, with the 10 percent limit'), y = linS(0, 45, H - m.b, m.t);
+    [0, 10, 20, 30, 40].forEach(function (v) { s('line', { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), 'class': v === 0 ? 'axis' : 'gl' }, svg); s('text', { x: m.l - 6, y: y(v) + 4, 'text-anchor': 'end', 'class': 't' }, svg, v + '%'); });
+    s('line', { x1: m.l, x2: W - m.r, y1: y(10), y2: y(10), 'class': 'limit' }, svg);
+    s('text', { x: W - m.r - 2, y: y(10) - 5, 'text-anchor': 'end', 'class': 't t-red t-halo' }, svg, '10% limit');
+    var cats = [0.05, 0.1, 0.25, 0.5], band = (W - m.l - m.r) / 4;
+    cats.forEach(function (f, i) {
+      var cx = m.l + band * (i + 0.5), rows = DATA.accuracy.filter(function (a) { return a.f === f; }), fails = rows.filter(function (a) { return a.med > 0.1; }).length;
+      s('text', { x: cx, y: m.t - 10, 'text-anchor': 'middle', 'class': 't ' + (fails ? 't-red' : 't-green') }, svg, fails ? (narrow ? '✕ fails' : '✕ ' + fails + ' of ' + rows.length + ' fail') : (narrow ? '✓ ≤ 10%' : '✓ ' + rows.length + ' of ' + rows.length + ' within'));
+      s('text', { x: cx, y: H - m.b + 16, 'text-anchor': 'middle', 'class': 't-b' }, svg, Math.round(f * 100) + '%');
+      s('text', { x: cx, y: H - m.b + 31, 'text-anchor': 'middle', 'class': 't' }, svg, Math.round(f * 600) + (narrow ? ' rec.' : ' records'));
+      var g = band * (narrow ? 0.24 : 0.22), d = band * (narrow ? 0.085 : 0.075);
+      NAMES.forEach(function (name, di) {
+        var gx = cx + (di ? g : -g), group = rows.filter(function (a) { return a.d === name; }), pair = group.length > 1;
+        s('line', { x1: gx - d - 5, x2: gx + d + 5, y1: y(group[0].floor * 100), y2: y(group[0].floor * 100), 'class': 'floor' }, svg);
+        group.forEach(function (a) {
+          var x = pair ? gx + (a.pilot === 60 ? -d : d) : gx, yy = y(a.med * 100), yp = y(a.p90 * 100), mark = s('g', {}, svg);
+          s('line', { x1: x, x2: x, y1: yy, y2: yp, 'class': 'w-mi' }, mark); s('line', { x1: x - 3, x2: x + 3, y1: yp, y2: yp, 'class': 'w-mi' }, mark);
+          marker(mark, SHAPE[name], x, yy, a.pilot === 60 ? 'm-mi' : 'm-hollow', a.pilot === 60 ? 5 : 4.5);
+          s('circle', { cx: x, cy: yy, r: 12, 'class': 'hit' }, mark);
+          bindMark(mark, function () { return { head: DATA.datasets[name].short + ', ' + a.pilot + '-record pilot, target ' + Math.round(f * 100) + '% (' + Math.round(f * 600) + ' records)', rows: [{ value: pct(a.med), label: 'median error (95% interval ' + pct(a.lo) + ' to ' + pct(a.hi) + ')', color: '--s-mi' }, { value: pct(a.p90), label: '90th percentile' }, { value: signed(a.signed * 100, 1) + '%', label: 'signed median error' }, { value: pct(a.floor), label: 'noise floor' }, { value: pct(a.retest), label: 'retest, another imputation seed' }, { value: num(a.compared), label: 'cohorts compared' }] }; });
+        });
+      });
+    });
+  }
+  function renderTestTable() {
+    var rows = DATA.accuracy.slice().sort(function (a, b) { return a.d.localeCompare(b.d) || a.pilot - b.pilot || a.f - b.f; }).map(function (a) { return [DATA.datasets[a.d].short + ', ' + a.pilot + '-record pilot', Math.round(a.f * 100) + '% (' + Math.round(a.f * 600) + ')', pct(a.med), pct(a.lo) + ' to ' + pct(a.hi), pct(a.p90), signed(a.signed * 100, 1) + '%', pct(a.floor), pct(a.retest), num(a.compared), a.med > 0.1 ? chip('st-red', '✕ above limit') : chip('st-green', '✓ within')]; });
+    table($('fig2-table'), null, ['Dataset, pilot', 'Target', 'Median error', '95% interval', 'p90', 'Signed', 'Noise floor', 'Retest', 'Cohorts', 'Rule'], rows);
+  }
+
+  /* calculator state */
+  var st = { n: 600, dist: 25, audit: 150, mode: 'type', k: 0, k0: 0, kLo: null, kHi: null, k0Lo: null, k0Hi: null, title: '', source: '', band: '', predictive: null, pilot: null, iv: null, ctx: null };
+  function presetValues(v) { var name = v.indexOf('nhanes') === 0 ? 'nhanes' : 'ctgov', size = v.replace(name, ''), d = DATA.datasets[name], p = d.pilots[size]; return { name: name, size: size, d: d, k: d.pool_k, k0: d.pool_discard_k, lo: p.k_q05, hi: p.k_q95 }; }
+  function applyPreset(v) {
+    var p = presetValues(v);
+    st.k = p.k; st.k0 = p.k0; st.kLo = p.lo; st.kHi = p.hi; st.k0Lo = null; st.k0Hi = null; st.predictive = null; st.pilot = null;
+    $('in-k').value = p.k.toFixed(4); $('in-k0').value = p.k0.toFixed(4); $('in-klo').value = p.lo.toFixed(4); $('in-khi').value = p.hi.toFixed(4);
+    st.title = 'Example: ' + p.d.short + ' pool values';
+    st.source = 'Example loaded: ' + p.d.short + ' pool k, with the spread seen across ' + p.size + '-record pilots. The band is the 5th to 95th percentile of pilot k in the study. Change any input to use your own values.';
+    st.band = 'k range: 5th to 95th percentile of pilot k in the study';
+  }
+  function readTyped() {
+    var err = $('type-err'), k = parseFloat($('in-k').value), k0 = parseFloat($('in-k0').value), lo = $('in-klo').value === '' ? null : parseFloat($('in-klo').value), hi = $('in-khi').value === '' ? null : parseFloat($('in-khi').value), msg = '';
+    if (!(k >= 0 && k <= 2)) msg = 'k must be a number from 0 to 2.';
+    else if (!(k0 >= 0 && k0 <= 2)) msg = 'The k for discarding recorded values must be a number from 0 to 2.';
+    else if ((lo !== null && !(lo >= 0 && lo <= k)) || (hi !== null && !(hi >= k && hi <= 2))) msg = 'The k range needs low ≤ k ≤ high, within 0 to 2. Leave both blank for no band.';
+    err.hidden = !msg; err.textContent = msg;
+    if (msg) return false;
+    st.k = k; st.k0 = k0; st.kLo = lo; st.kHi = hi; st.k0Lo = null; st.k0Hi = null; st.predictive = null; st.pilot = null;
+    st.title = 'Your values'; st.source = 'Using the k values you typed.' + (lo !== null && hi !== null ? ' The band is the range you typed.' : ' No band without a k range.');
+    st.band = 'k range you typed';
+    return true;
+  }
+
+  /* FIG-03 */
+  function drawMain() {
+    var el = $('fig3'), W = el.clientWidth; if (W < 200) return;
+    var narrow = W < 520, H = narrow ? 340 : 420, m = { l: narrow ? 42 : 48, r: 12, t: 12, b: 48 }, n = st.n, r = 1 + st.dist / 100;
+    var svg = mount(el, W, H, 'Expected interval width against audit fraction for linear MI and for discarding recorded values, with observed points from two datasets');
+    var xMin = 0.02, xMax = 1, yMax = 7, x = logS(xMin, xMax, m.l, W - m.r), y = logS(1, yMax, H - m.b, m.t), id = 'clip-main';
+    s('rect', { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b }, s('clipPath', { id: id }, s('defs', {}, svg)));
+    var zoneF = 30 / n;
+    if (zoneF > xMin) {
+      var zx = x(Math.min(zoneF, xMax)); s('rect', { x: m.l, y: m.t, width: zx - m.l, height: H - m.t - m.b, 'class': 'zone' }, svg);
+      if (zx - m.l >= 50) ['≤ 30', 'records:', 'failed'].forEach(function (t, i) { s('text', { x: m.l + 5, y: y(3.75) + i * 14, 'class': 't t-red t-halo', 'data-zone': '1' }, svg, t); });
+    }
+    var yTicks = [1, 1.25, 1.5, 2, 3, 4, 6];
+    yTicks.forEach(function (v) { s('line', { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), 'class': v === 1 ? 'axis' : 'gl' }, svg); if (Math.abs(y(v) - y(r)) > 12) s('text', { x: m.l - 6, y: y(v) + 4, 'text-anchor': 'end', 'class': 't' }, svg, v + '×'); });
+    (narrow ? [0.05, 0.1, 0.25, 0.5, 1] : [0.02, 0.05, 0.1, 0.25, 0.5, 0.75, 1]).forEach(function (f) {
+      var px = x(f); s('line', { x1: px, x2: px, y1: m.t, y2: H - m.b, 'class': 'gl' }, svg);
+      s('text', { x: px, y: H - m.b + 15, 'text-anchor': f === 1 ? 'end' : 'middle', 'class': 't-b' }, svg, Math.round(f * 100) + '%');
+      s('text', { x: px, y: H - m.b + 30, 'text-anchor': f === 1 ? 'end' : 'middle', 'class': 't' }, svg, compact(K.recordsAt(f, n)));
+    });
+    s('text', { x: m.l, y: H - 4, 'class': 't' }, svg, narrow ? 'Audit fraction, then records' : 'Audit fraction, then records at this cohort size');
+    var labelZone = W - m.r;
+    var plot = s('g', { 'clip-path': 'url(#' + id + ')' }, svg), fs = [], i;
+    for (i = 0; i <= 120; i++) fs.push(Math.exp(Math.log(xMin) + i / 120 * (Math.log(xMax) - Math.log(xMin))));
+    function curve(k) { return fs.map(function (f, j) { return (j ? 'L' : 'M') + x(f).toFixed(1) + ' ' + y(K.relative(k, f)).toFixed(1); }).join(''); }
+    function band(lo, hi, cls) { var up = fs.map(function (f, j) { return (j ? 'L' : 'M') + x(f).toFixed(1) + ' ' + y(K.relative(hi, f)).toFixed(1); }).join(''), down = fs.slice().reverse().map(function (f) { return 'L' + x(f).toFixed(1) + ' ' + y(K.relative(lo, f)).toFixed(1); }).join(''); s('path', { d: up + down + 'Z', 'class': cls }, plot); }
+    if (st.kLo !== null && st.kHi !== null) band(st.kLo, st.kHi, 'b-mi');
+    if (st.k0Lo !== null && st.k0Hi !== null) band(st.k0Lo, st.k0Hi, 'b-disc');
+    s('path', { d: curve(st.k0), 'class': 'c-disc' }, plot);
+    s('path', { d: curve(st.k), 'class': 'c-mi' }, plot);
+    /* target line and the two crossings */
+    s('line', { x1: m.l, x2: W - m.r, y1: y(r), y2: y(r), 'class': 'target' }, svg);
+    s('text', { x: m.l - 6, y: y(r) + 4, 'text-anchor': 'end', 'class': 't-b' }, svg, Number(r.toFixed(2)) + '×');
+    var fMi = K.required(st.k, r), fD = K.required(st.k0, r), lastEnd = -1e9, lastY = 0;
+    [[fMi, K.recordsFor(st.k, r, n), '--s-mi'], [fD, K.recordsFor(st.k0, r, n), '--s-disc']].forEach(function (c) {
+      if (c[0] < xMin) return;
+      var px = x(c[0]), line = s('line', { x1: px, x2: px, y1: y(r), y2: H - m.b, 'class': 'drop' }, svg); line.style.stroke = 'var(' + c[2] + ')';
+      s('circle', { cx: px, cy: y(r), r: 4, 'class': c[2] === '--s-mi' ? 'm-mi' : 'm-disc', 'pointer-events': 'none' }, svg);
+      var label = compact(c[1]) + (narrow ? ' rec.' : ' records'), w = label.length * 7.1, right = px + 7 + w <= labelZone, x0 = right ? px + 7 : px - 7 - w, ly = right ? y(r) - 7 : y(r) + 16;
+      if (x0 < lastEnd + 4) ly = lastY - 14;
+      s('text', { x: x0, y: ly, 'class': 't-b t-halo' }, svg, label);
+      lastEnd = x0 + w; lastY = ly;
+    });
+    /* planned audit */
+    var af = st.audit / n;
+    if (af >= xMin) {
+      var ax0 = x(af); s('line', { x1: ax0, x2: ax0, y1: m.t, y2: H - m.b, 'class': 'target' }, svg);
+      var nearRight = ax0 > W - m.r - 80; s('text', { x: ax0 + (nearRight ? -5 : 5), y: m.t + 12, 'text-anchor': nearRight ? 'end' : 'start', 'class': 't-b t-halo' }, svg, 'Audit ' + compact(st.audit));
+      [[st.k0, 'm-disc'], [st.k, 'm-mi']].forEach(function (c) { var v = K.relative(c[0], af); if (v <= yMax) s('circle', { cx: ax0, cy: y(v), r: 4, 'class': c[1], 'pointer-events': 'none' }, svg); });
+    }
+    /* direct labels on the two curves, above the audit line so its stroke does not cross them */
+    var fL = 0.14; if (K.relative(st.k0, fL) <= yMax * 0.92) s('text', { x: x(fL) + 9, y: y(K.relative(st.k0, fL)) - 2, 'class': 't t-halo' }, svg, 'Discards recorded');
+    var fT = Math.max(0.056, Math.min(0.5, zoneF * 1.12)), topK = st.kHi !== null ? st.kHi : st.k, lyT = y(K.relative(topK, fT)) - 7;
+    if (K.relative(topK, fT) <= yMax * 0.9 && (lyT < y(r) - 30 || lyT > y(r) + 16)) s('text', { x: x(fT) + 2, y: lyT, 'class': 't t-halo' }, svg, 'Linear MI');
+    /* hover layer: crosshair on the curves, then the observed points on top */
+    var ov = s('rect', { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b, 'class': 'hover-ov' }, svg), xh = null;
+    function moveXh(e) {
+      var pt = svg.getBoundingClientRect(), px = clamp(e.clientX - pt.left, m.l, W - m.r), f = Math.exp(Math.log(xMin) + (px - m.l) / (W - m.l - m.r) * (Math.log(xMax) - Math.log(xMin)));
+      if (!xh) xh = s('line', { y1: m.t, y2: H - m.b, 'class': 'xh' }, svg); xh.setAttribute('x1', px); xh.setAttribute('x2', px);
+      var rows = [{ value: ratio(K.relative(st.k, f)), label: 'linear MI', color: '--s-mi' }];
+      if (st.kLo !== null && st.kHi !== null) rows.push({ value: ratio(K.relative(st.kLo, f)) + ' to ' + ratio(K.relative(st.kHi, f)), label: 'at the k range' });
+      rows.push({ value: ratio(K.relative(st.k0, f)), label: 'discarding recorded values', color: '--s-disc' });
+      showTip(e.clientX, e.clientY, { head: pct(f) + ' audit, ' + num(K.recordsAt(f, n)) + ' of ' + num(n) + ' records', rows: rows });
+    }
+    ov.addEventListener('pointermove', moveXh); ov.addEventListener('pointerenter', moveXh);
+    ov.addEventListener('pointerleave', function (e) { if (xh) { xh.remove(); xh = null; } if (e.pointerType === 'touch') tipTimer = setTimeout(hideTip, 2600); else hideTip(); });
+    if (st.predictive) st.predictive.forEach(function (p) {
+      if (p.fraction < xMin) return;
+      var px = x(p.fraction), mark = s('g', {}, svg), y0 = y(clamp(p.lower, 1, yMax)), y1 = y(clamp(p.upper, 1, yMax));
+      s('line', { x1: px, x2: px, y1: y0, y2: y1, 'class': 'w-mi' }, mark); s('line', { x1: px - 3, x2: px + 3, y1: y0, y2: y0, 'class': 'w-mi' }, mark); s('line', { x1: px - 3, x2: px + 3, y1: y1, y2: y1, 'class': 'w-mi' }, mark);
+      s('rect', { x: px - 8, y: Math.min(y0, y1), width: 16, height: Math.max(Math.abs(y0 - y1), 16), 'class': 'hit' }, mark);
+      bindMark(mark, function () { return { head: 'One audit of ' + num(p.records) + ' records (' + pct(p.fraction, 0) + ')', rows: [{ value: ratio(p.lower) + ' to ' + ratio(p.upper), label: 'predictive range, 95% nominal', color: '--s-mi' }] }; });
+    });
+    NAMES.forEach(function (name, di) {
+      var d = DATA.datasets[name], nudge = di ? 3 : -3;
+      d.frozen.forEach(function (row) {
+        [['mi', 'm-mi', 'Linear MI', d.pool_k, '--s-mi', st.k], ['ref', 'm-disc', 'Reference normal, discarding', d.pool_discard_k, '--s-disc', st.k0]].forEach(function (c) {
+          var obs = row[c[0]] / row.oracle, form = K.relative(c[3], row.f), mark = s('g', {}, svg), px = x(row.f) + nudge, py = y(obs);
+          marker(mark, SHAPE[name], px, py, c[1], 5); s('circle', { cx: px, cy: py, r: 12, 'class': 'hit' }, mark);
+          bindMark(mark, function () { return { head: d.short + ', ' + pct(row.f, 0) + ' audit, ' + c[2], rows: [{ value: ratio(obs), label: 'observed, frozen study, ' + num(row.cohorts) + ' cohorts', color: c[4] }, { value: ratio(form), label: 'formula at this dataset\'s k, ' + c[3].toFixed(c[3] > 0.5 ? 3 : 4) }, { value: signed((obs - form) / obs * 100, 1) + '%', label: 'observed minus formula, as a share of observed' }, { value: ratio(K.relative(c[5], row.f)), label: 'curve shown, at the k in use' }] }; });
+        });
+      });
+    });
+  }
+  function compact(v) { return v >= 100000 ? (v / 1000).toFixed(0) + 'K' : v >= 10000 ? (v / 1000).toFixed(1) + 'K' : num(v); }
+
+  function renderCalc() {
+    var n = st.n, r = 1 + st.dist / 100, a = Math.min(st.audit, n), f = a / n, hasBand = st.kLo !== null && st.kHi !== null, d = st.dist + '%';
+    $('out-title').textContent = st.title; $('out-source').textContent = st.source;
+    $('dist-hint').textContent = 'Target width ratio ' + Number(r.toFixed(2));
+    $('t-target-k').textContent = 'Within ' + d + ', linear MI'; $('t-target-k0').textContent = 'Within ' + d + ', discarding';
+    var miRec = K.recordsFor(st.k, r, n), dRec = K.recordsFor(st.k0, r, n);
+    function value(el, big, small) { el.textContent = big; if (small) h('small', '', ' ' + small, el); }
+    value($('t-mi'), num(miRec), 'of ' + num(n));
+    var miS = hasBand ? 'At the k range: ' + num(K.recordsFor(st.kLo, r, n)) + ' to ' + num(K.recordsFor(st.kHi, r, n)) + ' records.' : 'No k range given.';
+    if (st.pilot) miS += ' ' + num(Math.max(0, miRec - st.pilot.referenceRows)) + ' beyond your ' + num(st.pilot.referenceRows) + '-row pilot.';
+    $('t-mi-s').textContent = miS;
+    value($('t-disc'), num(dRec), 'of ' + num(n));
+    $('t-disc-s').textContent = (st.k0Lo !== null ? 'At the k range: ' + num(K.recordsFor(st.k0Lo, r, n)) + ' to ' + num(K.recordsFor(st.k0Hi, r, n)) + ' records. ' : '') + 'k = ' + st.k0.toFixed(3) + '.';
+    $('t-audit-k').textContent = 'Audit of ' + num(a) + ' records';
+    value($('t-audit'), ratio(K.relative(st.k, f)), 'linear MI');
+    $('t-audit-s').textContent = ratio(K.relative(st.k0, f)) + ' discarding recorded values.' + (hasBand ? ' k range: ' + ratio(K.relative(st.kLo, f)) + ' to ' + ratio(K.relative(st.kHi, f)) + '.' : '');
+    var note = $('audit-note'); note.textContent = ''; note.style.cssText = 'margin:10px 0 2px;display:flex;flex-wrap:wrap;gap:6px';
+    if (a <= 30) h('span', 'st st-red', '✕ At or below the 30-record audit that failed the test. One audit this small is not predictable.', note);
+    else if (a < 60) h('span', 'st st-amber', '! Between the failed 30-record size and the next tested size, 60 records.', note);
+    else h('span', 'st st-plain', 'Tested sizes of 60 to 300 records came within 7.8% at the median and 20.6% at p90. Descriptive only.', note);
+    if (n !== 600) h('span', 'st st-amber', '! The test used cohorts of 600. This cohort size is extrapolation.', note);
+    if (st.pilot && st.pilot.flags.some(function (x) { return x.name === 'gross_errors'; })) h('span', 'st st-red', '✕ Gross-error warning: do not rely on this plan. Review the recording audit first.', note);
+    legend($('fig3-legend'), [{ type: 'line', cls: 'c-mi', label: 'Linear MI, keeps recorded' }, { type: 'line', cls: 'c-disc', label: 'Discards recorded' }].concat(hasBand ? [{ type: 'band', cls: 'b-mi', label: st.band }] : []).concat(st.predictive ? [{ type: 'whisker', cls: 'w-mi', w: 12, label: 'One audit, predictive range' }] : []).concat([{ type: 'point', shape: 'circle', cls: 'm-n', w: 14, label: 'ClinicalTrials.gov, observed' }, { type: 'point', shape: 'diamond', cls: 'm-n', w: 14, label: 'NHANES, observed' }]));
+    drawMain(); renderMainTables(); drawPilotK();
+  }
+  function renderMainTables() {
+    var n = st.n, hasBand = st.kLo !== null && st.kHi !== null, heads = ['Audit', 'Records', 'Linear MI'], fs = [0.05, 0.1, 0.25, 0.5, 0.75, 1];
+    if (hasBand) heads.push('At k low', 'At k high');
+    heads.push('Discarding');
+    if (st.k0Lo !== null) heads.push('At k low', 'At k high');
+    if (st.predictive) heads.push('One audit, predictive');
+    var rows = fs.map(function (f) {
+      var row = [pct(f, 0), num(K.recordsAt(f, n)), ratio(K.relative(st.k, f))];
+      if (hasBand) row.push(ratio(K.relative(st.kLo, f)), ratio(K.relative(st.kHi, f)));
+      row.push(ratio(K.relative(st.k0, f)));
+      if (st.k0Lo !== null) row.push(ratio(K.relative(st.k0Lo, f)), ratio(K.relative(st.k0Hi, f)));
+      if (st.predictive) { var p = st.predictive.filter(function (q) { return q.fraction === f; })[0]; row.push(p ? ratio(p.lower) + ' to ' + ratio(p.upper) : 'not run'); }
+      return row;
+    });
+    table($('fig3-table'), 'Curves at the inputs in use', heads, rows);
+    var obs = [];
+    NAMES.forEach(function (name) { var d = DATA.datasets[name]; d.frozen.forEach(function (x) { obs.push([d.short, pct(x.f, 0), num(x.cohorts), ratio(x.mi / x.oracle), ratio(x.ref / x.oracle)]); }); });
+    table($('fig3-obs'), 'Observed points: frozen study mean width over mean oracle width', ['Dataset', 'Audit', 'Cohorts', 'Linear MI', 'Reference normal'], obs);
+  }
+
+  /* FIG-05 */
+  function drawPilotK() {
+    var el = $('fig5'), W = el.clientWidth; if (W < 200) return;
+    var narrow = W < 520, rowH = 30, labelW = narrow ? 112 : 210, list = [{ inUse: true, label: st.pilot ? (narrow ? 'Your pilot' : 'Your pilot, bootstrap interval') : (narrow ? 'k in use' : 'k in use, with its range') }];
+    NAMES.forEach(function (name) { ['60', '150'].forEach(function (size) { list.push({ name: name, size: size, d: DATA.datasets[name], p: DATA.datasets[name].pilots[size], label: (narrow ? (name === 'ctgov' ? 'CT.gov' : 'NHANES') : DATA.datasets[name].short) + ', ' + size + (narrow ? '' : ' records') }); }); });
+    var H = 16 + list.length * rowH + 26, svg = mount(el, W, H, 'Spread of pilot estimates of k by dataset and pilot size'), x = logS(0.0008, 0.25, labelW, W - 12), yOf = function (i) { return 12 + i * rowH + rowH / 2; };
+    (narrow ? [0.001, 0.01, 0.1] : [0.001, 0.01, 0.05, 0.1, 0.2]).forEach(function (v) { var px = x(v); s('line', { x1: px, x2: px, y1: 8, y2: H - 22, 'class': 'gl' }, svg); s('text', { x: px, y: H - 8, 'text-anchor': 'middle', 'class': 't' }, svg, String(v)); });
+    function cx(v) { return x(clamp(v, 0.0008, 0.25)); }
+    list.forEach(function (row, i) {
+      var py = yOf(i); s('text', { x: 0, y: py + 4, 'class': row.inUse ? 't-b' : 't' }, svg, row.label);
+      if (row.inUse) {
+        var mark0 = s('g', {}, svg);
+        if (st.kLo !== null && st.kHi !== null) { s('line', { x1: cx(st.kLo), x2: cx(st.kHi), y1: py, y2: py, 'class': 'med' }, mark0); }
+        marker(mark0, 'circle', cx(st.k), py, 'm-ink', 5); s('rect', { x: Math.min(cx(st.kLo === null ? st.k : st.kLo), cx(st.k) - 12), y: py - 12, width: Math.max(cx(st.kHi === null ? st.k : st.kHi) - cx(st.kLo === null ? st.k : st.kLo), 24), height: 24, 'class': 'hit' }, mark0);
+        bindMark(mark0, function () { return { head: st.pilot ? 'Your pilot' : 'k in use', rows: [{ value: kf(st.k), label: 'k' }].concat(st.kLo !== null && st.kHi !== null ? [{ value: kf(st.kLo) + ' to ' + kf(st.kHi), label: 'range' }] : []) }; });
+        return;
+      }
+      var p = row.p, mark = s('g', {}, svg);
+      s('line', { x1: cx(p.k_q05), x2: cx(p.k_q95), y1: py, y2: py, 'class': 'w-mi' }, mark);
+      s('rect', { x: cx(p.k_q25), y: py - 6, width: cx(p.k_q75) - cx(p.k_q25), height: 12, rx: 2, 'class': 'iqr' }, mark);
+      s('line', { x1: cx(p.k_median), x2: cx(p.k_median), y1: py - 7, y2: py + 7, 'class': 'med' }, mark);
+      marker(mark, SHAPE[row.name], cx(row.d.pool_k), py, 'm-mi', 5);
+      s('rect', { x: cx(p.k_q05) - 4, y: py - 12, width: cx(p.k_q95) - cx(p.k_q05) + 8, height: 24, 'class': 'hit' }, mark);
+      var ans = row.d.answers[row.size];
+      bindMark(mark, function () { return { head: row.d.short + ', ' + row.size + '-record pilot, ' + num(p.plans_returned) + ' plans', rows: [{ value: kf(p.k_median), label: 'median pilot k' }, { value: kf(p.k_q05) + ' to ' + kf(p.k_q95), label: '5th to 95th percentile', color: '--s-mi' }, { value: kf(row.d.pool_k), label: 'pool k' }, { value: pct(p.interval_covers_pool), label: 'k interval contained pool k' }, { value: num(ans.med) + ' (' + num(ans.q05) + ' to ' + num(ans.q95) + ')', label: 'records for within 25%, of 600' }] }; });
+    });
+    legend($('fig5-legend'), [{ type: 'range', w: 26, label: 'Pilot k: 5th to 95th percentile, middle half, median' }, { type: 'point', shape: 'circle', cls: 'm-mi', w: 14, label: 'Pool k, ClinicalTrials.gov' }, { type: 'point', shape: 'diamond', cls: 'm-mi', w: 14, label: 'Pool k, NHANES' }, { type: 'point', shape: 'circle', cls: 'm-ink', w: 14, label: st.pilot ? 'Your pilot k' : 'k in use' }]);
+  }
+  function renderPilotTable() {
+    var rows = [];
+    NAMES.forEach(function (name) { var d = DATA.datasets[name]; ['60', '150'].forEach(function (size) { var p = d.pilots[size], a = d.answers[size]; rows.push([d.short + ', ' + size, kf(d.pool_k), kf(p.k_median), kf(p.k_q05) + ' to ' + kf(p.k_q95), kf(p.k_q25) + ' to ' + kf(p.k_q75), pct(p.interval_covers_pool), num(a.med) + ' (' + num(a.q05) + ' to ' + num(a.q95) + ')']); }); });
+    table($('fig5-table'), null, ['Dataset, pilot', 'Pool k', 'Median', '5th to 95th', '25th to 75th', 'Interval has pool k', 'Records for within 25%'], rows);
+  }
+
+  /* FIG-04 and Table 1 */
+  function drawFit(elId, name) {
+    var el = $(elId), W = el.clientWidth; if (W < 200) return;
+    var d = DATA.datasets[name], H = 316, m = { l: 42, r: 12, t: 14, b: 56 }, svg = mount(el, W, H, d.short + ': width ratio against audit fraction, curve and observed single audits'), x = logS(0.035, 0.7, m.l, W - m.r), y = logS(1, 2.9, H - m.b, m.t);
+    [1, 1.25, 1.5, 2, 2.5].forEach(function (v) { s('line', { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), 'class': v === 1 ? 'axis' : 'gl' }, svg); s('text', { x: m.l - 6, y: y(v) + 4, 'text-anchor': 'end', 'class': 't' }, svg, v + '×'); });
+    d.single.forEach(function (a) { var px = x(a.f); s('text', { x: px, y: H - m.b + 15, 'text-anchor': 'middle', 'class': 't-b' }, svg, Math.round(a.f * 100) + '%'); s('text', { x: px, y: H - m.b + 30, 'text-anchor': 'middle', 'class': 't' }, svg, String(a.records)); });
+    s('text', { x: m.l, y: H - 4, 'class': 't' }, svg, 'Audit fraction, then records of 600');
+    var fs = [], i; for (i = 0; i <= 60; i++) fs.push(0.035 * Math.pow(0.7 / 0.035, i / 60));
+    s('path', { d: fs.map(function (f, j) { return (j ? 'L' : 'M') + x(f).toFixed(1) + ' ' + y(K.relative(d.pool_k, f)).toFixed(1); }).join(''), 'class': 'c-mi' }, svg);
+    d.single.forEach(function (a) {
+      var px = x(a.f), mark = s('g', {}, svg), frozen = d.frozen.filter(function (z) { return z.f === a.f; })[0], form = K.relative(d.pool_k, a.f);
+      s('line', { x1: px, x2: px, y1: y(a.q05), y2: y(a.q95), 'class': 'w-mi' }, mark);
+      s('line', { x1: px - 4, x2: px + 4, y1: y(a.q95), y2: y(a.q95), 'class': 'w-mi' }, mark);
+      s('line', { x1: px - 4, x2: px + 4, y1: y(a.q05), y2: y(a.q05), 'class': 'w-mi' }, mark);
+      s('rect', { x: px - 5, y: y(a.q75), width: 10, height: Math.max(y(a.q25) - y(a.q75), 2), rx: 2, 'class': 'iqr' }, mark);
+      s('line', { x1: px - 7, x2: px + 7, y1: y(a.q50), y2: y(a.q50), 'class': 'med' }, mark);
+      marker(mark, SHAPE[name], px - 12, y(a.mean), 'm-hollow', 4);
+      if (frozen) marker(mark, SHAPE[name], px + 12, y(frozen.mi / frozen.oracle), 'm-mi', 5);
+      s('rect', { x: px - 18, y: Math.min(y(a.q95), y(a.q50) - 12) - 2, width: 36, height: Math.max(y(a.q05) - y(a.q95) + 4, 28), 'class': 'hit' }, mark);
+      bindMark(mark, function () { return { head: d.short + ', ' + Math.round(a.f * 100) + '% audit (' + a.records + ' of 600)', rows: [{ value: ratio(form), label: 'formula at pool k', color: '--s-mi' }, { value: ratio(a.q50), label: 'median of one audit, ' + num(a.ok) + ' cohorts' }, { value: ratio(a.q05) + ' to ' + ratio(a.q95), label: '5th to 95th percentile' }, { value: ratio(a.mean), label: 'mean in this test' }].concat(frozen ? [{ value: ratio(frozen.mi / frozen.oracle), label: 'mean in the frozen study' }] : [{ value: 'none', label: 'frozen study did not run this size' }]) }; });
+      if (a.f === 0.05) { s('text', { x: px + 9, y: y(a.q95) + 4, 'class': 't-b t-halo' }, svg, ratio(a.q95)); s('text', { x: px + 9, y: y(a.q05) - 3, 'class': 't-b t-halo' }, svg, ratio(a.q05)); }
+    });
+  }
+  function renderFitTables() {
+    var rows = [];
+    NAMES.forEach(function (name) { var d = DATA.datasets[name]; d.single.forEach(function (a) { var f = d.frozen.filter(function (z) { return z.f === a.f; })[0]; rows.push([d.short, Math.round(a.f * 100) + '% (' + a.records + ')', num(a.ok), ratio(K.relative(d.pool_k, a.f)), ratio(a.q50), ratio(a.q05) + ' to ' + ratio(a.q95), ratio(a.q25) + ' to ' + ratio(a.q75), ratio(a.mean), f ? ratio(f.mi / f.oracle) : 'not run']); }); });
+    table($('fig4-table'), null, ['Dataset', 'Audit (records)', 'Cohorts', 'Formula', 'Median', '5th to 95th', '25th to 75th', 'Mean, this test', 'Mean, frozen'], rows);
+    function gapChip(g) { var v = signed(g * 100, 1) + '%'; if (Math.abs(g) > 0.1) return chip('st-red', '✕ ' + v); if (Math.abs(g) > 0.05) return chip('st-amber', '! ' + v); return v; }
+    var fit = [];
+    NAMES.forEach(function (name) { var d = DATA.datasets[name]; d.frozen.forEach(function (x) { var mi = x.mi / x.oracle, fm = K.relative(d.pool_k, x.f), rf = x.ref / x.oracle, fd = K.relative(d.pool_discard_k, x.f); var first = h('span', '', d.short + ', ' + Math.round(x.f * 100) + '%'); h('small', '', num(x.cohorts) + ' cohorts', first); fit.push([{ node: first }, ratio(fm), ratio(mi), gapChip((mi - fm) / mi), ratio(fd), ratio(rf), gapChip((rf - fd) / rf)]); }); });
+    table($('fit-table'), null, ['Dataset, audit', 'Linear MI formula', 'Linear MI observed', 'Gap', 'Discarding formula', 'Discarding observed', 'Gap'], fit);
+  }
+
+  /* CSV */
+  var MISSING = /^(|na|n\/a|nan|null|\.)$/i;
+  function parseCSV(text) {
+    var first = text.split(/\r?\n/).filter(function (l) { return l.trim(); })[0] || '', delims = [',', '\t', ';'], best = ',', bestN = -1;
+    delims.forEach(function (c) { var cnt = first.split(c).length; if (cnt > bestN) { bestN = cnt; best = c; } });
+    var rows = [], row = [], cur = '', q = false, i, ch;
+    for (i = 0; i < text.length; i++) {
+      ch = text[i];
+      if (q) { if (ch === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
+      else if (ch === '"') q = true;
+      else if (ch === best) { row.push(cur); cur = ''; }
+      else if (ch === '\n' || ch === '\r') { if (ch === '\r' && text[i + 1] === '\n') i++; row.push(cur); cur = ''; if (row.some(function (c) { return c.trim() !== ''; })) rows.push(row); row = []; }
+      else cur += ch;
+    }
+    if (cur !== '' || row.length) { row.push(cur); if (row.some(function (c) { return c.trim() !== ''; })) rows.push(row); }
+    if (rows.length < 2) throw new Error('Paste a header row and at least one data row.');
+    var header = rows[0].map(function (c, j) { return c.trim() || 'column ' + (j + 1); }), data = rows.slice(1);
+    if (new Set(header).size !== header.length) throw new Error('Two columns share the name "' + header.filter(function (c, j) { return header.indexOf(c) !== j; })[0] + '". Rename one.');
+    data.forEach(function (r, j) { if (r.length !== header.length) throw new Error('Data row ' + (j + 1) + ' has ' + r.length + ' fields and the header has ' + header.length + '.'); });
+    return { header: header, rows: data.map(function (r) { return r.map(function (c) { return c.trim(); }); }) };
+  }
+  function columnInfo(parsed) {
+    return parsed.header.map(function (name, j) {
+      var vals = parsed.rows.map(function (r) { return r[j]; }).filter(function (v) { return !MISSING.test(v); }), numeric = vals.length > 0 && vals.every(function (v) { return isFinite(Number(v)); }), levels = numeric ? null : Array.from(new Set(vals)).sort();
+      return { name: name, index: j, numeric: numeric, levels: levels };
+    });
+  }
+  function idName(c) { return /(^|_)(id|subjid|usubjid|subject|row)$/i.test(c.name); }
+  function idLike(c, rows) { return idName(c) || (!c.numeric && c.levels && (c.levels.length > 20 || c.levels.length >= rows)); }
+  function guess(info, patterns, taken, rows) {
+    var i;
+    for (var p = 0; p < patterns.length; p++) for (i = 0; i < info.length; i++) if (taken.indexOf(i) < 0 && !idName(info[i]) && patterns[p].test(info[i].name)) return i;
+    for (i = 0; i < info.length; i++) if (taken.indexOf(i) < 0 && !idLike(info[i], rows) && info[i].numeric) return i;
+    for (i = 0; i < info.length; i++) if (taken.indexOf(i) < 0) return i;
+    return 0;
+  }
+  var parsedCSV = null, csvInfo = null, csvRun = 0, exampleText = null, exampleVector = null, parsedText = null;
+  function fillSelect(sel, info, chosen) { sel.textContent = ''; info.forEach(function (c, i) { var o = h('option', '', c.name, sel); o.value = String(i); if (i === chosen) o.selected = true; }); }
+  function refreshMapping() {
+    var err = $('csv-err'), wrap = $('map-wrap'); err.hidden = true; err.textContent = ''; parsedText = $('in-csv').value;
+    try { parsedCSV = parseCSV(parsedText); }
+    catch (e) { parsedCSV = null; wrap.hidden = true; err.hidden = false; err.textContent = e.message; return false; }
+    csvInfo = columnInfo(parsedCSV);
+    var rowCount = parsedCSV.rows.length, taken = [], ir = guess(csvInfo, [/^recorded$/i, /^recorded/i, /record|^edc|^crf|^value$/i], taken, rowCount); taken.push(ir);
+    var iy = guess(csvInfo, [/^reference$/i, /^reference/i, /refer|^ref$|gold|^source$|^sdv|truth|audit/i], taken, rowCount); taken.push(iy);
+    var io = guess(csvInfo, [/^outcome$/i, /outcome|^y$|response|endpoint/i], taken, rowCount); taken.push(io);
+    fillSelect($('map-rec'), csvInfo, ir); fillSelect($('map-ref'), csvInfo, iy); fillSelect($('map-out'), csvInfo, io);
+    var cov = $('map-cov'); cov.textContent = '';
+    csvInfo.forEach(function (c, i) {
+      if (taken.indexOf(i) >= 0) return;
+      var lab = h('label', '', undefined, cov), box = h('input', '', undefined, lab); box.type = 'checkbox'; box.value = String(i); box.checked = !idLike(c, rowCount);
+      lab.appendChild(document.createTextNode(c.name + (c.numeric ? '' : ' (text)')));
+    });
+    if (!cov.children.length) h('span', 'hint', 'No other columns. The analysis will have no covariates.', cov);
+    wrap.hidden = false;
+    return true;
+  }
+  function refreshCovariates() {
+    var chosen = [$('map-rec').value, $('map-ref').value, $('map-out').value], cov = $('map-cov'), kept = {};
+    Array.prototype.forEach.call(cov.querySelectorAll('input'), function (b) { kept[b.value] = b.checked; }); cov.textContent = '';
+    csvInfo.forEach(function (c, i) { if (chosen.indexOf(String(i)) >= 0) return; var lab = h('label', '', undefined, cov), box = h('input', '', undefined, lab); box.type = 'checkbox'; box.value = String(i); box.checked = kept[String(i)] !== undefined ? kept[String(i)] : !idLike(c, parsedCSV.rows.length); lab.appendChild(document.createTextNode(c.name + (c.numeric ? '' : ' (text)'))); });
+  }
+  function buildInput() {
+    var ir = +$('map-rec').value, iy = +$('map-ref').value, io = +$('map-out').value;
+    if (ir === iy || ir === io || iy === io) throw new Error('Recorded, reference and outcome must be three different columns.');
+    function numberAt(row, j, label, i, allowMissing) { var v = row[j]; if (MISSING.test(v)) { if (allowMissing) return null; throw new Error('The ' + label + ' column "' + parsedCSV.header[j] + '" is missing on data row ' + (i + 1) + '. Analysis variables must be complete.'); } var x = Number(v); if (!isFinite(x)) throw new Error('The ' + label + ' column "' + parsedCSV.header[j] + '" has the value "' + v + '" on data row ' + (i + 1) + ', which is not a number.'); return x; }
+    var covs = Array.prototype.filter.call($('map-cov').querySelectorAll('input'), function (b) { return b.checked; }).map(function (b) { return csvInfo[+b.value]; });
+    covs.forEach(function (c) { var vals = parsedCSV.rows.map(function (r) { return r[c.index]; }); if (new Set(vals).size < 2) throw new Error('Remove constant predictor: ' + c.name + '.'); });
+    var out = { outcome: [], recorded: [], reference: [], covariates: [] };
+    parsedCSV.rows.forEach(function (r, i) {
+      out.outcome.push(numberAt(r, io, 'outcome', i)); out.recorded.push(numberAt(r, ir, 'recorded', i, true)); out.reference.push(numberAt(r, iy, 'reference', i, true));
+      var z = [];
+      covs.forEach(function (c) { if (c.numeric) z.push(numberAt(r, c.index, 'covariate', i)); else { if (MISSING.test(r[c.index])) throw new Error('The covariate column "' + c.name + '" is missing on data row ' + (i + 1) + '. Analysis variables must be complete.'); c.levels.slice(1).forEach(function (lv) { z.push(r[c.index] === lv ? 1 : 0); }); } });
+      out.covariates.push(z);
+    });
+    out.formula = parsedCSV.header[io] + ' ~ ' + [parsedCSV.header[ir]].concat(covs.map(function (c) { return c.name; })).join(' + ');
+    return out;
+  }
+  function vectorCSV(v) { var head = ['outcome', 'recorded', 'reference'].concat(v.covariates[0].map(function (c, i) { return 'x' + (i + 1); })), lines = [head.join(',')]; v.outcome.forEach(function (o, i) { lines.push([o, v.recorded[i] === null ? 'NA' : v.recorded[i], v.reference[i] === null ? 'NA' : v.reference[i]].concat(v.covariates[i]).join(',')); }); return lines.join('\n') + '\n'; }
+  function loadExample(index) { exampleVector = DATA.vectors[+index]; exampleText = vectorCSV(exampleVector); $('in-csv').value = exampleText; refreshMapping(); }
+  async function runCSV() {
+    var token = ++csvRun, err = $('csv-err'), status = $('csv-status'), flagsEl = $('csv-flags'), btn = $('run-csv'), isExample = $('in-csv').value === exampleText;
+    err.hidden = true; err.textContent = ''; flagsEl.textContent = '';
+    if ((parsedText !== $('in-csv').value || !parsedCSV) && !refreshMapping()) { status.textContent = 'Nothing computed. The chart still shows the last valid inputs.'; return; }
+    var input, ctx, pt;
+    try { input = buildInput(); ctx = K.prepare(input); pt = K.point(ctx); }
+    catch (e) { err.hidden = false; err.textContent = e.message; status.textContent = 'Nothing computed. The chart still shows the last valid inputs.'; return; }
+    btn.disabled = true;
+    status.textContent = 'Point estimates done: k ' + kf(pt.k) + ', discarding ' + kf(pt.discardK) + '. Running the bootstrap: 0 of 500 draws.';
+    var iv = await K.interval(ctx, pt, { bootstrap: 500, seed: 1, onProgress: function (b, B) { if (token === csvRun) status.textContent = 'Point estimates done: k ' + kf(pt.k) + ', discarding ' + kf(pt.discardK) + '. Running the bootstrap: ' + b + ' of ' + B + ' draws.'; } });
+    if (token !== csvRun) return;
+    btn.disabled = false;
+    if (iv.lostSupport) pt.flags.push({ name: 'bootstrap_lost_support', message: 'Only ' + iv.usable + ' of ' + iv.bootstrap + ' pilot resamples could be fitted, usually because a category is rare. The interval for k is conditional on those resamples.' });
+    st.ctx = ctx; st.iv = iv; st.pilot = pt; st.k = pt.k; st.k0 = pt.discardK; st.kLo = iv.kLower; st.kHi = iv.kUpper; st.k0Lo = iv.discardLower; st.k0Hi = iv.discardUpper;
+    if (!ctx.poolMode) { st.n = ctx.n; syncCohort(); }
+    if (st.audit > st.n) st.audit = st.n;
+    st.predictive = K.predictive(ctx, iv, GRID, st.n);
+    st.title = isExample ? 'Example pilot (synthetic)' : 'Your pilot';
+    st.band = '95% bootstrap interval for k';
+    st.source = (isExample ? 'Example pilot from the R test vectors, not real data. ' : 'Computed in this browser from the pasted rows. ') + 'Analysis: ' + input.formula + ', term ' + parsedCSV.header[+$('map-rec').value] + '. Bootstrap limits are bias-corrected and accelerated, 500 draws, seed 1.' + (ctx.poolMode ? ' Every row has a reference, so these rows stand in for the cohort, and cohort size stays as you set it.' : '');
+    var lines = num(ctx.n) + ' rows, ' + num(ctx.rows.length) + ' with a reference, ' + num(ctx.calibration) + ' with both values, ' + num(pt.disagreements) + ' disagreeing. k ' + kf(pt.k) + ' (' + kf(iv.kLower) + ' to ' + kf(iv.kUpper) + '), discarding ' + kf(pt.discardK) + ' (' + kf(iv.discardLower) + ' to ' + kf(iv.discardUpper) + '), empirical classical ' + kf(pt.classical) + '.';
+    if (ctx.poolMode) lines += ' catmech_audit_plan() would refuse these rows, since none is unaudited. This is the pool-level calculation.';
+    if (isExample && exampleVector) { var chk = K.checkVector(exampleVector), rb = exampleVector.expected.r_bootstrap_only; lines += ' R test vector: k ' + kf(exampleVector.expected.k) + ', ' + (chk.pass ? 'matched' : 'NOT matched') + '. R bootstrap limits, from its own random stream: ' + kf(rb.k_lower) + ' to ' + kf(rb.k_upper) + '.'; }
+    status.textContent = lines;
+    pt.flags.forEach(function (f) { var li = h('li', '', undefined, flagsEl); h('span', 'st ' + (f.name === 'gross_errors' || f.name === 'pilot_looks_selective' ? 'st-red' : 'st-amber'), (f.name === 'gross_errors' || f.name === 'pilot_looks_selective' ? '✕ ' : '! ') + f.name, li).style.width = 'fit-content'; h('span', '', f.message, li); });
+    if (!pt.flags.length) h('li', '', 'No pilot warnings raised. That is not a validation.', flagsEl);
+    renderCalc();
+  }
+  function setMode(mode) {
+    st.mode = mode; $('tab-type').setAttribute('aria-selected', String(mode === 'type')); $('tab-csv').setAttribute('aria-selected', String(mode === 'csv')); $('pane-type').hidden = mode !== 'type'; $('pane-csv').hidden = mode !== 'csv';
+    if (mode === 'csv') { if (!st.pilot) runCSV(); }
+    else if ($('in-preset').value === 'custom') { readTyped(); renderCalc(); }
+    else { applyPreset($('in-preset').value); renderCalc(); }
+  }
+  function syncCohort() { $('in-n').value = st.n; ['in-audit', 'in-audit-n'].forEach(function (id) { $(id).max = st.n; }); $('in-audit').value = st.audit; $('in-audit-n').value = st.audit; }
+
+  /* wiring */
+  $('in-n').addEventListener('input', function () { var v = Math.round(+this.value); if (!(v >= 10 && v <= 10000000)) return; st.n = v; if (st.audit > v) st.audit = v; syncCohort(); if (st.iv && st.pilot) st.predictive = K.predictive(st.ctx, st.iv, GRID, st.n); renderCalc(); });
+  function pairInput(a, b, set) { [a, b].forEach(function (id) { $(id).addEventListener('input', function () { var v = Math.round(+this.value), mn = +this.min, mx = +this.max; if (!(v >= mn && v <= mx)) return; set(v); $(a).value = v; $(b).value = v; renderCalc(); }); }); }
+  pairInput('in-dist', 'in-dist-n', function (v) { st.dist = v; });
+  pairInput('in-audit', 'in-audit-n', function (v) { st.audit = v; });
+  $('in-preset').addEventListener('change', function () { if (this.value === 'custom') { if (readTyped()) renderCalc(); } else { $('type-err').hidden = true; applyPreset(this.value); renderCalc(); } });
+  ['in-k', 'in-k0', 'in-klo', 'in-khi'].forEach(function (id) { $(id).addEventListener('input', function () { $('in-preset').value = 'custom'; if (readTyped()) renderCalc(); }); });
+  $('tab-type').addEventListener('click', function () { setMode('type'); });
+  $('tab-csv').addEventListener('click', function () { setMode('csv'); });
+  $('in-example').addEventListener('change', function () { loadExample(this.value); runCSV(); });
+  var csvTimer = null;
+  $('in-csv').addEventListener('input', function () { clearTimeout(csvTimer); csvTimer = setTimeout(function () { $('csv-flags').textContent = ''; $('csv-status').textContent = refreshMapping() ? 'Not computed yet. Check the column roles above, then press Compute. The chart still shows the last valid inputs.' : 'Nothing computed. The chart still shows the last valid inputs.'; }, 200); });
+  ['map-rec', 'map-ref', 'map-out'].forEach(function (id) { $(id).addEventListener('change', refreshCovariates); });
+  $('run-csv').addEventListener('click', function () { clearTimeout(csvTimer); runCSV(); });
+  $('calc-form').addEventListener('submit', function (e) { e.preventDefault(); });
+  $('menu-toggle').addEventListener('click', function () { var top = $('topbar'), open = top.classList.toggle('open'); this.setAttribute('aria-expanded', String(open)); });
+  Array.prototype.forEach.call(document.querySelectorAll('.top .nav a'), function (a) { a.addEventListener('click', function () { $('topbar').classList.remove('open'); $('menu-toggle').setAttribute('aria-expanded', 'false'); }); });
+  var root = document.documentElement, mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  function themeNow() { return root.getAttribute('data-theme') || (mq && mq.matches ? 'dark' : 'light'); }
+  function themeLabel() { $('theme-toggle').textContent = themeNow() === 'dark' ? 'Light' : 'Dark'; $('theme-toggle').setAttribute('aria-label', themeNow() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'); }
+  $('theme-toggle').addEventListener('click', function () { var t = themeNow() === 'dark' ? 'light' : 'dark'; root.setAttribute('data-theme', t); try { localStorage.setItem('bp-theme', t); } catch (e) {} themeLabel(); });
+  if (mq && mq.addEventListener) mq.addEventListener('change', themeLabel);
+
+  /* first render: an example is already computed */
+  function drawAll() { drawTest(); drawMain(); drawPilotK(); drawFit('fig4a', 'ctgov'); drawFit('fig4b', 'nhanes'); }
+  function grossWhy() {
+    var b = DATA.boundary, g = b.gross_warning, c = b.gross_cell_slope_coverage, worst = b.error.filter(function (e) { return e.cell === 'error_gross_and_small' && e.pilot === 150 && e.f === 0.05; })[0];
+    $('gross-why').textContent = "In the synthetic gross-error cell, linear MI's coverage of the true slope was " + [c['0.05'], c['0.1'], c['0.25'], c['0.5']].map(function (v) { return pct(v); }).join(', ') + " at 5%, 10%, 25% and 50% audits (a table line added after the plan), and the planner's median error reached " + pct(worst.med) + '. The warning fired on ' + g.error_gross_and_small[0] + ' of ' + g.error_gross_and_small[1] + ' pilots there, ' + g.missed_flags[0] + ' of ' + g.missed_flags[1] + ' in the missed-flags cell, ' + g.nhanes[0] + ' of ' + num(g.nhanes[1]) + ' on NHANES and ' + g.ctgov[0] + ' of ' + num(g.ctgov[1]) + ' on ClinicalTrials.gov. It tells you to stop. It repairs nothing.';
+  }
+  function selfCheck() {
+    var results = DATA.vectors.map(K.checkVector), pass = results.filter(function (r) { return r.pass; }).length, el = $('ro-port');
+    el.textContent = pass + ' of ' + results.length; el.className = 'v ' + (pass === results.length ? 'c-green' : 'c-red');
+    $('ro-port-s').textContent = pass === results.length ? 'R test vectors matched in this browser' : 'R test vectors did NOT all match. Do not use the calculator.';
+    return results;
+  }
+  renderDuels(); renderMethods(); renderTestTable(); renderPilotTable(); renderFitTables(); grossWhy(); themeLabel();
+  var results = selfCheck();
+  legend($('fig2-legend'), [{ type: 'point', shape: 'circle', cls: 'm-mi', w: 14, label: 'ClinicalTrials.gov, 60-record pilot' }, { type: 'point', shape: 'circle', cls: 'm-hollow', w: 14, label: '150-record pilot' }, { type: 'point', shape: 'diamond', cls: 'm-mi', w: 14, label: 'NHANES, 60-record pilot' }, { type: 'point', shape: 'diamond', cls: 'm-hollow', w: 14, label: '150-record pilot' }, { type: 'whisker', cls: 'w-mi', w: 12, label: 'Up to p90' }, { type: 'line', cls: 'floor', w: 16, label: 'Noise floor' }]);
+  legend($('fig4-legend'), [{ type: 'line', cls: 'c-mi', label: 'Formula at pool k' }, { type: 'range', w: 26, label: 'One audit in the test: 5th to 95th percentile, middle half, median' }, { type: 'point', shape: 'circle', cls: 'm-hollow', w: 14, label: 'Mean, this test' }, { type: 'point', shape: 'circle', cls: 'm-mi', w: 14, label: 'Mean, frozen study' }]);
+  (function () { var c = DATA.datasets.ctgov, n = DATA.datasets.nhanes, c5 = c.single[0], c10 = c.single[1], n5 = n.single[0];
+    $('fig4-note').textContent = 'One 30-record audit ran from ' + ratio(c5.q05) + ' to ' + ratio(c5.q95) + ' of the full-audit width on ClinicalTrials.gov and from ' + ratio(n5.q05) + ' to ' + ratio(n5.q95) + ' on NHANES, 5th to 95th percentile. That spread is why the 5% target failed. On NHANES at 5%, the only observation is this test: a mean of ' + ratio(n5.mean) + ' against a formula value of ' + ratio(K.relative(n.pool_k, 0.05)) + '. On ClinicalTrials.gov the mean follows the curve while the median of one audit sits below it, ' + ratio(c10.q50) + ' and ' + ratio(c10.mean) + ' against ' + ratio(K.relative(c.pool_k, 0.1)) + ' at 10%.'; })();
+  $('fig4a-t').textContent = 'ClinicalTrials.gov, k = ' + DATA.datasets.ctgov.pool_k.toFixed(4);
+  $('fig4b-t').textContent = 'NHANES, k = ' + DATA.datasets.nhanes.pool_k.toFixed(4);
+  loadExample($('in-example').value);
+  applyPreset('nhanes60'); renderCalc(); drawAll();
+  var widths = new WeakMap();
+  if (window.ResizeObserver) { var ro = new ResizeObserver(function (entries) { entries.forEach(function (e) { var w = Math.round(e.contentRect.width), id = e.target.id; if (widths.get(e.target) === w) return; widths.set(e.target, w); if (id === 'fig2') drawTest(); if (id === 'fig3') drawMain(); if (id === 'fig5') drawPilotK(); if (id === 'fig4a') drawFit('fig4a', 'ctgov'); if (id === 'fig4b') drawFit('fig4b', 'nhanes'); }); }); ['fig2', 'fig3', 'fig5', 'fig4a', 'fig4b'].forEach(function (id) { ro.observe($(id)); }); }
+  else window.addEventListener('resize', drawAll);
+  window.AuditPlannerPage = { state: st, data: DATA, selfCheck: results, render: renderCalc, runCSV: runCSV, parseCSV: parseCSV };
+})();
+</script>
+</body>
+</html>

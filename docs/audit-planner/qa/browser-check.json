@@ -1,0 +1,917 @@
+{
+ "page": "docs/audit-planner/index.html",
+ "chrome": "Chrome/156.0.8078.74",
+ "checks": [
+  {
+   "name": "desktop-light: no horizontal page scroll",
+   "pass": true,
+   "detail": "1360 vs 1360 DIV.top#topbar:1360:sticky DIV.wrap#:1280:static NAV.nav#:1200:static A.#:853:static A.#:908:static A.#:979:static A.#:1083:static A.#:1129:static A.#:1200:static BUTTON.btn-t#theme-toggle:1264:static MAIN.wrap#main:1280:static HEADER.hero#:1264:static"
+  },
+  {
+   "name": "desktop-light: nothing past the right edge",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "desktop-light: side gutter at least 16px",
+   "pass": true,
+   "detail": "96"
+  },
+  {
+   "name": "desktop-light: chart text inside its figure",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "desktop-light: chart text does not collide",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "desktop-light: every chart has marks at first load",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "desktop-light: first-load example is computed",
+   "pass": true,
+   "detail": "67 of 600"
+  },
+  {
+   "name": "desktop-light: theme background",
+   "pass": true,
+   "detail": "rgb(244, 246, 249)"
+  },
+  {
+   "name": "desktop-dark: no horizontal page scroll",
+   "pass": true,
+   "detail": "1360 vs 1360 DIV.top#topbar:1360:sticky DIV.wrap#:1280:static NAV.nav#:1198:static A.#:850:static A.#:905:static A.#:976:static A.#:1080:static A.#:1127:static A.#:1198:static BUTTON.btn-t#theme-toggle:1264:static MAIN.wrap#main:1280:static HEADER.hero#:1264:static"
+  },
+  {
+   "name": "desktop-dark: nothing past the right edge",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "desktop-dark: side gutter at least 16px",
+   "pass": true,
+   "detail": "96"
+  },
+  {
+   "name": "desktop-dark: chart text inside its figure",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "desktop-dark: chart text does not collide",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "desktop-dark: every chart has marks at first load",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "desktop-dark: first-load example is computed",
+   "pass": true,
+   "detail": "67 of 600"
+  },
+  {
+   "name": "desktop-dark: theme background",
+   "pass": true,
+   "detail": "rgb(11, 15, 21)"
+  },
+  {
+   "name": "phone-light: no horizontal page scroll",
+   "pass": true,
+   "detail": "375 vs 375 "
+  },
+  {
+   "name": "phone-light: nothing past the right edge",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "phone-light: side gutter at least 16px",
+   "pass": true,
+   "detail": "16"
+  },
+  {
+   "name": "phone-light: chart text inside its figure",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "phone-light: chart text does not collide",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "phone-light: every chart has marks at first load",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "phone-light: first-load example is computed",
+   "pass": true,
+   "detail": "67 of 600"
+  },
+  {
+   "name": "phone-light: theme background",
+   "pass": true,
+   "detail": "rgb(244, 246, 249)"
+  },
+  {
+   "name": "phone-dark: no horizontal page scroll",
+   "pass": true,
+   "detail": "375 vs 375 "
+  },
+  {
+   "name": "phone-dark: nothing past the right edge",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "phone-dark: side gutter at least 16px",
+   "pass": true,
+   "detail": "16"
+  },
+  {
+   "name": "phone-dark: chart text inside its figure",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "phone-dark: chart text does not collide",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "phone-dark: every chart has marks at first load",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "phone-dark: first-load example is computed",
+   "pass": true,
+   "detail": "67 of 600"
+  },
+  {
+   "name": "phone-dark: theme background",
+   "pass": true,
+   "detail": "rgb(11, 15, 21)"
+  },
+  {
+   "name": "status strip: port readout",
+   "pass": true,
+   "detail": "3 of 3"
+  },
+  {
+   "name": "verdict shown",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "calculator labeled unvalidated",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "ctgov tile keep",
+   "pass": true,
+   "detail": "42 of 600"
+  },
+  {
+   "name": "ctgov tile discard",
+   "pass": true,
+   "detail": "384 of 600"
+  },
+  {
+   "name": "nhanes tile keep",
+   "pass": true,
+   "detail": "67 of 600"
+  },
+  {
+   "name": "nhanes tile discard",
+   "pass": true,
+   "detail": "379 of 600"
+  },
+  {
+   "name": "example: records keep",
+   "pass": true,
+   "detail": "67 of 600"
+  },
+  {
+   "name": "example: k range records",
+   "pass": true,
+   "detail": "At the k range: 32 to 117 records."
+  },
+  {
+   "name": "example: records discard",
+   "pass": true,
+   "detail": "379 of 600"
+  },
+  {
+   "name": "example: audit 150 ratio",
+   "pass": true,
+   "detail": "1.10× linear MI / 1.97× discarding recorded values. k range: 1.05× to 1.19×."
+  },
+  {
+   "name": "FIG-02 table equals planner_accuracy",
+   "pass": true,
+   "detail": "12 of 12"
+  },
+  {
+   "name": "FIG-05 table equals pilot_estimates",
+   "pass": true,
+   "detail": "4"
+  },
+  {
+   "name": "Table 1 equals frozen-comparison.csv",
+   "pass": true,
+   "detail": "7"
+  },
+  {
+   "name": "FIG-01: NHANES 5% explained",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "FIG-01 equals real-data-study/summary.csv, all cells",
+   "pass": true,
+   "detail": "54 of 54"
+  },
+  {
+   "name": "prose number: failed cells",
+   "pass": true,
+   "detail": "11.3%, 16.8%, 13.9%, 15.5%"
+  },
+  {
+   "name": "prose number: max median above 5%",
+   "pass": true,
+   "detail": "7.8%"
+  },
+  {
+   "name": "prose number: max p90 above 5%",
+   "pass": true,
+   "detail": "20.6%"
+  },
+  {
+   "name": "prose number: noise floor at 5%",
+   "pass": true,
+   "detail": "17.4%, 16.1%"
+  },
+  {
+   "name": "prose number: retest at 5%",
+   "pass": true,
+   "detail": "3.7%, 9.3%"
+  },
+  {
+   "name": "prose number: signed range at 5%",
+   "pass": true,
+   "detail": "−3.9%, +1.6%"
+  },
+  {
+   "name": "prose number: k interval against actual ratio",
+   "pass": true,
+   "detail": "35.2%, 67.9%"
+  },
+  {
+   "name": "prose number: predictive against actual ratio",
+   "pass": true,
+   "detail": "60.3%, 92.3%"
+  },
+  {
+   "name": "prose number: k interval against pool k",
+   "pass": true,
+   "detail": "53.7%, 74.3%"
+  },
+  {
+   "name": "prose number: closest failure interval",
+   "pass": true,
+   "detail": "10.2%, 12.4%"
+  },
+  {
+   "name": "preset ctgov60",
+   "pass": true,
+   "detail": "42 of 600 At the k range: 2 to 114 records."
+  },
+  {
+   "name": "preset ctgov150",
+   "pass": true,
+   "detail": "42 of 600 At the k range: 8 to 111 records."
+  },
+  {
+   "name": "preset nhanes150",
+   "pass": true,
+   "detail": "67 of 600 At the k range: 40 to 99 records."
+  },
+  {
+   "name": "target 10% moves answer",
+   "pass": true,
+   "detail": "150 of 600"
+  },
+  {
+   "name": "audit 30 raises the failure chip",
+   "pass": true,
+   "detail": "✕ At or below the 30-record audit that failed the test. One audit this small is not predictable."
+  },
+  {
+   "name": "audit 45 raises the between-sizes chip",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "cohort 2000",
+   "pass": true,
+   "detail": "221 of 2,000"
+  },
+  {
+   "name": "typed k",
+   "pass": true,
+   "detail": "91 of 600"
+  },
+  {
+   "name": "invalid k shows an error and keeps the last chart",
+   "pass": true,
+   "detail": "k must be a number from 0 to 2."
+  },
+  {
+   "name": "k = 0 handled",
+   "pass": true,
+   "detail": "91 of 600 The k range needs low ≤ k ≤ high, within 0 to 2. Leave both blank for no band."
+  },
+  {
+   "name": "blank k range means no band",
+   "pass": true,
+   "detail": "No k range given."
+  },
+  {
+   "name": "FIG-03 point tooltip on hover",
+   "pass": true,
+   "detail": "ClinicalTrials.gov, 5% audit, Linear MI1.39×observed, frozen study, 200 cohorts1.34×formula at this dataset's k, 0.0418+3.6%observed minus formula, as a share of observed1.53×curve shown, at the k in use"
+  },
+  {
+   "name": "FIG-03 crosshair tooltip lists both series",
+   "pass": true,
+   "detail": "33.4% audit, 201 of 600 records1.07×linear MI1.03× to 1.13×at the k range1.71×discarding recorded values"
+  },
+  {
+   "name": "tooltip hides when the pointer leaves",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "fig2 tooltip on hover",
+   "pass": true,
+   "detail": "ClinicalTrials.gov, 60-record pilot, target 5% (30 records)11.3%median error (95% interval 10.2% to 12.4%)38.8%90th percentile−3.6%signed median error17.4%noise floor3.7%retest, another imputation seed1,400cohorts compared"
+  },
+  {
+   "name": "fig4a tooltip on hover",
+   "pass": true,
+   "detail": "ClinicalTrials.gov, 5% audit (30 of 600)1.34×formula at pool k1.20×median of one audit, 1,400 cohorts1.00× to 2.57×5th to 95th percentile1.43×mean in this test1.39×mean in the frozen study"
+  },
+  {
+   "name": "fig4b tooltip on hover",
+   "pass": true,
+   "detail": "NHANES, 5% audit (30 of 600)1.53×formula at pool k1.53×median of one audit, 1,383 cohorts1.14× to 2.58×5th to 95th percentile1.65×mean in this testnonefrozen study did not run this size"
+  },
+  {
+   "name": "fig5 tooltip on hover",
+   "pass": true,
+   "detail": "k in use0.0698k0.0313 to 0.1353range"
+  },
+  {
+   "name": "keyboard focus shows the same tooltip",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "CSV tab opens with an example, computed",
+   "pass": true,
+   "detail": "80 rows, 40 with a reference, 40 with both values, 9 disagreeing. k 0.0607 (0.0087 to 0.1453), discarding 0.5979 (0.3445 to 0.8969), empirical classical 0.0492. R test vector: k 0.0607, matched. R bootstrap limits, from its own random stream: 0.0092 to 0.1525."
+  },
+  {
+   "name": "example pilot: labeled synthetic",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "vector noisy_recording: browser equals R",
+   "pass": true,
+   "detail": "60 rows, 30 with a reference, 30 with both values, 30 disagreeing. k 0.0996 (0.0571 to 0.1594), discarding 0.6110 (0.2655 to 1.0547), empirical classical 0.2041. R test vector: k 0.0996, matched. R bootstrap limits, from its own random stream: 0.0534 to 0.1603."
+  },
+  {
+   "name": "vector noisy_recording: flags",
+   "pass": true,
+   "detail": "! small_pilotSmall pilot: k rests on 30 rows, so its interval is wide. Below 100 rows, plan on the u"
+  },
+  {
+   "name": "vector exact_or_different: browser equals R",
+   "pass": true,
+   "detail": "80 rows, 40 with a reference, 40 with both values, 9 disagreeing. k 0.0607 (0.0087 to 0.1453), discarding 0.5979 (0.3445 to 0.8969), empirical classical 0.0492. R test vector: k 0.0607, matched. R bootstrap limits, from its own random stream: 0.0092 to 0.1525."
+  },
+  {
+   "name": "vector exact_or_different: flags",
+   "pass": true,
+   "detail": "! small_pilotSmall pilot: k rests on 40 rows, so its interval is wide. Below 100 rows, plan on the u"
+  },
+  {
+   "name": "vector missing_recorded: browser equals R",
+   "pass": true,
+   "detail": "70 rows, 45 with a reference, 38 with both values, 38 disagreeing. k 0.3024 (0.1916 to 0.4622), discarding 0.5309 (0.3023 to 0.7550), empirical classical 0.3135. R test vector: k 0.3024, matched. R bootstrap limits, from its own random stream: 0.1855 to 0.4293."
+  },
+  {
+   "name": "vector missing_recorded: flags",
+   "pass": true,
+   "detail": "! small_pilotSmall pilot: k rests on 38 rows, so its interval is wide. Below 100 rows, plan on the u"
+  },
+  {
+   "name": "real paste: recorded and reference columns guessed",
+   "pass": true,
+   "detail": "recorded_kg,reference_kg"
+  },
+  {
+   "name": "real paste: asks the reader to check roles before computing",
+   "pass": true,
+   "detail": "Not computed yet. Check the column roles above, then press Compute. The chart still shows the last valid inputs."
+  },
+  {
+   "name": "real paste: identifier column left out, others in",
+   "pass": true,
+   "detail": "[[\"record_id (text)\",false],[\"age\",true],[\"sex (text)\",true],[\"race (text)\",true],[\"height\",true]]"
+  },
+  {
+   "name": "real paste: computed",
+   "pass": true,
+   "detail": "300 rows, 60 with a reference, 60 with both values, 60 disagreeing. k 0.0623 (0.0362 to 0.0853), discarding 0.7125 (0.4542 to 0.9071), empirical classical 0.0053."
+  },
+  {
+   "name": "real paste: k equals R",
+   "pass": true,
+   "detail": "0.062349180211525156 vs 0.0623491802116252"
+  },
+  {
+   "name": "real paste: discard k equals R",
+   "pass": true,
+   "detail": "0.7125075846364124 vs 0.712507584636412"
+  },
+  {
+   "name": "real paste: classical equals R",
+   "pass": true,
+   "detail": "0.0052719398739058555 vs 0.0052719398738853"
+  },
+  {
+   "name": "real paste: pilot counts and checks equal R",
+   "pass": true,
+   "detail": "[60,1.254039996140744,6.672708060298145,[\"small_pilot\"]]"
+  },
+  {
+   "name": "real paste: cohort size follows the rows",
+   "pass": true,
+   "detail": "30 of 300"
+  },
+  {
+   "name": "real paste: bootstrap limits close to R (different random stream)",
+   "pass": true,
+   "detail": "0.03619715590830983 0.08534158899995391 0.0362433584581275 0.0856356900607441"
+  },
+  {
+   "name": "real paste: usable resamples close to R",
+   "pass": true,
+   "detail": "472 vs 475"
+  },
+  {
+   "name": "real paste: predictive ranges within 0.1 of R",
+   "pass": true,
+   "detail": "[{\"fraction\":0.05,\"browser\":[1.2131157813850388,2.5321515257826825],\"r\":[1.17269262632118,2.50973744424916]},{\"fraction\":0.1,\"browser\":[1.100087311526884,1.6412910971221846],\"r\":[1.09234512117253,1.61795902916407]},{\"fraction\":0.25,\"browser\":[1.0375573691841908,1.1999131195933985],\"r\":[1.0378512578634,1.21138689462746]},{\"fraction\":0.5,\"browser\":[1.013387532457119,1.0678398696350027],\"r\":[1.013216"
+  },
+  {
+   "name": "error: no data rows",
+   "pass": true,
+   "detail": "Paste a header row and at least one data row."
+  },
+  {
+   "name": "error: pilot too small",
+   "pass": true,
+   "detail": "The pilot has 12 rows with both values and needs at least 30 to estimate k: 30, and 20 more than the 4 imputation coefficients. Audit more random records."
+  },
+  {
+   "name": "error: non-numeric recorded value",
+   "pass": true,
+   "detail": "The recorded column \"recorded\" has the value \"abc\" on data row 4, which is not a number."
+  },
+  {
+   "name": "error: missing outcome",
+   "pass": true,
+   "detail": "The outcome column \"outcome\" is missing on data row 6. Analysis variables must be complete."
+  },
+  {
+   "name": "error: constant covariate",
+   "pass": true,
+   "detail": "Remove constant predictor: site."
+  },
+  {
+   "name": "error: no references",
+   "pass": true,
+   "detail": "At least one reference value is required. Fill in the reference column on the audited rows."
+  },
+  {
+   "name": "pilot only: runs as the pool-level calculation and says so",
+   "pass": true,
+   "detail": "60 rows, 60 with a reference, 60 with both values, 60 disagreeing. k 0.0158 (0.0081 to 0.0247), discarding 0.7426 (0.3866 to 1.1227), empirical classical 0.0136. catmech_audit_plan() would refuse these rows, since none is unaudited. This is the pool-level calculation."
+  },
+  {
+   "name": "quoted fields with commas parse",
+   "pass": true,
+   "detail": " | 50 rows, 40 with a reference, 40 with both values, 8 disagreeing. k 0.0835 (0.0484 to 0.1290), discarding 0.9949 (0.8069 to 1.2640), empirical classical 0.1108. | Computed in this browser from the pasted rows. Analysis: outcome ~ recorded + site, group, term recorded. Bootstrap limits are bias-corrected and accelerated, 500 draws, seed 1."
+  },
+  {
+   "name": "tab-separated paste parses",
+   "pass": true,
+   "detail": "50 rows, 40 with a reference, 40 with both values, 8 disagreeing. k 0.0835 (0.0484 to 0.1290), discarding 0.9949 (0.8069 to 1.2640), empirical classical 0.1108."
+  },
+  {
+   "name": "gross-error warning reaches the result panel",
+   "pass": true,
+   "detail": "! Between the failed 30-record size and the next tested size, 60 records.! The test used cohorts of 600. This cohort size is extrapolation.✕ Gross-error warning: do not rely on this plan. Review the recording audit first."
+  },
+  {
+   "name": "back to typed k returns to the example",
+   "pass": true,
+   "detail": "Example: NHANES pool values"
+  },
+  {
+   "name": "theme toggle switches to dark",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "theme toggle switches back",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "phone menu opens",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "phone menu closes after a choice",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "phone: no horizontal scroll with the CSV pane and tables open",
+   "pass": true,
+   "detail": "375 "
+  },
+  {
+   "name": "phone: tooltip stays on screen",
+   "pass": true,
+   "detail": "{\"hidden\":false,\"left\":12,\"right\":332,\"w\":375}"
+  },
+  {
+   "name": "relative links point at files that exist",
+   "pass": true,
+   "detail": "../../validation/REAL_DATA_SYNTHESIS.md, ../../validation/AUDIT_PLAN_SYNTHESIS.md, ../../validation/AUDIT_PLAN_PLAN.md, ../AUDIT_PLANNING.md, ../CONTAMINATION_METHOD.md, ../../validation/audit-plan-study/planner-data.json, ../../validation/audit-plan-study/summary.csv"
+  },
+  {
+   "name": "anchor links resolve",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "no network requests beyond the file itself",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "no uncaught exceptions",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "no console errors or warnings",
+   "pass": true,
+   "detail": ""
+  }
+ ],
+ "console_errors": [],
+ "exceptions": [],
+ "requests": [
+  "file:///Users/patrickiben/Documents/catmech/docs/audit-planner/index.html"
+ ],
+ "layout": {
+  "desktop-light": {
+   "scrollWidth": 1360,
+   "clientWidth": 1360,
+   "overflowing": [],
+   "svgOut": [],
+   "svgOverlap": [],
+   "gutterLeft": 96,
+   "tw": [
+    "fig2-table:713>689"
+   ],
+   "culprits": [
+    "DIV.top#topbar:1360:sticky",
+    "DIV.wrap#:1280:static",
+    "NAV.nav#:1200:static",
+    "A.#:853:static",
+    "A.#:908:static",
+    "A.#:979:static",
+    "A.#:1083:static",
+    "A.#:1129:static",
+    "A.#:1200:static",
+    "BUTTON.btn-t#theme-toggle:1264:static",
+    "MAIN.wrap#main:1280:static",
+    "HEADER.hero#:1264:static"
+   ]
+  },
+  "desktop-dark": {
+   "scrollWidth": 1360,
+   "clientWidth": 1360,
+   "overflowing": [],
+   "svgOut": [],
+   "svgOverlap": [],
+   "gutterLeft": 96,
+   "tw": [
+    "fig2-table:713>689"
+   ],
+   "culprits": [
+    "DIV.top#topbar:1360:sticky",
+    "DIV.wrap#:1280:static",
+    "NAV.nav#:1198:static",
+    "A.#:850:static",
+    "A.#:905:static",
+    "A.#:976:static",
+    "A.#:1080:static",
+    "A.#:1127:static",
+    "A.#:1198:static",
+    "BUTTON.btn-t#theme-toggle:1264:static",
+    "MAIN.wrap#main:1280:static",
+    "HEADER.hero#:1264:static"
+   ]
+  },
+  "phone-light": {
+   "scrollWidth": 375,
+   "clientWidth": 375,
+   "overflowing": [],
+   "svgOut": [],
+   "svgOverlap": [],
+   "gutterLeft": 16,
+   "tw": [
+    "method-ctgov:363>313",
+    "method-nhanes:363>313",
+    "fig2-table:653>313",
+    "fig3-table:348>313",
+    "fig3-obs:358>313",
+    "fig5-table:475>313",
+    "fig4-table:573>313",
+    "fit-table:548>313"
+   ],
+   "culprits": []
+  },
+  "phone-dark": {
+   "scrollWidth": 375,
+   "clientWidth": 375,
+   "overflowing": [],
+   "svgOut": [],
+   "svgOverlap": [],
+   "gutterLeft": 16,
+   "tw": [
+    "method-ctgov:363>313",
+    "method-nhanes:363>313",
+    "fig2-table:653>313",
+    "fig3-table:348>313",
+    "fig3-obs:358>313",
+    "fig5-table:475>313",
+    "fig4-table:573>313",
+    "fit-table:548>313"
+   ],
+   "culprits": []
+  },
+  "phone-csv-pane": {
+   "scrollWidth": 375,
+   "clientWidth": 375,
+   "overflowing": [],
+   "svgOut": [],
+   "svgOverlap": [],
+   "gutterLeft": 16,
+   "tw": [
+    "method-ctgov:363>313",
+    "method-nhanes:363>313",
+    "fig2-table:653>313",
+    "fig3-table:348>313",
+    "fig3-obs:358>313",
+    "fig5-table:475>313",
+    "fig4-table:573>313",
+    "fit-table:548>313"
+   ]
+  }
+ },
+ "r_comparison": {
+  "bootstrap_noisy_recording": {
+   "browser": [
+    0.057072317033714,
+    0.15935573003197107
+   ],
+   "r": [
+    0.0533591066570362,
+    0.160340287834235
+   ]
+  },
+  "bootstrap_exact_or_different": {
+   "browser": [
+    0.008684033653624563,
+    0.14526825399229515
+   ],
+   "r": [
+    0.00922631901222059,
+    0.152466884327458
+   ]
+  },
+  "bootstrap_missing_recorded": {
+   "browser": [
+    0.1915622908904346,
+    0.4621898514112879
+   ],
+   "r": [
+    0.185534947621243,
+    0.429325646687996
+   ]
+  },
+  "real_covariates": [
+   [
+    "record_id (text)",
+    false
+   ],
+   [
+    "age",
+    true
+   ],
+   [
+    "sex (text)",
+    true
+   ],
+   [
+    "race (text)",
+    true
+   ],
+   [
+    "height",
+    true
+   ]
+  ],
+  "real_paste": {
+   "browser": {
+    "k": 0.062349180211525156,
+    "k0": 0.7125075846364124,
+    "lo": 0.03619715590830983,
+    "hi": 0.08534158899995391,
+    "k0lo": 0.4541737011205848,
+    "k0hi": 0.907064488777854,
+    "n": 300,
+    "classical": 0.0052719398739058555,
+    "dis": 60,
+    "sel": 1.254039996140744,
+    "z": 6.672708060298145,
+    "usable": 472,
+    "pred": [
+     {
+      "fraction": 0.05,
+      "records": 15,
+      "lower": 1.2131157813850388,
+      "upper": 2.5321515257826825
+     },
+     {
+      "fraction": 0.1,
+      "records": 30,
+      "lower": 1.100087311526884,
+      "upper": 1.6412910971221846
+     },
+     {
+      "fraction": 0.25,
+      "records": 75,
+      "lower": 1.0375573691841908,
+      "upper": 1.1999131195933985
+     },
+     {
+      "fraction": 0.5,
+      "records": 150,
+      "lower": 1.013387532457119,
+      "upper": 1.0678398696350027
+     },
+     {
+      "fraction": 0.75,
+      "records": 225,
+      "lower": 1.004771603039829,
+      "upper": 1.021979815079336
+     }
+    ],
+    "flags": [
+     "small_pilot"
+    ]
+   },
+   "r": {
+    "k": 0.0623491802116252,
+    "discard_k": 0.712507584636412,
+    "classical": 0.0052719398738853,
+    "discard_classical": 1.00069943625003,
+    "k_lower": 0.0362433584581275,
+    "k_upper": 0.0856356900607441,
+    "discard_lower": 0.453090735833798,
+    "discard_upper": 0.924409912201464,
+    "records": 30,
+    "records_lower": 19,
+    "records_upper": 40,
+    "disagreements": 60,
+    "selection_z": 1.25403999614073,
+    "largest_recorded_z": 6.67270806029815,
+    "bootstrap_usable": 475,
+    "relative_0.05": 1.47805088681712,
+    "relative_0.1": 1.24945693079219,
+    "relative_0.25": 1.0895171135117,
+    "relative_0.5": 1.03070324546478,
+    "relative_0.75": 1.01033809196256,
+    "discard_relative_0.05": 3.81282626251077,
+    "discard_relative_0.1": 2.7226032141551,
+    "discard_relative_0.25": 1.77130538132453,
+    "discard_relative_0.5": 1.30862813076764,
+    "discard_relative_0.75": 1.11243090941062,
+    "predictive_lower_0.05": 1.17269262632118,
+    "predictive_lower_0.1": 1.09234512117253,
+    "predictive_lower_0.25": 1.0378512578634,
+    "predictive_lower_0.5": 1.01321657943543,
+    "predictive_lower_0.75": 1.00442952847148,
+    "predictive_upper_0.05": 2.50973744424916,
+    "predictive_upper_0.1": 1.61795902916407,
+    "predictive_upper_0.25": 1.21138689462746,
+    "predictive_upper_0.5": 1.06474101497723,
+    "predictive_upper_0.75": 1.02190673242096
+   }
+  },
+  "predictive": [
+   {
+    "fraction": 0.05,
+    "browser": [
+     1.2131157813850388,
+     2.5321515257826825
+    ],
+    "r": [
+     1.17269262632118,
+     2.50973744424916
+    ]
+   },
+   {
+    "fraction": 0.1,
+    "browser": [
+     1.100087311526884,
+     1.6412910971221846
+    ],
+    "r": [
+     1.09234512117253,
+     1.61795902916407
+    ]
+   },
+   {
+    "fraction": 0.25,
+    "browser": [
+     1.0375573691841908,
+     1.1999131195933985
+    ],
+    "r": [
+     1.0378512578634,
+     1.21138689462746
+    ]
+   },
+   {
+    "fraction": 0.5,
+    "browser": [
+     1.013387532457119,
+     1.0678398696350027
+    ],
+    "r": [
+     1.01321657943543,
+     1.06474101497723
+    ]
+   },
+   {
+    "fraction": 0.75,
+    "browser": [
+     1.004771603039829,
+     1.021979815079336
+    ],
+    "r": [
+     1.00442952847148,
+     1.02190673242096
+    ]
+   }
+  ]
+ },
+ "summary": {
+  "passed": 119,
+  "failed": 0
+ }
+}

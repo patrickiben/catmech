@@ -1,0 +1,253 @@
+{
+ "generated_from": "docs/audit-planner/index.html, script#k-engine",
+ "node": "v22.23.2",
+ "vectors": [
+  {
+   "name": "noisy_recording",
+   "pass": true,
+   "worst_relative_difference": 6.256140799662848e-15,
+   "k": 0.09962178797903722,
+   "discard_k": 0.6109827115518082,
+   "classical": 0.20408052171519672,
+   "fails": []
+  },
+  {
+   "name": "exact_or_different",
+   "pass": true,
+   "worst_relative_difference": 4.176781337262113e-15,
+   "k": 0.06073287450466025,
+   "discard_k": 0.5979295500732282,
+   "classical": 0.049202975291469754,
+   "fails": []
+  },
+  {
+   "name": "missing_recorded",
+   "pass": true,
+   "worst_relative_difference": 4.956067591153501e-15,
+   "k": 0.3024174016349785,
+   "discard_k": 0.530894501356346,
+   "classical": 0.3134931221945004,
+   "fails": []
+  }
+ ],
+ "pools": [
+  {
+   "name": "ctgov",
+   "rows": 27208,
+   "js_k": 0.041795645217724296,
+   "json_k": 0.0417956452176635,
+   "js_discard_k": 0.9928248489513446,
+   "json_discard_k": 0.992824848939551,
+   "js_classical": 0.028361346749931432,
+   "json_classical": 0.0283613467560308,
+   "relative_differences": {
+    "k": 1.45461420686388e-12,
+    "discard_k": 1.18787202296744e-11,
+    "classical": -2.1505919267639229e-10,
+    "discard_classical": -3.0753177782116836e-12
+   },
+   "pass": true
+  },
+  {
+   "name": "nhanes",
+   "rows": 3908,
+   "js_k": 0.0698179910375257,
+   "json_k": 0.0698179910375213,
+   "js_discard_k": 0.9591218216878303,
+   "json_discard_k": 0.959121821687825,
+   "js_classical": 0.08800558731267272,
+   "json_classical": 0.0880055873126626,
+   "relative_differences": {
+    "k": 6.306066779870889e-14,
+    "discard_k": 5.551115123125783e-15,
+    "classical": 1.1501910535116622e-13,
+    "discard_classical": 1.354472090042691e-14
+   },
+   "pass": true
+  }
+ ],
+ "bootstrap": [
+  {
+   "name": "noisy_recording",
+   "ms": 85,
+   "usable": 500,
+   "js": [
+    0.057072317033714,
+    0.15935573003197107,
+    0.2654716854030642,
+    1.054734653893137
+   ],
+   "r": [
+    0.0533591066570362,
+    0.160340287834235,
+    0.249922123810663,
+    1.08808038645726
+   ],
+   "predictive": [
+    {
+     "fraction": 0.05,
+     "records": 3,
+     "lower": 1.1240063727020675,
+     "upper": 4.707376641972366
+    },
+    {
+     "fraction": 0.1,
+     "records": 6,
+     "lower": 1.1444626533982512,
+     "upper": 3.0481577028143567
+    },
+    {
+     "fraction": 0.25,
+     "records": 15,
+     "lower": 1.0478007949725154,
+     "upper": 1.4410755563747522
+    },
+    {
+     "fraction": 0.5,
+     "records": 30,
+     "lower": 1.0162903270046835,
+     "upper": 1.1151494305803618
+    },
+    {
+     "fraction": 0.75,
+     "records": 45,
+     "lower": 1.006566394741367,
+     "upper": 1.0391096727267382
+    }
+   ]
+  },
+  {
+   "name": "exact_or_different",
+   "ms": 90,
+   "usable": 500,
+   "js": [
+    0.008684033653624563,
+    0.14526825399229515,
+    0.3445236303900337,
+    0.8968937524075842
+   ],
+   "r": [
+    0.00922631901222059,
+    0.152466884327458,
+    0.345665731576049,
+    0.874049681648434
+   ],
+   "predictive": [
+    {
+     "fraction": 0.05,
+     "records": 4,
+     "lower": 1.0039329645067576,
+     "upper": 4.658205051429513
+    },
+    {
+     "fraction": 0.1,
+     "records": 8,
+     "lower": 1.009218654849615,
+     "upper": 2.9426905863932538
+    },
+    {
+     "fraction": 0.25,
+     "records": 20,
+     "lower": 1.0014579919231454,
+     "upper": 1.3502099692266902
+    },
+    {
+     "fraction": 0.5,
+     "records": 40,
+     "lower": 1.0007217855637325,
+     "upper": 1.1221361051377992
+    },
+    {
+     "fraction": 0.75,
+     "records": 60,
+     "lower": 1.0003103855118598,
+     "upper": 1.0343338080234779
+    }
+   ]
+  },
+  {
+   "name": "missing_recorded",
+   "ms": 87,
+   "usable": 500,
+   "js": [
+    0.1915622908904346,
+    0.4621898514112879,
+    0.30230602802009393,
+    0.7550002446808326
+   ],
+   "r": [
+    0.185534947621243,
+    0.429325646687996,
+    0.313706454910969,
+    0.762330781576764
+   ],
+   "predictive": [
+    {
+     "fraction": 0.05,
+     "records": 4,
+     "lower": 1.5393800067643366,
+     "upper": 7.917317904161956
+    },
+    {
+     "fraction": 0.1,
+     "records": 7,
+     "lower": 1.498345713605959,
+     "upper": 4.8325193644168785
+    },
+    {
+     "fraction": 0.25,
+     "records": 18,
+     "lower": 1.1320758966741267,
+     "upper": 1.907352349938739
+    },
+    {
+     "fraction": 0.5,
+     "records": 35,
+     "lower": 1.0570674346587807,
+     "upper": 1.3528058823359017
+    },
+    {
+     "fraction": 0.75,
+     "records": 53,
+     "lower": 1.0195254817933366,
+     "upper": 1.1141743412509724
+    }
+   ]
+  }
+ ],
+ "normal_functions": {
+  "qnorm_975": 1.9599639845400536,
+  "expected_qnorm_975": 1.959963984540054,
+  "pnorm_196": 0.975,
+  "qnorm_001": -3.090232306167813,
+  "expected_qnorm_001": -3.090232306167813,
+  "round_trip_error": 2.930988785010413e-14
+ },
+ "records_rule": [
+  {
+   "name": "ctgov",
+   "k": 0.0417956452176635,
+   "discard_k": 0.992824848939551,
+   "fraction_keep": 0.06916423368003746,
+   "fraction_discard": 0.6383392187275071,
+   "exact_records_keep": 41.498540208022476,
+   "exact_records_discard": 383.0035312365043,
+   "records_keep_ceiling": 42,
+   "records_discard_ceiling": 384,
+   "ratio_at_rounded_down": 1.2529357299293167
+  },
+  {
+   "name": "nhanes",
+   "k": 0.0698179910375213,
+   "discard_k": 0.959121821687825,
+   "fraction_keep": 0.11041594897997827,
+   "fraction_discard": 0.6303286454080558,
+   "exact_records_keep": 66.24956938798695,
+   "exact_records_discard": 378.19718724483346,
+   "records_keep_ceiling": 67,
+   "records_discard_ceiling": 379,
+   "ratio_at_rounded_down": 1.250956041751464
+  }
+ ],
+ "all_exact_checks_pass": true
+}

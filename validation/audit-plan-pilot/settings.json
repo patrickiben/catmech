@@ -1,0 +1,32 @@
+{
+  "mode": "pilot",
+  "workers": 14,
+  "m": 20,
+  "n": 600,
+  "bootstrap": 500,
+  "real_reps": 280,
+  "synthetic_reps": 40,
+  "retest_reps": 40,
+  "split": "development",
+  "target_records": [30, 60, 150, 300],
+  "pilot_records": [60, 150],
+  "target_ratio": 1.25,
+  "cohort_base": 700100000,
+  "order_base": 710100000,
+  "imputation_base": 720000000,
+  "plan_10_base": 730000000,
+  "plan_25_base": 740000000,
+  "retest_base": 750000000,
+  "offsets": {
+    "ctgov": 0,
+    "nhanes": 2000000,
+    "missed_flags": 4000000,
+    "error_gross_and_small": 6000000
+  },
+  "fixture_master_seed": 430272,
+  "fixture_phase": "development",
+  "fixture_selection_base": 770100000,
+  "fixture_noise_base": 776100000,
+  "fixture_mechanism_base": 778100000,
+  "fixture_imputation_base": 790000000
+}
