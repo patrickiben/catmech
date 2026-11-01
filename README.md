@@ -349,3 +349,8 @@ such as [hmi](https://doi.org/10.18637/jss.v095.i09), and
 AI-assisted work is disclosed in [CONTRIBUTING.md](CONTRIBUTING.md).
 [GitHub preparation](docs/GITHUB.md) describes upload steps; no publication is
 performed by preparing this repository.
+
+Real-audit data come from [Nshimyiryo et al. (2020)](https://doi.org/10.1371/journal.pone.0235823),
+*PLOS ONE*, under CC BY, and [Maassen et al. (2020)](https://doi.org/10.1371/journal.pone.0233107),
+*PLOS ONE*, with data on [OSF](https://osf.io/7nsmd/) under CC0. See
+[the data note](validation/real-audit/README.md) for what was copied and changed.

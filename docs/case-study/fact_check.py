@@ -352,8 +352,12 @@ def check_links(paths):
 def wording_rules(docs):
     """Negated forms only for publication, users, review and validation claims; no third party; American spelling."""
     problems = []
+    # Specific names live in an untracked local file, so this public script never contains them.
+    blocked = HERE / ".local-terms"
+    extra = [re.escape(line.strip()) for line in blocked.read_text().splitlines() if line.strip()] if blocked.exists() else []
+    pattern = "|".join(["third party", r"third.party"] + extra)
     for name, text in docs.items():
-        if re.search(r"third party|third.party", text, re.I):
+        if re.search(pattern, text, re.I):
             problems.append(f"{name}: names a third party")
         if re.search(r"\b(?:favour|colour|modelling|analyse[ds]?|behaviour)\b", text, re.I):
             problems.append(f"{name}: non-American spelling")

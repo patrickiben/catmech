@@ -8,3 +8,6 @@ output/
 .Rproj.user/
 __pycache__/
 *.pyc
+
+# Local names kept out of public pages by fact_check.py
+docs/case-study/.local-terms
