@@ -1,0 +1,14 @@
+{
+  "mode": "study",
+  "workers": 14,
+  "m": 20,
+  "fractions": [0.25, 0.5],
+  "month_reps": 500,
+  "quarter_reps": 200,
+  "effect_reps": 500,
+  "ratio_resamples": 2000,
+  "ratio_seed": 430000000,
+  "cohort_base": 400100000,
+  "selection_base": 410100000,
+  "imputation_base": 420000000
+}

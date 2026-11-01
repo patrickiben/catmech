@@ -1,0 +1,267 @@
+Scored from validation/real-audit-study by tools/real-audit-score.py
+Requests: 45600; returned: 45167; convergence refusals: 426; refused: 3; other errors: 4
+
+RULE 1. Does a partial audit pay? linear_mi against recorded, facility-months, recovery RMSE ratio
+  pnc       25%: 0.923 [0.861, 0.991] -> pays
+  pnc       50%: 0.562 [0.519, 0.605] -> pays
+  syphilis  25%: 2.393 [2.172, 2.626] -> costs
+  syphilis  50%: 1.385 [1.260, 1.517] -> costs
+  iron      25%: 1.125 [1.040, 1.216] -> costs
+  iron      50%: 0.615 [0.570, 0.660] -> pays
+  anc4      25%: 0.458 [0.430, 0.487] -> pays
+  anc4      50%: 0.223 [0.207, 0.238] -> pays
+
+RULE 2. Does the contamination model add anything? contamination against linear_mi, facility-months, 25%
+  pnc       ratio 0.745 [0.690, 0.802]; returned 0.936 (need 0.90); clustered coverage 0.716 vs oracle 0.952 (need within 0.03); quarter ratio 0.485 -> lower error True, conditions met False
+  syphilis  ratio 1.111 [0.991, 1.242]; returned 0.808 (need 0.90); clustered coverage 0.666 vs oracle 0.932 (need within 0.03); quarter ratio 0.529 -> lower error False, conditions met False
+  iron      ratio 0.717 [0.656, 0.792]; returned 0.848 (need 0.90); clustered coverage 0.354 vs oracle 0.902 (need within 0.03); quarter ratio 0.499 -> lower error True, conditions met False
+  Outcome: INCONCLUSIVE
+  anc4, stress case outside the rule: 1.488 [1.400, 1.579]
+  anc4 at 50%: 1.948 [1.835, 2.077]
+
+RULE 3. Control. Recovery RMSE ratio against recorded, effect sizes
+  effect_smd 25%: linear_mi 2.705 [2.393, 3.040]; raking 6.706 [6.014, 7.441]; audited_only 9.742 [8.902, 10.741]; contamination 1.306 [1.177, 1.444]
+  effect_smd 50%: linear_mi 1.222 [1.123, 1.337]; raking 2.073 [1.880, 2.293]; audited_only 4.221 [3.858, 4.635]; contamination 0.927 [0.828, 1.045]
+  effect_r   25%: linear_mi 1.578 [1.435, 1.728]; raking 5.853 [5.233, 6.499]; audited_only 9.950 [9.036, 10.908]; contamination 0.950 [0.888, 1.022]
+  effect_r   50%: linear_mi 0.902 [0.829, 0.984]; raking 1.971 [1.758, 2.205]; audited_only 5.493 [5.037, 6.006]; contamination 0.667 [0.622, 0.710]
+
+PREDICTIONS
+  1. anc4 linear_mi beats recorded: True; pnc does not: False
+  2. pnc lower: True; syphilis lower: False; iron lower: True; anc4 not lower: True
+  3. default undercovers for every method and fraction: True; clustered closer to 95% for every method and fraction: True; contamination gap to oracle in points: pnc 23.6, syphilis 26.6, iron 54.8, anc4 46.9
+  4. effect_smd: lowest is recorded: recorded 0.0256, audited_only 0.2494, linear_mi 0.0692, raking 0.1716, contamination 0.0339
+  4. effect_r: lowest is contamination: recorded 0.0037, audited_only 0.0369, linear_mi 0.0059, raking 0.0217, contamination 0.0035
+  5. rwanda_month: raking wider, default 3/4, clustered 4/4
+  5. rwanda_quarter: raking wider, default 0/4, clustered 0/4
+  5. effect_size: raking wider, default 2/2, clustered 2/2
+  6. mean AUC at facility-months: pnc 25% 0.501, pnc 50% 0.509, syphilis 25% 0.525, syphilis 50% 0.536, iron 25% 0.528, iron 50% 0.547, anc4 25% 0.582, anc4 50% 0.619
+  7. audit-using methods better at 50% than 25% in every cell: True []
+
+TABLES: recovery RMSE, bias, clustered coverage
+| rwanda_month | pnc | 25% | 468/500 | 0.078, +0.059, 50.8% | 0.090, -0.015, 83.2% | 0.072, -0.007, 85.4% | 0.087, -0.018, 80.4% | 0.053, +0.022, 71.6% | -0.008, 95.2% |
+| rwanda_month | pnc | 50% | 500/500 | 0.078, +0.059, 50.8% | 0.055, -0.013, 89.8% | 0.044, -0.007, 86.0% | 0.050, -0.015, 88.6% | 0.042, +0.013, 86.0% | -0.008, 95.2% |
+| rwanda_month | syphilis | 25% | 404/500 | 0.076, +0.003, 92.6% | 0.378, +0.241, 61.0% | 0.182, +0.059, 84.6% | 0.308, +0.197, 69.6% | 0.195, +0.085, 66.6% | +0.012, 93.2% |
+| rwanda_month | syphilis | 50% | 494/500 | 0.076, +0.003, 92.6% | 0.231, +0.132, 75.2% | 0.106, +0.048, 85.2% | 0.151, +0.075, 82.0% | 0.089, +0.036, 83.2% | +0.012, 93.2% |
+| rwanda_month | iron | 25% | 424/500 | 0.139, +0.128, 54.6% | 0.185, +0.028, 77.2% | 0.156, +0.014, 79.5% | 0.183, +0.027, 70.5% | 0.112, +0.093, 35.4% | +0.008, 90.2% |
+| rwanda_month | iron | 50% | 500/500 | 0.139, +0.128, 54.6% | 0.105, +0.019, 85.6% | 0.085, +0.017, 84.6% | 0.093, +0.018, 84.4% | 0.080, +0.063, 70.4% | +0.008, 90.2% |
+| rwanda_month | anc4 | 25% | 469/500 | 0.186, +0.180, 27.6% | 0.133, +0.011, 78.8% | 0.085, +0.003, 87.2% | 0.115, +0.003, 80.4% | 0.124, +0.113, 49.7% | -0.000, 96.6% |
+| rwanda_month | anc4 | 50% | 499/500 | 0.186, +0.180, 27.6% | 0.067, +0.009, 90.0% | 0.041, -0.001, 95.2% | 0.048, +0.002, 93.4% | 0.080, +0.068, 78.0% | -0.000, 96.6% |
+| rwanda_quarter | pnc | 25% | 176/200 | 0.073, +0.057, 72.5% | 0.157, -0.002, 78.0% | 0.136, +0.022, 91.5% | 0.154, +0.007, 71.0% | 0.067, +0.036, 79.0% | -0.001, 96.0% |
+| rwanda_quarter | pnc | 50% | 200/200 | 0.073, +0.057, 72.5% | 0.082, -0.013, 95.5% | 0.072, -0.001, 90.5% | 0.073, -0.011, 92.5% | 0.050, +0.022, 88.5% | -0.001, 96.0% |
+| rwanda_quarter | syphilis | 25% | 147/200 | 0.054, +0.037, 94.5% | 0.544, +0.387, 61.5% | 0.285, +0.156, 90.5% | 0.483, +0.357, 53.5% | 0.133, +0.078, 81.6% | +0.044, 94.0% |
+| rwanda_quarter | syphilis | 50% | 198/200 | 0.054, +0.037, 94.5% | 0.280, +0.202, 80.5% | 0.110, +0.088, 90.5% | 0.189, +0.143, 84.5% | 0.080, +0.060, 90.9% | +0.044, 94.0% |
+| rwanda_quarter | iron | 25% | 155/200 | 0.168, +0.158, 64.5% | 0.316, +0.097, 69.5% | 0.258, +0.033, 84.9% | 0.280, +0.064, 55.1% | 0.130, +0.111, 53.5% | +0.012, 95.0% |
+| rwanda_quarter | iron | 50% | 199/200 | 0.168, +0.158, 64.5% | 0.141, +0.019, 86.0% | 0.097, +0.014, 92.0% | 0.110, +0.014, 80.5% | 0.089, +0.071, 86.4% | +0.012, 95.0% |
+| rwanda_quarter | anc4 | 25% | 190/200 | 0.213, +0.213, 37.0% | 0.220, +0.085, 91.5% | 0.109, -0.001, 97.0% | 0.193, +0.067, 79.0% | 0.144, +0.137, 65.3% | +0.006, 95.0% |
+| rwanda_quarter | anc4 | 50% | 199/200 | 0.213, +0.213, 37.0% | 0.097, +0.040, 90.0% | 0.053, -0.002, 94.0% | 0.067, +0.021, 90.0% | 0.101, +0.095, 83.9% | +0.006, 95.0% |
+| effect_size | effect_smd | 25% | 463/500 | 0.026, -0.006, 95.8% | 0.249, +0.010, 96.4% | 0.069, +0.000, 96.4% | 0.172, +0.027, 90.8% | 0.034, +0.005, 94.6% | +0.001, 96.8% |
+| effect_size | effect_smd | 50% | 500/500 | 0.026, -0.006, 95.8% | 0.108, +0.007, 97.0% | 0.031, +0.003, 96.0% | 0.053, +0.009, 94.8% | 0.024, +0.002, 96.0% | +0.001, 96.8% |
+| effect_size | effect_r | 25% | 489/500 | 0.004, +0.001, 97.2% | 0.037, -0.002, 96.6% | 0.006, -0.001, 97.0% | 0.022, -0.001, 94.0% | 0.004, -0.000, 96.3% | -0.002, 96.0% |
+| effect_size | effect_r | 50% | 500/500 | 0.004, +0.001, 97.2% | 0.020, -0.005, 93.8% | 0.003, -0.002, 95.8% | 0.007, -0.003, 93.8% | 0.002, -0.001, 96.0% | -0.002, 96.0% |
+
+DEFAULT COVERAGE AND WIDTHS, facility-months
+  pnc       25%: oracle default 81.0% width 0.116 clustered width 0.194; linear_mi default 81.6% width 0.211 clustered width 0.237; contamination default 63.2% width 0.094 clustered width 0.122
+  pnc       50%: oracle default 81.0% width 0.116 clustered width 0.194; linear_mi default 80.4% width 0.148 clustered width 0.184; contamination default 73.2% width 0.107 clustered width 0.154
+  syphilis  25%: oracle default 65.4% width 0.307 clustered width 0.716; linear_mi default 73.8% width 0.553 clustered width 0.762; contamination default 50.7% width 0.311 clustered width 0.520
+  syphilis  50%: oracle default 65.4% width 0.307 clustered width 0.716; linear_mi default 65.4% width 0.375 clustered width 0.668; contamination default 59.9% width 0.327 clustered width 0.610
+  iron      25%: oracle default 84.0% width 0.208 clustered width 0.285; linear_mi default 72.5% width 0.421 clustered width 0.480; contamination default 28.5% width 0.131 clustered width 0.166
+  iron      50%: oracle default 84.0% width 0.208 clustered width 0.285; linear_mi default 79.0% width 0.277 clustered width 0.324; contamination default 62.6% width 0.187 clustered width 0.240
+  anc4      25%: oracle default 87.2% width 0.153 clustered width 0.219; linear_mi default 80.8% width 0.261 clustered width 0.313; contamination default 34.5% width 0.173 clustered width 0.230
+  anc4      50%: oracle default 87.2% width 0.153 clustered width 0.219; linear_mi default 88.4% width 0.188 clustered width 0.249; contamination default 57.3% width 0.168 clustered width 0.232
+
+COVERING INTERVALS PER REQUEST, clustered, facility-months
+  pnc       25%: linear_mi 85.4%; raking 80.4%; contamination 67.0%
+  pnc       50%: linear_mi 86.0%; raking 88.6%; contamination 86.0%
+  syphilis  25%: linear_mi 84.6%; raking 69.6%; contamination 53.8%
+  syphilis  50%: linear_mi 85.2%; raking 82.0%; contamination 82.2%
+  iron      25%: linear_mi 79.2%; raking 70.2%; contamination 30.0%
+  iron      50%: linear_mi 84.6%; raking 84.4%; contamination 70.4%
+  anc4      25%: linear_mi 87.2%; raking 80.4%; contamination 46.6%
+  anc4      50%: linear_mi 95.2%; raking 93.4%; contamination 77.8%
+
+PER-RECORD SCORES, mean across cohorts: AUC; Brier vs prevalence; actual vs expected errors; posterior vs recorded RMSE
+  rwanda_month   pnc        25%: AUC 0.501; Brier 0.342 vs 0.248; errors 76.8 vs 43.7; RMSE 5.376 vs 4.713
+  rwanda_month   pnc        50%: AUC 0.509; Brier 0.290 vs 0.248; errors 53.7 vs 40.3; RMSE 5.033 vs 4.728
+  rwanda_month   syphilis   25%: AUC 0.525; Brier 0.292 vs 0.240; errors 64.0 vs 54.1; RMSE 15.685 vs 12.807
+  rwanda_month   syphilis   50%: AUC 0.536; Brier 0.261 vs 0.240; errors 44.4 vs 40.5; RMSE 12.960 vs 12.661
+  rwanda_month   iron       25%: AUC 0.528; Brier 0.290 vs 0.206; errors 42.0 vs 26.6; RMSE 14.027 vs 10.712
+  rwanda_month   iron       50%: AUC 0.547; Brier 0.248 vs 0.207; errors 29.3 vs 21.3; RMSE 11.687 vs 10.482
+  rwanda_month   anc4       25%: AUC 0.582; Brier 0.131 vs 0.119; errors 134.2 vs 126.4; RMSE 7.553 vs 9.787
+  rwanda_month   anc4       50%: AUC 0.619; Brier 0.120 vs 0.118; errors 93.0 vs 90.4; RMSE 7.062 vs 9.611
+  rwanda_quarter pnc        25%: AUC 0.557; Brier 0.194 vs 0.130; errors 39.5 vs 31.9; RMSE 12.657 vs 11.282
+  rwanda_quarter pnc        50%: AUC 0.558; Brier 0.142 vs 0.131; errors 26.8 vs 25.2; RMSE 11.777 vs 11.220
+  rwanda_quarter syphilis   25%: AUC 0.549; Brier 0.271 vs 0.226; errors 32.6 vs 29.2; RMSE 32.806 vs 27.165
+  rwanda_quarter syphilis   50%: AUC 0.569; Brier 0.239 vs 0.223; errors 22.5 vs 21.3; RMSE 27.508 vs 26.450
+  rwanda_quarter iron       25%: AUC 0.478; Brier 0.365 vs 0.246; errors 22.7 vs 14.5; RMSE 33.888 vs 26.729
+  rwanda_quarter iron       50%: AUC 0.509; Brier 0.282 vs 0.243; errors 15.4 vs 12.9; RMSE 27.134 vs 26.040
+  rwanda_quarter anc4       25%: AUC 0.406; Brier 0.035 vs 0.027; errors 50.6 vs 47.9; RMSE 19.403 vs 26.223
+  rwanda_quarter anc4       50%: AUC 0.455; Brier 0.031 vs 0.029; errors 34.9 vs 34.3; RMSE 18.537 vs 26.321
+  effect_size    effect_smd 25%: AUC 0.544; Brier 0.215 vs 0.198; errors 30.6 vs 29.1; RMSE 0.389 vs 0.255
+  effect_size    effect_smd 50%: AUC 0.553; Brier 0.207 vs 0.197; errors 20.7 vs 20.5; RMSE 0.300 vs 0.248
+  effect_size    effect_r   25%: AUC 0.497; Brier 0.146 vs 0.139; errors 25.2 vs 26.9; RMSE 0.045 vs 0.037
+  effect_size    effect_r   50%: AUC 0.489; Brier 0.140 vs 0.136; errors 16.4 vs 17.6; RMSE 0.038 vs 0.036
+
+RMSE AGAINST THE POOL SLOPE, as the plan listed: method values, then paired ratios with 95% limits from 2,000 resamples
+  pnc        25%: oracle 0.046, recorded 0.067, audited_only 0.095, linear_mi 0.078, raking 0.093, contamination 0.046; linear_mi/recorded 1.172 [1.083, 1.267]; contamination/linear_mi 0.584 [0.545, 0.632]
+  pnc        50%: oracle 0.046, recorded 0.067, audited_only 0.067, linear_mi 0.059, raking 0.065, contamination 0.047; linear_mi/recorded 0.881 [0.813, 0.950]; contamination/linear_mi 0.798 [0.756, 0.844]
+  syphilis   25%: oracle 0.164, recorded 0.169, audited_only 0.391, linear_mi 0.234, raking 0.318, contamination 0.254; linear_mi/recorded 1.385 [1.296, 1.486]; contamination/linear_mi 1.088 [1.017, 1.164]
+  syphilis   50%: oracle 0.164, recorded 0.169, audited_only 0.290, linear_mi 0.201, raking 0.228, contamination 0.200; linear_mi/recorded 1.190 [1.126, 1.252]; contamination/linear_mi 0.990 [0.961, 1.022]
+  iron       25%: oracle 0.075, recorded 0.146, audited_only 0.199, linear_mi 0.169, raking 0.197, contamination 0.110; linear_mi/recorded 1.157 [1.077, 1.240]; contamination/linear_mi 0.646 [0.599, 0.699]
+  iron       50%: oracle 0.075, recorded 0.146, audited_only 0.130, linear_mi 0.110, raking 0.119, contamination 0.098; linear_mi/recorded 0.757 [0.709, 0.806]; contamination/linear_mi 0.888 [0.839, 0.942]
+  anc4       25%: oracle 0.050, recorded 0.192, audited_only 0.142, linear_mi 0.096, raking 0.124, contamination 0.133; linear_mi/recorded 0.501 [0.466, 0.532]; contamination/linear_mi 1.405 [1.321, 1.493]
+  anc4       50%: oracle 0.050, recorded 0.192, audited_only 0.081, linear_mi 0.059, raking 0.065, contamination 0.091; linear_mi/recorded 0.309 [0.287, 0.333]; contamination/linear_mi 1.537 [1.430, 1.650]
+  effect_smd 25%: oracle 0.086, recorded 0.084, audited_only 0.272, linear_mi 0.108, raking 0.197, contamination 0.082; linear_mi/recorded 1.291 [1.211, 1.376]; contamination/linear_mi 0.750 [0.706, 0.801]
+  effect_smd 50%: oracle 0.086, recorded 0.084, audited_only 0.142, linear_mi 0.092, raking 0.102, contamination 0.084; linear_mi/recorded 1.101 [1.058, 1.145]; contamination/linear_mi 0.907 [0.882, 0.934]
+  effect_r   25%: oracle 0.018, recorded 0.018, audited_only 0.040, linear_mi 0.018, raking 0.028, contamination 0.018; linear_mi/recorded 1.025 [0.992, 1.061]; contamination/linear_mi 0.958 [0.931, 0.986]
+  effect_r   50%: oracle 0.018, recorded 0.018, audited_only 0.028, linear_mi 0.018, raking 0.020, contamination 0.018; linear_mi/recorded 1.022 [0.997, 1.047]; contamination/linear_mi 0.979 [0.965, 0.994]
+
+COUNTS ACROSS THE 20 CELLS (non-oracle planned methods)
+  lowest recovery RMSE: recorded 5, audited_only 0, linear_mi 4, raking 0, contamination 11
+  lowest RMSE against the pool: recorded 5, audited_only 0, linear_mi 4, raking 0, contamination 11
+  clustered coverage closest to 95%: recorded 4, audited_only 3, linear_mi 10, raking 2, contamination 1
+  worst clustered coverage, four facility-month analyses at 25%: recorded 27.6%, audited_only 61.0%, linear_mi 79.5%, raking 69.6%, contamination 35.4%
+
+REFUSALS, facility-months at 25%: other methods on refused against returned cohorts, and falling back to linear MI when the model refuses
+  pnc       refused 32; refused/returned recovery RMSE: recorded 1.108, audited_only 0.861, linear_mi 1.012; with fallback recovery RMSE 0.055, clustered coverage 72.2%
+  syphilis  refused 96; refused/returned recovery RMSE: recorded 0.856, audited_only 1.136, linear_mi 1.193; with fallback recovery RMSE 0.198, clustered coverage 70.0%
+  iron      refused 76; refused/returned recovery RMSE: recorded 0.942, audited_only 1.258, linear_mi 1.015; with fallback recovery RMSE 0.120, clustered coverage 41.4%
+  anc4      refused 31; refused/returned recovery RMSE: recorded 0.951, audited_only 1.305, linear_mi 1.266; with fallback recovery RMSE 0.123, clustered coverage 51.2%
+
+SHARE OF REPORTED BIAS KEPT, facility-months: by pool bias, then by recovery bias
+  pnc       25%: contamination 38% and 45%; linear_mi -11%
+  pnc       50%: contamination 23% and 32%; linear_mi -12%
+  iron      25%: contamination 73% and 72%; linear_mi 11%
+  iron      50%: contamination 50% and 46%; linear_mi 13%
+  anc4      25%: contamination 63% and 62%; linear_mi 2%
+  anc4      50%: contamination 38% and 38%; linear_mi -1%
+
+POOL DESCRIPTION
+  rwanda_month   pnc         rows  200 units   69 target +0.9729 reported +1.0350 gap +0.0622 wrong  101 above   49 below   52 error/resid 0.81 corr(error, covariate) +0.265
+  rwanda_quarter pnc         rows   62 units   62 target +0.9732 reported +1.0340 gap +0.0608 wrong   52 above   30 below   22 error/resid 0.79 corr(error, covariate) +0.298
+  rwanda_month   syphilis    rows  206 units   69 target +0.5792 reported +0.5685 gap -0.0107 wrong   84 above   67 below   17 error/resid 0.60 corr(error, covariate) -0.115
+  rwanda_quarter syphilis    rows   68 units   68 target +0.5723 reported +0.5681 gap -0.0043 wrong   43 above   34 below    9 error/resid 0.46 corr(error, covariate) -0.165
+  rwanda_month   iron        rows  186 units   63 target +0.8940 reported +1.0201 gap +0.1260 wrong   56 above   44 below   12 error/resid 0.78 corr(error, covariate) +0.224
+  rwanda_quarter iron        rows   60 units   60 target +0.8663 reported +1.0132 gap +0.1470 wrong   31 above   24 below    7 error/resid 0.76 corr(error, covariate) +0.276
+  rwanda_month   anc4        rows  207 units   69 target +0.2559 reported +0.4347 gap +0.1788 wrong  179 above  156 below   23 error/resid 0.78 corr(error, covariate) +0.477
+  rwanda_quarter anc4        rows   69 units   69 target +0.3075 reported +0.5128 gap +0.2053 wrong   67 above   57 below   10 error/resid 0.73 corr(error, covariate) +0.574
+  effect_size    effect_smd  rows  147 units  147 target -0.0873 reported -0.0937 gap -0.0064 wrong   41 above   22 below   19 error/resid 0.30 corr(error, covariate) -0.013
+  effect_size    effect_r    rows  202 units  202 target -0.0573 reported -0.0546 gap +0.0027 wrong   34 above   14 below   20 error/resid 0.18 corr(error, covariate) -0.060
+
+INFLUENCE: slope using reference values when each facility is left out, facility-months
+  pnc       full 0.973; leave-one-out range 0.945 to 1.008
+  syphilis  full 0.579; leave-one-out range 0.448 to 0.694
+  iron      full 0.894; leave-one-out range 0.862 to 0.949
+  anc4      full 0.256; leave-one-out range 0.231 to 0.277
+
+POST HOC, not in the plan: swap-in uses reference values on audited rows and recorded values elsewhere
+  rwanda_month   pnc        25%: recovery RMSE recorded 0.0775, swap-in 0.0634, linear_mi 0.0716; same cohorts contamination 0.0533 vs swap-in 0.0626; cor 0.838, gap 0.0306; contamination keeps 38% of reported bias, swap-in 74%
+  rwanda_month   pnc        50%: recovery RMSE recorded 0.0775, swap-in 0.0484, linear_mi 0.0436; same cohorts contamination 0.0419 vs swap-in 0.0484; cor 0.934, gap 0.0217; contamination keeps 23% of reported bias, swap-in 48%
+  rwanda_month   syphilis   25%: recovery RMSE recorded 0.0762, swap-in 0.0676, linear_mi 0.1824; same cohorts contamination 0.1949 vs swap-in 0.0694; cor 0.703, gap 0.1883; reported bias near zero
+  rwanda_month   syphilis   50%: recovery RMSE recorded 0.0762, swap-in 0.0510, linear_mi 0.1056; same cohorts contamination 0.0887 vs swap-in 0.0510; cor 0.934, gap 0.0754; reported bias near zero
+  rwanda_month   iron       25%: recovery RMSE recorded 0.1387, swap-in 0.1141, linear_mi 0.1562; same cohorts contamination 0.1117 vs swap-in 0.1133; cor 0.646, gap 0.0575; contamination keeps 73% of reported bias, swap-in 79%
+  rwanda_month   iron       50%: recovery RMSE recorded 0.1387, swap-in 0.0824, linear_mi 0.0853; same cohorts contamination 0.0798 vs swap-in 0.0824; cor 0.893, gap 0.0354; contamination keeps 50% of reported bias, swap-in 55%
+  rwanda_month   anc4       25%: recovery RMSE recorded 0.1856, swap-in 0.1447, linear_mi 0.0849; same cohorts contamination 0.1241 vs swap-in 0.1446; cor 0.914, gap 0.0366; contamination keeps 63% of reported bias, swap-in 75%
+  rwanda_month   anc4       50%: recovery RMSE recorded 0.1856, swap-in 0.1039, linear_mi 0.0413; same cohorts contamination 0.0805 vs swap-in 0.1037; cor 0.917, gap 0.0339; contamination keeps 38% of reported bias, swap-in 49%
+  rwanda_quarter pnc        25%: recovery RMSE recorded 0.0732, swap-in 0.0644, linear_mi 0.1362; same cohorts contamination 0.0675 vs swap-in 0.0666; cor 0.878, gap 0.0261; contamination keeps 64% of reported bias, swap-in 80%
+  rwanda_quarter pnc        50%: recovery RMSE recorded 0.0732, swap-in 0.0515, linear_mi 0.0723; same cohorts contamination 0.0503 vs swap-in 0.0515; cor 0.958, gap 0.0195; contamination keeps 39% of reported bias, swap-in 55%
+  rwanda_quarter syphilis   25%: recovery RMSE recorded 0.0544, swap-in 0.0475, linear_mi 0.2850; same cohorts contamination 0.1331 vs swap-in 0.0464; cor 0.835, gap 0.1278; contamination keeps 212% of reported bias, swap-in 105%
+  rwanda_quarter syphilis   50%: recovery RMSE recorded 0.0544, swap-in 0.0448, linear_mi 0.1098; same cohorts contamination 0.0795 vs swap-in 0.0450; cor 0.958, gap 0.0635; contamination keeps 162% of reported bias, swap-in 113%
+  rwanda_quarter iron       25%: recovery RMSE recorded 0.1679, swap-in 0.1344, linear_mi 0.2585; same cohorts contamination 0.1303 vs swap-in 0.1341; cor 0.755, gap 0.0686; contamination keeps 71% of reported bias, swap-in 76%
+  rwanda_quarter iron       50%: recovery RMSE recorded 0.1679, swap-in 0.0985, linear_mi 0.0966; same cohorts contamination 0.0889 vs swap-in 0.0986; cor 0.935, gap 0.0421; contamination keeps 45% of reported bias, swap-in 56%
+  rwanda_quarter anc4       25%: recovery RMSE recorded 0.2128, swap-in 0.1620, linear_mi 0.1089; same cohorts contamination 0.1439 vs swap-in 0.1608; cor 0.955, gap 0.0323; contamination keeps 65% of reported bias, swap-in 72%
+  rwanda_quarter anc4       50%: recovery RMSE recorded 0.2128, swap-in 0.1204, linear_mi 0.0528; same cohorts contamination 0.1009 vs swap-in 0.1203; cor 0.938, gap 0.0356; contamination keeps 45% of reported bias, swap-in 52%
+  effect_size    effect_smd 25%: recovery RMSE recorded 0.0256, swap-in 0.0229, linear_mi 0.0692; same cohorts contamination 0.0339 vs swap-in 0.0231; cor 0.945, gap 0.0297; reported bias near zero
+  effect_size    effect_smd 50%: recovery RMSE recorded 0.0256, swap-in 0.0180, linear_mi 0.0313; same cohorts contamination 0.0237 vs swap-in 0.0180; cor 0.982, gap 0.0170; reported bias near zero
+  effect_size    effect_r   25%: recovery RMSE recorded 0.0037, swap-in 0.0031, linear_mi 0.0059; same cohorts contamination 0.0035 vs swap-in 0.0031; cor 0.993, gap 0.0022; reported bias near zero
+  effect_size    effect_r   50%: recovery RMSE recorded 0.0037, swap-in 0.0023, linear_mi 0.0033; same cohorts contamination 0.0025 vs swap-in 0.0023; cor 0.998, gap 0.0010; reported bias near zero
+
+POST HOC, AFTER INDEPENDENT REVIEW, not in the plan
+  Slopes: reported; one-item target; both sides recounted; reported minus target; reported minus both-sides recount
+  pnc       1.035; 0.973; 1.016; +0.062 [-0.009, 0.144] (+6%); +0.019 [-0.025, 0.069] (+2%); covariate wrong on 46 of 200
+  syphilis  0.568; 0.579; 0.665; -0.011 [-0.174, 0.112] (-2%); -0.097 [-0.253, 0.053] (-15%); covariate wrong on 32 of 206
+  iron      1.020; 0.894; 0.954; +0.126 [-0.010, 0.270] (+14%); +0.066 [-0.031, 0.192] (+7%); covariate wrong on 30 of 186
+  anc4      0.435; 0.256; 0.284; +0.179 [0.086, 0.260] (+70%); +0.151 [0.041, 0.243] (+53%); covariate wrong on 32 of 207
+  Gap structure: reported equals covariate; wrong rows copying it; gap and gap without three facilities; within-catchment correlation; recounts of zero and slopes without them
+  pnc       62 of 200; 28 of 101; 0.062 to 0.004 (f64 f66 f43); 0.206; 0 rows in 0 facilities, target 0.973, reported 1.035, gap 0.062
+  syphilis  144 of 206; 60 of 84; -0.011 to 0.074 (f66 f10 f50); -0.017; 9 rows in 5 facilities, target 0.684, reported 0.617, gap -0.067
+  iron      150 of 186; 42 of 56; 0.126 to 0.001 (f64 f66 f40); 0.237; 6 rows in 3 facilities, target 0.901, reported 1.030, gap 0.129
+  anc4      2 of 207; 2 of 179; 0.179 to 0.105 (f71 f10 f34); 0.455; 2 rows in 2 facilities, target 0.256, reported 0.435, gap 0.179
+  Mean error when no key facility is audited, then when any is
+  pnc       recorded       +0.056, +0.061
+  pnc       linear_mi      +0.036, -0.045
+  pnc       contamination  +0.041, +0.006
+  pnc       audited_only   +0.026, -0.053
+  syphilis  recorded       +0.024, -0.014
+  syphilis  linear_mi      -0.013, +0.117
+  syphilis  contamination  +0.086, +0.084
+  syphilis  audited_only   +0.252, +0.233
+  iron      recorded       +0.125, +0.131
+  iron      linear_mi      +0.111, -0.091
+  iron      contamination  +0.119, +0.067
+  iron      audited_only   +0.107, -0.056
+  anc4      recorded       +0.164, +0.192
+  anc4      linear_mi      +0.041, -0.025
+  anc4      contamination  +0.131, +0.100
+  anc4      audited_only   +0.016, +0.008
+  Rule 1 on fresh cohorts: recovery ratio; ratio against the pool slope
+  pnc                            0.25 cohorts 2000: 1.009 [0.969, 1.048]; 1.136 [1.090, 1.179]
+  pnc                            0.50 cohorts 2000: 0.622 [0.598, 0.646]; 0.884 [0.851, 0.918]
+  syphilis                       0.25 cohorts 2000: 2.577 [2.446, 2.715]; 1.469 [1.422, 1.520]
+  syphilis                       0.50 cohorts 2000: 1.385 [1.310, 1.462]; 1.134 [1.104, 1.167]
+  iron                           0.25 cohorts 1996: 1.153 [1.089, 1.234]; 1.205 [1.144, 1.278]
+  iron                           0.50 cohorts 2000: 0.557 [0.538, 0.579]; 0.712 [0.688, 0.735]
+  anc4                           0.25 cohorts 2000: 0.443 [0.428, 0.458]; 0.503 [0.486, 0.521]
+  anc4                           0.50 cohorts 2000: 0.234 [0.225, 0.242]; 0.346 [0.334, 0.359]
+  syphilis_without_zero_recounts 0.25 cohorts 1000: 1.758 [1.661, 1.863]; 1.237 [1.174, 1.304]
+  Checking errors against the covariate on audited rows, 25%: share significant; share with the wrong sign
+  pnc       17.8%; 19.0%
+  syphilis  7.0%; 61.4%
+  iron      18.8%; 28.0%
+  anc4      56.6%; 5.0%
+  Oracle coverage: default; allowing unequal variance; clustered
+  pnc       81.0%; 86.8%; 95.2%
+  syphilis  65.4%; 83.4%; 93.2%
+  iron      84.0%; 88.6%; 90.2%
+  anc4      87.2%; 91.6%; 96.6%
+  Errors shuffled within catchment, 25%: oracle coverage; model returned, bias, coverage, SE over SD; linear MI coverage
+  pnc       92.0%; 187 of 200, -0.007, 74.9%, 0.613; 89.0%
+  syphilis  97.5%; 156 of 200, +0.054, 76.3%, 0.638; 83.5%
+  iron      92.5%; 168 of 200, +0.041, 63.1%, 0.569; 81.0%
+  anc4      97.5%; 181 of 200, -0.003, 93.9%, 0.943; 88.5%
+  Error means by facility-size group, paired cohorts: strata then default then linear MI, for recovery RMSE, bias and coverage
+  pnc       paired 129: 0.051, 0.052, 0.070; +0.017, +0.025, -0.002; 68.2%, 69.0%, 84.5%
+  syphilis  paired 100: 0.251, 0.179, 0.171; +0.138, +0.078, +0.045; 48.0%, 62.0%, 80.0%
+  iron      paired 111: 0.110, 0.110, 0.130; +0.093, +0.094, +0.031; 34.2%, 31.5%, 82.9%
+  anc4      paired 129: 0.071, 0.124, 0.086; +0.031, +0.111, +0.010; 86.0%, 51.9%, 88.4%
+  Imputation resampling audited facilities, first 200 cohorts at 25%: coverage scratch, package, oracle; recovery RMSE scratch, package
+  pnc       91.5%, 84.0%, 96.0%; 0.064, 0.069
+  syphilis  91.5%, 80.5%, 94.5%; 0.162, 0.190
+  iron      90.5%, 81.0%, 89.0%; 0.122, 0.155
+  anc4      90.5%, 86.5%, 96.0%; 0.083, 0.088
+  Raking with the small-sample factor: clustered coverage saved, then with the factor
+  effect_size:effect_r:audit_25pct         94.0%, 98.4%
+  effect_size:effect_r:audit_50pct         93.8%, 96.4%
+  effect_size:effect_smd:audit_25pct       90.8%, 96.6%
+  effect_size:effect_smd:audit_50pct       94.8%, 96.8%
+  rwanda_month:anc4:audit_25pct            80.4%, 83.4%
+  rwanda_month:anc4:audit_50pct            93.4%, 94.0%
+  rwanda_month:iron:audit_25pct            70.5%, 74.7%
+  rwanda_month:iron:audit_50pct            84.4%, 86.6%
+  rwanda_month:pnc:audit_25pct             80.4%, 85.0%
+  rwanda_month:pnc:audit_50pct             88.6%, 89.6%
+  rwanda_month:syphilis:audit_25pct        69.6%, 73.8%
+  rwanda_month:syphilis:audit_50pct        82.0%, 83.0%
+  rwanda_quarter:anc4:audit_25pct          79.0%, 92.5%
+  rwanda_quarter:anc4:audit_50pct          90.0%, 91.5%
+  rwanda_quarter:iron:audit_25pct          55.1%, 72.2%
+  rwanda_quarter:iron:audit_50pct          80.5%, 83.0%
+  rwanda_quarter:pnc:audit_25pct           71.0%, 80.5%
+  rwanda_quarter:pnc:audit_50pct           92.5%, 95.0%
+  rwanda_quarter:syphilis:audit_25pct      53.5%, 67.0%
+  rwanda_quarter:syphilis:audit_50pct      84.5%, 87.0%
+  Difference estimator: below linear MI in 15 of 20 cells; largest ratio to linear MI 1.047; raking above it in 20
+  Fixed pool: swap-in beats recorded in 14 of 20 cells
+  pnc       fixed pool, 25%: linear MI over recorded 1.094; contamination over linear MI 0.588
+  syphilis  fixed pool, 25%: linear MI over recorded 17.712; contamination over linear MI 0.973
+  iron      fixed pool, 25%: linear MI over recorded 1.241; contamination over linear MI 0.638
+  anc4      fixed pool, 25%: linear MI over recorded 0.475; contamination over linear MI 1.464

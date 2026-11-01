@@ -22,6 +22,8 @@ AP, AK, AV, AR = [f"validation/audit-plan-study/{x}.csv" for x in ("summary", "p
 MV = "validation/merged-audit-pilot/study/verdict.csv"
 PT, RSET, ASET = "validation/real-data-study/pool-targets.csv", "validation/real-data-study/settings.json", "validation/audit-plan-study/settings.json"
 SYN_R, SYN_A, VAL, ASSESS = "validation/REAL_DATA_SYNTHESIS.md", "validation/AUDIT_PLAN_SYNTHESIS.md", "validation/VALIDATION.md", "docs/ASSESSMENT.md"
+RA, RR, RE, DEC, SYN_T = "validation/real-audit-study/summary.csv", "validation/real-audit-study/recovery-ratios.csv", "validation/real-audit-review/rule1-extension.csv", "validation/real-audit-decisions.txt", "validation/REAL_AUDIT_SYNTHESIS.md"
+BIASED = ("pnc", "iron", "anc4")
 
 _cache = {}
 
@@ -94,6 +96,19 @@ def audit_pct(family, scenario):
     return rd(family, scenario, "cole_mi", "mean_available_n") / json.loads((ROOT / RSET).read_text())["n"]
 
 
+def ra(analysis, method, col="coverage_cluster"):
+    """Rwanda facility-months at a 25% audit, from the real-audit study."""
+    return float(one(RA, level="rwanda_month", analysis=analysis, fraction="0.25", method=method)[col])
+
+
+def ratio_25(analysis, method, comparator):
+    return one(RR, level="rwanda_month", analysis=analysis, fraction="0.25", method=method, comparator=comparator)
+
+
+def mi_gaps():
+    return [ra(a, "oracle") - ra(a, "linear_mi") for a in ("pnc", "syphilis", "iron", "anc4")]
+
+
 EXAMPLE = {}
 
 
@@ -115,6 +130,16 @@ def run_example():
 # Each claim: text as shown, documents using it (R README front page, C case study and PDF, B blurbs, L README lower sections
 # changed in this rewrite), what it says, source file, and a function returning the text the source supports.
 claims = [
+    ("35%", "RC", "Real audit, 25%: lowest clustered coverage of the contamination model on slopes with a material gap", RA, lambda: pct0(min(ra(a, "contamination") for a in BIASED))),
+    ("72%", "RC", "Real audit, 25%: highest clustered coverage of the contamination model on slopes with a material gap", RA, lambda: pct0(max(ra(a, "contamination") for a in BIASED))),
+    ("90%", "RC", "Real audit: lowest clustered coverage of a one-item recount on those slopes", RA, lambda: pct0(min(ra(a, "oracle") for a in BIASED))),
+    ("97%", "RC", "Real audit: highest clustered coverage of a one-item recount on those slopes", RA, lambda: pct0(max(ra(a, "oracle") for a in BIASED))),
+    ("79.5%", "R", "Real audit, 25%: worst clustered coverage of linear MI across the four facility-month slopes", RA, lambda: pct1(min(ra(a, "linear_mi") for a in ("pnc", "syphilis", "iron", "anc4")))),
+    ("1.4", "R", "Real audit, 25%: RMSE against the pool, linear MI over trusting reported values, syphilis", RA, lambda: f'{ra("syphilis", "linear_mi", "rmse") / ra("syphilis", "recorded", "rmse"):.1f}'),
+    ("2.6", "R", "Real audit, 25%: recovery RMSE on 2,000 fresh cohorts, linear MI over trusting reported values, syphilis (2.4 in the study's 500)", RE, lambda: f'{float(one(RE, analysis="syphilis", fraction="0.25")["recovery_ratio"]):.1f}'),
+    ("9", "R", "Real audit, 25%: smallest gap between linear MI and one-item recount clustered coverage, points", RA, lambda: f"{100 * min(mi_gaps()):.0f}"),
+    ("11", "R", "Real audit, 25%: largest gap between linear MI and one-item recount clustered coverage, points", RA, lambda: f"{100 * max(mi_gaps()):.0f}"),
+    ("two of three", "RC", "Real audit, 25%: exact-or-wrong slopes where the model's error was clearly below linear MI's", RR, lambda: worded(sum(float(ratio_25(a, "contamination", "linear_mi")["upper"]) < 1 for a in ("pnc", "syphilis", "iron")) == 2, "two of three", "not two slopes")),
     ("0.4.1", "RC", "Package version", "DESCRIPTION", lambda: re.search(r"^Version: (.+)$", (ROOT / "DESCRIPTION").read_text(), re.M).group(1)),
     ("November 1, 2026", "CB", "Status date", ASSESS, lambda: has(ASSESS, r"Assessed 2026-11-01", "November 1, 2026")),
     ("Version 0.4", "C", "Release that added the recording-error model", "NEWS.md", lambda: has("NEWS.md", r"# catmech 0\.4\.0\n\n- Add `catmech_contamination\(\)`", "Version 0.4")),
@@ -224,7 +249,12 @@ BOUND_L, BOUND_R = r"(?<![\d.,])", r"(?!\d|\.\d)"
 
 # Statements without a number, each checked by grep against the record that supports it.
 statements = [
-    ("Neither real dataset is a clinical source-data audit", VAL, r"Neither dataset is a clinical source-data audit"),
+    ("The real-audit rule on the contamination model came out inconclusive", DEC, r"Outcome: INCONCLUSIVE"),
+    ("The README says so", "README.md", r"came out inconclusive at a 25% audit"),
+    ("The README says the model had lower error on two of three slopes, not the reverse", "README.md", r"model had lower error than linear MI on two of three slopes"),
+    ("The README says the model's coverage was the lower one", "README.md", r"its intervals covered 35% to 72%, against 90% to 97% for the recount"),
+    ("No dataset is a patient-level clinical source-data audit", "README.md", r"No real dataset here is a patient-level clinical source-data audit"),
+    ("The write-up says what the target is", SYN_T, r"Every \"full audit\" here recounts one item and keeps the covariate as reported"),
     ("On ClinicalTrials.gov both values are sponsor-entered, so the reference is not independent truth", SYN_R, r"both are entered by sponsors[\s\S]*reference is not independent truth"),
     ("Simulation data are synthetic, and the primary cells favor the model", "validation/CONTAMINATION_SYNTHESIS.md", r"favor it by construction[\s\S]*All data are synthetic"),
     ("No new statistical method is claimed", ASSESS, r"does not support a novel-method"),

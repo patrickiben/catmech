@@ -3,9 +3,12 @@
 "Contamination" here means recording error, the usage in the selective-editing literature. It does not mean treatment
 spillover between trial arms, the usage in cluster randomized trials.
 
-**Try linear imputation first.** On real recording differences, `catmech_reference(..., use_recorded = TRUE)` and generalized raking
-matched or beat this model. It is strongest when errors are large relative to the target's conditional spread, or when a reference has
-a credible declared SD. See [synthetic evidence](../validation/CONTAMINATION_SYNTHESIS.md) and [real-data evidence](../validation/REAL_DATA_SYNTHESIS.md).
+**Try linear imputation first when you need an interval.** On real recording differences, `catmech_reference(..., use_recorded = TRUE)` and generalized raking
+matched or beat this model. In synthetic studies it was strongest when errors were large and separable, or when a reference had a credible
+declared SD. A [test on real audit data](../validation/REAL_AUDIT_SYNTHESIS.md) with moderate errors did not reproduce the first of these, and gross, separable errors remain untested on real data.
+At a 25% audit the model often had lower point error than linear imputation, but where a reported slope differed from a recount of that one item it kept 38% to 73% of the gap, and its intervals covered 35% to 72% against 90% to 97% for the recount.
+Its intervals were too narrow on most slopes even with the link between errors and the covariate removed. Post hoc, separate error means by facility size (`error_strata`) largely repaired the one slope whose errors grew with size, and did not help the others.
+See [synthetic evidence](../validation/CONTAMINATION_SYNTHESIS.md) and [real-data evidence](../validation/REAL_DATA_SYNTHESIS.md).
 
 `catmech_contamination()` addresses a gap in `catmech_reference()`. The reference workflow
 treats every unreferenced target as missing, so it throws away the recorded value W even
@@ -80,7 +83,7 @@ reference, `sigma^2` receives a proper prior because no row then pins the target
 | References are exact, or their SD is declared correctly | Bias | Near-universal disagreement in the audit is a warning sign. |
 | The target is linear and normal given Z | Genuine extremes can be classified as errors | Hold-out check, comparison with `catmech_reference()` |
 | Errors are additive normal within strata | Misclassification, though gross errors are usually still caught | Audit of observed error sizes, hold-out check |
-| Errors do not depend on outcome or value given the strata | Bias | Audit by candidate columns, hold-out check, limited power |
+| Errors do not depend on outcome, value or other predictors given the strata | Bias. This failed on one slope of a [real facility audit](../validation/REAL_AUDIT_SYNTHESIS.md), where errors grew with size and `error_strata` by size largely repaired it, post hoc. | Audit by candidate columns, the slope of the error on analysis covariates in audited rows (low power, so a null is no reassurance), hold-out check, limited power |
 | Missing W is ignorable given Z and the strata | Bias, because W rows inform the target model | Compare W-missing and W-observed reference rows |
 | Flags are not computed from W | The same evidence counts twice | Knowledge of how flags were created |
 
@@ -114,7 +117,7 @@ and expected against observed error counts. It uses no simulation truth and is t
 calibration available on real data. It shares the reference selection process, has limited power with few
 errors and cannot detect a reference that is itself wrong. A clean result is not proof of validity. In the synthetic study it
 caught a strong undeclared site shift 18 times in 40, but only once in 40 for heavy-tailed targets, where coverage failed. Its `advice`
-field reports when the model shows no skill against the recorded value or the stratum error rate, as happened on both real datasets. That
+field reports when the model shows no skill against the recorded value or the stratum error rate, as happened on ClinicalTrials.gov and NHANES. That
 is a reason to prefer linear MI or raking. This reading comes from the real-data study and has not been tested prospectively.
 
 ## Bootstrap donors for reference matching
@@ -134,7 +137,8 @@ and Greenland, 2006; Giganti et al., 2020), and data augmentation. No claim of a
 novel estimator is made. Design-based alternatives such as generalized raking (Lumley, Shaw and Dai, 2011; Oh et
 al., 2021) need no recording model and remain better grounded when the recording model is doubtful and selection
 probabilities are known. The posterior corruption probability is a model output and does not identify which
-record is actually wrong. No real or clinical measurements have been used to evaluate this workflow.
+record is actually wrong. The workflow has been evaluated on real recording differences and on two real audits, one of health-facility counts and one of
+psychology effect sizes. No patient-level clinical source-data audit has been used.
 
 ## Sources
 

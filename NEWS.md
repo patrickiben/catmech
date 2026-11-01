@@ -5,6 +5,7 @@
 - A prospective test on held-out real data returned **NO-GO** under a rule fixed in advance. Median error in predicting width was within 10% at target audits of 10%, 25% and 50% (7.8% at worst), and 11.3% to 16.8% at a 5% audit. A 30-record audit's width
   is too noisy to predict that closely. The bootstrap interval for `k` undercovered the pool value, and small pilots estimated `k` poorly. The planner should not be described as validated. See `validation/AUDIT_PLAN_SYNTHESIS.md` and `docs/AUDIT_PLANNING.md`.
 - Existing workflows are numerically unchanged: 18 of 18 runs match frozen v0.3.1, and 12 of 12 match frozen v0.4.0. No package dependency was added.
+- A later test on real audit data, with no package code changed, used a Rwanda health-facility recount and a psychology effect-size audit. The contamination model's advantage over linear imputation was **inconclusive** under a rule fixed in advance: it often had lower point error, but its intervals were too narrow. Linear imputation's coverage held up better. See `validation/REAL_AUDIT_SYNTHESIS.md`.
 
 # catmech 0.4.0
 

@@ -5,8 +5,9 @@
 | Test | Result | What the numbers said |
 |---|---|---|
 | Simulations that favored the new model | Model looked strong | Uncertainty ranges 30% to 38% narrower than the old default |
-| Two public datasets with real recording differences | Model lost or tied | A simple method had lower error on ClinicalTrials.gov and tied on NHANES at a 25% audit |
-| Merged-paper idea, in simulation | NO-GO | Targeting audits by network position did not beat auditing the most suspicious records |
+| Two public datasets with recording differences | Model lost or tied | Simple method lower error on ClinicalTrials.gov, tied on NHANES at a 25% audit |
+| A real facility audit, not patient values | Inconclusive | Lower error on two of three slopes, but ranges covered 35% to 72%; a recount's, 90% to 97% |
+| Merged-paper idea, in simulation | NO-GO | Targeting by network position did not beat auditing the most suspicious records |
 | Audit-size planner, on public data | NO-GO | Median error of 11.3% to 16.8% at the smallest audit, against a 10% limit |
 
 ## The problem
@@ -31,7 +32,7 @@ catmech is an R package that fills in unchecked values several plausible ways (m
 
 ## The decision
 
-- **Recommend the simple baseline first.** It became a supported package option. The new model stays for large or gross errors, where the baseline's 95% ranges contained the truth only 64.7% of the time in simulation, against 94.0%.
+- **Recommend the simple baseline first when an interval is needed.** It is now a package option. The new model stays for gross errors, untested on real data, where the baseline's 95% ranges covered only 64.7% in simulation, against 94.0%.
 - **Do not write the merged paper** on that thesis.
 - **Keep the planner as a documented calculation,** labeled not validated. Nothing was retuned after viewing.
 - **Claim no new statistical method.**
@@ -39,7 +40,7 @@ catmech is an R package that fills in unchecked values several plausible ways (m
 ## What this shows about how Patrick works
 
 - **Plans come before results.** Every study had a written plan before its evaluation run, and earlier looks are disclosed. Advance predictions on real data were scored: two of five held.
-- **Strong baselines.** The favored model had to beat the methods a skeptical reviewer would try first, and it did not.
+- **Strong baselines.** The favored model had to beat the methods a skeptical reviewer would try first, and it did not do so clearly.
 - **Failures stay visible.** Failed screens, refusals, a bookkeeping bug and missed run-time estimates are on the record, and the package's front page leads with the loss.
 - **Weak ideas get stopped.** A NO-GO ended that line of work instead of prompting variations until one passed.
 
@@ -49,6 +50,6 @@ Target: each pool's regression coefficient using every reference, in cohorts of 
 
 ## Limits and AI disclosure
 
-Neither public dataset is a clinical source-data audit, and on ClinicalTrials.gov both values are sponsor-entered. Simulation data are synthetic. OpenAI Codex and Anthropic Claude Code were used for code drafting, literature search, adversarial review, test construction and simulation orchestration, and Claude Code helped draft this page. No AI system is listed as an author, and AI review is not peer review. Patrick retains responsibility for the scientific claims, intended-use decisions and release.
+No dataset here is a patient-level clinical source-data audit, and on ClinicalTrials.gov both values are sponsor-entered. Simulation data are synthetic. OpenAI Codex and Anthropic Claude Code were used for code drafting, literature search, adversarial review, test construction and simulation orchestration, and Claude Code helped draft this page. No AI system is listed as an author, and AI review is not peer review. Patrick retains responsibility for the scientific claims, intended-use decisions and release.
 
-Sources in `validation/`: [`REAL_DATA_SYNTHESIS.md`](../../validation/REAL_DATA_SYNTHESIS.md), [`CONTAMINATION_SYNTHESIS.md`](../../validation/CONTAMINATION_SYNTHESIS.md), [`merged-audit-pilot/README.md`](../../validation/merged-audit-pilot/README.md), [`AUDIT_PLAN_SYNTHESIS.md`](../../validation/AUDIT_PLAN_SYNTHESIS.md). Every number is traced in [`docs/case-study/FACT_CHECK.md`](FACT_CHECK.md).
+Sources in `validation/`: [`REAL_DATA_SYNTHESIS.md`](../../validation/REAL_DATA_SYNTHESIS.md), [`CONTAMINATION_SYNTHESIS.md`](../../validation/CONTAMINATION_SYNTHESIS.md), [`merged-audit-pilot/README.md`](../../validation/merged-audit-pilot/README.md), [`AUDIT_PLAN_SYNTHESIS.md`](../../validation/AUDIT_PLAN_SYNTHESIS.md), [`REAL_AUDIT_SYNTHESIS.md`](../../validation/REAL_AUDIT_SYNTHESIS.md). Every number is traced in [`docs/case-study/FACT_CHECK.md`](FACT_CHECK.md).

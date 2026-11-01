@@ -4,19 +4,20 @@
 
 **The question:** can you keep error-prone recorded values for precision without trusting them, and which method should you try first?
 
-**The finding:** on real data, simple linear multiple imputation (MI) given the recorded value matched or beat `catmech_contamination()`, the recording-error model this package added. Start with linear MI.
+**The finding:** on public data with real recording differences, simple linear multiple imputation (MI) given the recorded value matched or beat `catmech_contamination()`, the recording-error model this package added. On a real audit the model often had lower point error, but its intervals failed. Start with linear MI when you need an interval.
 
 - **Real data, 25% audits.** Linear MI had lower RMSE than the model on ClinicalTrials.gov (0.0286 against 0.0308) and less bias (+0.0001 against +0.0068). They tied on NHANES (0.0409 against 0.0408). The model's largest edge, at the 10% NHANES audit (0.0435 against 0.0490), was within Monte Carlo noise, and 14 of 200 requests returned no interval there. It could not tell which records were wrong (AUC 0.54 and 0.50).
 - **What held up.** Keeping the recorded value pays. Linear MI's intervals were about half as wide as those from discarding it (0.102 against 0.205, and 0.154 against 0.297), with coverage near the all-references oracle (91.8% against 91.2%, and 93.9% against 94.9%).
 - **Where linear MI fails.** Under synthetic gross errors it covered 64.7%, against 94.0% for the model.
+- **A real audit was inconclusive.** On a [health-facility recount in Rwanda](validation/REAL_AUDIT_SYNTHESIS.md), the rule fixed in advance came out inconclusive at a 25% audit. The model had lower error than linear MI on two of three slopes, but where a reported slope differed from a recount of that item its intervals covered 35% to 72%, against 90% to 97% for the recount. Linear MI's coverage held up better (79.5% at worst), and it cost accuracy where reported values were close: 1.4 to 2.6 times the error of trusting them on the syphilis slope, depending on the measure. These are facility counts, not patient values, and gross errors remain untested on real data.
 - **Audit planning: not validated.** `catmech_audit_plan()` returned **NO-GO** under a rule fixed in advance. Its median error in predicting interval width missed the 10% limit at a 5% audit (11.3% to 16.8%). Larger targets stayed within 7.8%, but that pattern was not the test. It is a documented calculation, not a validated tool, so it is left out of the example below.
 
 ## Which method to start with
 
 | Situation | Start with | Evidence and limit |
 | --- | --- | --- |
-| Most cases, especially errors small relative to the spread of the target | `catmech_reference(..., use_recorded = TRUE)`: linear imputation given the recorded value. Consider generalized raking when selection probabilities are known; the package does not implement raking. | Best or tied among reference-using methods on both real datasets at 25% audits. Failed under synthetic gross errors (64.7% coverage). |
-| Large or gross errors, or a fallible reference with a credible declared SD | `catmech_contamination()` | Strongest in synthetic cells with these errors (coverage 94.0% under gross errors, 91.8% with a declared reference SD). Worse than linear MI and raking on ClinicalTrials.gov. Failed with heavy-tailed targets (87.3%) and with selection on the true value when errors were present (79.3%). |
+| Most cases, especially errors small relative to the spread of the target | `catmech_reference(..., use_recorded = TRUE)`: linear imputation given the recorded value. Consider generalized raking when selection probabilities are known; the package does not implement raking. | Best or tied among reference-using methods on ClinicalTrials.gov and NHANES at 25% audits. On a real facility audit its average bias was near zero and its worst-case coverage the best, but it rarely had the lowest point error, and its clustered coverage ran about 9 to 11 points below a recount's at 25%. Failed under synthetic gross errors (64.7% coverage). |
+| Gross, separable errors, or a fallible reference with a credible declared SD | `catmech_contamination()` | Strongest in synthetic cells with these errors (coverage 94.0% under gross errors, 91.8% with a declared reference SD), which remain untested on real data. Worse than linear MI and raking on ClinicalTrials.gov. On a real facility audit with moderate errors it often had lower point error, but its intervals were too narrow. Failed with heavy-tailed targets (87.3%) and with selection on the true value when errors were present (79.3%). |
 | Target residuals doubtful and precision not critical | `catmech_reference()` (default) | Assumes least about recorded values, with intervals about twice as wide on the real data. Failed with selective references (7.3%) and noisy ones (52.7%). |
 
 "Contamination" here means recording error, not treatment spillover between trial arms.
@@ -64,14 +65,14 @@ Random 25% audit, 1,000 cohorts of 600 from each evaluation pool. "Reference nor
 
 ## Limits
 
-- **Not clinical.** Neither real dataset is a clinical source-data audit. On ClinicalTrials.gov both values are sponsor-entered, so the reference is not independent truth. Two public datasets say nothing about transport.
+- **Not clinical.** No real dataset here is a patient-level clinical source-data audit. The Rwanda audit holds facility counts, the effect-size audit comes from psychology, and on ClinicalTrials.gov both values are sponsor-entered, so the reference is not independent truth. A few public datasets say nothing about transport.
 - **Synthetic simulations.** All simulation data are synthetic, and the primary cells use the error form the model assumes, which favors it.
 - **No novelty or guarantee.** The methods are established, and no new statistical method is claimed. Even the oracle covered only 91.2% on ClinicalTrials.gov.
 - **No outside review.** Not on CRAN, with no outside peer review or clinical validation. AI-assisted work is [disclosed](CONTRIBUTING.md).
 
 ## Read next
 
-[Assessment](docs/ASSESSMENT.md) | [Real-data evidence](validation/REAL_DATA_SYNTHESIS.md) | [Synthetic evidence](validation/CONTAMINATION_SYNTHESIS.md) | [Audit planner test](validation/AUDIT_PLAN_SYNTHESIS.md) | [Merged-paper go/no-go](validation/merged-audit-pilot/README.md) | [Validation record](validation/VALIDATION.md) | [Case study](docs/case-study/CASE_STUDY.md)
+[Assessment](docs/ASSESSMENT.md) | [Real-audit test](validation/REAL_AUDIT_SYNTHESIS.md) | [Real-data evidence](validation/REAL_DATA_SYNTHESIS.md) | [Synthetic evidence](validation/CONTAMINATION_SYNTHESIS.md) | [Audit planner test](validation/AUDIT_PLAN_SYNTHESIS.md) | [Merged-paper go/no-go](validation/merged-audit-pilot/README.md) | [Validation record](validation/VALIDATION.md) | [Case study](docs/case-study/CASE_STUDY.md)
 
 <!-- front-page-end: docs/case-study/fact_check.py checks every number above this line. -->
 
@@ -209,9 +210,12 @@ catmech_holdout_check(fit)      # scores unseen references, using no simulation 
 Selection into the audit may depend on recorded values, so a targeted audit is supported. Selection
 on the true value beyond what the recorded value shows is not. `selection_delta` and `reference_sd`
 are declared sensitivity assumptions to compare with `catmech_sensitivity()`. If the hold-out check shows
-no skill against the recorded value or the stratum error rate, prefer linear MI or raking. On both real
-datasets the model could not tell which records were wrong (AUC 0.54 and 0.50), so do not read its per-record
-probabilities as labels on data like those. See the [method](docs/CONTAMINATION_METHOD.md),
+no skill against the recorded value or the stratum error rate, prefer linear MI or raking. On ClinicalTrials.gov
+and NHANES the model could not tell which records were wrong (AUC 0.54 and 0.50), so do not read its per-record
+probabilities as labels on data like those. The model also assumes errors do not track the other variables. You can check
+that on the audited rows, but a null is no reassurance: at a 25% audit of a [real facility recount](validation/REAL_AUDIT_SYNTHESIS.md), a clustered test
+reached significance on 18% to 57% of audits where a gap existed. There the model's intervals were too narrow with or
+without such tracking. See the [method](docs/CONTAMINATION_METHOD.md),
 [synthetic evidence](validation/CONTAMINATION_SYNTHESIS.md), [real-data evidence](validation/REAL_DATA_SYNTHESIS.md)
 and [example](inst/examples/contamination.R).
 
@@ -278,6 +282,8 @@ with a new coverage guarantee.
   NHANES with real recording differences. Neither dataset is a clinical source-data audit.
 - Version 0.4.1 adds the [audit planner test](validation/AUDIT_PLAN_SYNTHESIS.md), which returned NO-GO, and
   changes no existing function.
+- A later [test on real audit data](validation/REAL_AUDIT_SYNTHESIS.md) uses a Rwanda health-facility recount and a
+  psychology effect-size audit. It changes no package code.
 
 The [v0.2 coverage protocol](validation/COVERAGE_PLAN.md) transfers useful controls from
 the author's carryover, False Floor, calibration and assumption-audit research.

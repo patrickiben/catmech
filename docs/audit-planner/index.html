@@ -294,7 +294,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     </div>
   </div>
   <div class="qprow">
-    <a class="qp" href="#method"><div class="qe">Which method</div><div class="qt">Linear MI that keeps the recorded value, first →</div><div class="qd">On ClinicalTrials.gov it had lower bias and error than the contamination model, and on NHANES they roughly tied. Keep the contamination model for large or gross errors, or a fallible reference with a declared SD.</div></a>
+    <a class="qp" href="#method"><div class="qe">Which method</div><div class="qt">Linear MI that keeps the recorded value, first →</div><div class="qd">On ClinicalTrials.gov it had lower bias and error than the contamination model, and on NHANES they roughly tied. On a real facility audit the model often had lower error, but its intervals were too narrow. Consider the model for gross errors, untested on real data, or a fallible reference with a declared SD.</div></a>
     <a class="qp" href="#results"><div class="qe">How many records</div><div class="qt">About 40 to 70 of 600 on these data, against about 380 →</div><div class="qd">Those are the counts that reach within 25% of a full audit's width by formula, keeping or discarding recorded values. Across pilots the answer ran from 2 to 117 records, 5th to 95th percentile, so treat these counts as the size of the tradeoff.</div></a>
   </div>
   <div class="strip" aria-label="Status">
@@ -352,7 +352,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       </div>
       <div class="rowi">
         <div><h3>The reference itself is fallible</h3><p>You can declare a credible SD for reference error, and you are willing to vary it as an assumption.</p></div>
-        <div><p class="use">Contamination model with <code>reference_sd</code></p><p class="why">The model's niche is narrower than the synthetic study implied: errors large relative to the target's conditional spread, gross errors that would corrupt a linear proxy, or a fallible reference with a credible declared SD.</p></div>
+        <div><p class="use">Contamination model with <code>reference_sd</code></p><p class="why">The model's niche is narrower than the synthetic study implied: gross errors that would corrupt a linear proxy, or a fallible reference with a credible declared SD. A <a href="../../validation/REAL_AUDIT_SYNTHESIS.md">test on a real facility audit</a> with moderate errors did not reproduce its simulated edge, and its intervals were too narrow. Gross errors remain untested on real data.</p></div>
       </div>
       <div class="rowi">
         <div><h3>Choices the evidence argues against</h3></div>

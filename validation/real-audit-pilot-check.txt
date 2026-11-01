@@ -1,0 +1,77 @@
+Engineering pilots for validation/REAL_AUDIT_PLAN.md. Statuses only; no estimates were read.
+
+First pilot, raking calibrated on every coefficient's influence function: 1680 requests
+  effect_size     0.25 audited_only   ok 28
+  effect_size     0.25 contamination  convergence_failure 1, ok 27
+  effect_size     0.25 linear_mi      ok 28
+  effect_size     0.25 oracle         ok 28
+  effect_size     0.25 raking         error 17, ok 11
+  effect_size     0.25 recorded       ok 28
+  effect_size     0.50 audited_only   ok 28
+  effect_size     0.50 contamination  ok 28
+  effect_size     0.50 linear_mi      ok 28
+  effect_size     0.50 oracle         ok 28
+  effect_size     0.50 raking         error 17, ok 11
+  effect_size     0.50 recorded       ok 28
+  rwanda_month    0.25 audited_only   ok 56
+  rwanda_month    0.25 contamination  convergence_failure 5, ok 51
+  rwanda_month    0.25 linear_mi      ok 55, refused 1
+  rwanda_month    0.25 oracle         ok 56
+  rwanda_month    0.25 raking         error 5, ok 51
+  rwanda_month    0.25 recorded       ok 56
+  rwanda_month    0.50 audited_only   ok 56
+  rwanda_month    0.50 contamination  ok 56
+  rwanda_month    0.50 linear_mi      ok 56
+  rwanda_month    0.50 oracle         ok 56
+  rwanda_month    0.50 raking         error 2, ok 54
+  rwanda_month    0.50 recorded       ok 56
+  rwanda_quarter  0.25 audited_only   ok 56
+  rwanda_quarter  0.25 contamination  convergence_failure 11, ok 45
+  rwanda_quarter  0.25 linear_mi      ok 56
+  rwanda_quarter  0.25 oracle         ok 56
+  rwanda_quarter  0.25 raking         error 17, ok 39
+  rwanda_quarter  0.25 recorded       ok 56
+  rwanda_quarter  0.50 audited_only   ok 56
+  rwanda_quarter  0.50 contamination  ok 56
+  rwanda_quarter  0.50 linear_mi      ok 56
+  rwanda_quarter  0.50 oracle         ok 56
+  rwanda_quarter  0.50 raking         error 3, ok 53
+  rwanda_quarter  0.50 recorded       ok 56
+
+Second pilot, raking calibrated on an intercept and the slope's influence function: 1680 requests
+  effect_size     0.25 audited_only   ok 28
+  effect_size     0.25 contamination  convergence_failure 1, ok 27
+  effect_size     0.25 linear_mi      ok 28
+  effect_size     0.25 oracle         ok 28
+  effect_size     0.25 raking         ok 28
+  effect_size     0.25 recorded       ok 28
+  effect_size     0.50 audited_only   ok 28
+  effect_size     0.50 contamination  ok 28
+  effect_size     0.50 linear_mi      ok 28
+  effect_size     0.50 oracle         ok 28
+  effect_size     0.50 raking         ok 28
+  effect_size     0.50 recorded       ok 28
+  rwanda_month    0.25 audited_only   ok 56
+  rwanda_month    0.25 contamination  convergence_failure 5, ok 51
+  rwanda_month    0.25 linear_mi      ok 55, refused 1
+  rwanda_month    0.25 oracle         ok 56
+  rwanda_month    0.25 raking         error 1, ok 55
+  rwanda_month    0.25 recorded       ok 56
+  rwanda_month    0.50 audited_only   ok 56
+  rwanda_month    0.50 contamination  ok 56
+  rwanda_month    0.50 linear_mi      ok 56
+  rwanda_month    0.50 oracle         ok 56
+  rwanda_month    0.50 raking         ok 56
+  rwanda_month    0.50 recorded       ok 56
+  rwanda_quarter  0.25 audited_only   ok 56
+  rwanda_quarter  0.25 contamination  convergence_failure 11, ok 45
+  rwanda_quarter  0.25 linear_mi      ok 56
+  rwanda_quarter  0.25 oracle         ok 56
+  rwanda_quarter  0.25 raking         ok 56
+  rwanda_quarter  0.25 recorded       ok 56
+  rwanda_quarter  0.50 audited_only   ok 56
+  rwanda_quarter  0.50 contamination  ok 56
+  rwanda_quarter  0.50 linear_mi      ok 56
+  rwanda_quarter  0.50 oracle         ok 56
+  rwanda_quarter  0.50 raking         ok 56
+  rwanda_quarter  0.50 recorded       ok 56

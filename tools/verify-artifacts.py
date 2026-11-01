@@ -455,6 +455,312 @@ def verify_real_data_study(folder, source_root):
     print(f"{folder.name}: all {len(records)} planned requests, {len(summary)} recomputed groups, independent pool targets and audit counts, deletion control: PASS")
 
 
+REAL_AUDIT_ANALYSES = [
+    ("rwanda_month", "pnc"), ("rwanda_month", "syphilis"), ("rwanda_month", "iron"), ("rwanda_month", "anc4"),
+    ("rwanda_quarter", "pnc"), ("rwanda_quarter", "syphilis"), ("rwanda_quarter", "iron"), ("rwanda_quarter", "anc4"),
+    ("effect_size", "effect_smd"), ("effect_size", "effect_r")]
+REAL_AUDIT_METHODS = ["oracle", "recorded", "audited_only", "linear_mi", "raking", "contamination"]
+RWANDA_COLUMNS = {"pnc": ("pnc_newborn_24h_h", "pnc_newborn_24h_r", "hf_deliveries_h"),
+                  "syphilis": ("anc_syphilis_test_h", "anc_syphilis_test_r", "ancnewreg_h"),
+                  "iron": ("womenreciron_h", "womenreciron_r", "ancnewreg_h"),
+                  "anc4": ("anc_4visits_h", "anc_4visits_r", "ancnewreg_h")}
+
+
+def real_audit_pools():
+    """Rebuild each analysis frame from the pool files, independently of R: (stratum, recorded, reference, covariate)."""
+    centers = [r for r in rows(ROOT/"validation/real-audit/rwanda-pool.csv") if r["facility_type"] == "health_center"]
+    frames = {}
+    for name, (w, reference, x) in RWANDA_COLUMNS.items():
+        kept = [r for r in centers if r[w] != "" and r[reference] != "" and r[x] != ""]
+        frames[("rwanda_month", name)] = [(r["hosp_id"], float(r[w]), float(r[reference]), float(r[x])) for r in kept]
+        months = {}
+        for r in centers:
+            months.setdefault(r["facility_id"], []).append(r)
+        frames[("rwanda_quarter", name)] = [
+            (group[0]["hosp_id"], sum(float(r[w]) for r in group), sum(float(r[reference]) for r in group), sum(float(r[x]) for r in group))
+            for group in months.values() if all(r[w] != "" and r[reference] != "" and r[x] != "" for r in group)]
+    effect = [r for r in rows(ROOT/"validation/real-audit/effect-size-pool.csv") if r["info"] in ("0", "1")]
+    for name, family in [("effect_smd", "smd"), ("effect_r", "r")]:
+        kept = [r for r in effect if r["family"] == family]
+        counts = {}
+        for r in kept:
+            counts[r["meta"]] = counts.get(r["meta"], 0)+1
+        frames[("effect_size", name)] = [(r["meta"], float(r["recorded"]), float(r["reference"]), math.log(float(r["n"])))
+                                         for r in kept if counts[r["meta"]] >= 2]
+    return frames
+
+
+def real_audit_slope(frame, column):
+    strata = sorted({row[0] for row in frame})
+    design = [[1.0]+[float(row[0] == level) for level in strata[1:]]+[row[3]] for row in frame]
+    return least_squares_last(design, [row[column] for row in frame])
+
+
+def verify_rwanda_published_table():
+    """The pool must reproduce the published facility table: facilities, exact matches and within-range counts."""
+    pool = rows(ROOT/"validation/real-audit/rwanda-pool.csv")
+    published = [("ancnewreg_r", "ancnewreg_h", 69, 49, 66), ("anc1vis_16weeks_r", "anc1vis1trim_h", 68, 5, 17),
+                 ("anc_syphilis_test_r", "anc_syphilis_test_h", 68, 25, 46), ("womenreciron_r", "womenreciron_h", 60, 29, 47),
+                 ("anc_4visits_r", "anc_4visits_h", 69, 2, 12), ("hf_deliveries_r", "hf_deliveries_h", 76, 42, 75),
+                 ("livebirths_r", "livebirths_h", 76, 39, 72), ("pnc_newborn_24h_r", "pnc_newborn_24h_h", 65, 10, 53)]
+    within_matches = 0
+    for reference, recorded, n, exact, within in published:
+        months = {}
+        for r in pool:
+            months.setdefault(r["facility_id"], []).append(r)
+        ratios = []
+        for group in months.values():
+            if all(r[reference] != "" and r[recorded] != "" for r in group):
+                a, b = sum(float(r[reference]) for r in group), sum(float(r[recorded]) for r in group)
+                if a == 0 and b == 0:
+                    ratios.append(1.0)
+                elif b > 0:
+                    ratios.append(a/b)
+                else:
+                    ratios.append(math.inf)
+        assert len(ratios) == n, (reference, len(ratios))
+        assert sum(value == 1 for value in ratios) == exact, (reference, "exact")
+        count = sum(0.9 <= value <= 1.1 for value in ratios)
+        assert abs(count-within) <= 1, (reference, count, within)
+        within_matches += count == within
+    assert within_matches == 6, within_matches
+    return within_matches
+
+
+def real_audit_planned(settings):
+    reps = {"rwanda_month": settings["month_reps"], "rwanda_quarter": settings["quarter_reps"], "effect_size": settings["effect_reps"]}
+    expected = set()
+    for index, (level, analysis) in enumerate(REAL_AUDIT_ANALYSES, 1):
+        for fraction_index, fraction in enumerate(settings["fractions"], 1):
+            for replicate in range(1, reps[level]+1):
+                for method in REAL_AUDIT_METHODS:
+                    expected.add((level, analysis, float(fraction), method, replicate))
+    return expected
+
+
+def verify_real_audit_records(records, settings):
+    actual = {(r["level"], r["analysis"], float(r["fraction"]), r["method"], int(r["replicate"])) for r in records}
+    assert actual == real_audit_planned(settings) and len(actual) == len(records), "Missing, duplicate or unplanned requests"
+    position = {pair: index for index, pair in enumerate(REAL_AUDIT_ANALYSES, 1)}
+    for r in records:
+        index = position[(r["level"], r["analysis"])]
+        fraction_index = settings["fractions"].index(float(r["fraction"]))+1
+        replicate = int(r["replicate"])
+        assert int(r["selection_seed"]) == settings["selection_base"]+index*1000000+fraction_index*100000+replicate
+        assert int(r["imputation_seed"]) == settings["imputation_base"]+index*1000000+fraction_index*100000+replicate
+
+
+def real_audit_groups(records):
+    groups = {}
+    for r in records:
+        groups.setdefault((r["scenario"], r["method"]), []).append(r)
+    return groups
+
+
+def verify_real_audit_summary(summary, groups):
+    close = lambda a, b: math.isclose(float(a), b, rel_tol=1e-7, abs_tol=1e-9)
+    for row in summary:
+        group = groups[(row["scenario"], row["method"])]
+        good = [r for r in group if r["status"] == "ok"]
+        assert int(row["requested"]) == len(group) and int(row["returned_intervals"]) == len(good), row["scenario"]
+        recovery = [float(r["recovery_error"]) for r in good]
+        error = [float(r["error"]) for r in good]
+        assert close(row["recovery_rmse"], math.sqrt(sum(v*v for v in recovery)/len(recovery))), ("recovery", row["scenario"], row["method"])
+        assert close(row["rmse"], math.sqrt(sum(v*v for v in error)/len(error))), ("rmse", row["scenario"], row["method"])
+        assert close(row["bias"], sum(error)/len(error)), ("bias", row["scenario"], row["method"])
+        assert close(row["coverage"], sum(float(r["coverage"]) for r in good)/len(good)), ("coverage", row["scenario"], row["method"])
+        assert close(row["coverage_cluster"], sum(float(r["coverage_cluster"]) for r in good)/len(good)), ("cluster", row["scenario"], row["method"])
+        assert close(row["mean_width"], sum(float(r["width"]) for r in good)/len(good)), ("width", row["scenario"], row["method"])
+        assert close(row["mean_width_cluster"], sum(float(r["width_cluster"]) for r in good)/len(good)), ("cluster width", row["scenario"], row["method"])
+        assert close(row["interval_return_rate"], len(good)/len(group)), ("return rate", row["scenario"], row["method"])
+        assert int(row["convergence_failures"]) == sum(r["status"] == "convergence_failure" for r in group), ("convergence", row["scenario"], row["method"])
+        assert int(row["refused"]) == sum(r["status"] == "refused" for r in group) and int(row["other_errors"]) == sum(r["status"] == "error" for r in group), row["scenario"]
+
+
+def verify_real_audit_writeup(summary):
+    """Regenerate the scored output, tie the post-hoc table to the study, and check the write-up's numbers against both."""
+    import re
+    import subprocess
+    import sys
+    scored = subprocess.run([sys.executable, "-I", str(ROOT/"tools/real-audit-score.py")], capture_output=True, text=True, check=True).stdout
+    saved = (ROOT/"validation/real-audit-decisions.txt").read_text(encoding="utf-8")
+    assert scored.strip() == saved.strip(), "Scored output differs from the saved decisions"
+    lookup = {(r["level"], r["analysis"], r["fraction"], r["method"]): float(r["recovery_rmse"]) for r in summary}
+    posthoc = rows(ROOT/"validation/real-audit-posthoc/swap-in-summary.csv")
+    assert len(posthoc) == 20
+    for r in posthoc:
+        key = (r["level"], r["analysis"], r["fraction"])
+        assert math.isclose(float(r["recorded_recovery_rmse"]), lookup[key+("recorded",)], rel_tol=1e-6), key
+        assert math.isclose(float(r["linear_mi_recovery_rmse"]), lookup[key+("linear_mi",)], rel_tol=1e-6), key
+        assert math.isclose(float(r["contamination_recovery_rmse"]), lookup[key+("contamination",)], rel_tol=1e-6), key
+        assert float(r["swap_in_recovery_rmse"]) < float(r["recorded_recovery_rmse"]), key
+    text = (ROOT/"validation/REAL_AUDIT_SYNTHESIS.md").read_text(encoding="utf-8")
+    triples = verify_real_audit_tables(text, summary)
+    assert triples == 100, triples
+    limits = re.findall(r"\d\.\d{3} \[\d\.\d{3}, \d\.\d{3}\]", text)
+    assert len(limits) >= 20 and all(t in saved for t in limits), [t for t in limits if t not in saved][:3]
+    fourths = re.findall(r"\b0\.\d{4}\b", text)
+    table = {f"{float(r[f]):.4f}" for r in posthoc for f in ["recorded_recovery_rmse", "swap_in_recovery_rmse", "linear_mi_recovery_rmse", "contamination_recovery_rmse", "swap_in_recovery_rmse_same_cohorts"]}
+    summary_values = {f"{value:.4f}" for value in lookup.values()}
+    missing = [v for v in fourths if v not in table and v not in summary_values]
+    assert not missing, missing
+    outcome = real_audit_rule2(summary, rows(ROOT/"validation/real-audit-study/recovery-ratios.csv"))
+    assert outcome == "INCONCLUSIVE" and f"Outcome: {outcome}" in saved and f"the result is **{outcome.lower()}**" in text, outcome
+    return triples, len(limits)
+
+
+def verify_real_audit_tables(text, summary):
+    """Check each method-table cell by position: section, row label, then method column."""
+    sections = {"**Rwanda facility-months**": "rwanda_month", "**Rwanda quarter totals**": "rwanda_quarter", "**Effect sizes, the control**": "effect_size"}
+    labels = {"PNC": "pnc", "Syphilis": "syphilis", "Iron": "iron", "ANC 4th visit": "anc4", "SMD family": "effect_smd", "r family": "effect_r"}
+    lookup = {(r["level"], r["analysis"], float(r["fraction"]), r["method"]): r for r in summary}
+    level, checked = None, 0
+    for line in text.splitlines():
+        for marker, name in sections.items():
+            if line.startswith(marker):
+                level = name
+        if line.startswith("**RMSE against the pool slope**"):
+            level = None
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if level is None or len(cells) != 8 or ", " not in cells[0] or cells[0].split(", ")[0] not in labels:
+            continue
+        name, audit = cells[0].rsplit(", ", 1)
+        fraction = float(audit.rstrip("%"))/100
+        for method, cell in zip(["recorded", "audited_only", "linear_mi", "raking", "contamination"], cells[2:7]):
+            row = lookup[(level, labels[name], fraction, method)]
+            expected = f'{float(row["recovery_rmse"]):.3f}, {float(row["bias"]):+.3f}, {100*float(row["coverage_cluster"]):.1f}%'
+            assert cell == expected, (level, name, audit, method, cell, expected)
+            checked += 1
+        model = lookup[(level, labels[name], fraction, "contamination")]
+        assert cells[1] == f'{model["returned_intervals"]}/{model["requested"]}', (level, name, audit)
+    return checked
+
+
+def real_audit_rule2(summary, ratio_rows):
+    """Re-derive Rule 2 of the plan from saved tables, separately from the scoring script."""
+    lookup = {(r["level"], r["analysis"], float(r["fraction"]), r["method"]): r for r in summary}
+    ratios = {(r["level"], r["analysis"], float(r["fraction"]), r["method"], r["comparator"]): r for r in ratio_rows}
+    supported, contradicted = 0, 0
+    for analysis in ["pnc", "syphilis", "iron"]:
+        pair = ratios[("rwanda_month", analysis, .25, "contamination", "linear_mi")]
+        model = lookup[("rwanda_month", analysis, .25, "contamination")]
+        oracle = lookup[("rwanda_month", analysis, .25, "oracle")]
+        quarter = ratios[("rwanda_quarter", analysis, .25, "contamination", "linear_mi")]
+        if (float(pair["upper"]) < 1 and float(model["interval_return_rate"]) >= .90
+                and float(model["coverage_cluster"]) >= float(oracle["coverage_cluster"])-.03 and float(quarter["recovery_rmse_ratio"]) < 1):
+            supported += 1
+        contradicted += float(pair["lower"]) > 1
+    return "SUPPORTED" if supported >= 2 else "CONTRADICTED" if contradicted >= 2 else "INCONCLUSIVE"
+
+
+def verify_real_audit_replay(records):
+    """Saved results must match a replay from seeds, which catches relabeled or rescaled results."""
+    lookup = {(r["scenario"], r["replicate"], r["method"]): r for r in records}
+    replay = rows(ROOT/"validation/real-audit-replay/replay.csv")
+    assert len(replay) == 600 and {r["method"] for r in replay} == set(REAL_AUDIT_METHODS)
+    for row in replay:
+        saved = lookup[(row["scenario"], row["replicate"], row["method"])]
+        assert row["status"] == saved["status"], row
+        if row["status"] == "ok":
+            for field in ["estimate", "se", "se_cluster"]:
+                assert abs(float(row[field])-float(saved[field])) < 1e-7, (row["scenario"], row["replicate"], row["method"], field)
+
+
+def verify_real_audit_study(folder, require_study=True):
+    if require_study:
+        for row in rows(folder/"source-hashes.csv"):
+            candidate = ROOT/"validation/v0.4.1-source"/row["file"]
+            path = candidate if candidate.exists() else ROOT/row["file"]
+            assert hashlib.sha256(path.read_bytes()).hexdigest() == row["sha256"], row["file"]
+    manifest = json.loads((ROOT/"validation/real-audit/fetch-manifest.json").read_text())
+    for name, entry in [("rwanda-pool.csv", manifest["rwanda"]), ("effect-size-pool.csv", manifest["effect_sizes"])]:
+        assert hashlib.sha256((ROOT/"validation/real-audit"/name).read_bytes()).hexdigest() == entry["pool_sha256"], name
+    for entry in [manifest["rwanda"], manifest["effect_sizes"]]:
+        assert hashlib.sha256((ROOT/"validation/real-audit/raw"/entry["file"]).read_bytes()).hexdigest() == entry["sha256"], entry["file"]
+    within_matches = verify_rwanda_published_table()
+    effect = rows(ROOT/"validation/real-audit/effect-size-pool.csv")
+    assert [sum(r["info"] == str(code) for r in effect) for code in range(4)] == [276, 74, 54, 96]
+    settings = json.loads((folder/"settings.json").read_text())
+    if require_study:
+        assert settings["mode"] == "study" and settings["m"] == 20 and settings["fractions"] == [0.25, 0.5]
+        assert settings["month_reps"] == 500 and settings["quarter_reps"] == 200 and settings["effect_reps"] == 500
+        assert (settings["cohort_base"], settings["selection_base"], settings["imputation_base"]) == (400100000, 410100000, 420000000)
+    assert not (folder/"checkpoint.rds").exists()
+    records = rows(folder/"replicates.csv")
+    verify_real_audit_records(records, settings)
+    frames = real_audit_pools()
+    saved = {(r["level"], r["analysis"]): r for r in rows(folder/"pool-targets.csv")}
+    for key, frame in frames.items():
+        target, recorded = real_audit_slope(frame, 2), real_audit_slope(frame, 1)
+        tol = {"effect_smd": .049, "effect_r": .025}.get(key[1], 0)
+        wrong = sum(abs(row[1]-row[2]) > tol+1e-8 for row in frame)
+        assert int(saved[key]["rows"]) == len(frame) and int(saved[key]["wrong_rows"]) == wrong, key
+        assert math.isclose(float(saved[key]["target_coefficient"]), target, rel_tol=1e-7), key
+        assert math.isclose(float(saved[key]["recorded_coefficient"]), recorded, rel_tol=1e-7), key
+        assert all(math.isclose(float(r["truth"]), target, rel_tol=1e-7) for r in records if (r["level"], r["analysis"]) == key), key
+    groups = real_audit_groups(records)
+    oracle = {(r["scenario"], r["replicate"]): float(r["estimate"]) for r in records if r["method"] == "oracle"}
+    for r in records:
+        if r["status"] != "ok":
+            continue
+        estimate, truth = float(r["estimate"]), float(r["truth"])
+        assert math.isclose(float(r["error"]), estimate-truth, rel_tol=1e-6, abs_tol=1e-9)
+        assert math.isclose(float(r["recovery_error"]), estimate-oracle[(r["scenario"], r["replicate"])], rel_tol=1e-6, abs_tol=1e-9)
+        assert (float(r["lower"]) <= truth <= float(r["upper"])) == (float(r["coverage"]) == 1)
+        assert (float(r["lower_cluster"]) <= truth <= float(r["upper_cluster"])) == (float(r["coverage_cluster"]) == 1)
+    summary = rows(folder/"summary.csv")
+    assert len(summary) == len(groups)
+    verify_real_audit_summary(summary, groups)
+    generator = random.Random(20261101)
+    worst = 0.0
+    for row in rows(folder/"recovery-ratios.csv"):
+        first = {r["replicate"]: float(r["recovery_error"])**2 for r in groups[(row["scenario"], row["method"])] if r["status"] == "ok"}
+        second = {r["replicate"]: float(r["recovery_error"])**2 for r in groups[(row["scenario"], row["comparator"])] if r["status"] == "ok"}
+        shared = sorted(set(first) & set(second))
+        a, b = [first[k] for k in shared], [second[k] for k in shared]
+        assert int(row["complete_pairs"]) == len(shared)
+        assert math.isclose(float(row["recovery_rmse_ratio"]), math.sqrt(sum(a)/sum(b)), rel_tol=1e-7), (row["scenario"], row["method"])
+        draws = []
+        for _ in range(400):
+            picks = generator.choices(range(len(a)), k=len(a))
+            denominator = sum(b[i] for i in picks)
+            if denominator > 0:
+                draws.append(math.sqrt(sum(a[i] for i in picks)/denominator))
+        draws.sort()
+        worst = max(worst, abs(draws[int(.975*len(draws))]-float(row["upper"]))/max(float(row["recovery_rmse_ratio"]), 1e-9),
+                    abs(draws[int(.025*len(draws))]-float(row["lower"]))/max(float(row["recovery_rmse_ratio"]), 1e-9))
+    if require_study:
+        assert worst < .15, worst
+        verify_real_audit_replay(records)
+        swapped = [dict(r, method={"linear_mi": "contamination", "contamination": "linear_mi"}.get(r["method"], r["method"])) for r in records]
+        rescaled = [dict(r, se_cluster=str(float(r["se_cluster"])*3)) if r["method"] == "contamination" and r["status"] == "ok" else r for r in records]
+        for wrong, label in [(swapped, "relabeled methods"), (rescaled, "rescaled standard errors")]:
+            try:
+                verify_real_audit_replay(wrong)
+            except AssertionError:
+                pass
+            else:
+                raise AssertionError(f"Negative control: {label} went undetected")
+    mutated = [dict(r) for r in summary]
+    mutated[0]["recovery_rmse"] = str(float(mutated[0]["recovery_rmse"])+.2)
+    try:
+        verify_real_audit_summary(mutated, groups)
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError("Negative control: corrupted real-audit summary went undetected")
+    try:
+        verify_real_audit_records([r for r in records if r["analysis"] != "anc4"], settings)
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError("Negative control: omitted planned analysis went undetected")
+    print(f"{folder.name}: all {len(records)} planned requests, {len(summary)} recomputed groups, independent pool targets, published Rwanda table ({within_matches} of 8 within-range counts exact, the other 2 off by one), published effect-size counts, ratio limits recomputed, two negative controls: PASS")
+    if require_study:
+        triples, limits = verify_real_audit_writeup(summary)
+        print(f"Real-audit write-up: scored output regenerated identically, post-hoc table tied to the study, Rule 2 re-derived, {triples} table entries checked by position, {limits} ratio intervals found in the scored output, replay from seeds matches, relabeled and rescaled results caught: PASS")
+
+
 def verify_contamination_supplement(folder):
     scores = rows(folder/"corruption-scores.csv")
     main = rows(ROOT/"validation/contamination-study/replicates.csv")
@@ -1358,6 +1664,7 @@ def main():
     verify_audit_plan_study(ROOT/"validation/audit-plan-study", ROOT/"validation/v0.4.1-source")
     verify_sponsor_clustering(ROOT/"validation/sponsor-clustering/development", "development")
     verify_sponsor_clustering(ROOT/"validation/sponsor-clustering/evaluation", "evaluation")
+    verify_real_audit_study(ROOT/"validation/real-audit-study")
     print("This verifies correspondence and repeatability, not inferential validity.")
 
 

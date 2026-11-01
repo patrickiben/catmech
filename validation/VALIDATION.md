@@ -11,6 +11,7 @@ audit. It is not clinical validation, a general coverage guarantee, or a claim t
   failed for its main claim. See the [figure](real-data-figures/real-data-evidence.pdf). Neither dataset is a clinical source-data audit.
 - **[Go/no-go simulation](merged-audit-pilot/README.md), 28,800 records.** NO-GO for transmitter-targeted auditing under spillover.
 - **[Audit planner test](AUDIT_PLAN_SYNTHESIS.md), 14,400 target fits and 7,200 plans.** NO-GO under a rule fixed in advance. Median error in predicting width was 11.3% to 16.8% at a 5% audit, against a 10% limit, and at most 7.8% elsewhere. The bootstrap interval for `k` undercovered. This is new in v0.4.1 and did not change any earlier result.
+- **[Test on real audit data](REAL_AUDIT_SYNTHESIS.md), 45,600 requests.** A Rwanda health-facility recount, with a psychology effect-size audit as a control. The model's advantage over linear MI was inconclusive under a rule fixed in advance: lower error on two of three slopes at a 25% audit, but it failed the coverage condition on all three. Where a reported slope differed from a recount of that one item it kept 38% to 73% of the gap, with clustered coverage of 35% to 72% against 90% to 97% for the oracle. Linear MI's coverage held up better, though at a 25% audit its point error clearly beat trusting reported values on only one of four slopes. Neither audit holds patient values. No package code changed.
 
 ## Software and independent checks
 
@@ -26,6 +27,8 @@ audit. It is not clinical validation, a general coverage guarantee, or a claim t
 | Serial and parallel pilots | Output files byte-identical between 1 and 14 workers | `contamination-pilot-check.txt` |
 | Supplement for a runner bug | 1,731 score records and 120 hold-out records recovered; every estimate matched the main study to within 1e-9 | `contamination-supplement/` |
 | Independent evidence recomputation | Plain Python recomputes all summaries, Wilson intervals and paired MCSEs for every study, both real-data target coefficients and pool audit counts, and the go/no-go verdicts, including the audit planner's summaries, pool `k` values and browser test vectors; deleting a planned cell is detected | `v0.4.1-checks/artifact-verification.log`, `tools/verify-artifacts.py` |
+| Real-audit replay | 600 requests across all six methods, replayed from seeds with the runner's own functions, match the saved study; relabeled or rescaled results are caught | `real-audit-replay/`, `tools/verify-artifacts.py` |
+| Review of the real-audit test | Three independent AI reviewers found no error in the rule or tables and corrected several readings, listed in the write-up. This is not human peer review. | `REAL_AUDIT_SYNTHESIS.md`, `real-audit-review/` |
 | CRT port | Reproduces deposited naive results closely; adjusted RMSE 0.158 against 0.149 and coverage 0.946 against 0.963 | `merged-audit-pilot/reproduce/port-check.csv` |
 | GitHub Actions | Three-platform workflow supplied; not run remotely | `.github/workflows/R-CMD-check.yaml` |
 
@@ -43,9 +46,11 @@ Run times exceeded my estimates: the synthetic study took 40 minutes (estimated 
 
 Version 0.4.1 adds the audit planner and changes no existing function. Its [plan](AUDIT_PLAN_PLAN.md) preceded its evaluation run, which ran on the sources preserved in `v0.4.1-source/`. Development choices used the development split and are listed in the plan, along with the frozen tables already seen by hand.
 
+The [real-audit test](REAL_AUDIT_PLAN.md) came after that release and ran on package sources identical to `v0.4.1-source/`. Its plan discloses the descriptive looks that preceded it and two changes made after its pilots, before any estimate was seen. It took 16 minutes against an estimate of 21. Its swap-in comparison and the tables in `real-audit-review/` are post hoc, are labeled as such and are not part of any rule. The plan was not under version control before that run, so its timing rests on file hashes and timestamps.
+
 ## Evidence limits
 
-Real-data pools are two public datasets, and the ClinicalTrials.gov reference is sponsor-entered. No clinical source-data audit was available. Simulated error rates have not been checked against published audits, and the main fixture's 8% may be high. Hold-out checks had low power. Clustered records, non-constant variance, survival and interaction models remain limits.
+Real-data pools are public, and the ClinicalTrials.gov reference is sponsor-entered. The two public audits are facility counts and psychology effect sizes. No patient-level clinical source-data audit was available. Simulated error rates have not been checked against published audits, and the main fixture's 8% may be high. Hold-out checks had low power. Clustered records, non-constant variance, survival and interaction models remain limits.
 Adversarial or AI-assisted review is not independent human refereeing. AI use is disclosed in `CONTRIBUTING.md`.
 
 ## Reproduce
@@ -61,7 +66,13 @@ Rscript tools/real-data-prepare.R my-raw-directory validation/my-real-data
 Rscript tools/real-data-benchmark.R study validation/my-real-data-study
 Rscript tools/merged-audit-pilot.R study validation/merged-audit-pilot/my-study 400
 Rscript tools/audit-plan-benchmark.R study validation/my-audit-plan-study
+Rscript tools/real-audit-prepare.R validation/real-audit/raw validation/my-real-audit
+Rscript tools/real-audit-benchmark.R study validation/my-real-audit-study
+python3 -I tools/real-audit-score.py my-decisions.txt validation/my-real-audit-study
+Rscript tools/real-audit-posthoc.R validation/my-real-audit-posthoc
+Rscript tools/real-audit-review-checks.R validation/my-real-audit-review
+Rscript tools/real-audit-replay.R validation/my-real-audit-replay
 python3 tools/verify-artifacts.py
 ```
 
-Use new output directories. To reproduce the exact fingerprints, run from the frozen sources in `v0.4.0-source/`, or `v0.4.1-source/` for the audit planner test. A fresh ClinicalTrials.gov download will differ from the dated pool. Set `CATMECH_BENCHMARK_WORKERS` to change parallelism. Exact cross-platform numerical equality is not promised.
+Use new output directories. The real-audit benchmark always reads the pools in `validation/real-audit/`, and the post-hoc, review and replay scripts read the saved study. To reproduce the exact fingerprints, run from the frozen sources in `v0.4.0-source/`, or `v0.4.1-source/` for the audit planner test. A fresh ClinicalTrials.gov download will differ from the dated pool. Set `CATMECH_BENCHMARK_WORKERS` to change parallelism. Exact cross-platform numerical equality is not promised.

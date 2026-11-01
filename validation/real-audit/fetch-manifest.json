@@ -1,0 +1,25 @@
+{
+  "retrieved_date": "2026-11-01",
+  "rwanda": {
+    "file": "pone.0235823.s001.dta",
+    "url": "https://journals.plos.org/plosone/article/file?type=supplementary&id=10.1371/journal.pone.0235823.s001",
+    "license": "CC BY (article license)",
+    "citation": "Health management information system (HMIS) data verification: A case study in four districts in Rwanda. PLOS ONE 2020. doi:10.1371/journal.pone.0235823",
+    "bytes": 51266,
+    "sha256": "36cff31467f5d57c8950e68bc53393499f4329363e7a46cb27f56626894b56cd",
+    "rows": 228,
+    "facilities": 76,
+    "pool_sha256": "71077054ebc052e47a53d11c7108c3c8a74023ed77875e0174182b695353186b"
+  },
+  "effect_sizes": {
+    "file": "codebook-primary-studies-complete.csv",
+    "url": "https://osf.io/7nsmd/ (codebooks/codebook-primary-studies-complete.csv in the linked storage)",
+    "license": "CC0 1.0 Universal",
+    "citation": "Maassen et al. Reproducibility of individual effect sizes in meta-analyses in psychology. PLOS ONE 2020. doi:10.1371/journal.pone.0233107",
+    "bytes": 431041,
+    "sha256": "936ab4e2e9755a62263fca1e8f38740a2940fe3a1d4396ad16c79692d2ecd4c7",
+    "rows": 500,
+    "meta_analyses": 33,
+    "pool_sha256": "d425c51140bb9b80e38cb62586552dcc0418f2b1f1b3749669d49be395d217d1"
+  }
+}

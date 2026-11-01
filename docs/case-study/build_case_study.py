@@ -90,7 +90,7 @@ header { background: var(--navy); color: var(--on-navy); padding: .29in .45in .2
 h1 { font: 600 20.5pt/1.12 'Avenir Next', 'Helvetica Neue', sans-serif; margin: .03in 0 .05in; letter-spacing: -.005em; }
 .intro { color: var(--on-navy2); font-size: 8.8pt; line-height: 1.34; margin: 0; max-width: 7.3in; }
 .intro strong { color: var(--on-navy); font-weight: 600; }
-.strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: .09in; margin-top: .13in; }
+.strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: .08in; margin-top: .13in; }
 .tile { background: var(--card); border: 1px solid var(--line); border-radius: 5px; padding: .075in .09in .085in; }
 .tile b { display: block; font-weight: 500; font-size: 7.7pt; line-height: 1.22; color: var(--on-navy); min-height: 2.45em; }
 .chip { display: inline-block; font: 700 7.5pt/1 'Avenir Next', 'Helvetica Neue', sans-serif; padding: .028in .06in; border-radius: 3px; margin: .035in 0 .045in; }
@@ -107,7 +107,7 @@ figcaption { font-size: 7.7pt; line-height: 1.28; color: var(--ink2); margin-top
 .sidebar { background: var(--tint); border-radius: 5px; padding: .08in .1in .05in; margin-top: .09in; }
 .sidebar h2 { border: 0; margin: 0 0 .02in; font-size: 8.9pt; padding: 0; }
 .sidebar p { font-size: 7.75pt; line-height: 1.29; margin: 0 0 .03in; }
-footer { margin: 0 .45in; padding: .07in 0 .2in; border-top: 1px solid var(--hair); font-size: 7.45pt; line-height: 1.29; color: var(--ink2); }
+footer { margin: 0 .45in; padding: .07in 0 .14in; border-top: 1px solid var(--hair); font-size: 7.45pt; line-height: 1.29; color: var(--ink2); }
 footer strong { color: var(--ink); } footer p { margin: 0 0 .03in; }
 code { font: 6.7pt 'SF Mono', Menlo, monospace; }
 """
@@ -115,7 +115,7 @@ code { font: 6.7pt 'SF Mono', Menlo, monospace; }
 
 def build_html(md):
     title, intro, table, sections = parse(md)
-    chips = {"Model looked strong": "good", "Model lost or tied": "mixed", "NO-GO": "stop"}
+    chips = {"Model looked strong": "good", "Model lost or tied": "mixed", "Inconclusive": "mixed", "NO-GO": "stop"}
     tiles = "".join(f'<div class="tile"><b>{inline(t)}</b><span class="chip {chips[r]}">{inline(r)}</span><span class="note">{inline(n)}</span></div>'
                     for t, r, n in table)
     def section(name, cls=""):

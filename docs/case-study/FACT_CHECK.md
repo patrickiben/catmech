@@ -2,12 +2,22 @@
 
 Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-01. Each row recomputes the number from its source, and most sources are frozen results tables that the script only reads. A document fails if it contains a digit or number word that no row covers, or if a row's text no longer appears in it. Rerun with `python3 docs/case-study/fact_check.py`.
 
-**Result: all 83 claims match their sources.** PDF: 1 page, generated from the current `CASE_STUDY.md`. Relative links and README tool paths checked: 72, 0 broken. External DOI links were not checked, because this check stays offline. Negative controls: a changed number, an added number, an added number word, a wrong claim value, an unnegated publication claim, a third-party reference and broken links were all caught.
+**Result: all 93 claims match their sources.** PDF: 1 page, generated from the current `CASE_STUDY.md`. Relative links and README tool paths checked: 77, 0 broken. External DOI links were not checked, because this check stays offline. Negative controls: a changed number, an added number, an added number word, a wrong claim value, an unnegated publication claim, a third-party reference and broken links were all caught.
 
 ## README.md front page
 
 | As shown | What it says | Source file | Result |
 |---|---|---|---|
+| `35%` | Real audit, 25%: lowest clustered coverage of the contamination model on slopes with a material gap | `validation/real-audit-study/summary.csv` | Match |
+| `72%` | Real audit, 25%: highest clustered coverage of the contamination model on slopes with a material gap | `validation/real-audit-study/summary.csv` | Match |
+| `90%` | Real audit: lowest clustered coverage of a one-item recount on those slopes | `validation/real-audit-study/summary.csv` | Match |
+| `97%` | Real audit: highest clustered coverage of a one-item recount on those slopes | `validation/real-audit-study/summary.csv` | Match |
+| `79.5%` | Real audit, 25%: worst clustered coverage of linear MI across the four facility-month slopes | `validation/real-audit-study/summary.csv` | Match |
+| `1.4` | Real audit, 25%: RMSE against the pool, linear MI over trusting reported values, syphilis | `validation/real-audit-study/summary.csv` | Match |
+| `2.6` | Real audit, 25%: recovery RMSE on 2,000 fresh cohorts, linear MI over trusting reported values, syphilis (2.4 in the study's 500) | `validation/real-audit-review/rule1-extension.csv` | Match |
+| `9` | Real audit, 25%: smallest gap between linear MI and one-item recount clustered coverage, points | `validation/real-audit-study/summary.csv` | Match |
+| `11` | Real audit, 25%: largest gap between linear MI and one-item recount clustered coverage, points | `validation/real-audit-study/summary.csv` | Match |
+| `two of three` | Real audit, 25%: exact-or-wrong slopes where the model's error was clearly below linear MI's | `validation/real-audit-study/recovery-ratios.csv` | Match |
 | `0.4.1` | Package version | `DESCRIPTION` | Match |
 | `25%` | Audit fraction: mean referenced rows over cohort size, ClinicalTrials.gov cell | `validation/real-data-study/summary.csv` | Match |
 | `25%` | Audit fraction: mean referenced rows over cohort size, NHANES cell | `validation/real-data-study/summary.csv` | Match |
@@ -67,6 +77,11 @@ Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-01. Each row reco
 
 | As shown | What it says | Source file | Result |
 |---|---|---|---|
+| `35%` | Real audit, 25%: lowest clustered coverage of the contamination model on slopes with a material gap | `validation/real-audit-study/summary.csv` | Match |
+| `72%` | Real audit, 25%: highest clustered coverage of the contamination model on slopes with a material gap | `validation/real-audit-study/summary.csv` | Match |
+| `90%` | Real audit: lowest clustered coverage of a one-item recount on those slopes | `validation/real-audit-study/summary.csv` | Match |
+| `97%` | Real audit: highest clustered coverage of a one-item recount on those slopes | `validation/real-audit-study/summary.csv` | Match |
+| `two of three` | Real audit, 25%: exact-or-wrong slopes where the model's error was clearly below linear MI's | `validation/real-audit-study/recovery-ratios.csv` | Match |
 | `0.4.1` | Package version | `DESCRIPTION` | Match |
 | `November 1, 2026` | Status date | `docs/ASSESSMENT.md` | Match |
 | `Version 0.4` | Release that added the recording-error model | `NEWS.md` | Match |
@@ -140,7 +155,12 @@ Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-01. Each row reco
 
 | Statement | Source file | Result |
 |---|---|---|
-| Neither real dataset is a clinical source-data audit | `validation/VALIDATION.md` | Supported |
+| The real-audit rule on the contamination model came out inconclusive | `validation/real-audit-decisions.txt` | Supported |
+| The README says so | `README.md` | Supported |
+| The README says the model had lower error on two of three slopes, not the reverse | `README.md` | Supported |
+| The README says the model's coverage was the lower one | `README.md` | Supported |
+| No dataset is a patient-level clinical source-data audit | `README.md` | Supported |
+| The write-up says what the target is | `validation/REAL_AUDIT_SYNTHESIS.md` | Supported |
 | On ClinicalTrials.gov both values are sponsor-entered, so the reference is not independent truth | `validation/REAL_DATA_SYNTHESIS.md` | Supported |
 | Simulation data are synthetic, and the primary cells favor the model | `validation/CONTAMINATION_SYNTHESIS.md` | Supported |
 | No new statistical method is claimed | `docs/ASSESSMENT.md` | Supported |

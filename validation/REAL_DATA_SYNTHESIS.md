@@ -108,7 +108,7 @@ conservative on these data, and the reason to prefer it over the normal method i
 ## What this changes
 
 - Linear MI with the recorded value should be tried before the contamination model, now available as `catmech_reference(use_recorded = TRUE)`, and raking is well grounded when selection probabilities are known. The synthetic gross-error cell shows when this ordering can reverse.
-- The contamination model's niche is narrower than the synthetic study implied: errors that are large relative to the target's conditional spread, gross errors that would corrupt a linear proxy, or fallible references with a credible declared SD.
+- The contamination model's niche is narrower than the synthetic study implied: errors that are large relative to the target's conditional spread, gross errors that would corrupt a linear proxy, or fallible references with a credible declared SD. A later [test on real audit data](REAL_AUDIT_SYNTHESIS.md) did not reproduce the first of these on moderate errors.
 - On ClinicalTrials.gov the audit finds little to correct for this slope. That is a legitimate audit outcome.
 
 Limits: two public datasets, neither a trial's source-data verification. The ClinicalTrials.gov reference is not independent truth. NHANES survey weights are ignored because the pool is treated as a finite population. Resampling a pool says nothing about transport to other

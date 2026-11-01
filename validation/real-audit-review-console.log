@@ -1,0 +1,14 @@
+estimand ; elapsed 6 seconds
+gap structure ; elapsed 6 seconds
+conditional ; elapsed 10 seconds
+rule 1 extension ; elapsed 112 seconds
+detection ; elapsed 115 seconds
+oracle intervals ; elapsed 119 seconds
+raking factor ; elapsed 119 seconds
+difference estimator ; elapsed 137 seconds
+mechanism ; elapsed 462 seconds
+error strata ; elapsed 875 seconds
+facility bootstrap MI ; elapsed 877 seconds
+fixed pool swap-in ; elapsed 950 seconds
+fixed pool methods ; elapsed 1196 seconds
+Output: /Users/patrickiben/Documents/catmech/validation/real-audit-review 

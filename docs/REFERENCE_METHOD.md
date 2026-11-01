@@ -114,7 +114,7 @@ Records with a recorded value are imputed from a model fitted on references that
 Records without one are imputed from a model on the predictors alone, fitted on all references. If every
 calibration row agrees exactly, there is no residual variance to model and those records keep their recorded
 value, as the manifest notes. This was the strong comparator in the version 0.4 studies, and it was best or
-tied among reference-using methods on both real datasets at 25% audits. See [the real-data evidence](../validation/REAL_DATA_SYNTHESIS.md).
+tied among reference-using methods on ClinicalTrials.gov and NHANES at 25% audits. See [the real-data evidence](../validation/REAL_DATA_SYNTHESIS.md).
 
 This fits the predictive relationship between reference truth, the auxiliary
 measurement, and other predictors. That relationship may be nonlinear or

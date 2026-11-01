@@ -575,7 +575,7 @@
   {
    "name": "relative links point at files that exist",
    "pass": true,
-   "detail": "../../validation/REAL_DATA_SYNTHESIS.md, ../../validation/AUDIT_PLAN_SYNTHESIS.md, ../../validation/AUDIT_PLAN_PLAN.md, ../AUDIT_PLANNING.md, ../CONTAMINATION_METHOD.md, ../../validation/audit-plan-study/planner-data.json, ../../validation/audit-plan-study/summary.csv"
+   "detail": "../../validation/REAL_DATA_SYNTHESIS.md, ../../validation/AUDIT_PLAN_SYNTHESIS.md, ../../validation/AUDIT_PLAN_PLAN.md, ../../validation/REAL_AUDIT_SYNTHESIS.md, ../AUDIT_PLANNING.md, ../CONTAMINATION_METHOD.md, ../../validation/audit-plan-study/planner-data.json, ../../validation/audit-plan-study/summary.csv"
   },
   {
    "name": "anchor links resolve",
