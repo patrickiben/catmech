@@ -24,8 +24,9 @@ PT, RSET, ASET = "validation/real-data-study/pool-targets.csv", "validation/real
 SYN_R, SYN_A, VAL, ASSESS = "validation/REAL_DATA_SYNTHESIS.md", "validation/AUDIT_PLAN_SYNTHESIS.md", "validation/VALIDATION.md", "docs/ASSESSMENT.md"
 RA, RR, RE, DEC, SYN_T = "validation/real-audit-study/summary.csv", "validation/real-audit-study/recovery-ratios.csv", "validation/real-audit-review/rule1-extension.csv", "validation/real-audit-decisions.txt", "validation/REAL_AUDIT_SYNTHESIS.md"
 BIASED = ("pnc", "iron", "anc4")
-CLS, CLR, CLD = "validation/clustered-study/summary.csv", "validation/clustered-study/ratios.csv", "validation/clustered-decisions.txt"
-HELD = ("lbw", "resus", "stillbirths", "deliveries", "anc1_early")
+CLD = "validation/clustered-decisions.txt"
+FXS, FXR, FXD = "validation/clustered-fix-study/summary.csv", "validation/clustered-fix-study/ratios.csv", "validation/clustered-fix-decisions.txt"
+RARE, COMMON = ("lbw", "resus", "stillbirths"), ("deliveries", "anc1_early", "pnc", "syphilis", "iron", "anc4")
 
 _cache = {}
 
@@ -111,13 +112,13 @@ def mi_gaps():
     return [ra(a, "oracle") - ra(a, "linear_mi") for a in ("pnc", "syphilis", "iron", "anc4")]
 
 
-def cl(analysis, method):
-    """Held-out Rwanda items at a 25% audit, from the clustered-audit study."""
-    return float(one(CLS, level="held_out", analysis=analysis, fraction="0.25", method=method)["coverage"])
+def fx(analysis, method="random_intercept"):
+    """Rwanda items at a 25% audit, from the study of replacements for the clustered resampling."""
+    return float(one(FXS, analysis=analysis, fraction="0.25", method=method)["coverage"])
 
 
-def cl_ratio(analysis):
-    return float(one(CLR, level="held_out", analysis=analysis, fraction="0.25")["recovery_ratio"])
+def fx_ratio(analysis, field="recovery_ratio"):
+    return float(one(FXR, analysis=analysis, fraction="0.25", method="random_intercept")[field])
 
 
 EXAMPLE = {}
@@ -151,16 +152,17 @@ claims = [
     ("9", "R", "Real audit, 25%: smallest gap between linear MI and one-item recount clustered coverage, points", RA, lambda: f"{100 * min(mi_gaps()):.0f}"),
     ("11", "R", "Real audit, 25%: largest gap between linear MI and one-item recount clustered coverage, points", RA, lambda: f"{100 * max(mi_gaps()):.0f}"),
     ("two of three", "RC", "Real audit, 25%: exact-or-wrong slopes where the model's error was clearly below linear MI's", RR, lambda: worded(sum(float(ratio_25(a, "contamination", "linear_mi")["upper"]) < 1 for a in ("pnc", "syphilis", "iron")) == 2, "two of three", "not two slopes")),
-    ("PARTIAL", "RC", "Clustered-audit test: verdict under its rule fixed in advance", CLD, lambda: has(CLD, r"VERDICT: PARTIAL", "PARTIAL")),
-    ("five held-out", "R", "Clustered-audit test: held-out items", CLS, lambda: worded(len({r["analysis"] for r in rows(CLS) if r["level"] == "held_out"}) == 5, "five held-out", "item count")),
-    ("87.0%", "R", "Clustered-audit test, 25%: existing option's coverage on deliveries", CLS, lambda: pct1(cl("deliveries", "linear_mi"))),
-    ("91.4%", "R", "Clustered-audit test, 25%: clustered option's coverage on deliveries", CLS, lambda: pct1(cl("deliveries", "linear_mi_clustered"))),
-    ("79.6%", "R", "Clustered-audit test, 25%: existing option's coverage on early first ANC visits", CLS, lambda: pct1(cl("anc1_early", "linear_mi"))),
-    ("88.8%", "R", "Clustered-audit test, 25%: clustered option's coverage on early first ANC visits", CLS, lambda: pct1(cl("anc1_early", "linear_mi_clustered"))),
-    ("other three", "RC", "Clustered-audit test, 25%: held-out items where its recovery RMSE was above the existing option's", CLR, lambda: worded(sum(cl_ratio(a) > 1 for a in HELD) == 3, "other three", "count")),
-    ("two of five", "C", "Clustered-audit test, 25%: held-out items where its recovery RMSE ratio was clearly below 1", CLR, lambda: worded(sum(float(one(CLR, level="held_out", analysis=a, fraction="0.25")["recovery_upper"]) < 1 for a in HELD) == 2, "two of five", "count")),
-    ("14%", "RC", "Clustered-audit test, 25%: largest rise in recovery RMSE on a held-out item", CLR, lambda: pct0(max(cl_ratio(a) for a in HELD) - 1)),
-    ("0.5.0", "RC", "Package version", "DESCRIPTION", lambda: re.search(r"^Version: (.+)$", (ROOT / "DESCRIPTION").read_text(), re.M).group(1)),
+    ("PARTIAL", "R", "First clustered-audit test: verdict under its rule fixed in advance", CLD, lambda: has(CLD, r"VERDICT: PARTIAL", "PARTIAL")),
+    ("PARTIAL", "RC", "Second clustered-audit test: verdict under its rule fixed in advance", FXD, lambda: has(FXD, r"VERDICT: PARTIAL", "PARTIAL")),
+    ("random intercept", "R", "Second clustered-audit test: the candidate its simulations selected", FXD, lambda: has(FXD, r"SELECTED: random_intercept", "random intercept")),
+    ("six common", "RC", "Second clustered-audit test, 25%: common items where it raised coverage over linear MI, with a recovery ratio clearly below 1", FXR, lambda: worded(all(fx(a) > fx(a, "linear_mi") and fx_ratio(a, "recovery_upper") < 1 and fx(a, "linear_mi") < fx(a, "oracle") for a in COMMON), "six common", "not all six")),
+    ("79.6%", "R", "Second clustered-audit test, 25%: linear MI's coverage on early first ANC visits", FXS, lambda: pct1(fx("anc1_early", "linear_mi"))),
+    ("91.0%", "R", "Second clustered-audit test, 25%: the replacement's coverage on early first ANC visits", FXS, lambda: pct1(fx("anc1_early"))),
+    ("89.0%", "R", "Second clustered-audit test, 25%: the replacement's lowest coverage across the nine items", FXS, lambda: pct1(min(fx(a) for a in RARE + COMMON))),
+    ("three rare", "RC", "Second clustered-audit test, 25%: items where its recovery RMSE was above linear MI's", FXR, lambda: worded(all(fx_ratio(a) > 1 for a in RARE) and not any(fx_ratio(a) > 1 for a in COMMON), "three rare", "count")),
+    ("4%", "RC", "Second clustered-audit test, 25%: smallest rise in recovery RMSE on a rare item", FXR, lambda: pct0(min(fx_ratio(a) for a in RARE) - 1)),
+    ("5%", "RC", "Second clustered-audit test, 25%: largest rise in recovery RMSE on a rare item", FXR, lambda: pct0(max(fx_ratio(a) for a in RARE) - 1)),
+    ("0.6.0", "RC", "Package version", "DESCRIPTION", lambda: re.search(r"^Version: (.+)$", (ROOT / "DESCRIPTION").read_text(), re.M).group(1)),
     ("November 1, 2026", "C", "Status date", ASSESS, lambda: has(ASSESS, r"Assessed 2026-11-01", "November 1, 2026")),
     ("Version 0.4", "C", "Release that added the recording-error model", "NEWS.md", lambda: has("NEWS.md", r"# catmech 0\.4\.0\n\n- Add `catmech_contamination\(\)`", "Version 0.4")),
     ("25%", "RC", "Audit fraction: mean referenced rows over cohort size, ClinicalTrials.gov cell", RD, lambda: pct0(audit_pct("ctgov", "audit_25pct"))),

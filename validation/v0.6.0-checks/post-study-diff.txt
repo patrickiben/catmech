@@ -1,0 +1,13 @@
+Package sources after the study of replacements, against the frozen copy in validation/clustered-fix-source.
+R/analysis.R byte-identical to the frozen copy
+R/audit-plan.R byte-identical to the frozen copy
+R/contamination.R changed
+R/impute.R byte-identical to the frozen copy
+R/imputer.R byte-identical to the frozen copy
+R/model.R byte-identical to the frozen copy
+R/reference.R changed
+R/simulate.R byte-identical to the frozen copy
+R/spec.R byte-identical to the frozen copy
+R/reference.R: the selected candidate replaces the resampling, cluster_strata is removed, and the documentation comments change.
+R/contamination.R: the hold-out refit no longer passes cluster_strata.
+The replay in validation/clustered-fix-replay confirms that the package gives every study request for the selected candidate.

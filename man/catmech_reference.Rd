@@ -14,8 +14,7 @@ catmech_reference(
   m = 20L,
   seed = 1L,
   use_recorded = FALSE,
-  cluster = NULL,
-  cluster_strata = NULL
+  cluster = NULL
 )
 }
 \arguments{
@@ -51,15 +50,9 @@ predictors fitted on all references. It needs rows with both values. If every su
 agrees exactly, those records keep their recorded value, as `spec$recorded_fit` notes.}
 
 \item{cluster}{With `use_recorded = TRUE`, the name of a complete column identifying
-audit clusters, such as a site or facility. Each imputation then resamples audited
-clusters with replacement, fits the regression to that resample, and imputes from its
-prediction plus normal noise with its residual variance, instead of drawing from a
-posterior that treats rows as independent. See details.}
-
-\item{cluster_strata}{Optional names of categorical columns within which audited
-clusters are resampled, usually the strata of the audit. Every cluster must sit in one
-stratum. A stratum with a single audited cluster keeps it in every resample. With few
-audited clusters per stratum, resampling within strata understates variance. See details.}
+audit clusters, such as a site or facility. The imputation model then adds a random
+intercept for the cluster, instead of treating rows as independent. If the audit is
+stratified, put the strata in `predictors`. See details.}
 }
 \value{
 A `catmech_result`. Its completed target contains exact gold references
@@ -111,21 +104,24 @@ reference-using methods at 25% audits on two real datasets, and failed under syn
 gross errors, which distort a linear fit;
 [catmech_contamination()] is the alternative there.
 
-With `cluster`, parameter uncertainty comes from resampling audited clusters, which
-allows for errors and residuals that are correlated within a cluster. Imputed noise is
-still independent across rows. Fewer than five audited clusters are refused, and a
-resample that loses design support is redrawn, then refused if that keeps happening.
-Pool with [catmech_pool_lm()], which uses a cluster-robust variance for such a fit.
-The approach combines established ideas (von Hippel and Bartlett, 2021; Cameron and
-Miller, 2015). It is not a claim of a new method.
+With `cluster`, the imputation model is the recorded-value regression plus a random
+intercept for the cluster. Its variance components come from moments (Henderson, 1953,
+method 3) on the audited rows and are drawn in each imputation, and coefficients are
+drawn from the generalized least squares fit given them. An unaudited cluster gets a new
+intercept, an audited cluster with unaudited rows gets one conditional on its residuals,
+and every imputed row gets normal noise. If the audited rows cannot separate the two
+variances, as with one row per cluster, the intercept variance is zero. Fewer than five
+audited clusters are refused. Pool with [catmech_pool_lm()], which uses a cluster-robust
+variance for such a fit. This is ordinary multilevel imputation (Schafer and Yucel, 2002;
+Grund and colleagues, 2018) in closed form, and not a new method. It assumes one normal
+intercept per cluster, so cluster-specific slopes and non-constant variance are not modeled.
 
-`cluster` is experimental. Its planned test came out PARTIAL under a rule fixed in
-advance: on held-out items of a real facility recount at a 25% audit, it helped where
-the existing option fell short and lost accuracy elsewhere. Post hoc and not yet tested,
-the losses fell on rare events whose residuals show no within-facility correlation.
-A bootstrap mean within a stratum of n audited clusters has (n - 1)/n of the usual
-variance, so `cluster_strata` understates variance when strata hold few audited
-clusters. Treat `cluster` as a check, not a default. With about eight audited
-clusters, an occasional fit has near-zero degrees of freedom and an extremely wide
-interval, so read the `df` column. See `validation/CLUSTERED_SYNTHESIS.md`.
+`cluster` is experimental. Version 0.6.0 replaced an earlier version that resampled audited
+clusters, in which resampling within strata understated variance. The replacement's planned
+test came out PARTIAL under a rule fixed in advance: on a real facility recount at a 25%
+audit, coverage was within its limits on eight of nine items, with 89.0% on the ninth, but
+error on the three rare items ran 4% to 5% above the option without `cluster`, and the
+accuracy conditions failed. Treat `cluster` as a check, not a default. Read the `df` column,
+since very wide intervals remain possible with few audited clusters. See
+`validation/CLUSTERED_FIX_SYNTHESIS.md`.
 }

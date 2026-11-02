@@ -1,0 +1,2 @@
+Package sources at the study of replacements for the clustered resampling: the commit recorded in validation/VALIDATION.md, before the selected candidate moved into R/reference.R.
+Hashes are in validation/clustered-fix-study/source-hashes.csv. The candidates, runner, scorer and plan stay at their own paths, and the frozen pool stays in validation/real-audit/.

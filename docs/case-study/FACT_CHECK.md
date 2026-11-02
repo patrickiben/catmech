@@ -2,7 +2,7 @@
 
 Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-01. Each row recomputes the number from its source, and most sources are frozen results tables that the script only reads. A document fails if it contains a digit or number word that no row covers, or if a row's text no longer appears in it. Rerun with `python3 docs/case-study/fact_check.py`.
 
-**Result: all 100 claims match their sources.** PDF: 1 page, generated from the current `CASE_STUDY.md`. Relative links and README tool paths checked: 89, 0 broken. External DOI links were not checked, because this check stays offline. Negative controls: a changed number, an added number, an added number word, a wrong claim value, an unnegated publication claim, a listed term and broken links were all caught.
+**Result: all 101 claims match their sources.** PDF: 1 page, generated from the current `CASE_STUDY.md`. Relative links and README tool paths checked: 96, 0 broken. External DOI links were not checked, because this check stays offline. Negative controls: a changed number, an added number, an added number word, a wrong claim value, an unnegated publication claim, a listed term and broken links were all caught.
 
 ## README.md front page
 
@@ -18,15 +18,17 @@ Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-01. Each row reco
 | `9` | Real audit, 25%: smallest gap between linear MI and one-item recount clustered coverage, points | `validation/real-audit-study/summary.csv` | Match |
 | `11` | Real audit, 25%: largest gap between linear MI and one-item recount clustered coverage, points | `validation/real-audit-study/summary.csv` | Match |
 | `two of three` | Real audit, 25%: exact-or-wrong slopes where the model's error was clearly below linear MI's | `validation/real-audit-study/recovery-ratios.csv` | Match |
-| `PARTIAL` | Clustered-audit test: verdict under its rule fixed in advance | `validation/clustered-decisions.txt` | Match |
-| `five held-out` | Clustered-audit test: held-out items | `validation/clustered-study/summary.csv` | Match |
-| `87.0%` | Clustered-audit test, 25%: existing option's coverage on deliveries | `validation/clustered-study/summary.csv` | Match |
-| `91.4%` | Clustered-audit test, 25%: clustered option's coverage on deliveries | `validation/clustered-study/summary.csv` | Match |
-| `79.6%` | Clustered-audit test, 25%: existing option's coverage on early first ANC visits | `validation/clustered-study/summary.csv` | Match |
-| `88.8%` | Clustered-audit test, 25%: clustered option's coverage on early first ANC visits | `validation/clustered-study/summary.csv` | Match |
-| `other three` | Clustered-audit test, 25%: held-out items where its recovery RMSE was above the existing option's | `validation/clustered-study/ratios.csv` | Match |
-| `14%` | Clustered-audit test, 25%: largest rise in recovery RMSE on a held-out item | `validation/clustered-study/ratios.csv` | Match |
-| `0.5.0` | Package version | `DESCRIPTION` | Match |
+| `PARTIAL` | First clustered-audit test: verdict under its rule fixed in advance | `validation/clustered-decisions.txt` | Match |
+| `PARTIAL` | Second clustered-audit test: verdict under its rule fixed in advance | `validation/clustered-fix-decisions.txt` | Match |
+| `random intercept` | Second clustered-audit test: the candidate its simulations selected | `validation/clustered-fix-decisions.txt` | Match |
+| `six common` | Second clustered-audit test, 25%: common items where it raised coverage over linear MI, with a recovery ratio clearly below 1 | `validation/clustered-fix-study/ratios.csv` | Match |
+| `79.6%` | Second clustered-audit test, 25%: linear MI's coverage on early first ANC visits | `validation/clustered-fix-study/summary.csv` | Match |
+| `91.0%` | Second clustered-audit test, 25%: the replacement's coverage on early first ANC visits | `validation/clustered-fix-study/summary.csv` | Match |
+| `89.0%` | Second clustered-audit test, 25%: the replacement's lowest coverage across the nine items | `validation/clustered-fix-study/summary.csv` | Match |
+| `three rare` | Second clustered-audit test, 25%: items where its recovery RMSE was above linear MI's | `validation/clustered-fix-study/ratios.csv` | Match |
+| `4%` | Second clustered-audit test, 25%: smallest rise in recovery RMSE on a rare item | `validation/clustered-fix-study/ratios.csv` | Match |
+| `5%` | Second clustered-audit test, 25%: largest rise in recovery RMSE on a rare item | `validation/clustered-fix-study/ratios.csv` | Match |
+| `0.6.0` | Package version | `DESCRIPTION` | Match |
 | `25%` | Audit fraction: mean referenced rows over cohort size, ClinicalTrials.gov cell | `validation/real-data-study/summary.csv` | Match |
 | `25%` | Audit fraction: mean referenced rows over cohort size, NHANES cell | `validation/real-data-study/summary.csv` | Match |
 | `0.0286` | RMSE, linear MI, ClinicalTrials.gov, 25% | `validation/real-data-study/summary.csv` | Match |
@@ -90,11 +92,12 @@ Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-01. Each row reco
 | `90%` | Real audit: lowest clustered coverage of a one-item recount on those slopes | `validation/real-audit-study/summary.csv` | Match |
 | `97%` | Real audit: highest clustered coverage of a one-item recount on those slopes | `validation/real-audit-study/summary.csv` | Match |
 | `two of three` | Real audit, 25%: exact-or-wrong slopes where the model's error was clearly below linear MI's | `validation/real-audit-study/recovery-ratios.csv` | Match |
-| `PARTIAL` | Clustered-audit test: verdict under its rule fixed in advance | `validation/clustered-decisions.txt` | Match |
-| `other three` | Clustered-audit test, 25%: held-out items where its recovery RMSE was above the existing option's | `validation/clustered-study/ratios.csv` | Match |
-| `two of five` | Clustered-audit test, 25%: held-out items where its recovery RMSE ratio was clearly below 1 | `validation/clustered-study/ratios.csv` | Match |
-| `14%` | Clustered-audit test, 25%: largest rise in recovery RMSE on a held-out item | `validation/clustered-study/ratios.csv` | Match |
-| `0.5.0` | Package version | `DESCRIPTION` | Match |
+| `PARTIAL` | Second clustered-audit test: verdict under its rule fixed in advance | `validation/clustered-fix-decisions.txt` | Match |
+| `six common` | Second clustered-audit test, 25%: common items where it raised coverage over linear MI, with a recovery ratio clearly below 1 | `validation/clustered-fix-study/ratios.csv` | Match |
+| `three rare` | Second clustered-audit test, 25%: items where its recovery RMSE was above linear MI's | `validation/clustered-fix-study/ratios.csv` | Match |
+| `4%` | Second clustered-audit test, 25%: smallest rise in recovery RMSE on a rare item | `validation/clustered-fix-study/ratios.csv` | Match |
+| `5%` | Second clustered-audit test, 25%: largest rise in recovery RMSE on a rare item | `validation/clustered-fix-study/ratios.csv` | Match |
+| `0.6.0` | Package version | `DESCRIPTION` | Match |
 | `November 1, 2026` | Status date | `docs/ASSESSMENT.md` | Match |
 | `Version 0.4` | Release that added the recording-error model | `NEWS.md` | Match |
 | `25%` | Audit fraction: mean referenced rows over cohort size, ClinicalTrials.gov cell | `validation/real-data-study/summary.csv` | Match |

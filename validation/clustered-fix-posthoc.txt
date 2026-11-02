@@ -1,0 +1,53 @@
+Post hoc: made after the results, enters no rule
+
+NINE ITEMS AT 25%: mean distance of coverage from 95%, points; lowest coverage; widest mean width against the existing option
+  oracle               2.40; lowest 88.4%
+  linear_mi            7.92; lowest 79.5% on iron; widest +0% on lbw, narrowest +0%
+  linear_mi_clustered  3.25; lowest 88.8% on anc1_early; widest +41% on iron, narrowest +1%
+  no_strata            1.22; lowest 92.2% on deliveries; widest +88% on iron, narrowest +9%
+  rao_wu               1.11; lowest 91.8% on deliveries; widest +84% on iron, narrowest +4%
+  jackknife            1.58; lowest 91.4% on anc4; widest +169% on iron, narrowest +19%
+  random_intercept     3.07; lowest 89.0% on syphilis; widest +15% on pnc, narrowest +3%
+
+NINE ITEMS AT 25%: the replacement against the first option
+  Lower recovery ratio on 6: lbw, resus, stillbirths, anc1_early, iron, anc4; higher on 2: pnc, syphilis; the rest within 0.0015
+  Closer to 95% on 4: lbw, anc1_early, iron, anc4; farther on 4: stillbirths, deliveries, pnc, syphilis
+  Narrower mean width on 7: resus, deliveries, anc1_early, pnc, syphilis, iron, anc4
+  lbw          width: existing 0.055, first 0.056, replacement 0.060, jackknife 0.066
+  resus        width: existing 0.050, first 0.059, replacement 0.057, jackknife 0.087
+  stillbirths  width: existing 0.013, first 0.014, replacement 0.015, jackknife 0.018
+  deliveries   width: existing 0.234, first 0.249, replacement 0.240, jackknife 0.284
+  anc1_early   width: existing 0.257, first 0.337, replacement 0.289, jackknife 0.510
+  pnc          width: existing 0.237, first 0.307, replacement 0.272, jackknife 0.491
+  syphilis     width: existing 0.762, first 0.847, replacement 0.804, jackknife 1.095
+  iron         width: existing 0.480, first 0.678, replacement 0.518, jackknife 1.292
+  anc4         width: existing 0.313, first 0.362, replacement 0.347, jackknife 0.467
+
+NINE ITEMS AT 50%: replacement and first option, mean distance from 95%, points
+  linear_mi            5.71; lowest 84.6%
+  linear_mi_clustered  3.87; lowest 87.0%
+  random_intercept     3.07; lowest 86.8%
+
+SIMULATIONS, 38 CELLS: recovery ratio against the existing option
+  linear_mi_clustered  point ratio at most 1.05 in 33; upper limit at most 1.05 in 30; highest 1.117 (pairs_row_only 25%); lowest 0.911 (pairs_under 25%)
+  no_strata            point ratio at most 1.05 in 33; upper limit at most 1.05 in 28; highest 1.169 (pairs_row_only 25%); lowest 0.918 (pairs_under 25%)
+  rao_wu               point ratio at most 1.05 in 25; upper limit at most 1.05 in 15; highest 3.088 (pairs_row_only 25%); lowest 0.968 (none_under 25%)
+  jackknife            point ratio at most 1.05 in 37; upper limit at most 1.05 in 28; highest 1.065 (rwanda_outlier 25%); lowest 0.980 (pairs_rare 25%)
+  random_intercept     point ratio at most 1.05 in 35; upper limit at most 1.05 in 22; highest 1.090 (rwanda_rare 25%); lowest 0.835 (rwanda_outlier 25%)
+
+SIMULATIONS, 24 CLUSTERED CELLS: lowest and highest coverage; cells under 92%; cells over 98%
+  oracle               88.4% to 94.2%; under 92% in 8; over 98% in 0
+  linear_mi            86.0% to 92.6%; under 92% in 18; over 98% in 0
+  linear_mi_clustered  89.4% to 97.0%; under 92% in 2; over 98% in 0
+  no_strata            91.4% to 98.8%; under 92% in 2; over 98% in 1
+  rao_wu               91.4% to 99.0%; under 92% in 1; over 98% in 3
+  jackknife            91.0% to 95.8%; under 92% in 2; over 98% in 0
+  random_intercept     91.8% to 98.4%; under 92% in 1; over 98% in 1
+
+ALL REQUESTS: widths over five times their cell median; smallest degrees of freedom
+  linear_mi            9 of 29998; smallest df 1.71
+  linear_mi_clustered  24 of 29998; smallest df 0.79
+  no_strata            38 of 29998; smallest df 0.56
+  rao_wu               91 of 29998; smallest df 0.42
+  jackknife            119 of 29998; smallest df 0.69
+  random_intercept     5 of 29998; smallest df 2.05

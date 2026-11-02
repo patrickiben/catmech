@@ -135,26 +135,34 @@ subgroup.
 
 ### Clustered audits: experimental
 
-With `use_recorded = TRUE`, `cluster = "site"` changes how parameter uncertainty enters the imputations. For
-each imputation, audited clusters are resampled with replacement, within `cluster_strata` if given. The
-recorded-value regression is fitted to that resample, and unaudited rows get its prediction plus normal noise with
-its residual variance. This replaces the posterior draw, which treats rows as independent. Records with no
-recorded value use the same steps without that predictor. The noise itself stays independent across rows.
+With `use_recorded = TRUE`, `cluster = "site"` adds a random intercept for the cluster to the recorded-value
+regression: `target = x'beta + c_i + e_ij`. If the audit is stratified, put the strata in `predictors`. In each imputation:
 
-Fewer than five audited clusters are refused. A resample that loses design support is redrawn up to 100 times,
-then refused. A stratum with a single audited cluster keeps it in every resample. `catmech_pool_lm()` applies a CR1
-variance to each completed dataset and pools by Rubin's rules, with complete-data degrees of freedom of clusters
-minus one. A fit made without `cluster` can still use that variance through `catmech_pool_lm(cluster = )`.
+1. Variance components come from moments on the audited rows (Henderson, 1953, method 3). The fit with cluster
+   indicators gives the within-cluster sum of squares, and the rest of the pooled fit's gives the between-cluster part.
+   Each is divided by a chi-square draw, and the intercept variance is the moment solution, floored at zero.
+2. Coefficients are drawn from the generalized least squares fit given those components.
+3. An unaudited cluster gets a new intercept, an audited cluster with unaudited rows gets one conditional on its
+   residuals, and every imputed row gets normal noise.
 
-The approach combines the bootstrap at the imputation step (von Hippel and Bartlett, 2021,
-[doi:10.1214/20-STS793](https://doi.org/10.1214/20-STS793)) with the clustered bootstrap and cluster-robust
-inference (Cameron and Miller, 2015, [doi:10.3368/jhr.50.2.317](https://doi.org/10.3368/jhr.50.2.317)). It is not a
-new method. Its [planned test](../validation/CLUSTERED_SYNTHESIS.md) came out PARTIAL: it helped where the posterior
-draw fell short and lost accuracy elsewhere. Post hoc and not yet tested, the losses fell on rare events whose residuals
-show no within-facility correlation, and an unplanned rerun found that resampling single rows produced little of either the
-gain or the cost. Resampling within strata understates variance when few clusters per stratum are audited: a bootstrap mean
-within a stratum of n audited clusters has (n - 1)/n of the usual variance, and a stratum with one contributes none. Leaving
-out `cluster_strata` raised coverage in that rerun, and a rescaled bootstrap (Rao and Wu, 1988) is a lead that needs its own test.
+Records with no recorded value use the same steps without that predictor. If the audited rows cannot separate the two
+variances, as with one row per cluster, the intercept variance is zero. Fewer than five audited clusters are refused.
+`catmech_pool_lm()` applies a CR1 variance to each completed dataset and pools by Rubin's rules, with complete-data
+degrees of freedom of clusters minus one. A fit made without `cluster` can still use that variance through
+`catmech_pool_lm(cluster = )`.
+
+This is ordinary multilevel imputation (Schafer and Yucel, 2002,
+[doi:10.1198/106186002760180608](https://doi.org/10.1198/106186002760180608); Grund, Lüdtke and Robitzsch, 2018,
+[doi:10.1177/1094428117703686](https://doi.org/10.1177/1094428117703686)) in closed form, and not a new method. It assumes
+one normal intercept per cluster, so cluster-specific slopes and non-constant variance are not modeled.
+
+Its [planned test](../validation/CLUSTERED_FIX_SYNTHESIS.md) came out PARTIAL: coverage held on eight of nine items of a
+real recount at a 25% audit, with lower error on six common items, but error on three rare items ran 4% to 5% above the option
+without `cluster`, and the accuracy conditions failed. It replaced an [earlier version](../validation/CLUSTERED_SYNTHESIS.md)
+that resampled audited clusters in each imputation, within `cluster_strata` if given, which also came out PARTIAL. A bootstrap
+mean within a stratum of n audited clusters has (n - 1)/n of the usual variance, and a stratum with one contributes none. A
+rescaled bootstrap (Rao and Wu, 1988) overshot in the second test, and a stratified jackknife draw reached higher coverage with
+much wider intervals.
 
 ## Predictive mean matching and analysis
 

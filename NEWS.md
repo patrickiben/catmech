@@ -1,3 +1,9 @@
+# catmech 0.6.0
+
+- `catmech_reference(cluster = )` now adds a random intercept for the cluster, with its variance components drawn in each imputation, instead of resampling audited clusters. This removes the flaw in the earlier version, where resampling within strata understated variance. Results for calls with `cluster` change. `cluster_strata` is removed, so put strata in `predictors`. This is ordinary multilevel imputation in closed form, and not a new method.
+- A second prospective test, with its plan committed before either candidate was in the package or had run on a real item, came out **PARTIAL** under a rule fixed in advance. Simulations with clustered residuals selected this candidate over a stratified jackknife draw, by a tie-break on error. On a Rwanda facility recount at a 25% audit, coverage was within its limits on eight of nine items and 89.0% on the ninth. Against the option without `cluster`, error was 5% to 25% lower on six common items and 4% to 5% higher on three rare ones. Both accuracy conditions failed, so the option stays experimental and is not a recommended default. It would also have failed the first test's coverage condition, which the plan replaced before any real result with these candidates. See `validation/CLUSTERED_FIX_SYNTHESIS.md`.
+- Calls without `cluster` are numerically unchanged: 18 of 18 runs match frozen v0.3.1, and 12 of 12 match frozen v0.4.0. No package dependency was added.
+
 # catmech 0.5.0
 
 - Add `cluster` and `cluster_strata` to `catmech_reference(use_recorded = TRUE)`, which resample audited clusters in each imputation, and `cluster` to `catmech_pool_lm()`, a CR1 cluster-robust variance pooled with complete-data degrees of freedom of clusters minus one. These combine established ideas and are not a new method.

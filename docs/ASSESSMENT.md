@@ -1,6 +1,6 @@
 # Assessment and release decision
 
-Assessed 2026-11-01. Version 0.5.0 is worth releasing as an **experimental, auditable toolkit for data with recorded values and a
+Assessed 2026-11-01. Version 0.6.0 is worth releasing as an **experimental, auditable toolkit for data with recorded values and a
 reference subset**, built from established methods. Real-data testing narrowed its recommended use. It does not support a novel-method
 or clinical-validity claim. Earlier assessments are preserved for [v0.1](ASSESSMENT_V0.1.md), [v0.2](ASSESSMENT_V0.2.md) and [v0.3](ASSESSMENT_V0.3.md).
 
@@ -24,6 +24,8 @@ A later [test on real audit data](../validation/REAL_AUDIT_SYNTHESIS.md), with n
 
 Version 0.5.0 adds `cluster` options to `catmech_reference()` and `catmech_pool_lm()`. The first resamples audited clusters in each imputation, an idea suggested by a post-hoc check in the real-audit test. Its [planned test](../validation/CLUSTERED_SYNTHESIS.md) came out **PARTIAL** under a rule fixed in advance: it held on coverage and in simulation but failed on accuracy. On five held-out items at a 25% audit, it helped on the two where linear MI undercovered (87.0% to 91.4%, and 79.6% to 88.8%) and raised error on the other three. It stays experimental. One independent AI reviewer then confirmed the verdict and found no bug, and it corrected several of the first write-up's readings. Post hoc and untested, the losses fell on rare events whose residuals show no within-facility correlation. Both the gain and the cost come mainly from resampling whole clusters rather than rows, resampling within strata understates variance when few clusters per stratum are audited, and the plan's simulations barely contain the clustering the option is for.
 
+Version 0.6.0 replaces the resampling in `catmech_reference(cluster = )` with a random intercept, and removes `cluster_strata`. A [second planned test](../validation/CLUSTERED_FIX_SYNTHESIS.md) selected it over a stratified jackknife draw, using simulations with clustered residuals, and also came out **PARTIAL** under a rule fixed in advance. On nine Rwanda items at a 25% audit, coverage was within its limits on eight and 89.0% on the ninth. Error was lower than linear MI's on six common items and 4% to 5% higher on three rare ones, and both accuracy conditions failed. Against the resampling it replaced, error and interval stability improved, and average coverage barely moved. It stays experimental. This round has had no outside review, and the real items had all been seen under other methods.
+
 ## Current judgment
 
 | Question | Judgment |
@@ -34,8 +36,8 @@ Version 0.5.0 adds `cluster` options to `catmech_reference()` and `catmech_pool_
 | Is the contamination model the best default? | Not when an interval is needed. Linear MI is the better starting point for that. In simulation the model's niche was gross errors and fallible references with a credible declared SD. A real audit with moderate errors did not test gross errors, so that niche has no real-data support yet. There the model often had lower point error, but its intervals were too narrow. |
 | Can it say how many records to audit? | Not validated. The planner gave a NO-GO, failing only at the 5% target. It is a documented calculation, built on classical theory. |
 | Does it repair missed errors with no new information? | No. It requires genuine reference measurements. |
-| Generally valid confidence intervals? | No. Failures are recorded for each workflow. With default intervals the oracle itself undercovered on ClinicalTrials.gov and on the Rwanda audit, and no method in the real-audit test held the oracle's clustered coverage at a 25% facility audit. The experimental clustered option came closer, and still missed by 6.8 points on one of five held-out items, using stratified resampling that understates variance. |
-| Does it handle clustered audits? | Partly. `catmech_pool_lm(cluster = )` is a standard cluster-robust variance. `catmech_reference(cluster = )` is experimental: better worst-case coverage, a possible loss of accuracy, and a planned test that came out PARTIAL. |
+| Generally valid confidence intervals? | No. Failures are recorded for each workflow. With default intervals the oracle itself undercovered on ClinicalTrials.gov and on the Rwanda audit, and no method in the real-audit test held the oracle's clustered coverage at a 25% facility audit. The experimental clustered option came closer, and still reached only 89.0% on one of nine items, against 93.2% for a recount. |
+| Does it handle clustered audits? | Partly. `catmech_pool_lm(cluster = )` is a standard cluster-robust variance. `catmech_reference(cluster = )` is experimental: better worst-case coverage, some added error on rare items, and two planned tests that came out PARTIAL. |
 | Real-data evidence? | Two public datasets with real recording differences, and two public audits: Rwanda facility counts and psychology effect sizes. None is a patient-level clinical source-data audit, and the ClinicalTrials.gov reference is not independent truth. |
 | Ready for a GitHub research release? | Yes, with the recorded limitations. |
 | Ready for a methods paper or clinical use? | No. A short software paper may be realistic after review. A methods claim is not supported. |
@@ -52,7 +54,7 @@ every connection among those methods.
 2. Check simulated error rates and sizes against published audits. The main fixture uses 8% wrong records, which may be high for transcription errors.
 3. Test the hold-out advice prospectively, since it comes from the real-data study that suggested it.
 4. Consider non-constant variance, which remains out of scope. On the Rwanda audit it and clustering together cost the oracle up to 28 points of default coverage.
-5. Plan a second test of the clustered option, using the [leads from the first](../validation/CLUSTERED_SYNTHESIS.md): a rescaled bootstrap for stratified audits, simulations whose residuals are actually clustered, and whether within-facility correlation on audited rows shows when the option will help. All of these were seen only after the results.
+5. Test the clustered option on a second health system. Every item in the one recount available has now been seen, and two planned tests have run on it.
 6. Test whether checking errors against analysis covariates on audited rows can guide the choice of method. The real-audit results suggested this, so they cannot test it fairly, and at a 25% audit the check has low power.
 
 Neither reproducibility nor these validation checks are proof of inferential validity. AI-assisted review is disclosed, and no independent human peer review is implied.

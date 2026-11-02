@@ -1,5 +1,7 @@
 # Test of imputation for clustered audits: results and interpretation
 
+The option tested here was later replaced, and this write-up records the first test. See the [second test](CLUSTERED_FIX_SYNTHESIS.md).
+
 Under the [rule fixed in advance](CLUSTERED_PLAN.md) the verdict is **PARTIAL**. Resampling audited facilities in each imputation passed the coverage and simulation conditions, but it failed the accuracy condition on three of five held-out Rwanda items. As the plan requires, `catmech_reference(cluster = )` stays in the package as an experimental option with that failure stated. It is not recommended as a default.
 
 The verdict rests on the plan alone. Everything labeled post hoc below came after the results and enters no rule.

@@ -24,10 +24,7 @@ test_that("cluster needs use_recorded and valid columns", {
   expect_error(catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE, cluster = "x"), "must differ")
   e <- d; e$id[1] <- NA
   expect_error(catmech_reference(e, "recorded", "gold", "x", use_recorded = TRUE, cluster = "id"), "missing values")
-  expect_error(catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE, cluster = "id", cluster_strata = "nope"), "existing columns")
-  e <- d; e$group[1] <- "b"; e$group[2] <- "a"
-  expect_error(catmech_reference(e, "recorded", "gold", "x", use_recorded = TRUE, cluster = "id", cluster_strata = "group"), "one stratum")
-  expect_error(catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE, cluster_strata = "group"), "cluster must name")
+  expect_error(catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE, cluster = "id", cluster_strata = "group"), "unused argument")
 })
 
 test_that("clustered imputation keeps references, fills the rest and is reproducible", {
@@ -48,7 +45,7 @@ test_that("clustered imputation keeps references, fills the rest and is reproduc
   expect_identical(stats::runif(1), before)
   expect_identical(fit$spec$cluster, "id")
   expect_identical(fit$spec$audited_clusters, 12L)
-  expect_identical(fit$spec$cluster_uncertainty, "audited_cluster_bootstrap_each_imputation")
+  expect_identical(fit$spec$cluster_uncertainty, "random_intercept_drawn_each_imputation")
 })
 
 test_that("a fit without cluster records nothing about clusters", {
@@ -81,15 +78,122 @@ test_that("clustered imputation handles missing recorded values and full agreeme
   expect_equal(fit$completed[[1]]$recorded, d$recorded)
 })
 
-test_that("strata keep every stratum in the resample, including a single audited cluster", {
+test_that("strata enter as predictors, including one with a single audited cluster", {
   d <- cluster_fixture(clusters = 40L, audited = 40L)
   d$group <- ifelse(d$id <= 20L, "a", "b")
   d$gold[d$id > 8L & d$id <= 20L] <- NA
   d$gold[d$id > 21L] <- NA
-  fit <- catmech_reference(d, "recorded", "gold", c("x", "group"), use_recorded = TRUE, cluster = "id",
-                           cluster_strata = "group", m = 3, seed = 4)
+  fit <- catmech_reference(d, "recorded", "gold", c("x", "group"), use_recorded = TRUE, cluster = "id", m = 3, seed = 4)
   expect_length(fit$completed, 3L)
-  expect_identical(fit$spec$cluster_strata, "group")
+  expect_false("cluster_strata" %in% names(unclass(fit$spec)))
+  expect_false(any(vapply(fit$completed, function(z) anyNA(z$recorded), logical(1))))
+})
+
+test_that("variance components match a one-way analysis of variance", {
+  set.seed(31)
+  groups <- 12L; each <- 4L; n <- groups * each
+  cl <- factor(rep(seq_len(groups), each = each))
+  y <- rep(stats::rnorm(groups, 0, 2), each = each) + stats::rnorm(n)
+  moments <- catmech:::catmech_reference_cluster_moments(matrix(1, n, 1L), y, cl)
+  means <- tapply(y, cl, mean)
+  ms_between <- each * sum((means - mean(y))^2) / (groups - 1L)
+  ms_within <- sum((y - means[cl])^2) / (n - groups)
+  expect_equal(moments$df_within, n - groups)
+  expect_equal(moments$df_between, groups - 1L)
+  expect_equal(moments$sse_within / moments$df_within, ms_within)
+  expect_equal(moments$ss_between / moments$df_between, ms_between)
+  expect_equal(moments$trace, each * (groups - 1L))
+  tau2 <- moments$df_between * (moments$ss_between / moments$df_between - moments$sse_within / moments$df_within) / moments$trace
+  expect_equal(tau2, (ms_between - ms_within) / each)
+})
+
+test_that("the component trace holds with predictors and unequal clusters", {
+  set.seed(32)
+  cl <- factor(rep(1:8, times = c(2, 3, 4, 2, 5, 3, 2, 4)))
+  n <- length(cl)
+  X <- cbind(1, stats::rnorm(n))
+  y <- as.vector(X %*% c(1, .5)) + stats::rnorm(8)[cl] + stats::rnorm(n)
+  moments <- catmech:::catmech_reference_cluster_moments(X, y, cl)
+  Z <- stats::model.matrix(~ cl - 1)
+  M <- diag(n) - X %*% solve(crossprod(X), t(X))
+  expect_equal(moments$trace, sum(diag(t(Z) %*% M %*% Z)))
+  expect_equal(moments$sse_within, sum(stats::lm.fit(cbind(X, Z), y)$residuals^2))
+})
+
+test_that("generalized least squares matches explicit matrix algebra", {
+  set.seed(33)
+  cl <- factor(rep(1:7, times = c(1, 2, 3, 4, 2, 3, 5)))
+  n <- length(cl)
+  X <- cbind(1, stats::rnorm(n), stats::rexp(n))
+  y <- as.vector(X %*% c(1, .5, -.2)) + stats::rnorm(7)[cl] + stats::rnorm(n)
+  sigma2 <- 1.3; tau2 <- .7
+  V <- sigma2 * diag(n) + tau2 * tcrossprod(stats::model.matrix(~ cl - 1))
+  W <- solve(V)
+  expected <- solve(t(X) %*% W %*% X)
+  gls <- catmech:::catmech_reference_cluster_gls(X, y, cl, sigma2, tau2)
+  expect_equal(unname(gls$coefficients), as.vector(expected %*% t(X) %*% W %*% y))
+  R_inverse <- backsolve(qr.R(gls$qr), diag(3L))
+  expect_equal(sigma2 * tcrossprod(R_inverse), expected, ignore_attr = TRUE)
+  ols <- catmech:::catmech_reference_cluster_gls(X, y, cl, sigma2, 0)
+  expect_equal(unname(ols$coefficients), unname(stats::lm.fit(X, y)$coefficients))
+})
+
+test_that("imputed rows carry the cluster correlation of the audited residuals", {
+  set.seed(34)
+  clusters <- 60L; rows <- 3L
+  id <- rep(seq_len(clusters), each = rows)
+  x <- stats::rnorm(clusters * rows)
+  truth <- x + stats::rnorm(clusters * rows)
+  shift <- rep(stats::rnorm(clusters, 0, 3), each = rows)
+  d <- data.frame(id = id, x = x, recorded = truth + shift + stats::rnorm(clusters * rows, 0, .2))
+  d$gold <- ifelse(id <= 30L, truth, NA_real_)
+  fit <- catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE, cluster = "id", m = 200, seed = 5)
+  values <- vapply(fit$completed, function(z) z$recorded[z$id == 40L], numeric(rows))
+  noise <- values - rowMeans(values)
+  correlation <- mean(stats::cor(t(noise))[upper.tri(diag(rows))])
+  expect_gt(correlation, .5)
+  independent <- d
+  independent$recorded <- truth + stats::rnorm(clusters * rows, 0, 1)
+  fit <- catmech_reference(independent, "recorded", "gold", "x", use_recorded = TRUE, cluster = "id", m = 200, seed = 5)
+  values <- vapply(fit$completed, function(z) z$recorded[z$id == 40L], numeric(rows))
+  noise <- values - rowMeans(values)
+  expect_lt(abs(mean(stats::cor(t(noise))[upper.tri(diag(rows))])), .2)
+})
+
+test_that("an audited cluster with unaudited rows keeps its own intercept", {
+  set.seed(35)
+  clusters <- 40L; rows <- 4L
+  id <- rep(seq_len(clusters), each = rows)
+  x <- stats::rnorm(clusters * rows)
+  effect <- stats::rnorm(clusters, 0, 3)
+  effect[1L] <- 12
+  truth <- x + effect[id] + stats::rnorm(clusters * rows, 0, .5)
+  d <- data.frame(id = id, x = x, recorded = x + stats::rnorm(clusters * rows, 0, .5))
+  d$gold <- ifelse(id <= 25L, truth, NA_real_)
+  d$gold[d$id == 1L][4L] <- NA_real_
+  fit <- catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE, cluster = "id", m = 100, seed = 6)
+  row <- which(d$id == 1L)[4L]
+  imputed <- vapply(fit$completed, function(z) z$recorded[row], numeric(1))
+  expect_gt(mean(imputed), 9)
+  other <- vapply(fit$completed, function(z) z$recorded[which(d$id == 30L)[1L]], numeric(1))
+  expect_gt(stats::sd(other), 1.5)
+})
+
+test_that("with one row per cluster the intercept variance is zero and the draw still works", {
+  d <- cluster_fixture(clusters = 60L, rows = 1L, audited = 30L)
+  X <- cbind(1, d$x[!is.na(d$gold)], d$recorded[!is.na(d$gold)])
+  moments <- catmech:::catmech_reference_cluster_moments(X, d$gold[!is.na(d$gold)], factor(d$id[!is.na(d$gold)]))
+  expect_false(moments$separable)
+  fit <- catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE, cluster = "id", m = 5, seed = 8)
+  expect_false(any(vapply(fit$completed, function(z) anyNA(z$recorded), logical(1))))
+  values <- vapply(fit$completed, function(z) z$recorded[is.na(d$gold)], numeric(sum(is.na(d$gold))))
+  expect_gt(min(apply(values, 1, stats::sd)), 0)
+})
+
+test_that("audited rows with no residual variance are refused", {
+  d <- cluster_fixture()
+  d$gold[!is.na(d$gold)] <- 0
+  expect_error(catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE, cluster = "id", m = 2, seed = 1), "no residual variance")
 })
 
 test_that("the pooled cluster-robust variance matches a manual CR1 calculation", {
