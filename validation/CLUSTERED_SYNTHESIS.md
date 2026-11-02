@@ -70,7 +70,7 @@ The three simulation cells that missed were 70 clusters, intraclass correlation 
 | 1 | Closer to the oracle's coverage in at least 4 of 5 | **Held**, 5 of 5, with the caveat above |
 | 2 | Mean width 15% to 60% wider in all five | **Failed**: +1%, +19%, +9%, +7%, +31% |
 | 3 | Recovery RMSE no worse by more than 5% in at least 4 of 5 | **Failed**, 2 of 5 |
-| 4 | With 30 clusters at 25%, coverage below 92% in most cells | **Failed**, 0 of 9; the range was 92.8% to 96.8%, so eight audited clusters did better than I expected on coverage |
+| 4 | With 30 clusters at 25%, coverage below 92% in most cells | **Failed**, 0 of 9; the range was 92.8% to 96.8%, so eight audited clusters did better on coverage than predicted |
 | 5 | Width within 5% in the one-row controls | **Held**: -0.9% and -0.5% |
 | 6 | The gap shrinks from 25% to 50% | **Held in 4 of 5**, tied on `stillbirths`: 2.2 to 1.0, 2.4 to 1.0, 0.4 to 0.4, 4.4 to 2.2, 9.2 to 4.4 |
 

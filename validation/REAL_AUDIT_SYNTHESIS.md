@@ -9,7 +9,7 @@ What holds after that review:
 - **Only one reported slope is clearly off.** The ANC 4th-visit gap excludes zero at the facility level under either definition of the target. The other gaps do not.
 - **It is not a patient-level clinical source-data audit.** Rwanda holds facility counts, and the control comes from psychology.
 
-There were **45,600 requests: 45,167 returned intervals, 426 convergence refusals, 3 refusals for unsupported designs and 4 other errors**. The run took 933 seconds at 14 workers, under my estimate of 21 minutes. [Scored output](real-audit-decisions.txt) comes from a separate script.
+There were **45,600 requests: 45,167 returned intervals, 426 convergence refusals, 3 refusals for unsupported designs and 4 other errors**. The run took 933 seconds at 14 workers, under the estimate of 21 minutes. [Scored output](real-audit-decisions.txt) comes from a separate script.
 
 ## What was checked, and how
 
@@ -79,7 +79,7 @@ Each entry is **recovery RMSE, bias, clustered coverage**. Recovery RMSE is the 
 | r family, 25% | 489/500 | 0.004, +0.001, 97.2% | 0.037, -0.002, 96.6% | 0.006, -0.001, 97.0% | 0.022, -0.001, 94.0% | 0.004, -0.000, 96.3% | -0.002, 96.0% |
 | r family, 50% | 500/500 | 0.004, +0.001, 97.2% | 0.020, -0.005, 93.8% | 0.003, -0.002, 95.8% | 0.007, -0.003, 93.8% | 0.002, -0.001, 96.0% | -0.002, 96.0% |
 
-**RMSE against the pool slope**, which the plan listed and my first version left out. It does not charge a stable estimator for failing to follow the oracle's own sampling noise, which recovery RMSE does.
+**RMSE against the pool slope**, which the plan listed and the first version left out. It does not charge a stable estimator for failing to follow the oracle's own sampling noise, which recovery RMSE does.
 
 | Analysis, audit | Oracle | Recorded | Audited only | Linear MI | Raking | Contamination |
 |---|---:|---:|---:|---:|---:|---:|
@@ -189,7 +189,7 @@ Swap-in had lower recovery RMSE than recorded in all 20 cells, but that is large
 
 ## What the review changed
 
-Three AI reviewers worked independently: one rebuilt the results from raw data before reading any conclusions, one attacked the statistics, and one audited claims against the sources. No blocker was found, and every table cell reproduced. My first version of this document had these problems, each checked again before being changed here:
+Three AI reviewers worked independently: one rebuilt the results from raw data before reading any conclusions, one attacked the statistics, and one audited claims against the sources. No blocker was found, and every table cell reproduced. The first version of this document had these problems, each checked again before being changed here:
 
 1. It called the target "a full audit" and sorted slopes into biased and nearly right without saying only one item is recounted.
 2. It stated as fact that errors tracking facility size explained the model's failure. That fits ANC 4th visits and does not fit the other slopes.

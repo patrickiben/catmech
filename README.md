@@ -385,7 +385,7 @@ MIT license. Built on [mice](https://doi.org/10.18637/jss.v045.i03),
 such as [hmi](https://doi.org/10.18637/jss.v095.i09), and
 [multiple overimputation](https://doi.org/10.1177/0049124115585360).
 AI-assisted work is disclosed in [CONTRIBUTING.md](CONTRIBUTING.md).
-[GitHub status](docs/GITHUB.md) records where the repository stands.
+[GitHub notes](docs/GITHUB.md) record the repository's history and metadata.
 
 Real-audit data come from [Nshimyiryo et al. (2020)](https://doi.org/10.1371/journal.pone.0235823),
 *PLOS ONE*, under CC BY, and [Maassen et al. (2020)](https://doi.org/10.1371/journal.pone.0233107),

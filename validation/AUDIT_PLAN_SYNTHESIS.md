@@ -5,7 +5,7 @@
 
 This is a test on two public datasets. It is not a clinical audit, and these are new cohorts from the same pools as the [frozen real-data study](REAL_DATA_SYNTHESIS.md), whose tables had already been seen by hand, as the plan discloses.
 
-The run covered 1,500 cohorts per real dataset and 300 per synthetic cell: 14,400 target fits and 7,200 plans. **236 target fits and 19 plans were refused**, all because a category had no row with both values in a small audit. There were no other errors. It took 878 seconds at 14 workers against my estimate of about 12 minutes, on a machine shared with other jobs. Plain Python recomputed every summary, the verdict and both pool values of `k`.
+The run covered 1,500 cohorts per real dataset and 300 per synthetic cell: 14,400 target fits and 7,200 plans. **236 target fits and 19 plans were refused**, all because a category had no row with both values in a small audit. There were no other errors. It took 878 seconds at 14 workers against an estimate of about 12 minutes, on a machine shared with other jobs. Plain Python recomputed every summary, the verdict and both pool values of `k`.
 
 Sources are in [`audit-plan-study/`](audit-plan-study/). Each table names its file.
 
@@ -38,7 +38,7 @@ The predictions are nearly centered there, with signed median errors of -3.6%, -
 
 On NHANES, imputation noise alone at `m = 20` nearly uses the whole 10% allowance. The planner beat the floor with the 10% pilot, but that pilot contains the target's 30 records, an overlap a real plan would not have. With the 25% pilot, where the overlap is smaller, the planner came within 0.6 points of the floor in both datasets (16.8% against 17.4%, and 15.5% against 16.1%).
 
-Better estimates of `k` would not close that gap by themselves. I expected this from the development split (prediction 1), and the rule was not mine to change. Whether a narrower claim is worth testing is a decision for Patrick and his reviewer. Such a test would need new data, because these results have now been seen.
+Better estimates of `k` would not close that gap by themselves. This was expected from the development split (prediction 1), and the rule was not mine to change. Whether a narrower claim is worth testing is a decision for Patrick and his reviewer. Such a test would need new data, because these results have now been seen.
 
 ## Other descriptive results
 

@@ -8,7 +8,7 @@ do not have. The [plan was fixed first](REAL_DATA_PLAN.md), and the only earlier
 This is not a clinical audit. No public record-level clinical source-data audit was found. Both datasets are public, have both a recorded and a reference value on every row, and contain real differences.
 Nothing was injected. Cohorts of 600 were drawn with replacement from the evaluation split, so the pool's own coefficient, using references on every row, is the known target. There were **33,800 requests:
 33,613 returned intervals, 76 refusals for unsupported designs, 83 convergence refusals and 28 other errors**, the latter mainly singular raking fits at low audit fractions. The run took 2,543 seconds at 14 workers,
-well over my revised estimate of 25 to 30 minutes and my original estimate of 15 to 20. An independent plain-Python check recomputed both target coefficients and the pool audit counts.
+well over the revised estimate of 25 to 30 minutes and the original estimate of 15 to 20. An independent plain-Python check recomputed both target coefficients and the pool audit counts.
 
 See the [evidence figure](real-data-figures/real-data-evidence.pdf).
 

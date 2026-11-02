@@ -98,7 +98,7 @@ Clustering and the history gain are both stronger among industry sponsors. On D2
 - **The audit-yield condition failed on both parts.** Adaptive found slightly fewer discrepancies than risk ranking, and the interval excludes the required gain.
 - **The AUC gain did not turn into an audit gain.** A real sponsor signal exists on D, but this adaptive strategy did not outperform ranking on trial features alone.
 - **D2 did not support prediction.** Larger differences do not show the prediction gain that any difference does, which fits a pattern driven in part by small reporting differences. This data cannot establish that cause.
-- **Part of my prediction missed**, as scored below.
+- **Part of the prediction missed**, as scored below.
 
 ## Prediction, scored
 
@@ -111,7 +111,7 @@ Clustering and the history gain are both stronger among industry sponsors. On D2
 | AUC lower limit above 0, small negative Brier difference | 0.049, -0.0059 | Yes |
 | Yields: random about 14, risk 20 to 28, adaptive 18 to 25 | 14.9, 22.1, 21.3 | Yes |
 | Adaptive to risk about 0.8 to 1.1, failing 1.2 | 0.967 | Yes |
-| D2 clustering of the same kind, weaker in absolute count | Excess 390 against 1,062 | Yes, but I did not predict the lost prediction gain |
+| D2 clustering of the same kind, weaker in absolute count | Excess 390 against 1,062 | Yes, but the lost prediction gain was not predicted |
 | Industry ratio above other class, low confidence | 2.374 against 1.587 | Yes |
 
 ## Interpretation limits
@@ -127,7 +127,7 @@ Clustering and the history gain are both stronger among industry sponsors. On D2
 ## Run and checks
 
 - **Evaluation run:** once, 36.9 seconds ([`run-info.json`](sponsor-clustering/evaluation/run-info.json)). Plan, pool, sponsor map and script hashes were unchanged before and after ([`input-hashes.csv`](sponsor-clustering/evaluation/input-hashes.csv)).
-- **Development run:** engineering only, 22 seconds, in [`sponsor-clustering/development/`](sponsor-clustering/development/). It also returned WEAK, with an adaptive-to-risk ratio of 1.156 (0.906 to 1.708). I saw it before the evaluation run. No code changed after the first development run, and both saved runs carry the same script hash.
+- **Development run:** engineering only, 22 seconds, in [`sponsor-clustering/development/`](sponsor-clustering/development/). It also returned WEAK, with an adaptive-to-risk ratio of 1.156 (0.906 to 1.708). It was seen before the evaluation run. No code changed after the first development run, and both saved runs carry the same script hash.
 - **Independent recomputation:** `tools/verify-artifacts.py` rebuilds in plain Python, from the pool and sponsor map, all 200 summary values of each run. That covers Test 1's strata and statistic, the train-test split and reveal, the logistic fits, AUC and Brier, every per-seed audit count, the interval limits from saved replicates, the first 25 bootstrap replicates' AUC, Brier and risk yield, and the verdict with a table of fixed cases.
 - **Negative controls in the verifier:** a known-wrong Test 1 statistic is detected. In addition, 200 within-strata shuffles of evaluation D give a mean ratio of 0.999 to the saved null, with 3 of 200 below p = 0.01. The output is in [`verifier.log`](sponsor-clustering/verifier.log), and the whole verifier exits 0.
 - **Not recomputed independently:** two things use NumPy streams that plain Python cannot repeat. For the saved Test 1 null draws, the verifier recomputes the p-value and ratio from them and compares their mean with its own 200 shuffles, to within 4 standard errors. For the adaptive and random yields inside bootstrap replicates, it checks only that their means sit within one standard deviation of the point estimates. Those replicates' audit seeds use the zero-based replicate number, while `bootstrap.csv` numbers replicates from 1. Passing these checks shows correspondence and repeatability, not inferential validity.

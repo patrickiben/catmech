@@ -2,7 +2,7 @@
 
 Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-01. Each row recomputes the number from its source, and most sources are frozen results tables that the script only reads. A document fails if it contains a digit or number word that no row covers, or if a row's text no longer appears in it. Rerun with `python3 docs/case-study/fact_check.py`.
 
-**Result: all 101 claims match their sources.** PDF: 1 page, generated from the current `CASE_STUDY.md`. Relative links and README tool paths checked: 88, 0 broken. External DOI links were not checked, because this check stays offline. Negative controls: a changed number, an added number, an added number word, a wrong claim value, an unnegated publication claim, a third-party reference and broken links were all caught.
+**Result: all 100 claims match their sources.** PDF: 1 page, generated from the current `CASE_STUDY.md`. Relative links and README tool paths checked: 87, 0 broken. External DOI links were not checked, because this check stays offline. Negative controls: a changed number, an added number, an added number word, a wrong claim value, an unnegated publication claim, a listed term and broken links were all caught.
 
 ## README.md front page
 
@@ -142,16 +142,6 @@ Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-01. Each row reco
 | `1.31e-4` | Paired MSE difference, model minus linear MI, ClinicalTrials.gov, 25% | `validation/real-data-study/paired-comparisons.csv` | Match |
 | `2.2e-5` | MCSE of that difference | `validation/real-data-study/paired-comparisons.csv` | Match |
 
-## docs/case-study/BLURBS.md
-
-| As shown | What it says | Source file | Result |
-|---|---|---|---|
-| `November 1, 2026` | Status date | `docs/ASSESSMENT.md` | Match |
-| `25%` | Audit fraction: mean referenced rows over cohort size, ClinicalTrials.gov cell | `validation/real-data-study/summary.csv` | Match |
-| `NO-GO` | Merged-idea verdict | `validation/merged-audit-pilot/study/verdict.csv` | Match |
-| `two public datasets` | Real-data pools in the study | `validation/audit-plan-study/pool-k.csv` | Match |
-| `Two other ideas` | Merged idea and planner, both NO-GO | `validation/merged-audit-pilot/study/verdict.csv` | Match |
-
 ## README.md lower sections, numbers added or moved in this rewrite
 
 | As shown | What it says | Source file | Result |
@@ -187,7 +177,6 @@ Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-01. Each row reco
 | The planner test was not fully blind | `validation/AUDIT_PLAN_SYNTHESIS.md` | Supported |
 | Plain Python recomputes the reported summaries | `validation/VALIDATION.md` | Supported |
 | AI use and its limits | `CONTRIBUTING.md` | Supported |
-| Not published: this repository has no git remote, or only a private one | `git remote`, `gh repo view` | Supported |
 
 ## Excluded as not findings
 
@@ -197,10 +186,6 @@ Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-01. Each row reco
 | README.md front page | # 1. | Step number in a code comment |
 | README.md front page | # 2. | Step number in a code comment |
 | docs/case-study/CASE_STUDY.md and PDF | two poor options | Framing of the problem, not a measurement |
-| docs/case-study/BLURBS.md | a checked one | Ordinary phrase, not a count |
-| docs/case-study/BLURBS.md | One-line | Heading from the brief |
-| docs/case-study/BLURBS.md | Three-line | Heading from the brief |
-| docs/case-study/BLURBS.md | Two-sentence | Heading from the brief |
 
 ## The README example
 

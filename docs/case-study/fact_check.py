@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check every number in the README front page, case study, PDF and blurbs against its source, then write FACT_CHECK.md.
+"""Check every number in the README front page, case study and PDF against its source, then write FACT_CHECK.md.
 
 Usage: python3 docs/case-study/fact_check.py
 Each claim recomputes its value from a source file, usually a frozen results table, which is only read. Any digit or number
@@ -15,7 +15,7 @@ ROOT = HERE.parents[1]
 sys.path.insert(0, str(HERE))
 import build_case_study as build  # noqa: E402
 
-README, CASE, BLURBS = ROOT / "README.md", HERE / "CASE_STUDY.md", HERE / "BLURBS.md"
+README, CASE = ROOT / "README.md", HERE / "CASE_STUDY.md"
 RD, RP, RC, RS = [f"validation/real-data-study/{x}.csv" for x in ("summary", "paired-comparisons", "corruption-scores", "request-status")]
 SY = "validation/contamination-study/summary.csv"
 AP, AK, AV, AR = [f"validation/audit-plan-study/{x}.csv" for x in ("summary", "pool-k", "verdict", "request-status")]
@@ -138,7 +138,7 @@ def run_example():
     return out.stdout
 
 
-# Each claim: text as shown, documents using it (R README front page, C case study and PDF, B blurbs, L README lower sections
+# Each claim: text as shown, documents using it (R README front page, C case study and PDF, L README lower sections
 # changed in this rewrite), what it says, source file, and a function returning the text the source supports.
 claims = [
     ("35%", "RC", "Real audit, 25%: lowest clustered coverage of the contamination model on slopes with a material gap", RA, lambda: pct0(min(ra(a, "contamination") for a in BIASED))),
@@ -161,9 +161,9 @@ claims = [
     ("two of five", "C", "Clustered-audit test, 25%: held-out items where its recovery RMSE ratio was clearly below 1", CLR, lambda: worded(sum(float(one(CLR, level="held_out", analysis=a, fraction="0.25")["recovery_upper"]) < 1 for a in HELD) == 2, "two of five", "count")),
     ("14%", "RC", "Clustered-audit test, 25%: largest rise in recovery RMSE on a held-out item", CLR, lambda: pct0(max(cl_ratio(a) for a in HELD) - 1)),
     ("0.5.0", "RC", "Package version", "DESCRIPTION", lambda: re.search(r"^Version: (.+)$", (ROOT / "DESCRIPTION").read_text(), re.M).group(1)),
-    ("November 1, 2026", "CB", "Status date", ASSESS, lambda: has(ASSESS, r"Assessed 2026-11-01", "November 1, 2026")),
+    ("November 1, 2026", "C", "Status date", ASSESS, lambda: has(ASSESS, r"Assessed 2026-11-01", "November 1, 2026")),
     ("Version 0.4", "C", "Release that added the recording-error model", "NEWS.md", lambda: has("NEWS.md", r"# catmech 0\.4\.0\n\n- Add `catmech_contamination\(\)`", "Version 0.4")),
-    ("25%", "RCB", "Audit fraction: mean referenced rows over cohort size, ClinicalTrials.gov cell", RD, lambda: pct0(audit_pct("ctgov", "audit_25pct"))),
+    ("25%", "RC", "Audit fraction: mean referenced rows over cohort size, ClinicalTrials.gov cell", RD, lambda: pct0(audit_pct("ctgov", "audit_25pct"))),
     ("25%", "RC", "Audit fraction: mean referenced rows over cohort size, NHANES cell", RD, lambda: pct0(audit_pct("nhanes", "audit_25pct"))),
     ("0.0286", "RC", "RMSE, linear MI, ClinicalTrials.gov, 25%", RD, lambda: f4(rd("ctgov", "audit_25pct", "cole_mi", "rmse"))),
     ("0.0308", "RC", "RMSE, contamination model, ClinicalTrials.gov, 25%", RD, lambda: f4(rd("ctgov", "audit_25pct", "contamination", "rmse"))),
@@ -210,7 +210,7 @@ claims = [
     ("7.8%", "RC", "Largest planner median error at any larger target, real-data cells", AP, lambda: pct1(max(v for k, v in plan_errors().items() if k[2] > .05))),
     ("30 of 600 records", "C", "Records at the 5% target, cohort size", ASET, lambda: (lambda c: f'{c["target_records"][0]} of {c["n"]} records')(json.loads((ROOT / ASET).read_text()))),
     ("NO-GO", "RC", "Planner verdict", AV, lambda: rows(AV)[0]["verdict"]),
-    ("NO-GO", "RCB", "Merged-idea verdict", MV, lambda: one(MV, regime="moderate")["verdict"]),
+    ("NO-GO", "RC", "Merged-idea verdict", MV, lambda: one(MV, regime="moderate")["verdict"]),
     ("set.seed(1)", "R", "Example parameter, not a finding. Run by this check.", "README.md", lambda: "set.seed(1)"),
     ("nrow(d) / 4", "R", "Example parameter: a 25% audit. Run by this check.", "README.md", lambda: "nrow(d) / 4"),
     ("agreement_tol = 1", "R", "Example parameter: the 1 kg tolerance the frozen NHANES audit used", SYN_R, lambda: has(SYN_R, r"67\.3% beyond 1 kg", "agreement_tol = 1")),
@@ -224,7 +224,7 @@ claims = [
     ("1,000", "RC", "Cohorts at a 25% audit", RD, lambda: f'{int(rd("ctgov", "audit_25pct", "cole_mi", "requested")):,}'),
     ("600", "RC", "Records per cohort", RSET, lambda: str(json.loads((ROOT / RSET).read_text())["n"])),
     ("v0.3", "R", "Figure label for the old default, which discards recorded values", ASSESS, lambda: has(ASSESS, r"Version 0\.3 treated recorded values as unavailable", "v0.3")),
-    ("two public datasets", "RCB", "Real-data pools in the study", AK, lambda: worded(len(rows(AK)) == 2, "two public datasets", "pool count")),
+    ("two public datasets", "RC", "Real-data pools in the study", AK, lambda: worded(len(rows(AK)) == 2, "two public datasets", "pool count")),
     ("30%", "C", "Smallest interval reduction, model against old default, four primary synthetic cells", SY, lambda: pct0(min(narrower()))),
     ("38%", "C", "Largest interval reduction, model against old default, four primary synthetic cells", SY, lambda: pct0(max(narrower()))),
     ("three of four", "C", "Primary synthetic cells whose Wilson interval is inside the screen 0.925 to 0.975", SY, lambda: worded(screen_passes() == 3, "three of four", f"{screen_passes()} passes")),
@@ -237,7 +237,6 @@ claims = [
      lambda: worded(all(.4 <= 1 - rd(f, "audit_25pct", "cole_mi", "rmse") / rd(f, "audit_25pct", "reference_normal", "rmse") < .5 for f in REAL_CELLS), "nearly halved", "RMSE ratio")),
     ("95% ranges", "C", "Nominal level of the intervals scored for coverage", "validation/CONTAMINATION_PLAN.md", lambda: has("validation/CONTAMINATION_PLAN.md", r"95%|0\.95", "95% ranges")),
     ("Two more ideas", "C", "Merged idea and planner, both NO-GO", MV, lambda: worded(rows(AV)[0]["verdict"] == "NO-GO" and one(MV, regime="moderate")["verdict"] == "NO-GO", "Two more ideas", "verdicts")),
-    ("Two other ideas", "B", "Merged idea and planner, both NO-GO", MV, lambda: worded(rows(AV)[0]["verdict"] == "NO-GO" and one(MV, regime="moderate")["verdict"] == "NO-GO", "Two other ideas", "verdicts")),
     ("27,208", "C", "ClinicalTrials.gov evaluation pool rows", AK, lambda: f'{int(one(AK, dataset="ctgov")["pool_rows"]):,}'),
     ("3,908", "C", "NHANES evaluation pool rows", AK, lambda: f'{int(one(AK, dataset="nhanes")["pool_rows"]):,}'),
     ("1.31e-4", "C", "Paired MSE difference, model minus linear MI, ClinicalTrials.gov, 25%", RP, lambda: f'{float(one(RP, family="ctgov", scenario="audit_25pct", method="contamination", comparator="cole_mi")["mse_difference"]):.2e}'.replace("e-04", "e-4")),
@@ -257,8 +256,6 @@ not_findings = [
     ("R", "This one audit", "Describes the single illustrative run in the example"),
     ("R", "# 1.", "Step number in a code comment"), ("R", "# 2.", "Step number in a code comment"),
     ("C", "two poor options", "Framing of the problem, not a measurement"),
-    ("B", "a checked one", "Ordinary phrase, not a count"),
-    ("B", "One-line", "Heading from the brief"), ("B", "Three-line", "Heading from the brief"), ("B", "Two-sentence", "Heading from the brief"),
 ]
 
 
@@ -305,8 +302,8 @@ def self_test():
         misses.append("a wrong claim value")
     if not wording_rules({"test": "The package is published and has many users."}):
         misses.append("an unnegated publication claim")
-    if not wording_rules({"test": "A third party used this."}):
-        misses.append("a third-party reference")
+    if not wording_rules({"test": "A listed term appears here."}, terms=["listed term"]):
+        misses.append("a listed term")
     probe = HERE / "_link_probe.md"
     try:
         probe.write_text("[broken](no-such-file.md) and [anchor](../../README.md#no-such-heading)\n")
@@ -366,16 +363,19 @@ def check_links(paths):
     return count, problems
 
 
-def wording_rules(docs):
-    """Negated forms only for publication, users, review and validation claims; no third party; American spelling."""
+def local_terms():
+    """Extra terms to keep out of these documents, from an optional untracked file."""
+    path = HERE / ".local-terms"
+    return [line.strip() for line in path.read_text().splitlines() if line.strip()] if path.exists() else []
+
+
+def wording_rules(docs, terms=None):
+    """Negated forms only for publication, users, review and validation claims; no listed terms; American spelling."""
     problems = []
-    # Specific names live in an untracked local file, so this public script never contains them.
-    blocked = HERE / ".local-terms"
-    extra = [re.escape(line.strip()) for line in blocked.read_text().splitlines() if line.strip()] if blocked.exists() else []
-    pattern = "|".join(["third party", r"third.party"] + extra)
+    pattern = "|".join(re.escape(term) for term in (local_terms() if terms is None else terms))
     for name, text in docs.items():
-        if re.search(pattern, text, re.I):
-            problems.append(f"{name}: names a third party")
+        if pattern and re.search(pattern, text, re.I):
+            problems.append(f"{name}: contains a listed term")
         if re.search(r"\b(?:favour|colour|modelling|analyse[ds]?|behaviour)\b", text, re.I):
             problems.append(f"{name}: non-American spelling")
         if "—" in text:
@@ -397,8 +397,8 @@ def main():
     pdf = HERE / "catmech-case-study.pdf"
     pdf_text = subprocess.run(["pdftotext", str(pdf), "-"], capture_output=True, text=True, check=True).stdout
     pdf_text = re.sub(r"\s+", " ", pdf_text)
-    docs = {"R": clean(front), "C": clean(CASE.read_text()), "B": clean(BLURBS.read_text()), "L": clean(lower)}
-    names = {"R": "README.md front page", "C": "docs/case-study/CASE_STUDY.md and PDF", "B": "docs/case-study/BLURBS.md", "L": "README.md lower sections, numbers added or moved in this rewrite"}
+    docs = {"R": clean(front), "C": clean(CASE.read_text()), "L": clean(lower)}
+    names = {"R": "README.md front page", "C": "docs/case-study/CASE_STUDY.md and PDF", "L": "README.md lower sections, numbers added or moved in this rewrite"}
 
     results, failures = [], []
     for shown, where, meaning, source, fn in claims:
@@ -414,8 +414,8 @@ def main():
             if not re.search(BOUND_L + re.escape(shown) + BOUND_R, docs[d], re.I):
                 failures.append(f"{shown!r} is claimed for {names[d]} but does not appear there")
 
-    exempt = {d: [p for w, p, _ in not_findings if w == d] for d in "RCB"}
-    for d in "RCB":
+    exempt = {d: [p for w, p, _ in not_findings if w == d] for d in "RC"}
+    for d in "RC":
         phrases = [c[0] for c in claims if d in c[1]] + exempt[d]
         for hit in uncovered(docs[d], phrases):
             failures.append(f"Uncovered in {names[d]}: {hit}")
@@ -434,16 +434,12 @@ def main():
     if EXAMPLE.get("warnings"):
         failures.append("The README example raised a warning")
 
-    link_count, link_problems = check_links([README, CASE, BLURBS] + ([HERE / "FACT_CHECK.md"] if (HERE / "FACT_CHECK.md").exists() else []))
+    link_count, link_problems = check_links([README, CASE] + ([HERE / "FACT_CHECK.md"] if (HERE / "FACT_CHECK.md").exists() else []))
     failures += link_problems
-    failures += wording_rules({"README front page": front, "CASE_STUDY.md": CASE.read_text(), "BLURBS.md": BLURBS.read_text(), "PDF": pdf_text})
+    failures += wording_rules({"README front page": front, "CASE_STUDY.md": CASE.read_text(), "PDF": pdf_text})
     z = model_vs_linear()
     statement_results = [(text, source, bool(re.search(rx, (ROOT / source).read_text()))) for text, source, rx in statements]
     failures += [f"Statement not supported: {text} ({source})" for text, source, ok in statement_results if not ok]
-    remotes = subprocess.run(["git", "remote"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
-    unpublished = not remotes or subprocess.run(["gh", "repo", "view", "--json", "visibility", "-q", ".visibility"], cwd=ROOT, capture_output=True, text=True).stdout.strip() == "PRIVATE"
-    if not unpublished:
-        failures.append(f"A git remote exists ({remotes}) that is not confirmed private, so recheck every 'not published' statement")
     misses = self_test()
     failures += [f"Negative control missed: {m}" for m in misses]
 
@@ -452,8 +448,8 @@ def main():
              "A document fails if it contains a digit or number word that no row covers, or if a row's text no longer appears in it. Rerun with `python3 docs/case-study/fact_check.py`.", "",
              f"**Result: {'all ' + str(len(results)) + ' claims match their sources' if not failures else str(len(failures)) + ' problems'}.** "
              f"PDF: {pages} page, generated from the current `CASE_STUDY.md`. Relative links and README tool paths checked: {link_count}, {len(link_problems)} broken. External DOI links were not checked, because this check stays offline. "
-             f"Negative controls: a changed number, an added number, an added number word, a wrong claim value, an unnegated publication claim, a third-party reference and broken links {'were all caught' if not misses else 'WERE NOT ALL CAUGHT'}.", ""]
-    for d in "RCBL":
+             f"Negative controls: a changed number, an added number, an added number word, a wrong claim value, an unnegated publication claim, a listed term and broken links {'were all caught' if not misses else 'WERE NOT ALL CAUGHT'}.", ""]
+    for d in "RCL":
         lines += [f"## {names[d]}", "", "| As shown | What it says | Source file | Result |", "|---|---|---|---|"]
         for shown, where, meaning, source, got, ok in results:
             if d in where:
@@ -462,7 +458,7 @@ def main():
     lines += ["## Statements checked by grep", "", "| Statement | Source file | Result |", "|---|---|---|"]
     for text, source, ok in statement_results:
         lines.append(f"| {text} | `{source}` | {'Supported' if ok else 'NOT SUPPORTED'} |")
-    lines += ["| Not published: this repository has no git remote, or only a private one | `git remote`, `gh repo view` | " + ("Supported" if unpublished else "NOT SUPPORTED") + " |", ""]
+    lines += [""]
     lines += ["## Excluded as not findings", "", "| Document | Text | Why |", "|---|---|---|"]
     for w, p, why in not_findings:
         lines.append(f"| {names[w]} | {p} | {why} |")

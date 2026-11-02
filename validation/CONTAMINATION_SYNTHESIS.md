@@ -10,7 +10,7 @@ the error form the model assumes, so they favor it by construction. The stress c
 This report follows the [plan written first](CONTAMINATION_PLAN.md), with the development runs disclosed there.
 All data are synthetic. There were **52,950 requests: 52,900 returned intervals, 16 expected refusals, 33
 convergence refusals and 1 other error** (a singular raking fit). The run took 2,396 seconds at 14 workers, longer
-than my estimate of about 30 minutes. Every source and plan hash matched before and after the run, and the
+than the estimate of about 30 minutes. Every source and plan hash matched before and after the run, and the
 [independent verifier](../tools/verify-artifacts.py) recomputes every summary from replicate records. A pilot was byte-identical
 between 1 and 14 workers ([record](contamination-pilot-check.txt)).
 
