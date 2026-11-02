@@ -24,7 +24,7 @@ PT, RSET, ASET = "validation/real-data-study/pool-targets.csv", "validation/real
 SYN_R, SYN_A, VAL, ASSESS = "validation/REAL_DATA_SYNTHESIS.md", "validation/AUDIT_PLAN_SYNTHESIS.md", "validation/VALIDATION.md", "docs/ASSESSMENT.md"
 RA, RR, RE, DEC, SYN_T = "validation/real-audit-study/summary.csv", "validation/real-audit-study/recovery-ratios.csv", "validation/real-audit-review/rule1-extension.csv", "validation/real-audit-decisions.txt", "validation/REAL_AUDIT_SYNTHESIS.md"
 BIASED = ("pnc", "iron", "anc4")
-CLS, CLR, CLD = "validation/clustered-study/summary.csv", "validation/clustered-study/ratios.csv", "validation/clustered-decisions.txt"
+CLS, CLR, CLD, CLP = "validation/clustered-study/summary.csv", "validation/clustered-study/ratios.csv", "validation/clustered-decisions.txt", "validation/clustered-posthoc.txt"
 HELD = ("lbw", "resus", "stillbirths", "deliveries", "anc1_early")
 
 _cache = {}
@@ -159,6 +159,8 @@ claims = [
     ("88.8%", "R", "Clustered-audit test, 25%: clustered option's coverage on early first ANC visits", CLS, lambda: pct1(cl("anc1_early", "linear_mi_clustered"))),
     ("other three", "RC", "Clustered-audit test, 25%: held-out items where its recovery RMSE was above the existing option's", CLR, lambda: worded(sum(cl_ratio(a) > 1 for a in HELD) == 3, "other three", "count")),
     ("two of five", "C", "Clustered-audit test, 25%: held-out items where its recovery RMSE ratio was clearly below 1", CLR, lambda: worded(sum(float(one(CLR, level="held_out", analysis=a, fraction="0.25")["recovery_upper"]) < 1 for a in HELD) == 2, "two of five", "count")),
+    ("1.2 or fewer", "R", "Clustered-audit test, post hoc: largest mean recorded count among the items where error rose", CLP, lambda: has(CLP, r"Largest mean recorded count among them: 1\.2\.", "1.2 or fewer")),
+    ("about 20 to 40", "R", "Clustered-audit test, post hoc: mean recorded counts on the items where it helped", CLP, lambda: has(CLP, r"Mean recorded count: 19\.8 to 40\.1\.", "about 20 to 40")),
     ("14%", "RC", "Clustered-audit test, 25%: largest rise in recovery RMSE on a held-out item", CLR, lambda: pct0(max(cl_ratio(a) for a in HELD) - 1)),
     ("0.5.0", "RC", "Package version", "DESCRIPTION", lambda: re.search(r"^Version: (.+)$", (ROOT / "DESCRIPTION").read_text(), re.M).group(1)),
     ("November 1, 2026", "C", "Status date", ASSESS, lambda: has(ASSESS, r"Assessed 2026-11-01", "November 1, 2026")),

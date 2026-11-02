@@ -12,7 +12,7 @@ audit. It is not clinical validation, a general coverage guarantee, or a claim t
 - **[Go/no-go simulation](merged-audit-pilot/README.md), 28,800 records.** NO-GO for transmitter-targeted auditing under spillover.
 - **[Audit planner test](AUDIT_PLAN_SYNTHESIS.md), 14,400 target fits and 7,200 plans.** NO-GO under a rule fixed in advance. Median error in predicting width was 11.3% to 16.8% at a 5% audit, against a 10% limit, and at most 7.8% elsewhere. The bootstrap interval for `k` undercovered. This is new in v0.4.1 and did not change any earlier result.
 - **[Test on real audit data](REAL_AUDIT_SYNTHESIS.md), 45,600 requests.** A Rwanda health-facility recount, with a psychology effect-size audit as a control. The model's advantage over linear MI was inconclusive under a rule fixed in advance: lower error on two of three slopes at a 25% audit, but it failed the coverage condition on all three. Where a reported slope differed from a recount of that one item it kept 38% to 73% of the gap, with clustered coverage of 35% to 72% against 90% to 97% for the oracle. Linear MI's coverage held up better, though at a 25% audit its point error clearly beat trusting reported values on only one of four slopes. Neither audit holds patient values. No package code changed.
-- **[Test of imputation for clustered audits](CLUSTERED_SYNTHESIS.md), 148,000 requests.** **PARTIAL** under a rule fixed in advance. On five held-out items of the same Rwanda recount at a 25% audit, `catmech_reference(cluster = )` moved coverage closer to the oracle's on all five and within 5 points on four, but only two of five met the accuracy condition. It helped where the existing option undercovered and raised error elsewhere. It passed the simulation condition in 33 of 36 cells, though the existing option does not undercover in those simulations. The option is experimental.
+- **[Test of imputation for clustered audits](CLUSTERED_SYNTHESIS.md), 148,000 requests.** **PARTIAL** under a rule fixed in advance. On five held-out items of the same Rwanda recount at a 25% audit, `catmech_reference(cluster = )` moved coverage closer to the oracle's on all five and within 5 points on four, but only two of five met the accuracy condition. It helped where the existing option undercovered and raised error elsewhere; seen only afterward, and not yet tested, the losses came on rare events. It passed the simulation condition in 33 of 36 cells, though the existing option does not undercover in those simulations. The option is experimental.
 
 ## Software and independent checks
 
@@ -52,7 +52,7 @@ Version 0.4.1 adds the audit planner and changes no existing function. Its [plan
 
 The [real-audit test](REAL_AUDIT_PLAN.md) came after that release and ran on package sources identical to `v0.4.1-source/`. Its plan discloses the descriptive looks that preceded it and two changes made after its pilots, before any estimate was seen. It took 16 minutes against an estimate of 21. Its swap-in comparison and the tables in `real-audit-review/` are post hoc, are labeled as such and are not part of any rule. The plan was not under version control before that run, so its timing rests on file hashes and timestamps.
 
-The [clustered-audit test](CLUSTERED_PLAN.md) adds the only package code since v0.4.1. Its plan was committed before the option existed, and no amendment was needed. It ran on the sources preserved in `v0.5.0-source/`, with hashes checked before and after, and took about 13 minutes. This round has had no independent review.
+The [clustered-audit test](CLUSTERED_PLAN.md) adds the only package code since v0.4.1. Its plan was committed before the option existed, and no amendment was needed. It ran on the sources preserved in `v0.5.0-source/`, with hashes checked before and after, and took about 13 minutes. Its table of how common each event is, `clustered-posthoc.txt`, is post hoc and part of no rule. This round has had no independent review.
 
 ## Evidence limits
 
@@ -80,6 +80,7 @@ Rscript tools/real-audit-review-checks.R validation/my-real-audit-review
 Rscript tools/real-audit-replay.R validation/my-real-audit-replay
 Rscript tools/clustered-benchmark.R study validation/my-clustered-study
 python3 -I tools/clustered-score.py my-clustered-decisions.txt validation/my-clustered-study
+python3 -I tools/clustered-posthoc.py
 python3 tools/verify-artifacts.py
 ```
 

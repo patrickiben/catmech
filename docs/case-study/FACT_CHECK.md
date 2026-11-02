@@ -2,7 +2,7 @@
 
 Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-01. Each row recomputes the number from its source, and most sources are frozen results tables that the script only reads. A document fails if it contains a digit or number word that no row covers, or if a row's text no longer appears in it. Rerun with `python3 docs/case-study/fact_check.py`.
 
-**Result: all 100 claims match their sources.** PDF: 1 page, generated from the current `CASE_STUDY.md`. Relative links and README tool paths checked: 87, 0 broken. External DOI links were not checked, because this check stays offline. Negative controls: a changed number, an added number, an added number word, a wrong claim value, an unnegated publication claim, a listed term and broken links were all caught.
+**Result: all 102 claims match their sources.** PDF: 1 page, generated from the current `CASE_STUDY.md`. Relative links and README tool paths checked: 88, 0 broken. External DOI links were not checked, because this check stays offline. Negative controls: a changed number, an added number, an added number word, a wrong claim value, an unnegated publication claim, a listed term and broken links were all caught.
 
 ## README.md front page
 
@@ -25,6 +25,8 @@ Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-01. Each row reco
 | `79.6%` | Clustered-audit test, 25%: existing option's coverage on early first ANC visits | `validation/clustered-study/summary.csv` | Match |
 | `88.8%` | Clustered-audit test, 25%: clustered option's coverage on early first ANC visits | `validation/clustered-study/summary.csv` | Match |
 | `other three` | Clustered-audit test, 25%: held-out items where its recovery RMSE was above the existing option's | `validation/clustered-study/ratios.csv` | Match |
+| `1.2 or fewer` | Clustered-audit test, post hoc: largest mean recorded count among the items where error rose | `validation/clustered-posthoc.txt` | Match |
+| `about 20 to 40` | Clustered-audit test, post hoc: mean recorded counts on the items where it helped | `validation/clustered-posthoc.txt` | Match |
 | `14%` | Clustered-audit test, 25%: largest rise in recovery RMSE on a held-out item | `validation/clustered-study/ratios.csv` | Match |
 | `0.5.0` | Package version | `DESCRIPTION` | Match |
 | `25%` | Audit fraction: mean referenced rows over cohort size, ClinicalTrials.gov cell | `validation/real-data-study/summary.csv` | Match |

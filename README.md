@@ -10,14 +10,14 @@
 - **What held up.** Keeping the recorded value pays. Linear MI's intervals were about half as wide as those from discarding it (0.102 against 0.205, and 0.154 against 0.297), with coverage near the all-references oracle (91.8% against 91.2%, and 93.9% against 94.9%).
 - **Where linear MI fails.** Under synthetic gross errors it covered 64.7%, against 94.0% for the model.
 - **A real audit was inconclusive.** On a [health-facility recount in Rwanda](validation/REAL_AUDIT_SYNTHESIS.md), the rule fixed in advance came out inconclusive at a 25% audit. The model had lower error than linear MI on two of three slopes, but where a reported slope differed from a recount of that item its intervals covered 35% to 72%, against 90% to 97% for the recount. Linear MI's coverage held up better (79.5% at worst), and it cost accuracy where reported values were close: 1.4 to 2.6 times the error of trusting them on the syphilis slope, depending on the measure. These are facility counts, not patient values, and gross errors remain untested on real data.
-- **Clustered audits: experimental.** `catmech_reference(cluster = )` resamples audited sites in each imputation. Under a [rule fixed in advance](validation/CLUSTERED_SYNTHESIS.md) it came out **PARTIAL** on five held-out Rwanda items at a 25% audit. Where linear MI fell short of a recount it helped, raising coverage from 87.0% to 91.4% and from 79.6% to 88.8%, with lower error. On the other three its error ran up to 14% higher, and a single audit cannot show which case applies.
+- **Clustered audits: experimental.** `catmech_reference(cluster = )` resamples audited sites in each imputation. Under a [rule fixed in advance](validation/CLUSTERED_SYNTHESIS.md) it came out **PARTIAL** on five held-out Rwanda items at a 25% audit. Where linear MI fell short of a recount it helped, raising coverage from 87.0% to 91.4% and from 79.6% to 88.8%, with lower error. On the other three its error ran up to 14% higher. Seen only afterward, these are rare events, averaging 1.2 or fewer per facility-month, against about 20 to 40 where it helped. That pattern is untested.
 - **Audit planning: not validated.** `catmech_audit_plan()` returned **NO-GO** under a rule fixed in advance. Its median error in predicting interval width missed the 10% limit at a 5% audit (11.3% to 16.8%). Larger targets stayed within 7.8%, but that pattern was not the test. It is a documented calculation, not a validated tool, so it is left out of the example below.
 
 ## Which method to start with
 
 | Situation | Start with | Evidence and limit |
 | --- | --- | --- |
-| Most cases, especially errors small relative to the spread of the target | `catmech_reference(..., use_recorded = TRUE)`: linear imputation given the recorded value. Consider generalized raking when selection probabilities are known; the package does not implement raking. | Best or tied among reference-using methods on ClinicalTrials.gov and NHANES at 25% audits. On a real facility audit its average bias was near zero and its worst-case coverage the best, but it rarely had the lowest point error, and its clustered coverage ran about 9 to 11 points below a recount's at 25%. Failed under synthetic gross errors (64.7% coverage). |
+| Most cases, especially errors small relative to the spread of the target | `catmech_reference(..., use_recorded = TRUE)`: linear imputation given the recorded value. Consider generalized raking when selection probabilities are known; the package does not implement raking. | Best or tied among reference-using methods on ClinicalTrials.gov and NHANES at 25% audits. On a real facility audit its average bias was near zero and its worst-case coverage the best, but it rarely had the lowest point error, and on the slopes tested first its clustered coverage ran about 9 to 11 points below a recount's at 25%. Failed under synthetic gross errors (64.7% coverage). |
 | Gross, separable errors, or a fallible reference with a credible declared SD | `catmech_contamination()` | Strongest in synthetic cells with these errors (coverage 94.0% under gross errors, 91.8% with a declared reference SD), which remain untested on real data. Worse than linear MI and raking on ClinicalTrials.gov. On a real facility audit with moderate errors it often had lower point error, but its intervals were too narrow. Failed with heavy-tailed targets (87.3%) and with selection on the true value when errors were present (79.3%). |
 | Target residuals doubtful and precision not critical | `catmech_reference()` (default) | Assumes least about recorded values, with intervals about twice as wide on the real data. Failed with selective references (7.3%) and noisy ones (52.7%). |
 | Audit clustered by site or facility | Any of these with `catmech_pool_lm(cluster = )`. Add `catmech_reference(cluster = )` only as an experimental check. | The pooled variance is the standard cluster-robust form, and it can still be too narrow with few clusters. The imputation option came out PARTIAL in its planned test. |
@@ -248,7 +248,7 @@ catmech_pool_lm(fit_clustered, outcome ~ lab_value + age + sex + inflammation)
 ```
 
 The second option's [planned test](validation/CLUSTERED_SYNTHESIS.md) came out PARTIAL. It helped where the first
-undercovered and cost accuracy elsewhere, and its advantage faded at a 50% audit. Treat it as a check, not a default.
+undercovered and cost accuracy elsewhere, and its advantage faded at a 50% audit. Seen only afterward, the losses came on rare events, a pattern not yet tested. Treat it as a check, not a default.
 Fewer than five audited clusters are refused. With about eight, an occasional fit has near-zero degrees of freedom
 and an extremely wide interval, so read the `df` column. See the [method](docs/REFERENCE_METHOD.md#clustered-audits-experimental).
 
@@ -368,6 +368,7 @@ Rscript tools/merged-audit-pilot.R study validation/merged-audit-pilot/my-study 
 Rscript tools/audit-plan-benchmark.R study validation/my-audit-plan-study
 Rscript tools/clustered-benchmark.R study validation/my-clustered-study
 python3 -I tools/clustered-score.py my-clustered-decisions.txt validation/my-clustered-study
+python3 -I tools/clustered-posthoc.py
 python3 tools/verify-artifacts.py
 ```
 

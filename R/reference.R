@@ -170,8 +170,9 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #'
 #' `cluster` is experimental. Its planned test came out PARTIAL under a rule fixed in
 #' advance: on held-out items of a real facility recount at a 25% audit, it helped where
-#' the existing option undercovered and lost accuracy elsewhere, and a single audit cannot
-#' show which case applies. Treat it as a check, not a default. With about eight audited
+#' the existing option undercovered and lost accuracy elsewhere. Seen only afterward, and
+#' not yet tested, the losses came on rare events, whose counts are small with many zeros.
+#' Treat it as a check, not a default. With about eight audited
 #' clusters, an occasional fit has near-zero degrees of freedom and an extremely wide
 #' interval, so read the `df` column. See `validation/CLUSTERED_SYNTHESIS.md`.
 #' @export

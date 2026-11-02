@@ -846,6 +846,8 @@ def verify_clustered_study(folder):
                 matched += 1
     scored = subprocess.run([sys.executable, "-I", str(ROOT/"tools/clustered-score.py")], capture_output=True, text=True, check=True).stdout
     assert scored.strip() == (ROOT/"validation/clustered-decisions.txt").read_text(encoding="utf-8").strip(), "Scored output differs from the saved decisions"
+    posthoc = subprocess.run([sys.executable, "-I", str(ROOT/"tools/clustered-posthoc.py")], capture_output=True, text=True, check=True).stdout
+    assert posthoc.strip() == (ROOT/"validation/clustered-posthoc.txt").read_text(encoding="utf-8").strip(), "Post-hoc output differs from the saved table"
     verdict = re.search(r"VERDICT: (\S+)", scored).group(1)
     lookup = {(r["level"], r["analysis"], float(r["fraction"]), r["method"]): float(r["coverage"]) for r in summary}
     ratio = {r["analysis"]: float(r["recovery_upper"]) for r in rows(folder/"ratios.csv") if r["level"] == "held_out" and float(r["fraction"]) == .25}

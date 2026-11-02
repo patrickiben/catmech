@@ -150,7 +150,7 @@ The approach combines the bootstrap at the imputation step (von Hippel and Bartl
 [doi:10.1214/20-STS793](https://doi.org/10.1214/20-STS793)) with the clustered bootstrap and cluster-robust
 inference (Cameron and Miller, 2015, [doi:10.3368/jhr.50.2.317](https://doi.org/10.3368/jhr.50.2.317)). It is not a
 new method. Its [planned test](../validation/CLUSTERED_SYNTHESIS.md) came out PARTIAL: it helped where the posterior
-draw undercovered and lost accuracy elsewhere, and a single audit cannot show which case applies. The test also
+draw undercovered and lost accuracy elsewhere. Seen only afterward, and not yet tested, the losses came on rare events. The test also
 could not say how much of the gain comes from clustering rather than unequal variance.
 
 ## Predictive mean matching and analysis
