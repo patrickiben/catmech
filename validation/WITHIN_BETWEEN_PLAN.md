@@ -80,3 +80,9 @@ SNAP is one paired item with three analyses, in dollars and not in health, and i
 
 ## Amendments
 
+Made before the study ran and before any result was read.
+
+**The generator's independence is weaker than planned.** The agent reports that it did not open the repository and fit only ordinary least squares on full true values. But its session loaded an index of the author's notes without being asked, and the one-line summaries name catmech results and methods, including `ind_mice`, linear MI and a PARTIAL verdict on the cluster option. They do not state the candidate or this rule. It reports that it did not design toward them and cannot show that they had no influence. So this source is not as clean as this plan says. The generator stands, because a replacement would load the same index, and the condition is disclosed in place of a rerun.
+
+**Size.** The generator has 62 cells, 33 outcome and 29 predictor, against the required minimum of 24, so the new simulation makes 372,000 requests with both audit sizes. Six cells at 25% audit too few clusters for `ind_mice`, which then refuses. That has no effect on the rule, which judges the candidate and the option.
+

@@ -1,0 +1,3 @@
+Engineering pilot with separate seeds, 3 cohorts per cell: 198 guard, 108 Zambia and 2,448 deciding requests, read for statuses and timing only.
+All requests gave an interval except 18 from ind_mice, on six cells at 25% that audit too few clusters for it. The scorer and the description script ran end to end on its output, with the numbers discarded. It forced no change.
+The cohort control reran 110 saved ind_mice requests on real items at 25% and matched them.

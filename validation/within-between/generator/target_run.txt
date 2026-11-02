@@ -1,0 +1,7 @@
+generator_md5 ccbd05f44f1db89b579e115870352987
+build_md5 a84018cee190119f1aaacf9610c8f31c
+n_closed 10000
+n_mc 40000
+seed_base 100000000
+seed_step 1000000
+elapsed_sec 108
