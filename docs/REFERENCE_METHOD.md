@@ -113,7 +113,8 @@ fit_with_recorded <- catmech_reference(
 Records with a recorded value are imputed from a model fitted on references that also have one.
 Records without one are imputed from a model on the predictors alone, fitted on all references. If every
 calibration row agrees exactly, there is no residual variance to model and those records keep their recorded
-value, as the manifest notes. This was the strong comparator in the version 0.4 studies, and it was best or
+value, with no added uncertainty, a warning and an interpretation ending in `_recorded_kept`. Intervals then treat those
+records as correct, so a small audit that happened to miss large errors gives intervals that do not cover the truth. This was the strong comparator in the version 0.4 studies, and it was best or
 tied among reference-using methods on ClinicalTrials.gov and NHANES at 25% audits. See [the real-data evidence](../validation/REAL_DATA_SYNTHESIS.md).
 
 This fits the predictive relationship between reference truth, the auxiliary
@@ -146,26 +147,35 @@ regression: `target = x'beta + c_i + e_ij`. If the audit is stratified, put the 
    residuals, and every imputed row gets normal noise.
 
 Records with no recorded value use the same steps without that predictor. If the audited rows cannot separate the two
-variances, as with one row per cluster, the intercept variance is zero. Fewer than five audited clusters are refused.
+variances, as with one row per cluster, the intercept variance is zero, with a warning. If the predictors absorb every
+audited cluster, as with one audited cluster per stratum, the fit is refused when unaudited clusters need imputing. Fewer
+than five audited clusters are refused.
 `catmech_pool_lm()` applies a delete-one-cluster jackknife variance (`cv3`) to each completed dataset and pools by
 Rubin's rules, with complete-data degrees of freedom of clusters minus one. A fit made without `cluster` can still use
 that variance through `catmech_pool_lm(cluster = )`. A [planned test](../validation/VARIANCE_MI_SYNTHESIS.md) chose it
-narrowly. `cluster_variance = "cr1s"` gives the earlier default.
+narrowly (MacKinnon, Nielsen and Webb, 2023, [doi:10.1016/j.jeconom.2022.04.001](https://doi.org/10.1016/j.jeconom.2022.04.001), describe
+the variance; Barnard and Rubin, 1999, [doi:10.1093/biomet/86.4.948](https://doi.org/10.1093/biomet/86.4.948), the degrees of freedom).
+`cluster_variance = "cr1s"` gives the earlier default. A coefficient that a single cluster determines draws a warning: a
+pseudoinverse keeps the variance computable, but it leaves out that cluster's contribution, and in a simulated check such
+intervals covered about a third of the time.
 
 **Use `cluster` in the fit only when the audited value is the analysis outcome.** In simulations with the audited value
 as a predictor, the option biased that slope toward zero, and most when errors shifted whole clusters. A new intercept
 drawn independently of a cluster's outcomes appears to act like added noise in a predictor, though that explanation has
 not been tested. `catmech_pool_lm()` warns about this use. `mice` with `2l.lmer` and `2l.pan` attenuated the slope in the
-same cells, so this comes from the model, not from this implementation.
+same cells, so the model accounts for a large part of it, though this implementation attenuated more than `2l.lmer` in
+all of them, for reasons not established.
 
 The same model is available in `mice`, and a [planned comparison](../validation/OUTSIDE_METHODS_SYNTHESIS.md) found the same
 accuracy once the `mice` check that can drop the recorded value was off. This method draws its variance components in
 closed form, without MCMC or `lme4`, and its intervals were slightly wider.
 
-This is ordinary multilevel imputation (Schafer and Yucel, 2002,
+This is the usual random-intercept imputation model (Schafer and Yucel, 2002,
 [doi:10.1198/106186002760180608](https://doi.org/10.1198/106186002760180608); Grund, Lüdtke and Robitzsch, 2018,
-[doi:10.1177/1094428117703686](https://doi.org/10.1177/1094428117703686)) in closed form, and not a new method. It assumes
-one normal intercept per cluster, so cluster-specific slopes and non-constant variance are not modeled.
+[doi:10.1177/1094428117703686](https://doi.org/10.1177/1094428117703686)), and not a new method, with a moment-based draw of the
+variance components (Henderson, 1953, [doi:10.2307/3001853](https://doi.org/10.2307/3001853)) in place of a full posterior. That draw is
+exact in distribution only for balanced clusters, and it is weakest with one or two large sites. The model assumes one normal
+intercept per cluster, so cluster-specific slopes and non-constant variance are not modeled.
 
 Its [planned test](../validation/CLUSTERED_FIX_SYNTHESIS.md) came out PARTIAL: coverage held on eight of nine items of a
 real recount at a 25% audit, with lower error on six common items, but error on three rare items ran 4% to 5% above the option

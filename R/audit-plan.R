@@ -156,8 +156,9 @@ catmech_audit_plan <- function(data, value, reference, predictors, formula, term
   restore <- preserve_rng()
   on.exit(restore(), add = TRUE)
   fit_width <- function(use_recorded, fit_seed) {
-    fit <- catmech_reference(data, value, reference, predictors, use_recorded = use_recorded, m = m, seed = fit_seed)
-    row <- catmech_pool_lm(fit, formula, conf_level = conf_level)
+    # The planner raises its own no_disagreements flag for the case these would warn about.
+    fit <- suppressWarnings(catmech_reference(data, value, reference, predictors, use_recorded = use_recorded, m = m, seed = fit_seed))
+    row <- suppressWarnings(catmech_pool_lm(fit, formula, conf_level = conf_level))
     row <- row[row$term == term, ]
     list(width = row$upper - row$lower, within = row$within_variance, between = row$between_variance,
          full_width = 2 * stats::qt((1 + conf_level) / 2, n - ncol(analysis$D0)) * sqrt(row$within_variance),

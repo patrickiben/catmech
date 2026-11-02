@@ -100,7 +100,7 @@ to `1/sigma^2`.
 Reference selection and missing recorded values must be ignorable given the
 predictors, recorded value and strata. Selection may therefore depend on the
 recorded value, as in a targeted audit of unusual records; [catmech_reference()]
-does not support that. Errors must be nondifferential given the strata: they may
+supports that only with `use_recorded = TRUE`. Errors must be nondifferential given the strata: they may
 not depend on the outcome or true value once the strata are fixed.
 
 Recorded values that look unusual relative to `Z beta` are more likely to be

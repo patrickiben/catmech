@@ -1,26 +1,26 @@
 # catmech
 
-**An experimental R package for regression when every record has a recorded value and only an audited subset has a checked reference value. Version 0.7.0.**
+**An experimental R package for regression when every record has a recorded value and only an audited subset has a checked reference value. Version 0.7.1.**
 
 **The question:** can you keep error-prone recorded values for precision without trusting them, and which method should you try first?
 
 **The finding:** on public data with real recording differences, simple linear multiple imputation (MI) given the recorded value matched or beat `catmech_contamination()`, the recording-error model this package added. On a real audit the model often had lower point error, but its intervals failed. Start with linear MI when you need an interval.
 
 - **Real data, 25% audits.** Linear MI had lower RMSE than the model on ClinicalTrials.gov (0.0286 against 0.0308) and less bias (+0.0001 against +0.0068). They tied on NHANES (0.0409 against 0.0408). The model's largest edge, at the 10% NHANES audit (0.0435 against 0.0490), was within Monte Carlo noise, and 14 of 200 requests returned no interval there. It could not tell which records were wrong (AUC 0.54 and 0.50).
-- **What held up.** Keeping the recorded value pays. Linear MI's intervals were about half as wide as those from discarding it (0.102 against 0.205, and 0.154 against 0.297), with coverage near the all-references oracle (91.8% against 91.2%, and 93.9% against 94.9%).
-- **Where linear MI fails.** Under synthetic gross errors it covered 64.7%, against 94.0% for the model.
-- **A real audit was inconclusive.** On a [health-facility recount in Rwanda](validation/REAL_AUDIT_SYNTHESIS.md), the rule fixed in advance came out inconclusive at a 25% audit. The model had lower error than linear MI on two of three slopes, but where a reported slope differed from a recount of that item its intervals covered 35% to 72%, against 90% to 97% for the recount. Linear MI's coverage held up better (79.5% at worst), and it cost accuracy where reported values were close: 1.4 to 2.6 times the error of trusting them on the syphilis slope, depending on the measure. These are facility counts, not patient values, and gross errors remain untested on real data.
-- **Clustered audits: experimental.** `catmech_reference(cluster = )` adds a random intercept for each audited site. It replaced a [first version](validation/CLUSTERED_SYNTHESIS.md) that resampled sites, in which resampling within strata understated variance. Under a [new rule fixed in advance](validation/CLUSTERED_FIX_SYNTHESIS.md) the replacement, like the first version, came out **PARTIAL**, on a Rwanda recount at a 25% audit. On six common items where linear MI fell short of a recount, it raised coverage (from 79.6% to 91.0% on early antenatal visits) with lower error, though `syphilis` reached only 89.0%. On three rare items its error ran 4% to 5% higher, which failed the accuracy condition. That verdict sits within simulation noise of NO-GO. In [simulations where the audited value was a predictor](validation/VARIANCE_MI_SYNTHESIS.md), the option biased the slope, so use it only when the audited value is the outcome. In a [planned comparison with outside methods](validation/OUTSIDE_METHODS_SYNTHESIS.md), it was kept, narrowly: `mice` with the same model matched its accuracy once a default that can drop the recorded value was off, and its only lead was somewhat wider intervals. These rounds have had no outside review.
+- **What held up.** Keeping the recorded value pays. Linear MI's intervals were about half as wide as those from discarding it (0.102 against 0.205, and 0.154 against 0.297), with coverage near the all-references oracle (91.8% against 91.2%, and 93.9% against 94.9%). Against simply trusting the recorded value, a small audit often did not reduce error, and nothing tells you in advance when it will.
+- **Where linear MI fails.** Under synthetic gross errors it covered 64.7%, against 94.0% for the model. It also fell to 38.0% with noisy references and 74.0% with selection on the true value. If every audited row happens to agree, it keeps the recorded values with no added uncertainty and warns you, and in that case its intervals can be badly wrong.
+- **A real audit was inconclusive.** On a [health-facility recount in Rwanda](validation/REAL_AUDIT_SYNTHESIS.md), the rule fixed in advance came out inconclusive at a 25% audit. The model had lower error than linear MI on two of three slopes, but where a reported slope differed from a recount of that item its intervals covered 35% to 72%, against 90% to 97% for the recount. Linear MI's coverage held up better (79.5% at worst), and it cost accuracy where reported values were close: about 1.4 to 2.6 times the error of trusting them on the syphilis slope, on the measures used here, and more if the pool is held fixed. These are facility counts, not patient values, and gross errors remain untested on real data.
+- **Clustered audits: experimental.** `catmech_reference(cluster = )` adds a random intercept for each audited site. It replaced a [first version](validation/CLUSTERED_SYNTHESIS.md) that resampled sites, in which resampling within strata understated variance. Under a [new rule fixed in advance](validation/CLUSTERED_FIX_SYNTHESIS.md) the replacement, like the first version, came out **PARTIAL**, on a Rwanda recount at a 25% audit. On six common items where linear MI fell short of a recount, it raised coverage under the variance then in use (from 79.6% to 91.0% on early antenatal visits) with lower error, though `syphilis` reached only 89.0%. On three rare items its error ran 4% to 5% higher, which failed the accuracy condition. That verdict sits within simulation noise of NO-GO. In [simulations where the audited value was a predictor](validation/VARIANCE_MI_SYNTHESIS.md), the option biased the slope, so use it only when the audited value is the outcome. In a [planned comparison with outside methods](validation/OUTSIDE_METHODS_SYNTHESIS.md), it was kept, narrowly: `mice` with the same model matched its accuracy once a default that can drop the recorded value was off, and its lead was somewhat wider intervals. An AI assistant wrote the plans, rules, scoring and write-ups of these rounds, and no independent statistician has reviewed them.
 - **Audit planning: not validated.** `catmech_audit_plan()` returned **NO-GO** under a rule fixed in advance. Its median error in predicting interval width missed the 10% limit at a 5% audit (11.3% to 16.8%). Larger targets stayed within 7.8%, but that pattern was not the test. It is a documented calculation, not a validated tool, so it is left out of the example below.
 
 ## Which method to start with
 
 | Situation | Start with | Evidence and limit |
 | --- | --- | --- |
-| Most cases, especially errors small relative to the spread of the target | `catmech_reference(..., use_recorded = TRUE)`: linear imputation given the recorded value. Consider generalized raking when selection probabilities are known; the package does not implement raking. | Best or tied among reference-using methods on ClinicalTrials.gov and NHANES at 25% audits. On a real facility audit its average bias was near zero and its worst-case coverage the best, but it rarely had the lowest point error, and on the slopes tested first its clustered coverage ran about 9 to 11 points below a recount's at 25%. Failed under synthetic gross errors (64.7% coverage). |
+| Most cases | `catmech_reference(..., use_recorded = TRUE)`: linear imputation given the recorded value. The package does not implement raking. In the recipes tried here, which are not its best possible use, raking tied on recording-difference datasets and had higher error on the real facility audit and in the later comparison. | Best or tied among reference-using methods on ClinicalTrials.gov and NHANES at 25% audits. On a real facility audit its average bias was near zero and its worst-case coverage the best, but it rarely had the lowest point error, and on the slopes tested first its clustered coverage, under the earlier variance, ran about 9 to 11 points below a recount's at 25%. Failed under synthetic gross errors (64.7% coverage), noisy references (38.0%) and selection on the true value (74.0%). |
 | Gross, separable errors, or a fallible reference with a credible declared SD | `catmech_contamination()` | Strongest in synthetic cells with these errors (coverage 94.0% under gross errors, 91.8% with a declared reference SD), which remain untested on real data. Worse than linear MI and raking on ClinicalTrials.gov. On a real facility audit with moderate errors it often had lower point error, but its intervals were too narrow. Failed with heavy-tailed targets (87.3%) and with selection on the true value when errors were present (79.3%). |
 | Target residuals doubtful and precision not critical | `catmech_reference()` (default) | Assumes least about recorded values, with intervals about twice as wide on the real data. Failed with selective references (7.3%) and noisy ones (52.7%). |
-| Audit clustered by site or facility | Any of these with `catmech_pool_lm(cluster = )`. Add `catmech_reference(cluster = )` only as an experimental check. | The pooled variance is a cluster jackknife, chosen narrowly in a planned test, and it can still be too narrow with few clusters. The imputation option came out PARTIAL in both of its planned tests, and should not be used when the audited value is a predictor. `mice` offers the same model, with a default to watch. |
+| Audit clustered by site or facility | Linear imputation with `catmech_pool_lm(cluster = )`. The other methods have not been tested with this variance. Add `catmech_reference(cluster = )` only as an experimental check. | The pooled variance is a cluster jackknife, chosen narrowly in a planned test. It repairs the analysis step only: with the audited value as the outcome, linear imputation with it still covered 81% to 86% on the worst items of a real recount at a 25% audit, against 94% to 97% for a recount. The imputation option came out PARTIAL in both of its planned tests, and should not be used when the audited value is a predictor. `mice` offers the same model, with a default to watch. |
 
 "Contamination" here means recording error, not treatment spillover between trial arms.
 
@@ -74,7 +74,7 @@ Random 25% audit, 1,000 cohorts of 600 from each evaluation pool. "Reference nor
 
 ## Read next
 
-[Assessment](docs/ASSESSMENT.md) | [Real-audit test](validation/REAL_AUDIT_SYNTHESIS.md) | [Clustered-audit test](validation/CLUSTERED_SYNTHESIS.md) | [Real-data evidence](validation/REAL_DATA_SYNTHESIS.md) | [Synthetic evidence](validation/CONTAMINATION_SYNTHESIS.md) | [Audit planner test](validation/AUDIT_PLAN_SYNTHESIS.md) | [Merged-paper go/no-go](validation/merged-audit-pilot/README.md) | [Validation record](validation/VALIDATION.md) | [Case study](docs/case-study/CASE_STUDY.md)
+[Assessment](docs/ASSESSMENT.md) | [Real-audit test](validation/REAL_AUDIT_SYNTHESIS.md) | [Clustered option against outside methods](validation/OUTSIDE_METHODS_SYNTHESIS.md) | [Its variance](validation/VARIANCE_MI_SYNTHESIS.md) | [Its replacement test](validation/CLUSTERED_FIX_SYNTHESIS.md) | [Real-data evidence](validation/REAL_DATA_SYNTHESIS.md) | [Synthetic evidence](validation/CONTAMINATION_SYNTHESIS.md) | [Audit planner test](validation/AUDIT_PLAN_SYNTHESIS.md) | [Merged-paper go/no-go](validation/merged-audit-pilot/README.md) | [Validation record](validation/VALIDATION.md) | [Case study](docs/case-study/CASE_STUDY.md)
 
 <!-- front-page-end: docs/case-study/fact_check.py checks every number above this line. -->
 
@@ -151,8 +151,15 @@ as trusted. If an independently measured reference subset is available, use it
 as the observed target and impute every unvalidated target:
 
 ```r
-# reference_value contains actual reference measurements on selected rows,
-# with NA elsewhere. Do not manufacture reference values from flags or W.
+# A synthetic example with an audit of whole sites. In real use, reference_value contains
+# actual reference measurements on selected rows, with NA elsewhere. Do not manufacture
+# reference values from flags or W.
+dat_with_reference <- simulate_catmech_lab(n = 600, seed = 1)
+dat_with_reference$site <- rep(seq_len(30), each = 20)
+audited_sites <- dat_with_reference$site %in% seq(1, 30, by = 3)
+dat_with_reference$reference_value <- ifelse(audited_sites, dat_with_reference$lab_true, NA)
+dat_with_reference[c("lab_true", "corrupted")] <- NULL
+
 fit_reference <- catmech_reference(
   dat_with_reference, value = "lab_value", reference = "reference_value",
   predictors = c("age", "sex", "inflammation", "outcome"),
@@ -199,20 +206,20 @@ catmech_recording_audit(dat_with_reference, "lab_value", "reference_value",
 When the table points to the contamination model:
 
 ```r
-fit <- catmech_contamination(
+fit_contamination <- catmech_contamination(
   dat_with_reference, "lab_value", "reference_value",
   predictors = c("age", "sex", "inflammation", "outcome"),
   corruption_strata = "outlier_flag", m = 20, seed = 125
 )
-catmech_pool_lm(fit, outcome ~ lab_value + age + sex + inflammation)
-fit$contamination$corruption    # per-record posterior error probabilities
-catmech_holdout_check(fit)      # scores unseen references, using no simulation truth
+catmech_pool_lm(fit_contamination, outcome ~ lab_value + age + sex + inflammation)
+fit_contamination$contamination$corruption    # per-record posterior error probabilities
+catmech_holdout_check(fit_contamination)      # scores unseen references, using no simulation truth
 ```
 
 Selection into the audit may depend on recorded values, so a targeted audit is supported. Selection
 on the true value beyond what the recorded value shows is not. `selection_delta` and `reference_sd`
 are declared sensitivity assumptions to compare with `catmech_sensitivity()`. If the hold-out check shows
-no skill against the recorded value or the stratum error rate, prefer linear MI or raking. On ClinicalTrials.gov
+no skill against the recorded value or the stratum error rate, prefer linear MI. On ClinicalTrials.gov
 and NHANES the model could not tell which records were wrong (AUC 0.54 and 0.50), so do not read its per-record
 probabilities as labels on data like those. The model also assumes errors do not track the other variables. You can check
 that on the audited rows, but a null is no reassurance: at a 25% audit of a [real facility recount](validation/REAL_AUDIT_SYNTHESIS.md), a clustered test
@@ -226,18 +233,18 @@ and [example](inst/examples/contamination.R).
 Records from one site are not independent, so pool with a cluster-robust variance:
 
 ```r
-fit <- catmech_reference(
+fit_recorded <- catmech_reference(
   dat_with_reference, "lab_value", "reference_value",
   predictors = c("age", "sex", "inflammation", "outcome"),
   use_recorded = TRUE, m = 20, seed = 126
 )
-catmech_pool_lm(fit, outcome ~ lab_value + age + sex + inflammation, cluster = "site")
+catmech_pool_lm(fit_recorded, outcome ~ lab_value + age + sex + inflammation, cluster = "site")
 ```
 
 That applies a delete-one-cluster jackknife variance (`cv3`) to each completed dataset, then Rubin's rules with
 complete-data degrees of freedom of clusters minus one. A [planned test](validation/VARIANCE_MI_SYNTHESIS.md) chose it,
 narrowly, over the earlier default, which undercovered [even with every row checked](validation/VARIANCE_CHECK_RESULTS.md).
-Intervals can still be too narrow with few clusters or a few influential ones. Use `cluster_variance = "cr1s"` to reproduce
+Intervals can still be too narrow with few clusters or a few influential ones, and this variance does not repair a shortfall in the imputation itself: linear imputation still undercovered on real items with it. A coefficient that a single cluster determines, such as a site type found at one site, draws a warning, because its interval can be far too narrow. Use `cluster_variance = "cr1s"` to reproduce
 earlier results.
 
 If the audited value is the analysis outcome, you can also add a random intercept for the cluster to the imputation
@@ -256,18 +263,20 @@ catmech_pool_lm(fit_clustered, lab_value ~ age + sex + inflammation)
 zero, and `catmech_pool_lm()` warns about this use. The option's [planned test](validation/CLUSTERED_FIX_SYNTHESIS.md),
 with the audited value as the outcome, came out PARTIAL: it helped where the first example's imputation fell short of a
 recount and cost some accuracy on rare items. It replaced an [earlier version](validation/CLUSTERED_SYNTHESIS.md) that
-resampled audited clusters. If the audit is stratified, put the strata in `predictors`; `cluster_strata` no longer exists.
+resampled audited clusters. If the audit is stratified, put the strata in `predictors`; `cluster_strata` no longer exists. With one audited cluster per stratum, nothing can estimate between-cluster variance, so the fit is refused.
 It assumes one normal intercept per cluster. Treat the option as a check, not a default. Fewer than five audited clusters
 are refused. Very wide intervals remain possible with few audited clusters, so read the `df` column. See the
 [method](docs/REFERENCE_METHOD.md#clustered-audits-experimental).
 
-The same model is available elsewhere. In a [planned comparison](validation/OUTSIDE_METHODS_SYNTHESIS.md), `mice` with `2l.lmer` matched
-the option's accuracy on the same cohorts, with slightly narrower intervals and slightly lower coverage on the real items.
-If you use `mice` for audited values, check `loggedEvents`: by default it drops a predictor correlated at 0.99 or more with
-the imputed variable, which can remove the recorded value when records are good, and that made results much worse on
-several items. Raking and a difference estimator had higher error on these small audits. At a 25% audit, the recorded
-value alone had lower error than every audit-based method on 6 of 11 real items, and far higher error on others, so a
-small audit does not always improve a good record, and nothing here tells you in advance which case you have.
+The same model is available elsewhere. In a [planned comparison](validation/OUTSIDE_METHODS_SYNTHESIS.md), `mice` with `2l.lmer` under
+its defaults did much worse, because by default it drops a predictor correlated at 0.99 or more with the imputed variable,
+which can remove the recorded value when records are good. Check `loggedEvents` if you use `mice` for audited values. With
+that check off, in a rerun made after seeing the results, it matched the option's accuracy on the same cohorts, with slightly
+narrower intervals and slightly lower coverage on the real items. Turning it off takes a small wrapper, because `eps = 0` is
+passed on to `lmer`, which rejects it; see [the rerun's runner](tools/outside-methods-sensitivity.R). Raking and a difference
+estimator had higher error on these small audits. At a 25% audit, the recorded value alone had lower error than every
+audit-based method on 6 of 11 real items (five clearly, one tied), and far higher error on others, so a small audit does not
+always improve a good record, and nothing here tells you in advance which case you have.
 
 ## Planning an audit: not validated
 
@@ -344,6 +353,8 @@ with a new coverage guarantee.
   [third planned test](validation/VARIANCE_MI_SYNTHESIS.md), and adds a warning. Calls without `cluster` are numerically unchanged.
 - A later [comparison with outside methods](validation/OUTSIDE_METHODS_SYNTHESIS.md) kept the `cluster` option under a rule
   that could have retired it. It changes no package code.
+- Version 0.7.1 adds warnings and refusals found in an [overall check](validation/OVERALL_QC.md). Numbers from earlier
+  studies are unchanged.
 
 The [v0.2 coverage protocol](validation/COVERAGE_PLAN.md) transfers useful controls from
 the author's carryover, False Floor, calibration and assumption-audit research.
@@ -410,10 +421,11 @@ python3 -I tools/outside-methods-score.py validation/my-outside-methods-study my
 Rscript tools/outside-methods-sensitivity.R validation/my-outside-methods-sensitivity
 python3 -I tools/outside-methods-sensitivity-score.py
 python3 -I tools/outside-methods-posthoc.py
+Rscript tools/outside-methods-twophase-check.R my-twophase-check.txt
 python3 tools/verify-artifacts.py
 ```
 
-Use new output directories. The `outside-methods` runners also need `survey`, `lme4` and `pan`. `tools/clustered-benchmark.R`, `tools/clustered-review-checks.R` and
+Use new output directories. The `outside-methods` runners also need `survey`, `lme4` and `pan`, and `tools/check-cluster-algebra.R` needs `lme4` and `mitools`. [Validation](validation/VALIDATION.md) lists further commands, including the real-audit study. `tools/clustered-benchmark.R`, `tools/clustered-review-checks.R` and
 `tools/clustered-fix-benchmark.R` ran on the resampling that version 0.6.0 replaced, so run those three from commit
 `a010ede`. `tools/clustered-fix-replay.R` needs the variance that was the default through 0.6.0, so run it from `a762333`. Archived v0.1 to v0.5.0 sources retain the historical
 benchmark inputs; their hashes are checked against those frozen versions. A fresh
@@ -424,7 +436,7 @@ pooling; successful scalar estimates and intervals are unchanged. See
 
 ## License, credits and AI use
 
-MIT license. Built on [mice](https://doi.org/10.18637/jss.v045.i03),
+MIT license for code and documents. Data files keep their own terms, described below. Built on [mice](https://doi.org/10.18637/jss.v045.i03),
 [data augmentation](https://doi.org/10.1080/01621459.1987.10478458), interval imputation
 such as [hmi](https://doi.org/10.18637/jss.v095.i09), and
 [multiple overimputation](https://doi.org/10.1177/0049124115585360).
@@ -434,4 +446,6 @@ AI-assisted work is disclosed in [CONTRIBUTING.md](CONTRIBUTING.md).
 Real-audit data come from [Nshimyiryo et al. (2020)](https://doi.org/10.1371/journal.pone.0235823),
 *PLOS ONE*, under CC BY, and [Maassen et al. (2020)](https://doi.org/10.1371/journal.pone.0233107),
 *PLOS ONE*, with data on [OSF](https://osf.io/7nsmd/) under CC0. See
-[the data note](validation/real-audit/README.md) for what was copied and changed.
+[the data note](validation/real-audit/README.md) for what was copied and changed. Real-data pools come from
+NHANES (National Center for Health Statistics) and ClinicalTrials.gov (U.S. National Library of Medicine); see
+[their note](validation/real-data/README.md) for sources, changes and terms of use.

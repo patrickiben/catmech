@@ -10,7 +10,9 @@ catmech_sensitivity(
   term,
   reference = 0,
   conf_level = 0.95,
-  expected_scenarios = NULL
+  expected_scenarios = NULL,
+  cluster = NULL,
+  cluster_variance = c("cv3", "cr1s")
 )
 }
 \arguments{
@@ -29,6 +31,11 @@ prespecified scenario, including failures.}
 \item{expected_scenarios}{Optional character vector naming the complete
 prespecified set. Omitted members are recorded as failures; unplanned extras
 are rejected. Without this argument only supplied scenarios can be checked.}
+
+\item{cluster, cluster_variance}{Passed to [catmech_pool_lm()], so that fits made with
+and without `catmech_reference(cluster = )` can be compared under the same variance.
+Without `cluster`, a fit with its own cluster column uses a cluster-robust variance and
+a fit without one a model-based variance, and their widths are not comparable.}
 }
 \value{
 A list with table, status, complete, successful_envelope and

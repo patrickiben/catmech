@@ -73,7 +73,7 @@ test_that("clustered imputation handles missing recorded values and full agreeme
   expect_false(any(vapply(fit$completed, function(z) anyNA(z$recorded), logical(1))))
   d <- cluster_fixture()
   d$recorded[!is.na(d$gold)] <- d$gold[!is.na(d$gold)]
-  fit <- catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE, cluster = "id", m = 2, seed = 2)
+  expect_warning(fit <- catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE, cluster = "id", m = 2, seed = 2), "audited rows agree")
   expect_identical(fit$spec$recorded_fit, "recorded_kept_all_calibration_rows_agree")
   expect_equal(fit$completed[[1]]$recorded, d$recorded)
 })
@@ -184,7 +184,7 @@ test_that("with one row per cluster the intercept variance is zero and the draw 
   X <- cbind(1, d$x[!is.na(d$gold)], d$recorded[!is.na(d$gold)])
   moments <- catmech:::catmech_reference_cluster_moments(X, d$gold[!is.na(d$gold)], factor(d$id[!is.na(d$gold)]))
   expect_false(moments$separable)
-  fit <- catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE, cluster = "id", m = 5, seed = 8)
+  expect_warning(fit <- catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE, cluster = "id", m = 5, seed = 8), "cannot separate")
   expect_false(any(vapply(fit$completed, function(z) anyNA(z$recorded), logical(1))))
   values <- vapply(fit$completed, function(z) z$recorded[is.na(d$gold)], numeric(sum(is.na(d$gold))))
   expect_gt(min(apply(values, 1, stats::sd)), 0)
@@ -293,4 +293,89 @@ test_that("pooling warns when a fit with cluster has the audited value as a pred
   expect_no_warning(catmech_pool_lm(fit, recorded ~ x))
   plain <- catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE, m = 2, seed = 3)
   expect_no_warning(catmech_pool_lm(plain, x ~ recorded, cluster = "id"))
+})
+
+qc_clustered <- function(seed = 1L, audited_per_stratum = NULL, agree = FALSE) {
+  set.seed(seed)
+  strata <- rep(1:4, each = 4 * 5); ids <- rep(1:16, each = 5)
+  truth <- 1 + stats::rnorm(16, 0, 2)[ids] + stats::rnorm(80)
+  recorded <- if (agree) truth else truth + stats::rnorm(80, 0, .5)
+  picked <- if (is.null(audited_per_stratum)) c(1, 2, 3, 5, 6, 9, 13) else
+    unlist(lapply(0:3, function(h) h * 4 + seq_len(audited_per_stratum)))
+  reference <- truth; reference[!ids %in% picked] <- NA
+  data.frame(w = recorded, x = stats::rnorm(80), st = factor(strata), site = ids, ref = reference)
+}
+
+test_that("agreement on every audited row warns, labels and states what was done", {
+  d <- qc_clustered(agree = TRUE)
+  expect_warning(fit <- catmech_reference(d, "w", "ref", "x", use_recorded = TRUE, m = 3, seed = 1), "All 35 audited rows agree")
+  expect_warning(pooled <- catmech_pool_lm(fit, w ~ x), "treat them as correct")
+  expect_match(pooled$interpretation[1], "_recorded_kept$")
+  expect_warning(clustered <- catmech_reference(d, "w", "ref", "x", use_recorded = TRUE, cluster = "site", m = 3, seed = 1), "All 35 audited rows agree")
+  expect_identical(clustered$spec$cluster_uncertainty, "none_recorded_kept_all_calibration_rows_agree")
+  few <- d; few$ref[!few$site %in% 1:2] <- NA
+  expect_error(catmech_reference(few, "w", "ref", "x", use_recorded = TRUE, cluster = "site", m = 3, seed = 1), "Fewer than five")
+})
+
+test_that("an unidentified random intercept is refused or stated, never reported as drawn", {
+  set.seed(3)
+  ids <- rep(1:18, each = 4); strata <- factor(rep(1:6, each = 12))
+  absorbed <- data.frame(w = stats::rnorm(18)[ids] + stats::rnorm(72), x = stats::rnorm(72), st = strata, site = ids)
+  absorbed$ref <- absorbed$w + stats::rnorm(72, 0, .5); absorbed$ref[(ids - 1L) %% 3L != 0L] <- NA
+  expect_error(catmech_reference(absorbed, "w", "ref", c("x", "st"), use_recorded = TRUE, cluster = "site", m = 3, seed = 1), "absorb every audited cluster")
+  set.seed(4)
+  one_row <- data.frame(w = stats::rnorm(40), x = stats::rnorm(40), site = 1:40)
+  one_row$ref <- one_row$w + stats::rnorm(40, 0, .3); one_row$ref[21:40] <- NA
+  expect_warning(fit <- catmech_reference(one_row, "w", "ref", "x", use_recorded = TRUE, cluster = "site", m = 3, seed = 1), "cannot separate")
+  expect_identical(fit$spec$cluster_uncertainty, "intercept_variance_zero_not_separable")
+})
+
+test_that("a coefficient held by one cluster draws a warning naming it", {
+  set.seed(5)
+  ids <- rep(1:20, each = 5)
+  d <- data.frame(y = stats::rnorm(20)[ids] + stats::rnorm(100), x = stats::rnorm(100), one = as.numeric(ids == 1), site = ids)
+  fit <- stats::lm(y ~ x + one, d)
+  expect_identical(catmech_cluster_alone(fit, ids), "one")
+  expect_identical(catmech_cluster_alone(stats::lm(y ~ x, d), ids), character())
+  d$w <- d$y; d$ref <- d$y + stats::rnorm(100, 0, .2); d$ref[seq(2, 100, 2)] <- NA
+  got <- catmech_reference(d, "w", "ref", c("x", "one"), use_recorded = TRUE, m = 3, seed = 1)
+  expect_warning(catmech_pool_lm(got, w ~ x + one, cluster = "site"), "single cluster determines these coefficients, .*: one")
+})
+
+test_that("blank cluster ids are refused", {
+  d <- qc_clustered()
+  d$site <- as.character(d$site); d$site[d$site == "16"] <- ""
+  expect_error(catmech_reference(d, "w", "ref", "x", use_recorded = TRUE, cluster = "site", m = 3, seed = 1), "blank")
+  got <- catmech_reference(d, "w", "ref", "x", use_recorded = TRUE, m = 3, seed = 1)
+  expect_error(catmech_pool_lm(got, w ~ x, cluster = "site"), "blank")
+})
+
+test_that("an exact offset on audited rows is refused with cluster, as without it", {
+  d <- qc_clustered(); d$ref[!is.na(d$ref)] <- d$w[!is.na(d$ref)] + 1
+  expect_error(catmech_reference(d, "w", "ref", "x", use_recorded = TRUE, m = 3, seed = 1), "zero residual variance")
+  expect_error(catmech_reference(d, "w", "ref", "x", use_recorded = TRUE, cluster = "site", m = 3, seed = 1), "no residual variance")
+})
+
+test_that("coefficients and the intercept variance are drawn in each cluster imputation", {
+  set.seed(6)
+  fit_ids <- rep(1:12, each = 3); fill_ids <- rep(101:2100, each = 2)
+  ids <- c(fit_ids, fill_ids); n <- length(ids)
+  x <- cbind(1, stats::rnorm(n))
+  y <- 1 + .5 * x[, 2] + stats::rnorm(length(unique(ids)), 0, 1)[match(ids, unique(ids))] + stats::rnorm(n)
+  draws <- catmech_reference_cluster_fill(x, y, seq_along(fit_ids), length(fit_ids) + seq_along(fill_ids), ids, 60L)
+  fill_x <- x[length(fit_ids) + seq_along(fill_ids), 2]
+  slopes <- apply(draws, 2, function(v) unname(stats::coef(stats::lm(v ~ fill_x))[2]))
+  # With 4,000 imputed rows, noise alone gives a slope SD near 0.02, and the small audit's parameter uncertainty far more.
+  expect_gt(stats::sd(slopes), .08)
+  spreads <- apply(draws, 2, function(v) stats::var(tapply(v, fill_ids, mean)))
+  # 2,000 new intercepts per imputation: a plug-in variance would leave this nearly constant.
+  expect_gt(stats::sd(spreads) / mean(spreads), .15)
+})
+
+test_that("catmech_sensitivity can compare fits under one variance", {
+  d <- qc_clustered()
+  plain <- catmech_reference(d, "w", "ref", "x", use_recorded = TRUE, m = 5, seed = 1)
+  with_cluster <- catmech_reference(d, "w", "ref", "x", use_recorded = TRUE, cluster = "site", m = 5, seed = 1)
+  out <- suppressWarnings(catmech_sensitivity(list(a = plain, b = with_cluster), w ~ x, "x", cluster = "site"))
+  expect_true(all(grepl("cluster_robust", out$table$interpretation)))
 })

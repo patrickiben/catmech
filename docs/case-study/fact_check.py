@@ -162,7 +162,7 @@ claims = [
     ("three rare", "RC", "Second clustered-audit test, 25%: items where its recovery RMSE was above linear MI's", FXR, lambda: worded(all(fx_ratio(a) > 1 for a in RARE) and not any(fx_ratio(a) > 1 for a in COMMON), "three rare", "count")),
     ("4%", "RC", "Second clustered-audit test, 25%: smallest rise in recovery RMSE on a rare item", FXR, lambda: pct0(min(fx_ratio(a) for a in RARE) - 1)),
     ("5%", "RC", "Second clustered-audit test, 25%: largest rise in recovery RMSE on a rare item", FXR, lambda: pct0(max(fx_ratio(a) for a in RARE) - 1)),
-    ("0.7.0", "RC", "Package version", "DESCRIPTION", lambda: re.search(r"^Version: (.+)$", (ROOT / "DESCRIPTION").read_text(), re.M).group(1)),
+    ("0.7.1", "RC", "Package version", "DESCRIPTION", lambda: re.search(r"^Version: (.+)$", (ROOT / "DESCRIPTION").read_text(), re.M).group(1)),
     ("November 2, 2026", "C", "Status date", ASSESS, lambda: has(ASSESS, r"Assessed 2026-11-02", "November 2, 2026")),
     ("Version 0.4", "C", "Release that added the recording-error model", "NEWS.md", lambda: has("NEWS.md", r"# catmech 0\.4\.0\n\n- Add `catmech_contamination\(\)`", "Version 0.4")),
     ("25%", "RC", "Audit fraction: mean referenced rows over cohort size, ClinicalTrials.gov cell", RD, lambda: pct0(audit_pct("ctgov", "audit_25pct"))),
@@ -205,6 +205,12 @@ claims = [
     ("79.3%", "R", "Coverage, contamination model, synthetic selection on true value with errors", SY, lambda: pct1(sy("credibility", "nonignorable_missed", "contamination"))),
     ("7.3%", "R", "Coverage, reference normal, synthetic selective references", SY, lambda: pct1(sy("credibility", "nonignorable_missed", "reference_normal"))),
     ("52.7%", "R", "Coverage, reference normal, synthetic noisy references", SY, lambda: pct1(sy("credibility", "noisy_declared", "reference_normal"))),
+    ("38.0%", "R", "Coverage, linear MI, synthetic noisy references", SY, lambda: pct1(sy("credibility", "noisy_declared", "cole_mi"))),
+    ("74.0%", "R", "Coverage, linear MI, synthetic selection on the true value", SY, lambda: pct1(sy("credibility", "nonignorable_missed", "cole_mi"))),
+    ("81%", "R", "Corrected-variance test, 25%: linear MI's lowest coverage under cv3", "validation/VARIANCE_MI_SYNTHESIS.md", lambda: has("validation/VARIANCE_MI_SYNTHESIS.md", r"81\.0% to 86\.1%", "81%")),
+    ("86%", "R", "Corrected-variance test, 25%: top of linear MI's range on the worst items under cv3", "validation/VARIANCE_MI_SYNTHESIS.md", lambda: has("validation/VARIANCE_MI_SYNTHESIS.md", r"81\.0% to 86\.1%", "86%")),
+    ("94%", "R", "Corrected-variance test, 25%: the recount under cv3 on iron, the lowest of those items", "validation/VARIANCE_MI_SYNTHESIS.md", lambda: has("validation/VARIANCE_MI_SYNTHESIS.md", r"\| `iron` \| 91\.8 \| 94\.3", "94%")),
+    ("97%", "R", "Corrected-variance test, 25%: the recount under cv3 on pnc, the highest of those items", "validation/VARIANCE_MI_SYNTHESIS.md", lambda: has("validation/VARIANCE_MI_SYNTHESIS.md", r"\| `pnc` \| 94\.5 \| 97\.0", "97%")),
     ("10%", "RC", "Planner's limit on median width error", SYN_A, lambda: has(SYN_A, r"The limit is 10%", "10%")),
     ("5%", "R", "Smallest target audit in the planner test", AP, lambda: pct0(min(k[2] for k in plan_errors()))),
     ("11.3%", "RC", "Lowest planner median error at the 5% target, of four real-data cells", AP, lambda: pct1(min(v for k, v in plan_errors().items() if k[2] == .05))),
@@ -286,7 +292,7 @@ statements = [
     ("The planner is not validated", SYN_A, r"should not be described as validated"),
     ("The planner test was not fully blind", SYN_A, r"prospective for the planner's code, and not fully blind for the pools"),
     ("Plain Python recomputes the reported summaries", VAL, r"Plain Python recomputes all summaries"),
-    ("AI use and its limits", "CONTRIBUTING.md", r"OpenAI Codex[\s\S]*Anthropic Claude Code[\s\S]*No AI system is listed as an author[\s\S]*not external peer review"),
+    ("AI use and its limits", "CONTRIBUTING.md", r"OpenAI Codex[\s\S]*Anthropic Claude Code[\s\S]*no AI system is listed as a package or citation author[\s\S]*not external peer review"),
 ]
 
 

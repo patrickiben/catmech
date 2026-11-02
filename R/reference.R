@@ -109,12 +109,15 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #'   predictor. Records with a recorded value are imputed from a model fitted on
 #'   references that also have one, and records without one from a model on the
 #'   predictors fitted on all references. It needs rows with both values. If every such row
-#'   agrees exactly, those records keep their recorded value, as `spec$recorded_fit` notes.
+#'   agrees exactly, those records keep their recorded value with no imputation uncertainty,
+#'   as `spec$recorded_fit` notes and a warning says. Intervals then treat those records as
+#'   correct, which can be badly wrong when a small audit simply missed the errors.
 #' @param cluster With `use_recorded = TRUE`, the name of a complete column identifying
 #'   audit clusters, such as a site or facility. The imputation model then adds a random
 #'   intercept for the cluster, instead of treating rows as independent. If the audit is
-#'   stratified, put the strata in `predictors`. Do not use it when the audited value will
-#'   be a predictor in the analysis. See details.
+#'   stratified, put the strata in `predictors`, which needs some stratum with at least two
+#'   audited clusters. Do not use it when the audited value will be a predictor in the
+#'   analysis. See details.
 #' @return A `catmech_result`. Its completed target contains exact gold references
 #'   or imputations; the original reference column is unchanged. The `mids`
 #'   observed target is the reference values with other rows missing. The manifest
@@ -163,11 +166,16 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #' drawn from the generalized least squares fit given them. An unaudited cluster gets a new
 #' intercept, an audited cluster with unaudited rows gets one conditional on its residuals,
 #' and every imputed row gets normal noise. If the audited rows cannot separate the two
-#' variances, as with one row per cluster, the intercept variance is zero. Fewer than five
-#' audited clusters are refused. Pool with [catmech_pool_lm()], which uses a cluster-robust
-#' variance for such a fit. This is ordinary multilevel imputation (Schafer and Yucel, 2002;
-#' Grund and colleagues, 2018) in closed form, and not a new method. It assumes one normal
-#' intercept per cluster, so cluster-specific slopes and non-constant variance are not modeled.
+#' variances, as with one row per cluster, the intercept variance is zero, with a warning. If
+#' the predictors absorb every audited cluster, as with one audited cluster per stratum, there
+#' is no estimate of between-cluster variance for unaudited clusters, and the fit is refused.
+#' Fewer than five audited clusters are refused. Pool with [catmech_pool_lm()], which uses a
+#' cluster-robust variance for such a fit. This is the usual random-intercept imputation model
+#' (Schafer and Yucel, 2002; Grund and colleagues, 2018), with a moment-based draw of the
+#' variance components in place of a full posterior. That draw is exact in distribution only
+#' for balanced clusters and is weaker with one or two large sites. It is not a new method. It
+#' assumes one normal intercept per cluster, so cluster-specific slopes and non-constant
+#' variance are not modeled. The same model is available in other software, including `mice`.
 #'
 #' `cluster` is experimental. Version 0.6.0 replaced an earlier version that resampled audited
 #' clusters, in which resampling within strata understated variance. The replacement's planned
@@ -180,8 +188,8 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #'
 #' In later simulations where the audited value was a predictor in the analysis and errors
 #' shifted whole clusters, `cluster` biased that slope toward zero and covered far less than
-#' a fit without it, because a new intercept acts like added noise in a predictor.
-#' [catmech_pool_lm()] warns about this use. See `validation/VARIANCE_MI_SYNTHESIS.md`.
+#' a fit without it. The cause has not been established. [catmech_pool_lm()] warns about
+#' this use. See `validation/VARIANCE_MI_SYNTHESIS.md`.
 #' @export
 catmech_reference <- function(data, value, reference, predictors,
                               method = c("normal", "pmm", "pmm_abb"), donors = 5L,
@@ -208,6 +216,7 @@ catmech_reference <- function(data, value, reference, predictors,
   if (!any(known)) stop("At least one independently observed reference value is required.", call. = FALSE)
   X <- if (all(known) || use_recorded) NULL else catmech_model_matrix(data, predictors)
   recorded_fit <- NULL
+  cluster_uncertainty <- "random_intercept_drawn_each_imputation"
   restore <- preserve_rng()
   on.exit(restore(), add = TRUE)
   set.seed(as.integer(seed))
@@ -219,6 +228,14 @@ catmech_reference <- function(data, value, reference, predictors,
       catmech_reference_clustered_draws(data, value, gold, predictors, m, cluster)
     draws <- sampled$draws
     recorded_fit <- sampled$note
+    if (!is.null(sampled$cluster_uncertainty)) cluster_uncertainty <- sampled$cluster_uncertainty
+    if (identical(recorded_fit, "recorded_kept_all_calibration_rows_agree")) {
+      checked <- sum(known & !is.na(data[[value]]))
+      warning(sprintf(paste0("All %d audited rows agree with their recorded values, so %d unaudited recorded values were kept ",
+        "with no imputation uncertainty. An audit of this size cannot rule out an error rate of about %.1f%%, ",
+        "and intervals here treat those records as correct."),
+        checked, sum(!known & !is.na(data[[value]])), 100 * min(1, 3 / checked)), call. = FALSE)
+    }
     model_diagnostics <- catmech_reference_independent_diagnostics("reference_normal_recorded")
   } else if (method == "normal") {
     work <- data
@@ -252,7 +269,7 @@ catmech_reference <- function(data, value, reference, predictors,
   }
   if (!is.null(cluster)) {
     spec$cluster <- cluster
-    spec$cluster_uncertainty <- "random_intercept_drawn_each_imputation"
+    spec$cluster_uncertainty <- cluster_uncertainty
     spec$audited_clusters <- length(unique(data[[cluster]][known]))
   }
   audits <- lapply(seq_len(m), function(j) {
@@ -386,6 +403,8 @@ catmech_reference_check_cluster <- function(data, cluster, excluded) {
   if (cluster %in% excluded)
     stop("cluster must differ from the target, reference and predictor columns.", call. = FALSE)
   if (anyNA(data[[cluster]])) stop("cluster must not contain missing values.", call. = FALSE)
+  if (any(!nzchar(trimws(as.character(data[[cluster]])))))
+    stop("cluster must not contain blank values.", call. = FALSE)
   invisible(TRUE)
 }
 
@@ -396,7 +415,7 @@ catmech_reference_cluster_moments <- function(X, Y, cl) {
   n <- nrow(X); p <- ncol(X)
   pooled <- stats::lm.fit(X, Y)
   sse_pooled <- sum(pooled$residuals^2)
-  if (!is.finite(sse_pooled) || sse_pooled <= 0)
+  if (!is.finite(sse_pooled) || sse_pooled <= .Machine$double.eps^2 * max(1, sum(Y^2)) * length(Y))
     stop("The audited rows leave no residual variance.", call. = FALSE)
   D <- stats::model.matrix(~ cl - 1)
   within <- stats::lm.fit(cbind(X, D), Y)
@@ -428,6 +447,10 @@ catmech_reference_cluster_fill <- function(x, y, fit_rows, fill_rows, ids, m) {
   cl <- factor(as.character(ids[fit_rows])); sizes <- tabulate(cl)
   moments <- catmech_reference_cluster_moments(X, Y, cl)
   fill_clusters <- as.character(ids[fill_rows]); fill_units <- unique(fill_clusters)
+  if (moments$df_between == 0L && moments$df_within > 0L && any(!fill_units %in% levels(cl)))
+    stop("The predictors absorb every audited cluster, as with one audited cluster per stratum, so between-cluster variance cannot be estimated for unaudited clusters. Audit more clusters per stratum, or remove the strata from predictors.", call. = FALSE)
+  if (!moments$separable)
+    warning("The audited rows cannot separate within-cluster and between-cluster variance, as with one row per cluster, so the intercept variance is zero and this fit has no cluster effect.", call. = FALSE)
   out <- matrix(NA_real_, length(fill_rows), m)
   for (j in seq_len(m)) {
     draw <- NULL
@@ -457,6 +480,7 @@ catmech_reference_cluster_fill <- function(x, y, fit_rows, fill_rows, ids, m) {
       stop("Audited clusters lost design support in imputation; audit more clusters.", call. = FALSE)
     out[, j] <- draw
   }
+  attr(out, "separable") <- moments$separable
   out
 }
 
@@ -469,21 +493,30 @@ catmech_reference_clustered_draws <- function(data, value, gold, predictors, m, 
     stop("use_recorded requires rows with both recorded and reference values.", call. = FALSE)
   draws <- matrix(rep(gold, m), nrow = nrow(data), ncol = m)
   note <- "linear_given_recorded"
+  uncertainty <- "random_intercept_drawn_each_imputation"
   ids <- data[[cluster]]
   X <- catmech_model_matrix(data, predictors)
   if (any(recorded & !known)) {
+    if (length(unique(ids[calibration])) < 5L)
+      stop("Fewer than five audited clusters: cluster uncertainty is refused.", call. = FALSE)
     if (all(catmech_contamination_agreement(W[calibration], gold[calibration], 0))) {
       draws[recorded & !known, ] <- W[recorded & !known]
       note <- "recorded_kept_all_calibration_rows_agree"
+      uncertainty <- "none_recorded_kept_all_calibration_rows_agree"
     } else {
       with_recorded <- cbind(X, .catmech_recorded = ifelse(recorded, W, 0))
-      draws[recorded & !known, ] <- catmech_reference_cluster_fill(with_recorded, gold, which(calibration),
+      filled <- catmech_reference_cluster_fill(with_recorded, gold, which(calibration),
         which(recorded & !known), ids, m)
+      if (!isTRUE(attr(filled, "separable"))) uncertainty <- "intercept_variance_zero_not_separable"
+      draws[recorded & !known, ] <- filled
     }
   }
-  if (any(!recorded & !known))
-    draws[!recorded & !known, ] <- catmech_reference_cluster_fill(X, gold, which(known), which(!recorded & !known), ids, m)
-  list(draws = draws, note = note)
+  if (any(!recorded & !known)) {
+    filled <- catmech_reference_cluster_fill(X, gold, which(known), which(!recorded & !known), ids, m)
+    if (!isTRUE(attr(filled, "separable"))) uncertainty <- "intercept_variance_zero_not_separable"
+    draws[!recorded & !known, ] <- filled
+  }
+  list(draws = draws, note = note, cluster_uncertainty = uncertainty)
 }
 
 # Type-1 matching on a bootstrap of the donors. A resample that loses design support

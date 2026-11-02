@@ -1,0 +1,27 @@
+Simulated cohorts, seeds used nowhere else.
+
+ONE TOTAL, ONE DATASET, three rows per cluster: standard error, then its phase one and phase two variance
+  full, row level: SE 296, phase one 0, phase two 87672
+  full, one row per cluster: SE 589, phase one 259666, phase two 87672
+  approx, row level: SE 417, phase one 86401, phase two 87672
+  approx, one row per cluster: SE 417, phase one 86401, phase two 87672
+  simple, row level: SE 417, phase one 86401, phase two 87672
+  simple, one row per cluster: SE 417, phase one 86401, phase two 87672
+  full with a phase-one population of one million clusters, row level: SE 5981901, phase one 1.789e+13, phase two 1.789e+13
+
+STANDARD ERROR OVER THE SPREAD OF THE ESTIMATE, 300 cohorts: without calibration, then raked
+  full, none, 3 rows, 50%: 0.61, 0.50
+  full, none, 3 rows, 25%: 0.73, 0.62
+  full, rwanda, 3 rows, 50%: 0.55, 0.54
+  full, rwanda, 3 rows, 25%: 0.46, 0.62
+  full, none_210, 1 rows, 50%: 0.97, 0.98
+  approx, none, 3 rows, 50%: 0.86, 0.96
+  approx, none, 3 rows, 25%: 0.84, 0.85
+  approx, rwanda, 3 rows, 50%: 0.79, 0.88
+  approx, rwanda, 3 rows, 25%: 0.57, 0.75
+  approx, none_210, 1 rows, 50%: 0.97, 0.98
+  full_fpc, none, 3 rows, 50%: 0.86, 0.95
+  full_fpc, none, 3 rows, 25%: 0.85, 0.84
+  full_fpc, rwanda, 3 rows, 50%: 0.79, 0.88
+  full_fpc, rwanda, 3 rows, 25%: 0.57, 0.74
+  full_fpc, none_210, 1 rows, 50%: 0.98, 0.99

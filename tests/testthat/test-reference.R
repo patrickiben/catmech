@@ -227,7 +227,7 @@ test_that("use_recorded keeps recorded values when calibration rows all agree", 
   d$gold <- NA_real_
   d$gold[seq(1L, 120L, 3L)] <- d$lab_true[seq(1L, 120L, 3L)]
   d[c("lab_true", "corrupted")] <- NULL
-  fit <- catmech_reference(d, "lab_value", "gold", c("age", "outcome"), use_recorded = TRUE, m = 3, seed = 2)
+  expect_warning(fit <- catmech_reference(d, "lab_value", "gold", c("age", "outcome"), use_recorded = TRUE, m = 3, seed = 2), "audited rows agree")
   open <- is.na(d$gold) & !is.na(d$lab_value)
   expect_identical(fit$spec$recorded_fit, "recorded_kept_all_calibration_rows_agree")
   expect_equal(fit$completed[[2]]$lab_value[open], d$lab_value[open])

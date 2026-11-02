@@ -89,7 +89,7 @@ reference, `sigma^2` receives a proper prior because no row then pins the target
 
 Reference selection may depend on W. A targeted audit of flagged or unusual records is therefore
 supported, as long as selection does not depend on the true value beyond what W and Z say. That is
-a weaker requirement than `catmech_reference()` has, because that workflow omits W from its model.
+a weaker requirement than `catmech_reference()` has by default, because that default omits W from its model. With `use_recorded = TRUE`, W is in the model, and selection may depend on it there too.
 
 ## Computation
 

@@ -16,7 +16,7 @@ THE MICE DEFAULT, mice_2l_lmer at 25%: requests where mice dropped a predictor; 
 OPTION AGAINST MICE_2L_LMER WITH EPS = 0, real items at 25%: coverage difference in points with Monte Carlo error, mean width ratio, RMSE ratio
   lbw: +1.10 (MC error 0.42); option width over mice 1.067; mice RMSE over option 0.990
   resus: +0.75 (MC error 0.40); option width over mice 1.078; mice RMSE over option 0.984
-  stillbirths: +0.45 (MC error 0.39); option width over mice 1.057; mice RMSE over option 0.999
+  stillbirths: +0.46 (MC error 0.38); option width over mice 1.077; mice RMSE over option 0.977
   deliveries: +0.25 (MC error 0.18); option width over mice 1.011; mice RMSE over option 0.995
   anc1_early: +2.10 (MC error 0.45); option width over mice 1.098; mice RMSE over option 1.006
   pnc: +2.30 (MC error 0.48); option width over mice 1.084; mice RMSE over option 1.015
@@ -25,9 +25,45 @@ OPTION AGAINST MICE_2L_LMER WITH EPS = 0, real items at 25%: coverage difference
   anc4: +1.00 (MC error 0.41); option width over mice 1.064; mice RMSE over option 1.004
   ancnewreg: +0.60 (MC error 0.26); option width over mice 1.046; mice RMSE over option 1.001
   livebirths: +0.55 (MC error 0.28); option width over mice 1.031; mice RMSE over option 1.008
-  Mean distance from 95, mice minus option: 1.08 points; cohort resampling, 2000 draws, 2.5% to 97.5%: 0.76 to 1.27. This treats the 11 items as fixed.
+  Mean distance from 95, mice minus option: 1.06 points; cohort resampling, 2000 draws, 2.5% to 97.5%: 0.75 to 1.26. This treats the 11 items as fixed.
 
 MICE_2L_LMER, first run: requests with a singular fit in at least one imputation, 21.4%
+
+MICE_2L_LMER WITH EPS = 0, requests with no interval: iron 25% 6; none_rare 25% 2; stillbirths 25% 30
+
+OPTION AGAINST MICE_2L_LMER, AUDITED VALUE AS PREDICTOR, first run, paired: bias difference in percent of the target, with Monte Carlo error, and RMSE ratio option over mice
+  covariate_shift 25%: -4.1 (MC error 0.1); 1.208
+  covariate_shift 50%: -1.1 (MC error 0.1); 1.050
+  covariate_under 25%: -3.3 (MC error 0.1); 1.163
+  covariate_under 50%: -1.5 (MC error 0.1); 1.055
+  covariate_row_only 25%: -3.1 (MC error 0.1); 1.015
+  covariate_row_only 50%: -1.2 (MC error 0.1); 0.990
+
+EVERY AUDITED ROW AGREED, real items at 25%, so recorded values were kept: share of requests, and coverage on them against the rest. Linear MI and the option under cv3
+  lbw: linear_mi 0.0%; random_intercept 0.0%
+  resus: linear_mi 0.0%; random_intercept 0.0%
+  stillbirths: linear_mi 6.0%, coverage 88.3 against 94.7; random_intercept 6.0%, coverage 88.3 against 95.5
+  deliveries: linear_mi 0.0%; random_intercept 0.0%
+  anc1_early: linear_mi 0.0%; random_intercept 0.0%
+  pnc: linear_mi 0.0%; random_intercept 0.0%
+  syphilis: linear_mi 0.0%; random_intercept 0.0%
+  iron: linear_mi 0.0%; random_intercept 0.0%
+  anc4: linear_mi 0.0%; random_intercept 0.0%
+  ancnewreg: linear_mi 0.1%, coverage 50.0 against 88.8; random_intercept 0.1%, coverage 50.0 against 94.2
+  livebirths: linear_mi 0.0%; random_intercept 0.0%
+
+RECORDED OVER THE BEST AUDIT-USING METHOD, real items at 25%, RMSE ratio with a cohort-resampling range, 2.5% to 97.5%
+  lbw: 1.294 (1.248 to 1.336)
+  resus: 2.184 (2.100 to 2.295)
+  stillbirths: 0.954 (0.916 to 0.996)
+  deliveries: 0.952 (0.931 to 0.969)
+  anc1_early: 2.053 (1.993 to 2.133)
+  pnc: 0.991 (0.951 to 1.034)
+  syphilis: 0.737 (0.712 to 0.762)
+  iron: 1.077 (1.043 to 1.111)
+  anc4: 2.102 (2.038 to 2.183)
+  ancnewreg: 0.956 (0.936 to 0.978)
+  livebirths: 0.835 (0.809 to 0.857)
 
 RECORDED AGAINST THE OPTION, real items: RMSE ratio and recorded coverage
   25%:

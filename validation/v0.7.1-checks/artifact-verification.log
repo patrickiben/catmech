@@ -1,0 +1,34 @@
+Frozen v0.1 source hashes and independently recomputed 30 summary rows: PASS
+Known-wrong bias mutation detected: PASS
+coverage-confirmatory: 44750 unique requests, 50 recomputed groups, statuses and paired MCSEs: PASS
+coverage-clinical: 7500 unique requests, 30 recomputed groups, statuses and paired MCSEs: PASS
+Independent posterior oracle source hashes and moment checks: PASS
+extension-distribution: all 80000 prespecified requests, seeds and endpoint controls accounted for: PASS
+extension-distribution: 80000 unique requests, 80 recomputed groups, statuses and paired MCSEs: PASS
+extension-reference: all 35000 prespecified requests, seeds and endpoint controls accounted for: PASS
+extension-reference: 35000 unique requests, 35 recomputed groups, statuses and paired MCSEs: PASS
+extension-stress: all 17500 prespecified requests, seeds and endpoint controls accounted for: PASS
+extension-stress: 17500 unique requests, 42 recomputed groups, statuses and paired MCSEs: PASS
+extension-controls: all 80 prespecified requests, seeds and endpoint controls accounted for: PASS
+extension-controls: 80 unique requests, 4 recomputed groups, statuses and paired MCSEs: PASS
+Independent reference predictive oracle, contracts and negative controls: PASS
+Current pooling guards and frozen-v0.3 scalar numerical equivalence: PASS
+Known-wrong deletion of an entire planned scenario detected: PASS
+contamination-study: all 52950 planned requests, 183 recomputed groups, statuses, paired MCSEs and deletion control: PASS
+Independent contamination oracle, contracts and negative controls: PASS
+contamination-supplement: 1731 recovered records match every returned main-study fit in the six affected cells: PASS
+real-data-study: all 33800 planned requests, 85 recomputed groups, independent pool targets and audit counts, deletion control: PASS
+study: 28800 requests, independently recomputed NO-GO, direction-0 identity control: PASS
+audit-plan-study: all 14400 target fits and 28800 plan rows, 24 recomputed cells, verdict NO-GO, independent pool k and 3 browser test vectors recomputed: PASS
+Sponsor clustering development: 200 summary values, model fits, audit seeds, intervals and verdict (WEAK) recomputed in plain Python from raw files: PASS
+Sponsor clustering development negative controls: wrong statistic detected; 200 within-strata shuffles of D give mean ratio 1.005 and 3 of 200 below p = 0.01: PASS
+Sponsor clustering evaluation: 200 summary values, model fits, audit seeds, intervals and verdict (WEAK) recomputed in plain Python from raw files: PASS
+Sponsor clustering evaluation negative controls: wrong statistic detected; 200 within-strata shuffles of D give mean ratio 0.999 and 3 of 200 below p = 0.01: PASS
+real-audit-study: all 45600 planned requests, 120 recomputed groups, independent pool targets, published Rwanda table (6 of 8 within-range counts exact, the other 2 off by one), published effect-size counts, ratio limits recomputed, two negative controls: PASS
+Real-audit write-up: scored output regenerated identically, post-hoc table tied to the study, Rule 2 re-derived, 100 table entries checked by position, 35 ratio intervals found in the scored output, replay from seeds matches, relabeled and rescaled results caught: PASS
+clustered-study: all 148000 planned requests, 296 recomputed groups, held-out targets recomputed, 11998 development requests match the earlier study, verdict re-derived as PARTIAL, corrupted-summary control: PASS
+clustered-fix-study: all 210000 planned requests, 420 recomputed groups, seeds and pool targets recomputed, 27000 requests match the first study, 18000 match the review, selection and verdict re-derived as random_intercept and PARTIAL, 30000 replayed through the package, corrupted-summary control: PASS
+variance-check: all 24500 planned requests, scored output regenerated identically, reading re-derived, numbers in the results traced, algebra record has 50 passes: PASS
+variance-mi-study: all 148500 planned requests, sources hashed, scored output and post-hoc table regenerated identically, the outcome re-derived as cv3, 148500 replayed through the package: PASS
+outside-methods-study: all 297000 planned requests and 58356 rerun, sources hashed, three scored files regenerated identically, accuracy failures re-derived, controls passed: PASS
+This verifies correspondence and repeatability, not inferential validity.

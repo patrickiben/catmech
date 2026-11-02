@@ -1,6 +1,6 @@
 # Assessment and release decision
 
-Assessed 2026-11-02. Version 0.7.0 is worth releasing as an **experimental, auditable toolkit for data with recorded values and a
+Assessed 2026-11-02. Version 0.7.1 is worth releasing as an **experimental, auditable toolkit for data with recorded values and a
 reference subset**, built from established methods. Real-data testing narrowed its recommended use. It does not support a novel-method
 or clinical-validity claim. Earlier assessments are preserved for [v0.1](ASSESSMENT_V0.1.md), [v0.2](ASSESSMENT_V0.2.md) and [v0.3](ASSESSMENT_V0.3.md).
 
@@ -30,6 +30,8 @@ Version 0.7.0 changes the default variance in `catmech_pool_lm(cluster = )` to a
 
 A later [comparison with outside methods](../validation/OUTSIDE_METHODS_SYNTHESIS.md) kept `catmech_reference(cluster = )` under a rule that could have retired it, and changed no code. The margin is narrow, since `mice` offers the same model and matched its accuracy once a default was turned off. That comparison was not neutral: the option's author set up every comparator.
 
+Version 0.7.1 follows an [overall check](../validation/OVERALL_QC.md) by five independent AI reviewers. It adds a warning when every audited row agrees and recorded values are kept, a warning when one cluster determines a coefficient, and a refusal when no between-cluster variance can be estimated. These cases gave badly wrong intervals with no signal before. Earlier study numbers are unchanged.
+
 ## Current judgment
 
 | Question | Judgment |
@@ -40,7 +42,7 @@ A later [comparison with outside methods](../validation/OUTSIDE_METHODS_SYNTHESI
 | Is the contamination model the best default? | Not when an interval is needed. Linear MI is the better starting point for that. In simulation the model's niche was gross errors and fallible references with a credible declared SD. A real audit with moderate errors did not test gross errors, so that niche has no real-data support yet. There the model often had lower point error, but its intervals were too narrow. |
 | Can it say how many records to audit? | Not validated. The planner gave a NO-GO, failing only at the 5% target. It is a documented calculation, built on classical theory. |
 | Does it repair missed errors with no new information? | No. It requires genuine reference measurements. |
-| Generally valid confidence intervals? | No. Failures are recorded for each workflow. With default intervals the oracle itself undercovered on ClinicalTrials.gov and on the Rwanda audit, and no method in the real-audit test held the oracle's clustered coverage at a 25% facility audit. The experimental clustered option came closer, and still reached only 89.0% on one of nine items, against 93.2% for a recount. |
+| Generally valid confidence intervals? | No. Failures are recorded for each workflow. With default intervals the oracle itself undercovered on ClinicalTrials.gov and on the Rwanda audit, and no method in the real-audit test held the oracle's clustered coverage at a 25% facility audit. The experimental clustered option came closer, and under the variance then in use still reached only 89.0% on one of nine items, against 93.2% for a recount. |
 | Does it handle clustered audits? | Partly. `catmech_pool_lm(cluster = )` is a standard cluster-robust variance. `catmech_reference(cluster = )` is experimental: better worst-case coverage when the audited value is the outcome, some added error on rare items, two planned tests that came out PARTIAL, and bias when the audited value is a predictor. A planned comparison kept it, narrowly, over `mice` and design-based methods. |
 | Real-data evidence? | Two public datasets with real recording differences, and two public audits: Rwanda facility counts and psychology effect sizes. None is a patient-level clinical source-data audit, and the ClinicalTrials.gov reference is not independent truth. |
 | Ready for a GitHub research release? | Yes, with the recorded limitations. |

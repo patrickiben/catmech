@@ -47,13 +47,16 @@ normal method. Fewer reference observations than donors is an error when needed.
 predictor. Records with a recorded value are imputed from a model fitted on
 references that also have one, and records without one from a model on the
 predictors fitted on all references. It needs rows with both values. If every such row
-agrees exactly, those records keep their recorded value, as `spec$recorded_fit` notes.}
+agrees exactly, those records keep their recorded value with no imputation uncertainty,
+as `spec$recorded_fit` notes and a warning says. Intervals then treat those records as
+correct, which can be badly wrong when a small audit simply missed the errors.}
 
 \item{cluster}{With `use_recorded = TRUE`, the name of a complete column identifying
 audit clusters, such as a site or facility. The imputation model then adds a random
 intercept for the cluster, instead of treating rows as independent. If the audit is
-stratified, put the strata in `predictors`. Do not use it when the audited value will
-be a predictor in the analysis. See details.}
+stratified, put the strata in `predictors`, which needs some stratum with at least two
+audited clusters. Do not use it when the audited value will be a predictor in the
+analysis. See details.}
 }
 \value{
 A `catmech_result`. Its completed target contains exact gold references
@@ -111,11 +114,16 @@ method 3) on the audited rows and are drawn in each imputation, and coefficients
 drawn from the generalized least squares fit given them. An unaudited cluster gets a new
 intercept, an audited cluster with unaudited rows gets one conditional on its residuals,
 and every imputed row gets normal noise. If the audited rows cannot separate the two
-variances, as with one row per cluster, the intercept variance is zero. Fewer than five
-audited clusters are refused. Pool with [catmech_pool_lm()], which uses a cluster-robust
-variance for such a fit. This is ordinary multilevel imputation (Schafer and Yucel, 2002;
-Grund and colleagues, 2018) in closed form, and not a new method. It assumes one normal
-intercept per cluster, so cluster-specific slopes and non-constant variance are not modeled.
+variances, as with one row per cluster, the intercept variance is zero, with a warning. If
+the predictors absorb every audited cluster, as with one audited cluster per stratum, there
+is no estimate of between-cluster variance for unaudited clusters, and the fit is refused.
+Fewer than five audited clusters are refused. Pool with [catmech_pool_lm()], which uses a
+cluster-robust variance for such a fit. This is the usual random-intercept imputation model
+(Schafer and Yucel, 2002; Grund and colleagues, 2018), with a moment-based draw of the
+variance components in place of a full posterior. That draw is exact in distribution only
+for balanced clusters and is weaker with one or two large sites. It is not a new method. It
+assumes one normal intercept per cluster, so cluster-specific slopes and non-constant
+variance are not modeled. The same model is available in other software, including `mice`.
 
 `cluster` is experimental. Version 0.6.0 replaced an earlier version that resampled audited
 clusters, in which resampling within strata understated variance. The replacement's planned
@@ -128,6 +136,6 @@ since very wide intervals remain possible with few audited clusters. See
 
 In later simulations where the audited value was a predictor in the analysis and errors
 shifted whole clusters, `cluster` biased that slope toward zero and covered far less than
-a fit without it, because a new intercept acts like added noise in a predictor.
-[catmech_pool_lm()] warns about this use. See `validation/VARIANCE_MI_SYNTHESIS.md`.
+a fit without it. The cause has not been established. [catmech_pool_lm()] warns about
+this use. See `validation/VARIANCE_MI_SYNTHESIS.md`.
 }

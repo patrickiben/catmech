@@ -39,7 +39,7 @@ are the proposed publication-facing explanation.
 | Independent posterior quadrature | Verify one full sampler posterior without reusing Gibbs code |
 | Held-out coverage and clinical fixtures | Strong baselines, residual-bias diagnosis and explicit remaining undercoverage |
 
-The public package version is now `0.2.0`. Legacy API behavior remains available;
+This page dates from package version `0.2.0`; the current version is in `DESCRIPTION`. Legacy API behavior remains available;
 new model assumptions require the new entry point. See [NEWS](../NEWS.md).
 
 ## Version 0.3 extension

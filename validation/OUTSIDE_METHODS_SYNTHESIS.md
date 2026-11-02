@@ -21,7 +21,7 @@ Ratios are RMSE against the option's, as a geometric mean across items or cells.
 | *Rerun:* `mice_2l_lmer`, `eps = 0` | 0.998 | 1.003 | **8, 2.55** | Pass | 0.998, 30 | Pass | No |
 | *Rerun:* `mice_2l_pan`, `eps = 0` | 1.036 | 1.016 | **8, 2.60** | **Fail** | 1.000, 33 | Pass | No |
 
-Bold marks a failed condition. N3 also needs at most 98% on at least 10 of 11 items, which `mice_2l_pan` misses in both runs at 9, with `stillbirths` at 99.9%.
+Bold marks a failed condition. N3 also needs at most 98% on at least 10 of 11 items, which `mice_2l_pan` misses in both runs at 9, with `stillbirths` at 99.9%. The first-run coverage figures for `raking` are an artifact of the recipe, explained below, and should not be read as that method's performance. Its accuracy figures are not affected.
 
 ## The `mice` default
 
@@ -34,15 +34,17 @@ By default, `mice` removes a predictor whose correlation with the imputed variab
 | `ancnewreg` | 868 | 0.3640 | 0.1158 | 79.5 | 91.5 |
 | `pnc` | 158 | 0.2807 | 0.0600 | 74.7 | 78.5 |
 
-It is not always harmful. On `iron` and `stillbirths`, on the smaller groups of cohorts it touched, the default did better on coverage (86.0 against 75.4, and 96.7 against 87.9). Those are unusual cohorts, and both methods do poorly on them with the check off.
+It is not always harmful. On `iron` and `stillbirths`, on the smaller groups of cohorts it touched, the default did better on coverage (86.0 against 75.4, and 96.7 against 87.9). Those comparisons use 114 and 91 of the 120 cohorts touched on each item, since the others gave no interval under one method. They are unusual cohorts, and both methods do poorly on them with the check off.
+
+Turning the check off has its own cost. `mice_2l_lmer` with `eps = 0` gave no interval on 38 requests, 30 of them on `stillbirths` at 25%, mostly where every audited row agreed and the fit failed outright.
 
 This is the most directly useful finding here for anyone imputing audited values with `mice`: the better the records agree, the likelier the default is to remove them. The only signals are a brief warning that events were logged and an entry in `loggedEvents`. The setting that turns it off, `eps = 0`, cannot be passed straight through with `2l.lmer`, because `mice` hands it on to `lmer`, which rejects it. Then `mice` warns and returns unmodeled draws. The rerun used a small wrapper.
 
 ## The option against `mice_2l_lmer` with the check off
 
-These use the same model, and accuracy is the same: the RMSE ratio per item at 25% runs from 0.984 to 1.015. The difference is width. The option's intervals are wider on every item at 25%, by about 1% to 11%, and its coverage is higher on every item, by 0.25 to 2.46 points. The mean distance from 95% is 1.08 points larger for `mice`, with a cohort-resampling range of 0.76 to 1.27 that treats the 11 items as fixed. The condition allowed 0.25.
+These use the same model, and accuracy is the same: the RMSE ratio per item at 25% runs from 0.977 to 1.015. The difference is width. The option's intervals are wider on every item at 25%, by about 1% to 11%, and its coverage is higher on every item, by 0.25 to 2.46 points. The mean distance from 95% is 1.06 points larger for `mice`, with a cohort-resampling range of 0.75 to 1.26 that treats the 11 items as fixed. The condition allowed 0.25.
 
-So wider intervals are all the option has. On these real items, where almost everything undercovers, that helps. In the simulations the two tie at 30 of 36 cells, and both run high in some cells. Wider is not the same as better calibrated in general. Why the option is wider has not been tested, though it draws both variance components from chi-square distributions with few audited clusters, which would be consistent.
+So wider intervals are all the option has. On these real items, where almost everything undercovers, that helps. In the simulations the two tie at 30 of 36 cells, and both run high in some cells. Wider is not the same as better calibrated in general. Why the option is wider has not been tested. Both methods draw their variance components with chi-square or Wishart steps, so that alone does not separate them. One visible difference is that `2l.lmer` scales its intercept variance by squared predicted intercepts, which are shrunken and are zero on a singular fit, while the option uses a moment form.
 
 Speed: about 0.102 seconds per request for the option, against 0.544 for `mice_2l_lmer` and 0.236 for `mice_2l_pan`, on this machine under load. `lmer` also reported a singular fit in some imputation for 21% of requests in the first run.
 
@@ -52,18 +54,18 @@ Speed: about 0.102 seconds per request for the option, against 0.544 for `mice_2
 
 - **`audited_only` covers well and is imprecise.** It reaches 92% on more items than the option, at 10, with widths +31% to +205% and an RMSE 1.618 times the option's. The option's real gain over simply analyzing the audit is in accuracy.
 - **`raking` and `difference` fail on accuracy, whatever their variance.** Their point estimates do not depend on the variance setting, so these results stand under both runs. With one influence-function auxiliary and about 17 audited clusters, they likely use the recorded value less efficiently than a model does. That reading has not been tested.
-- **Their intervals are too narrow, and this part reflects my recipes.** With `raking` under `full`, standard errors ran 0.50 to 0.63 of the spread of the estimate in the shift cells, and with `approx` 0.66 to 0.93. `difference` ran as low as 0.36 in the design with two audited clusters per stratum. That looks like unadjusted leverage: with few audited clusters per stratum, stratum effects shrink the residuals, and these variances have no correction like the jackknife the option gets. It has not been tested. So this comparison does not show those coverage numbers are the best these methods can do. A jackknife might repair them, and it would not change N1.
-- **`survey::twophase(method = "full")` did not give consistent results with several rows per cluster.** On one fixture, one total had a standard error of 296 at row level and 589 after aggregating to clusters, against 417 both ways under `approx`. Whether this falls outside the method's intended use has not been settled, and the `survey` authors have not been asked.
+- **Their intervals are too narrow, and this part reflects the recipes used here.** With `raking` under `full`, standard errors ran 0.50 to 0.63 of the spread of the estimate in the shift cells, and with `approx` 0.66 to 0.93. `difference` ran as low as 0.36 in the design with two audited clusters per stratum. That looks like unadjusted leverage: with few audited clusters per stratum, stratum effects shrink the residuals, and these variances have no correction like the jackknife the option gets. It has not been tested. So this comparison does not show those coverage numbers are the best these methods can do. A jackknife might repair them, and it would not change N1.
+- **The first-run `raking` recipe left out the phase-one variance.** With clusters at phase one and no phase-one probabilities or population size, `twophase(method = "full")` gives a phase-one component of exactly zero when clusters have several rows, and this recipe supplied neither. The [documentation](https://r-survey.r-forge.r-project.org/survey/html/twophase.html) says genuine sampling probabilities must be available for that method. So this was an error in the recipe, which the plan's fixed-dataset check could not catch, because that check ran on one row per cluster. A [separate check](outside-methods-twophase-check.txt) shows the zero: on one dataset, a standard error of 296 at row level, with phase one 0, against 417 under `approx`. A phase-one population size gives results like `approx`. The [rerun's plan](OUTSIDE_METHODS_SENSITIVITY_PLAN.md) describes this as unsettled, because it was written before the cause was found.
 
 ## Recorded values alone
 
-At a 25% audit, `recorded` has a lower RMSE than every audit-using method on **6 of 11 items**: `stillbirths`, `deliveries`, `pnc`, `syphilis`, `ancnewreg` and `livebirths`. At 50% that falls to 2 of 11. So a partial audit can add more noise than it removes.
+At a 25% audit, `recorded` has a lower RMSE than every audit-using method on **6 of 11 items**: `stillbirths`, `deliveries`, `pnc`, `syphilis`, `ancnewreg` and `livebirths`. Five of those are clear. `pnc` is a tie, at a ratio of 0.991 with a cohort-resampling range of 0.951 to 1.034, and its recorded coverage is 60.8%. At 50% the count falls to 2 of 11. So a partial audit can add more noise than it removes.
 
 That is no reason to skip the audit, since no one can tell in advance which case applies. On other items the recorded value's RMSE is up to 2.107 times the option's at 25% and 3.722 times at 50%, and its coverage falls as low as 40.6%. It is a reason not to assume that imputation from a small audit improves a good record.
 
 ## When the audited value is a predictor
 
-No rule covers this. The earlier finding now has outside support: `mice_2l_lmer` and `mice_2l_pan` attenuate the slope too, at -12.0% and -14.7% with `shift` errors at 25%, against -16.1% for the option and -3.0% for linear MI. So this comes from the random-intercept model, not from catmech's code. It is the same pattern in independent software. The cause has still not been tested directly.
+No rule covers this. The earlier finding now has outside support: `mice_2l_lmer` and `mice_2l_pan` attenuate the slope too, at -12.0% and -14.7% with `shift` errors at 25%, against -16.1% for the option and -3.0% for linear MI. So the random-intercept model accounts for a large part of it, since the same pattern appears in independent software. It is not all of it. The option attenuates more than `mice_2l_lmer` in all six cells, by 1.1 to 4.1 percent of the target, with an RMSE up to 1.208 times as large. Why it does so has not been established. The advice not to use the option this way stands.
 
 Linear MI without `cluster` stays the advice for this use. `raking` is the notable alternative, at -0.8% to +0.2% bias across the six cells and, under `approx`, 92.4% to 95.0% coverage, with RMSE 1.029 to 1.148 times linear MI's. `audited_only` also has little bias and costs more in accuracy.
 
@@ -91,7 +93,7 @@ The [real-audit synthesis](REAL_AUDIT_SYNTHESIS.md) reports a "design-weighted d
 
 ## What this changes
 
-- **No package code.** `catmech_reference(cluster = )` stays, and stays experimental. Earlier verdicts stand.
+- **No package code, in this comparison.** `catmech_reference(cluster = )` stays, and stays experimental. Earlier verdicts stand. A later overall check changed the package in version 0.7.1, with warnings and refusals and no change to these numbers.
 - **Documentation** now says the same model is available in `mice`, warns about that default, and states this comparison.
 - **The option's case is narrow:** the same accuracy as `mice_2l_lmer`, somewhat wider intervals, greater speed, and no setting to get right, all on one health system.
 
@@ -101,7 +103,7 @@ This is not a neutral comparison, and that matters most here. The same assistant
 
 The option's lead over `mice_2l_lmer` rests on one condition, on real items from one health system, where the same items shaped earlier choices about this option, including the variance it uses. The rule's margins favor the comparators, but the option's author chose them. The analysis variance is the jackknife for both imputation methods and was chosen in an earlier round on the option's results, not `mice`'s. The Zambia file has not been used, so none of this has been tested on a second dataset.
 
-On process: the plan was committed before the runner existed, and the runner and scorer were committed before the study. An engineering pilot was read for statuses and timing only. The control reproduced the option's saved results on 660 requests. The fixed-dataset check matched `survey`'s point estimate and second-phase variance, and matched its first-phase variance apart from the factor G / (G - 1). The rerun took three attempts. One stalled for about 30 minutes because `mice_2l_pan` hung, and one failed its control because of the `eps` problem above. Both are recorded in its plan and neither is used. Commit order in a local repository is not third-party proof of timing.
+On process: the plan was committed before the runner existed, and the runner and scorer were committed before the study. An engineering pilot was read for statuses and timing only. The control reproduced the option's saved results on 660 requests. The fixed-dataset check matched `survey`'s point estimate and second-phase variance, and matched its first-phase variance apart from the factor G / (G - 1). It used one row per cluster, which is why it missed the gap in the `raking` recipe. The rerun took three attempts. One stalled for about 30 minutes because `mice_2l_pan` hung, and one failed its control because of the `eps` problem above. Both are recorded in its plan and neither is used. Commit order in a local repository is not third-party proof of timing.
 
 ## Sources
 

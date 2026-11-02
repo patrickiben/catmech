@@ -1,6 +1,6 @@
 # catmech: when the favored model did not win
 
-**A case study in testing an idea until the evidence said no.** Patrick Iben, independent biostatistician. Status on November 2, 2026: experimental R package, version 0.7.0, with no outside users, peer review or clinical validation.
+**A case study in testing an idea until the evidence said no.** Patrick Iben, independent biostatistician. Status on November 2, 2026: experimental R package, version 0.7.1, with no outside users, peer review or clinical validation.
 
 | Test | Result | What the numbers said |
 |---|---|---|
@@ -37,7 +37,7 @@ catmech is an R package that fills in unchecked values several plausible ways (m
 
 - **Recommend the simple baseline first when an interval is needed.** It is now a package option. The new model stays for gross errors, untested on real data, where the baseline's 95% ranges covered only 64.7% in simulation, against 94.0%.
 - **Do not write the merged paper** on that thesis.
-- **Keep the planner as a documented calculation,** labeled not validated, **and the clustered-audit option as experimental.** Nothing was retuned after viewing.
+- **Keep the planner as a documented calculation,** labeled not validated, **and the clustered-audit option as experimental,** for an audited outcome; `mice` fits the same model.
 - **Claim no new statistical method.**
 
 ## Technical sidebar
@@ -46,6 +46,6 @@ Target: each pool's regression coefficient using every reference, in cohorts of 
 
 ## Limits and AI disclosure
 
-No dataset here is a patient-level clinical source-data audit, and on ClinicalTrials.gov both values are sponsor-entered. Simulation data are synthetic. OpenAI Codex and Anthropic Claude Code were used for code drafting, literature search, adversarial review, test construction and simulation orchestration, and Claude Code helped draft this page. No AI system is listed as an author, and AI review is not peer review. Patrick retains responsibility for the scientific claims, intended-use decisions and release.
+No dataset here is a patient-level clinical source-data audit, and on ClinicalTrials.gov both values are sponsor-entered. Simulation data are synthetic. OpenAI Codex and Anthropic Claude Code were used for code, literature search, review and test construction. Claude Code also wrote most later plans and scoring and helped draft this page, with no independent review. No AI system is listed as an author, and AI review is not peer review. Patrick retains responsibility for the scientific claims, intended-use decisions and release.
 
-Sources in `validation/`: [`REAL_DATA_SYNTHESIS.md`](../../validation/REAL_DATA_SYNTHESIS.md), [`CONTAMINATION_SYNTHESIS.md`](../../validation/CONTAMINATION_SYNTHESIS.md), [`merged-audit-pilot/README.md`](../../validation/merged-audit-pilot/README.md), [`AUDIT_PLAN_SYNTHESIS.md`](../../validation/AUDIT_PLAN_SYNTHESIS.md), [`REAL_AUDIT_SYNTHESIS.md`](../../validation/REAL_AUDIT_SYNTHESIS.md), [`CLUSTERED_SYNTHESIS.md`](../../validation/CLUSTERED_SYNTHESIS.md). Every number is traced in [`docs/case-study/FACT_CHECK.md`](FACT_CHECK.md).
+Sources in `validation/`: [`REAL_DATA_SYNTHESIS.md`](../../validation/REAL_DATA_SYNTHESIS.md), [`CONTAMINATION_SYNTHESIS.md`](../../validation/CONTAMINATION_SYNTHESIS.md), [`merged-audit-pilot/README.md`](../../validation/merged-audit-pilot/README.md), [`AUDIT_PLAN_SYNTHESIS.md`](../../validation/AUDIT_PLAN_SYNTHESIS.md), [`REAL_AUDIT_SYNTHESIS.md`](../../validation/REAL_AUDIT_SYNTHESIS.md), [`OUTSIDE_METHODS_SYNTHESIS.md`](../../validation/OUTSIDE_METHODS_SYNTHESIS.md). Every number is traced in [`docs/case-study/FACT_CHECK.md`](FACT_CHECK.md).

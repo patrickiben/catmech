@@ -16,12 +16,17 @@
 #'   clusters. Each completed analysis then uses a cluster-robust variance, pooled by
 #'   Rubin's rules with complete-data degrees of freedom of clusters minus one. A fit
 #'   from `catmech_reference(cluster = )` uses its own column by default. With few
-#'   clusters, or a few influential ones, these intervals can be too narrow.
+#'   clusters, or a few influential ones, these intervals can be too narrow. A coefficient
+#'   determined by a single cluster, such as a site type found at one site, draws a warning,
+#'   because its interval can be far too narrow. This variance repairs the analysis step only:
+#'   linear imputation without `cluster` still undercovered on real items after it.
 #' @param cluster_variance With `cluster`, `"cv3"` (the default) for the delete-one-cluster
 #'   jackknife, or `"cr1s"` for the form with factor (G / (G - 1)) ((n - 1) / (n - p)), the
 #'   default through version 0.6.0. A planned test chose `"cv3"`, narrowly, as documented
 #'   in `validation/VARIANCE_MI_SYNTHESIS.md`. It gives wider intervals than `"cr1s"`.
-#' @details When the workflow declares that no target cells were imputed, all
+#' @details When every audited row agreed and recorded values were kept, the interpretation
+#'   ends in `_recorded_kept`, and a warning repeats that those records are treated as correct.
+#'   When the workflow declares that no target cells were imputed, all
 #'   completed analysis frames must agree and ordinary complete-data t intervals
 #'   are returned. A zero estimated between-imputation variance alone does not
 #'   activate this rule. Predictive matching and reference-subset results retain
@@ -109,10 +114,18 @@ catmech_pool_lm <- function(result, formula, conf_level = 0.95,
       stop("cluster must name a column in the completed data.", call. = FALSE)
     ids <- result$completed[[1]][[cluster_name]]
     if (anyNA(ids)) stop("cluster must not contain missing values.", call. = FALSE)
+    if (any(!nzchar(trimws(as.character(ids))))) stop("cluster must not contain blank values.", call. = FALSE)
     clusters <- length(unique(ids))
     if (clusters < 2L) stop("A cluster-robust variance needs at least two clusters.", call. = FALSE)
     robust <- lapply(fits, if (cluster_variance == "cv3") catmech_cluster_jackknife else catmech_cluster_vcov, ids = ids)
+    alone <- catmech_cluster_alone(fits[[1]], ids)
+    if (length(alone))
+      warning("A single cluster determines these coefficients, so their cluster-robust intervals can be far too narrow: ",
+              paste(alone, collapse = ", "), ".", call. = FALSE)
   }
+  recorded_kept <- identical(result[["spec"]][["recorded_fit"]], "recorded_kept_all_calibration_rows_agree")
+  if (recorded_kept)
+    warning("Every audited row agreed, so unaudited recorded values were kept, and these intervals treat them as correct.", call. = FALSE)
   output <- lapply(terms, function(term) {
     Q <- vapply(fits, function(f) unname(stats::coef(f)[term]), numeric(1))
     U <- if (is.null(robust)) vapply(fits, function(f) unname(stats::vcov(f)[term, term]), numeric(1)) else
@@ -125,6 +138,8 @@ catmech_pool_lm <- function(result, formula, conf_level = 0.95,
       mice::pool.scalar(Q, U, n = ns[1], k = ns[1] - dfs[1])
     if (!is.finite(pooled$qbar) || !is.finite(pooled$t) || pooled$t <= 0 ||
         is.na(pooled$df) || pooled$df <= 0)
+      stop("Pooled uncertainty is degenerate or nonfinite; a confidence interval cannot be reported.", call. = FALSE)
+    if (!is.null(robust) && pooled$t <= (sqrt(.Machine$double.eps) * abs(pooled$qbar))^2)
       stop("Pooled uncertainty is degenerate or nonfinite; a confidence interval cannot be reported.", call. = FALSE)
     se <- sqrt(pooled$t)
     critical <- stats::qt((1 + conf_level)/2, pooled$df)
@@ -139,6 +154,7 @@ catmech_pool_lm <- function(result, formula, conf_level = 0.95,
       row$cluster_variance <- cluster_variance
       row$interpretation <- paste0(row$interpretation, "_cluster_robust")
     }
+    if (recorded_kept) row$interpretation <- paste0(row$interpretation, "_recorded_kept")
     row
   })
   do.call(rbind, output)
@@ -162,6 +178,23 @@ catmech_cluster_jackknife <- function(fit, ids) {
   }
   g <- length(units)
   out * (g - 1) / g
+}
+
+# Coefficients that a single cluster determines: deleting that cluster leaves them inestimable.
+# A zero eigenvalue v of the block gives the null direction (X'X)^-1 X_g' v of the design without it.
+catmech_cluster_alone <- function(fit, ids) {
+  x <- stats::model.matrix(fit)
+  bread <- chol2inv(qr.R(fit$qr))
+  flagged <- logical(ncol(x))
+  for (u in split(seq_len(nrow(x)), as.character(ids))) {
+    xg <- x[u, , drop = FALSE]
+    block <- eigen(diag(length(u)) - xg %*% bread %*% t(xg), symmetric = TRUE)
+    zero <- block$values <= 1e-10
+    if (!any(zero)) next
+    direction <- bread %*% crossprod(xg, block$vectors[, zero, drop = FALSE])
+    flagged <- flagged | apply(abs(direction), 1L, max) > 1e-8 * max(abs(direction))
+  }
+  names(stats::coef(fit))[flagged]
 }
 
 # Cluster-robust covariance of one fitted linear model with factor (G / (G - 1)) ((n - 1) / (n - p)).
@@ -192,11 +225,17 @@ catmech_cluster_vcov <- function(fit, ids) {
 #' @param expected_scenarios Optional character vector naming the complete
 #'   prespecified set. Omitted members are recorded as failures; unplanned extras
 #'   are rejected. Without this argument only supplied scenarios can be checked.
+#' @param cluster,cluster_variance Passed to [catmech_pool_lm()], so that fits made with
+#'   and without `catmech_reference(cluster = )` can be compared under the same variance.
+#'   Without `cluster`, a fit with its own cluster column uses a cluster-robust variance and
+#'   a fit without one a model-based variance, and their widths are not comparable.
 #' @return A list with table, status, complete, successful_envelope and
 #'   interpretation. An incomplete scenario set always has an unresolved status.
 #' @export
 catmech_sensitivity <- function(results, formula, term, reference = 0,
-                                conf_level = 0.95, expected_scenarios = NULL) {
+                                conf_level = 0.95, expected_scenarios = NULL,
+                                cluster = NULL, cluster_variance = c("cv3", "cr1s")) {
+  cluster_variance <- match.arg(cluster_variance)
   if (!is.list(results) || !length(results) || is.null(names(results)) ||
       anyNA(names(results)) || any(!nzchar(names(results))) || anyDuplicated(names(results)))
     stop("results must be a nonempty list with unique scenario names.", call. = FALSE)
@@ -227,7 +266,8 @@ catmech_sensitivity <- function(results, formula, term, reference = 0,
   records <- lapply(names(results), function(name) {
     fit <- results[[name]]
     summary <- if (inherits(fit, "error")) fit else tryCatch(
-      catmech_pool_lm(fit, formula, conf_level, allow_sensitivity = TRUE), error = identity)
+      catmech_pool_lm(fit, formula, conf_level, allow_sensitivity = TRUE, cluster = cluster,
+                      cluster_variance = cluster_variance), error = identity)
     if (!inherits(summary, "error") && !term %in% summary$term)
       summary <- simpleError(paste("Coefficient not found:", term))
     if (inherits(summary, "error")) return(data.frame(scenario = name, status = "failed",

@@ -1,0 +1,2 @@
+Replayed all 148500 study requests under `cv3` through the package's own `catmech_reference()` and `catmech_pool_lm()`, using the runner's cohort and audit functions and the study's seeds.
+148486 returned intervals, and the rest match the study's refusals. Largest difference: estimate 1.1e-14, standard error 4.88e-15, degrees of freedom 1.78e-12. In 265 requests with almost no between-imputation variance, degrees of freedom differ by up to 0.00671, from the runner fault the plan describes. Coverage flips: 0.

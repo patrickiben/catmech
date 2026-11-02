@@ -27,17 +27,25 @@ def load(path, method_field, cover, width, se):
             if r["status"] != "ok":
                 continue
             out[(r[method_field], r["analysis"], float(r["fraction"]), int(r["replicate"]))] = {
-                "error": float(r["estimate"])-float(r["target"]), "estimate": float(r["estimate"]), "cover": float(r[cover]), "width": float(r[width]), "se": float(r[se]), "logged": int(r.get("logged") or 0)}
+                "error": float(r["estimate"])-float(r["target"]), "estimate": float(r["estimate"]), "cover": float(r[cover]), "width": float(r[width]), "se": float(r[se]), "logged": int(r.get("logged") or 0), "between": float(r.get("between") or 0)}
     return out
+
+
+def failed_rows(path):
+    with gzip.open(path, "rt", newline="", encoding="utf-8") as stream:
+        return {(r["method"], r["analysis"], float(r["fraction"]), int(r["replicate"])) for r in csv.DictReader(stream) if r["status"] != "ok"}
 
 
 study = load(ROOT/"validation/outside-methods-study/replicates.csv.gz", "method", "cover", "width", "se")
 rerun = load(ROOT/"validation/outside-methods-sensitivity/replicates.csv.gz", "method", "cover", "width", "se")
 earlier = load(ROOT/"validation/variance-mi-study/replicates.csv.gz", "imputer", "cover_cv3", "width_cv3", "se_cv3")
+rerun_failed = failed_rows(ROOT/"validation/outside-methods-sensitivity/replicates.csv.gz")
 
 
 def with_rerun(method, analysis, fraction, replicate):
     key = (method, analysis, fraction, replicate)
+    if key in rerun_failed:
+        return None
     return rerun.get(key, study.get(key))
 
 
@@ -91,6 +99,43 @@ say()
 with gzip.open(ROOT/"validation/outside-methods-study/replicates.csv.gz", "rt", newline="", encoding="utf-8") as stream:
     lmer = [int(r["singular"]) > 0 for r in csv.DictReader(stream) if r["method"] == "mice_2l_lmer"]
 say(f"MICE_2L_LMER, first run: requests with a singular fit in at least one imputation, {100*sum(lmer)/len(lmer):.1f}%")
+say()
+lost = {}
+for key in rerun_failed:
+    if key[0] == "mice_2l_lmer":
+        lost[(key[1], key[2])] = lost.get((key[1], key[2]), 0)+1
+say("MICE_2L_LMER WITH EPS = 0, requests with no interval: "+"; ".join(f"{a} {int(f*100)}% {n}" for (a, f), n in sorted(lost.items())))
+say()
+say("OPTION AGAINST MICE_2L_LMER, AUDITED VALUE AS PREDICTOR, first run, paired: bias difference in percent of the target, with Monte Carlo error, and RMSE ratio option over mice")
+for cell in ("covariate_shift", "covariate_under", "covariate_row_only"):
+    for fraction in (.25, .5):
+        both = [r for r in range(1, 501) if ("random_intercept", cell, fraction, r) in earlier and ("mice_2l_lmer", cell, fraction, r) in study]
+        a = [earlier[("random_intercept", cell, fraction, r)]["error"] for r in both]
+        b = [study[("mice_2l_lmer", cell, fraction, r)]["error"] for r in both]
+        gaps = [100*(x-y)/.5 for x, y in zip(a, b)]
+        say(f"  {cell} {int(fraction*100)}%: {statistics.mean(gaps):+.1f} (MC error {statistics.stdev(gaps)/math.sqrt(len(gaps)):.1f}); {rmse(a)/rmse(b):.3f}")
+say()
+say("EVERY AUDITED ROW AGREED, real items at 25%, so recorded values were kept: share of requests, and coverage on them against the rest. Linear MI and the option under cv3")
+for item in ITEMS:
+    parts = []
+    for name in ("linear_mi", "random_intercept"):
+        rows_all = [earlier[(name, item, .25, r)] for r in range(1, 2001) if (name, item, .25, r) in earlier]
+        kept = [v for v in rows_all if v["between"] == 0]
+        rest = [v for v in rows_all if v["between"] != 0]
+        parts.append(f"{name} {100*len(kept)/len(rows_all):.1f}%"+(f", coverage {100*statistics.mean(v['cover'] for v in kept):.1f} against {100*statistics.mean(v['cover'] for v in rest):.1f}" if kept else ""))
+    say(f"  {item}: "+"; ".join(parts))
+say()
+say("RECORDED OVER THE BEST AUDIT-USING METHOD, real items at 25%, RMSE ratio with a cohort-resampling range, 2.5% to 97.5%")
+AUDIT = [("audited_only", study), ("difference", study), ("raking", study), ("mice_2l_lmer", study), ("mice_2l_pan", study), ("random_intercept", earlier), ("linear_mi", earlier)]
+for item in ITEMS:
+    reps = list(range(1, 2001))
+    errs = {name: {r: source[(name, item, .25, r)]["error"] for r in reps if (name, item, .25, r) in source} for name, source in AUDIT}
+    errs["recorded"] = {r: study[("recorded", item, .25, r)]["error"] for r in reps}
+    def ratio(sample):
+        best = min(rmse([errs[name][r] for r in sample if r in errs[name]]) for name, _ in AUDIT)
+        return rmse([errs["recorded"][r] for r in sample])/best
+    resampled = sorted(ratio([reps[rng.randrange(len(reps))] for _ in reps]) for _ in range(400))
+    say(f"  {item}: {ratio(reps):.3f} ({resampled[10]:.3f} to {resampled[389]:.3f})")
 say()
 say("RECORDED AGAINST THE OPTION, real items: RMSE ratio and recorded coverage")
 for fraction in (.25, .5):

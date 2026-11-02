@@ -248,7 +248,7 @@ test_that("the recording audit reports exact counts and clear statuses", {
   skew$r <- ifelse(skew$w > 30, skew$w, NA)
   selected <- catmech_recording_audit(skew, "w", "r")
   expect_gt(selected$selection$value, 1)
-  expect_true(any(grepl("not simple random", selected$notes)))
+  expect_true(any(grepl("may not be simple random", selected$notes)))
 })
 
 test_that("the hold-out check scores unseen references and restores RNG", {

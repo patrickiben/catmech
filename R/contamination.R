@@ -57,7 +57,7 @@
 #' Reference selection and missing recorded values must be ignorable given the
 #' predictors, recorded value and strata. Selection may therefore depend on the
 #' recorded value, as in a targeted audit of unusual records; [catmech_reference()]
-#' does not support that. Errors must be nondifferential given the strata: they may
+#' supports that only with `use_recorded = TRUE`. Errors must be nondifferential given the strata: they may
 #' not depend on the outcome or true value once the strata are fixed.
 #'
 #' Recorded values that look unusual relative to `Z beta` are more likely to be
@@ -583,9 +583,11 @@ catmech_recording_audit <- function(data, value, reference, by = NULL, agreement
     }))
   }
   smd <- NA_real_
+  selection_n <- c(NA_real_, NA_real_)
   if (sum(recorded & known) > 1L && sum(recorded & !known) > 1L) {
     a <- W[recorded & known]
     b <- W[recorded & !known]
+    selection_n <- c(length(a), length(b))
     spread <- sqrt((stats::var(a) + stats::var(b)) / 2)
     if (is.finite(spread) && spread > 0) smd <- (mean(a) - mean(b)) / spread
   }
@@ -601,8 +603,8 @@ catmech_recording_audit <- function(data, value, reference, by = NULL, agreement
     if (!is.null(heterogeneity) && any(heterogeneity$p_value < .05, na.rm = TRUE))
       paste0("Disagreement rates differ across: ", paste(heterogeneity$column[which(heterogeneity$p_value < .05)], collapse = ", "),
              ". Consider declaring these as strata."),
-    if (is.finite(smd) && abs(smd) > .2)
-      "Recorded values differ between referenced and unreferenced rows, so reference selection is not simple random sampling.")
+    if (is.finite(smd) && abs(smd) / sqrt(1 / selection_n[1L] + 1 / selection_n[2L]) > 3.29)
+      "Recorded values differ between referenced and unreferenced rows by more than sampling noise, so reference selection may not be simple random sampling.")
   list(status = status, overall = overall, by = table_by, heterogeneity = heterogeneity,
        selection = data.frame(measure = "recorded_value_standardized_difference", value = smd,
                               stringsAsFactors = FALSE),
@@ -650,7 +652,7 @@ catmech_contamination_exact_test <- function(counts) {
 catmech_holdout_check <- function(fit, folds = 5L, m = 40L, level = 0.9, seed = 1L) {
   if (!inherits(fit, "catmech_result")) stop("Expected a catmech_result.", call. = FALSE)
   engine <- fit$manifest$engine
-  if (!engine %in% c("reference_contamination", "reference_normal", "reference_normal_recorded"))
+  if (!isTRUE(engine %in% c("reference_contamination", "reference_normal", "reference_normal_recorded")))
     stop("Hold-out checks support the contamination and normal reference workflows.", call. = FALSE)
   check_count(folds, "folds", 2L)
   check_count(m, "m", 20L)
@@ -674,7 +676,8 @@ catmech_holdout_check <- function(fit, folds = 5L, m = 40L, level = 0.9, seed = 
   assignment <- integer(length(rows))
   for (g in unique(group)) {
     members <- which(group == g)
-    assignment[members[sample.int(length(members))]] <- sample(rep_len(sample.int(folds), length(members)))
+    fold_labels <- rep_len(sample.int(folds), length(members))
+    assignment[members[sample.int(length(members))]] <- fold_labels[sample.int(length(fold_labels))]
   }
   refit <- function(train, fold_seed) {
     if (contamination) {
@@ -686,9 +689,9 @@ catmech_holdout_check <- function(fit, folds = 5L, m = 40L, level = 0.9, seed = 
         burnin = spec$burnin, iterations = spec$iterations, max_iterations = spec$max_iterations,
         chains = spec$chains)
     } else {
-      catmech_reference(train, spec$value, spec$reference, spec$predictors, method = "normal",
+      suppressWarnings(catmech_reference(train, spec$value, spec$reference, spec$predictors, method = "normal",
                         m = m, seed = fold_seed, use_recorded = identical(engine, "reference_normal_recorded"),
-                        cluster = spec[["cluster"]])
+                        cluster = spec[["cluster"]]))
     }
   }
   results <- list()

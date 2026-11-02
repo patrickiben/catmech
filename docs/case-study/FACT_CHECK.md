@@ -2,7 +2,7 @@
 
 Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-02. Each row recomputes the number from its source, and most sources are frozen results tables that the script only reads. A document fails if it contains a digit or number word that no row covers, or if a row's text no longer appears in it. Rerun with `python3 docs/case-study/fact_check.py`.
 
-**Result: all 101 claims match their sources.** PDF: 1 page, generated from the current `CASE_STUDY.md`. Relative links and README tool paths checked: 115, 0 broken. External DOI links were not checked, because this check stays offline. Negative controls: a changed number, an added number, an added number word, a wrong claim value, an unnegated publication claim, a listed term and broken links were all caught.
+**Result: all 107 claims match their sources.** PDF: 1 page, generated from the current `CASE_STUDY.md`. Relative links and README tool paths checked: 122, 0 broken. External DOI links were not checked, because this check stays offline. Negative controls: a changed number, an added number, an added number word, a wrong claim value, an unnegated publication claim, a listed term and broken links were all caught.
 
 ## README.md front page
 
@@ -28,7 +28,7 @@ Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-02. Each row reco
 | `three rare` | Second clustered-audit test, 25%: items where its recovery RMSE was above linear MI's | `validation/clustered-fix-study/ratios.csv` | Match |
 | `4%` | Second clustered-audit test, 25%: smallest rise in recovery RMSE on a rare item | `validation/clustered-fix-study/ratios.csv` | Match |
 | `5%` | Second clustered-audit test, 25%: largest rise in recovery RMSE on a rare item | `validation/clustered-fix-study/ratios.csv` | Match |
-| `0.7.0` | Package version | `DESCRIPTION` | Match |
+| `0.7.1` | Package version | `DESCRIPTION` | Match |
 | `25%` | Audit fraction: mean referenced rows over cohort size, ClinicalTrials.gov cell | `validation/real-data-study/summary.csv` | Match |
 | `25%` | Audit fraction: mean referenced rows over cohort size, NHANES cell | `validation/real-data-study/summary.csv` | Match |
 | `0.0286` | RMSE, linear MI, ClinicalTrials.gov, 25% | `validation/real-data-study/summary.csv` | Match |
@@ -60,6 +60,12 @@ Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-02. Each row reco
 | `79.3%` | Coverage, contamination model, synthetic selection on true value with errors | `validation/contamination-study/summary.csv` | Match |
 | `7.3%` | Coverage, reference normal, synthetic selective references | `validation/contamination-study/summary.csv` | Match |
 | `52.7%` | Coverage, reference normal, synthetic noisy references | `validation/contamination-study/summary.csv` | Match |
+| `38.0%` | Coverage, linear MI, synthetic noisy references | `validation/contamination-study/summary.csv` | Match |
+| `74.0%` | Coverage, linear MI, synthetic selection on the true value | `validation/contamination-study/summary.csv` | Match |
+| `81%` | Corrected-variance test, 25%: linear MI's lowest coverage under cv3 | `validation/VARIANCE_MI_SYNTHESIS.md` | Match |
+| `86%` | Corrected-variance test, 25%: top of linear MI's range on the worst items under cv3 | `validation/VARIANCE_MI_SYNTHESIS.md` | Match |
+| `94%` | Corrected-variance test, 25%: the recount under cv3 on iron, the lowest of those items | `validation/VARIANCE_MI_SYNTHESIS.md` | Match |
+| `97%` | Corrected-variance test, 25%: the recount under cv3 on pnc, the highest of those items | `validation/VARIANCE_MI_SYNTHESIS.md` | Match |
 | `10%` | Planner's limit on median width error | `validation/AUDIT_PLAN_SYNTHESIS.md` | Match |
 | `5%` | Smallest target audit in the planner test | `validation/audit-plan-study/summary.csv` | Match |
 | `11.3%` | Lowest planner median error at the 5% target, of four real-data cells | `validation/audit-plan-study/summary.csv` | Match |
@@ -97,7 +103,7 @@ Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-02. Each row reco
 | `three rare` | Second clustered-audit test, 25%: items where its recovery RMSE was above linear MI's | `validation/clustered-fix-study/ratios.csv` | Match |
 | `4%` | Second clustered-audit test, 25%: smallest rise in recovery RMSE on a rare item | `validation/clustered-fix-study/ratios.csv` | Match |
 | `5%` | Second clustered-audit test, 25%: largest rise in recovery RMSE on a rare item | `validation/clustered-fix-study/ratios.csv` | Match |
-| `0.7.0` | Package version | `DESCRIPTION` | Match |
+| `0.7.1` | Package version | `DESCRIPTION` | Match |
 | `November 2, 2026` | Status date | `docs/ASSESSMENT.md` | Match |
 | `Version 0.4` | Release that added the recording-error model | `NEWS.md` | Match |
 | `25%` | Audit fraction: mean referenced rows over cohort size, ClinicalTrials.gov cell | `validation/real-data-study/summary.csv` | Match |

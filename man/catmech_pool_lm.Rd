@@ -30,7 +30,10 @@ sensitivity-only label; this does not establish their inferential validity.}
 clusters. Each completed analysis then uses a cluster-robust variance, pooled by
 Rubin's rules with complete-data degrees of freedom of clusters minus one. A fit
 from `catmech_reference(cluster = )` uses its own column by default. With few
-clusters, or a few influential ones, these intervals can be too narrow.}
+clusters, or a few influential ones, these intervals can be too narrow. A coefficient
+determined by a single cluster, such as a site type found at one site, draws a warning,
+because its interval can be far too narrow. This variance repairs the analysis step only:
+linear imputation without `cluster` still undercovered on real items after it.}
 
 \item{cluster_variance}{With `cluster`, `"cv3"` (the default) for the delete-one-cluster
 jackknife, or `"cr1s"` for the form with factor (G / (G - 1)) ((n - 1) / (n - p)), the
@@ -49,7 +52,9 @@ Failed convergence is rejected. The legacy retain/replace sensitivity engine
 requires explicit opt-in and is labeled as sensitivity output.
 }
 \details{
-When the workflow declares that no target cells were imputed, all
+When every audited row agreed and recorded values were kept, the interpretation
+  ends in `_recorded_kept`, and a warning repeats that those records are treated as correct.
+  When the workflow declares that no target cells were imputed, all
   completed analysis frames must agree and ordinary complete-data t intervals
   are returned. A zero estimated between-imputation variance alone does not
   activate this rule. Predictive matching and reference-subset results retain

@@ -1,0 +1,167 @@
+Installed namespace-only model, legacy, pooling and JSON/RDS checks: PASS
+Installed namespace-only PMM, reference, adapter, audit, export and complete-reference checks: PASS
+       term  estimate std.error       df     lower     upper within_variance
+2 lab_value 0.6393485 0.1048552 56.93948 0.4293747 0.8493223     0.006929526
+  between_variance  m   n          interpretation
+2      0.003871514 20 160 conditional_model_based
+                scenario status  estimate  std.error     lower     upper
+1      ignore_categories     ok 0.6393485 0.10485521 0.4293747 0.8493223
+2 known_noisy_categories     ok 0.6548141 0.08820109 0.4795912 0.8300369
+3       exact_categories failed        NA         NA        NA        NA
+   direction          interpretation
+1      above conditional_model_based
+2      above conditional_model_based
+3 unresolved           not_available
+                                                                                    message
+1                                                                                          
+2                                                                                          
+3 A trusted value/category conflict has zero probability under the supplied category model.
+Scenario-set status: unresolved_incomplete_set 
+Descriptive finite-scenario envelope; not a calibrated confidence interval for unknown assumptions. 
+           scenario status  estimate  std.error     lower     upper direction
+1       flag_normal     ok 0.6888589 0.06635887 0.5577103 0.8200074     above
+2          flag_pmm     ok 0.6743731 0.07183590 0.5318928 0.8168534     above
+3 flag_pmm_category     ok 0.6747722 0.06970988 0.5368295 0.8127149     above
+4  reference_normal     ok 0.6482900 0.10242701 0.4399101 0.8566699     above
+5     reference_pmm     ok 0.6192946 0.11125686 0.3931180 0.8454713     above
+                   interpretation message
+1         conditional_model_based        
+2 conditional_predictive_matching        
+3 conditional_predictive_matching        
+4     conditional_reference_model        
+5                sensitivity_only        
+Scenario-set status: direction_stable_over_supplied_scenarios 
+Descriptive finite-scenario envelope; not a calibrated confidence interval for unknown assumptions. 
+   imputation requested reconstructed changed threshold_conflicts
+1           1        86            86      28                  17
+2           2        86            86      28                  17
+3           3        86            86      28                  17
+4           4        86            86      28                  17
+5           5        86            86      28                  17
+6           6        86            86      28                  17
+7           7        86            86      28                  17
+8           8        86            86      28                  17
+9           9        86            86      28                  17
+10         10        86            86      28                  17
+11         11        86            86      28                  17
+12         12        86            86      28                  17
+13         13        86            86      28                  17
+14         14        86            86      28                  17
+15         15        86            86      28                  17
+16         16        86            86      28                  17
+17         17        86            86      28                  17
+18         18        86            86      28                  17
+19         19        86            86      28                  17
+20         20        86            86      28                  17
+   fallback_draws threshold_violations
+1               0                    0
+2               0                    0
+3               0                    0
+4               0                    0
+5               0                    0
+6               0                    0
+7               0                    0
+8               0                    0
+9               0                    0
+10              0                    0
+11              0                    0
+12              0                    0
+13              0                    0
+14              0                    0
+15              0                    0
+16              0                    0
+17              0                    0
+18              0                    0
+19              0                    0
+20              0                    0
+          term    estimate   std.error    statistic       df      p.value
+1  (Intercept) 0.003765168 0.431433314  0.008727115 265.3627 9.930434e-01
+2    lab_value 0.725906753 0.064548453 11.245920270 213.3933 2.410809e-23
+3          age 0.001327031 0.007602934  0.174541934 275.0646 8.615680e-01
+4         sexM 0.039813776 0.132762229  0.299887823 276.2394 7.644883e-01
+5 inflammation 0.191327503 0.069514573  2.752336594 268.0463 6.321139e-03
+     q  estimate  std.error mean_reconstructed
+2  0.0 0.2420381 0.03303066              75.00
+21 0.5 0.3360531 0.05961087              80.45
+22 0.8 0.4755443 0.12011046              83.45
+23 1.0 0.7259068 0.06454845              86.00
+  rows reference_rows reference_rate calibration_rows disagreements
+1  400            100           0.25               81             5
+  disagreement_rate      lower     upper error_mean error_sd
+1         0.0617284 0.02394187 0.1299881   9.733082  1.97794
+        column level rows reference_rows reference_rate calibration_rows
+1 outlier_flag    No  363             89      0.2451791               70
+2 outlier_flag   Yes   37             11      0.2972973               11
+  disagreements disagreement_rate        lower      upper error_mean error_sd
+1             0         0.0000000 6.989747e-06 0.03512488         NA       NA
+2             5         0.4545455 1.996643e-01 0.73013625   9.733082  1.97794
+[1] "Disagreement rates differ across: outlier_flag. Consider declaring these as strata."
+           parameter        mean          sd         lower        upper
+1   beta:(Intercept) 2.215092921 0.269795078  1.710478e+00  2.771003716
+2           beta:age 0.024776875 0.004953867  1.479178e-02  0.034234167
+3          beta:sexM 0.060826801 0.090301337 -1.168424e-01  0.232715605
+4  beta:inflammation 0.302712493 0.049489268  2.091563e-01  0.399616989
+5       beta:outcome 0.470915734 0.036451599  4.017940e-01  0.545037281
+6              sigma 0.812841296 0.032309217  7.524184e-01  0.881364896
+7              pi:No 0.001773012 0.002534270  1.604596e-06  0.009317627
+8             pi:Yes 0.617859587 0.080837256  4.545789e-01  0.771870650
+9             mu:all 9.808760583 0.419782810  8.942497e+00 10.606124332
+10           tau:all 1.840839710 0.310792392  1.351327e+00  2.565044058
+11       latent_mean 6.565194952 0.027026761  6.512781e+00  6.619035563
+    row recorded reference corruption_stratum        evidence
+41   41 18.85243        NA                Yes posterior_model
+76   76 19.23777        NA                Yes posterior_model
+88   88 16.34995        NA                Yes posterior_model
+98   98 17.27823        NA                Yes posterior_model
+103 103 14.89005        NA                Yes posterior_model
+116 116 17.25363        NA                Yes posterior_model
+    posterior_corruption posterior_target
+41                     1         7.727444
+76                     1         6.634532
+88                     1         6.036595
+98                     1         7.445085
+103                    1         4.666945
+116                    1         7.449338
+[1] "no_miscalibration_detected"
+                   engine holdout_rows folds_completed with_recorded
+1 reference_contamination          100               5            81
+  errors_observed errors_expected calibration_z  brier_model brier_stratum_rate
+1               5         5.00087   -0.02948488 1.825313e-09         0.03826414
+  nominal_level predictive_coverage ks_p_value rmse_model rmse_recorded
+1           0.9                0.96  0.7319935  0.3652142      2.457825
+  mean_interval_width
+1           0.6015531
+             scenario status  estimate  std.error     lower     upper direction
+1    ignores_recorded     ok 0.7449280 0.08183018 0.5800502 0.9098058     above
+2       contamination     ok 0.7659136 0.05674579 0.6540852 0.8777420     above
+3  unreferenced_lower     ok 0.7626621 0.05661568 0.6511292 0.8741949     above
+4 unreferenced_higher     ok 0.7542961 0.05464244 0.6467116 0.8618806     above
+                   interpretation message
+1     conditional_reference_model        
+2 conditional_contamination_model        
+3 conditional_contamination_model        
+4 conditional_contamination_model        
+Scenario-set status: direction_stable_over_supplied_scenarios 
+  approach estimate lower upper
+1 recorded    0.135 0.080 0.223
+2  discard    0.656 0.514 0.838
+  fraction records relative_width relative_lower relative_upper
+1     0.10      60           1.49           1.31           1.73
+2     0.25     150           1.19           1.11           1.29
+3     0.50     300           1.07           1.04           1.11
+4     0.75     450           1.02           1.01           1.04
+  predictive_lower predictive_upper discard_relative_width
+1             1.14             2.12                   2.63
+2             1.07             1.43                   1.72
+3             1.02             1.14                   1.29
+4             1.01             1.05                   1.10
+  target_ratio fraction records records_lower records_upper
+1         1.25    0.194     117            75           171
+  smallest_grid_fraction
+1                   0.25
+[1] "The pilot is a simple random sample of these records."                                      
+[2] "The analysis is linear MI with Rubin's rules, using the same formula and predictors."       
+[3] "The reference is exact and measures the same quantity as the recorded value."               
+[4] "The relative widths come from a large-sample formula; small audits run wider and vary more."
+Bundled main-model, reference, legacy, contamination and audit-plan examples: PASS
+Clustered option: PASS

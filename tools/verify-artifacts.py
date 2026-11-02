@@ -1109,7 +1109,9 @@ def verify_outside_methods(folder):
     rerun = ROOT/"validation/outside-methods-sensitivity"
     for where in (folder, rerun):
         for row in rows(where/"source-hashes.csv"):
-            assert hashlib.sha256((ROOT/row["file"]).read_bytes()).hexdigest() == row["sha256"], row["file"]
+            candidate = ROOT/"validation/outside-methods-source"/row["file"]
+            path = candidate if candidate.exists() else ROOT/row["file"]
+            assert hashlib.sha256(path.read_bytes()).hexdigest() == row["sha256"], row["file"]
     with gzip.open(folder/"replicates.csv.gz", "rt", newline="", encoding="utf-8") as stream:
         records = list(csv.DictReader(stream))
     assert len(records) == 297000 and len({(r["analysis"], r["fraction"], r["replicate"], r["method"]) for r in records}) == 297000, "Missing or duplicate requests"
@@ -1142,7 +1144,7 @@ def verify_outside_methods(folder):
     assert "390 requests" in (rerun/"control.txt").read_text(encoding="utf-8"), "The rerun's control did not pass"
     synthesis = (ROOT/"validation/OUTSIDE_METHODS_SYNTHESIS.md").read_text(encoding="utf-8")
     assert "the outcome is **KEEP**" in synthesis, "Write-up does not state the outcome"
-    sources = scored+second+posthoc+"".join((ROOT/"validation"/name).read_text(encoding="utf-8") for name in ("OUTSIDE_METHODS_PLAN.md", "OUTSIDE_METHODS_SENSITIVITY_PLAN.md", "outside-methods-check.txt"))
+    sources = scored+second+posthoc+"".join((ROOT/"validation"/name).read_text(encoding="utf-8") for name in ("OUTSIDE_METHODS_PLAN.md", "OUTSIDE_METHODS_SENSITIVITY_PLAN.md", "outside-methods-check.txt", "outside-methods-twophase-check.txt"))
     decimals = lambda text: set(re.findall(r"(?<![\w.])\d+\.\d+(?![\d])", text))
     unsupported = sorted(decimals(re.sub(r"\]\([^)]*\)", "]", synthesis))-decimals(sources))
     assert not unsupported, ("Numbers in the write-up with no source", unsupported)

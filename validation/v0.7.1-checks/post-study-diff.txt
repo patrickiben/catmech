@@ -1,0 +1,12 @@
+ R/analysis.R                        | 48 ++++++++++++++++++--
+ R/audit-plan.R                      |  5 ++-
+ R/contamination.R                   | 17 ++++---
+ R/reference.R                       | 65 ++++++++++++++++++++-------
+ man/catmech_contamination.Rd        |  2 +-
+ man/catmech_pool_lm.Rd              |  9 +++-
+ man/catmech_reference.Rd            | 28 +++++++-----
+ man/catmech_sensitivity.Rd          |  9 +++-
+ tests/testthat/test-clustered.R     | 89 ++++++++++++++++++++++++++++++++++++-
+ tests/testthat/test-contamination.R |  2 +-
+ tests/testthat/test-reference.R     |  2 +-
+ 12 files changed, 230 insertions(+), 48 deletions(-)
