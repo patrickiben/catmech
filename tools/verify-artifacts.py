@@ -1099,6 +1099,57 @@ def verify_variance_mi_study(folder):
     print(f"{folder.name}: all {len(records)} planned requests, sources hashed, scored output and post-hoc table regenerated identically, the outcome re-derived as cv3, {replayed} replayed through the package: PASS")
 
 
+def verify_outside_methods(folder):
+    """Comparison with outside methods: sources, planned requests, scored output, the accuracy failures behind the outcome, the rerun and the write-up's numbers."""
+    import gzip
+    import math
+    import re
+    import subprocess
+    import sys
+    rerun = ROOT/"validation/outside-methods-sensitivity"
+    for where in (folder, rerun):
+        for row in rows(where/"source-hashes.csv"):
+            assert hashlib.sha256((ROOT/row["file"]).read_bytes()).hexdigest() == row["sha256"], row["file"]
+    with gzip.open(folder/"replicates.csv.gz", "rt", newline="", encoding="utf-8") as stream:
+        records = list(csv.DictReader(stream))
+    assert len(records) == 297000 and len({(r["analysis"], r["fraction"], r["replicate"], r["method"]) for r in records}) == 297000, "Missing or duplicate requests"
+    with gzip.open(rerun/"replicates.csv.gz", "rt", newline="", encoding="utf-8") as stream:
+        replaced = sum(1 for _ in csv.DictReader(stream))
+    assert replaced == 58356, replaced
+    run = lambda *args: subprocess.run([sys.executable, "-I", *map(str, args)], capture_output=True, text=True, check=True).stdout
+    scored = run(ROOT/"tools/outside-methods-score.py", folder)
+    assert scored.strip() == (ROOT/"validation/outside-methods-decisions.txt").read_text(encoding="utf-8").strip(), "Scored output differs from the saved decisions"
+    assert "OUTCOME: KEEP" in scored
+    second = run(ROOT/"tools/outside-methods-sensitivity-score.py")
+    assert second.strip() == (ROOT/"validation/outside-methods-sensitivity-decisions.txt").read_text(encoding="utf-8").strip(), "The rerun's score differs from the saved file"
+    assert second.startswith("POST HOC") and "OUTCOME: KEEP" in second
+    posthoc = run(ROOT/"tools/outside-methods-posthoc.py")
+    assert posthoc.strip() == (ROOT/"validation/outside-methods-posthoc.txt").read_text(encoding="utf-8").strip(), "Post-hoc output differs from the saved table"
+    # Separately from the scorer: every judged method's accuracy ratio at 25% on real items exceeds the limit in the first run.
+    with gzip.open(ROOT/"validation/variance-mi-study/replicates.csv.gz", "rt", newline="", encoding="utf-8") as stream:
+        option = {(r["analysis"], r["replicate"]): float(r["estimate"])-float(r["target"]) for r in csv.DictReader(stream) if r["imputer"] == "random_intercept" and r["status"] == "ok" and float(r["fraction"]) == .25 and r["level"] not in ("simulation", "imputed_covariate")}
+    items = sorted({k[0] for k in option})
+    assert len(items) == 11
+    for method in ("audited_only", "difference", "raking", "mice_2l_lmer", "mice_2l_pan"):
+        errors = {(r["analysis"], r["replicate"]): float(r["estimate"])-float(r["target"]) for r in records if r["method"] == method and r["status"] == "ok" and float(r["fraction"]) == .25 and r["analysis"] in items}
+        logs = []
+        for item in items:
+            both = [k for k in errors if k[0] == item and k in option]
+            logs.append(.5*math.log(sum(errors[k]**2 for k in both)/sum(option[k]**2 for k in both)))
+        assert math.exp(sum(logs)/11) > 1.05, method
+    control = (folder/"control.txt").read_text(encoding="utf-8")
+    assert "660 requests" in control and "status mismatches 0" in control, "The control did not pass"
+    assert "390 requests" in (rerun/"control.txt").read_text(encoding="utf-8"), "The rerun's control did not pass"
+    synthesis = (ROOT/"validation/OUTSIDE_METHODS_SYNTHESIS.md").read_text(encoding="utf-8")
+    assert "the outcome is **KEEP**" in synthesis, "Write-up does not state the outcome"
+    sources = scored+second+posthoc+"".join((ROOT/"validation"/name).read_text(encoding="utf-8") for name in ("OUTSIDE_METHODS_PLAN.md", "OUTSIDE_METHODS_SENSITIVITY_PLAN.md", "outside-methods-check.txt"))
+    decimals = lambda text: set(re.findall(r"(?<![\w.])\d+\.\d+(?![\d])", text))
+    unsupported = sorted(decimals(re.sub(r"\]\([^)]*\)", "]", synthesis))-decimals(sources))
+    assert not unsupported, ("Numbers in the write-up with no source", unsupported)
+    assert decimals("A made-up 12.345 here.")-decimals(sources), "Negative control: a made-up number went undetected"
+    print(f"{folder.name}: all {len(records)} planned requests and {replaced} rerun, sources hashed, three scored files regenerated identically, accuracy failures re-derived, controls passed: PASS")
+
+
 def verify_contamination_supplement(folder):
     scores = rows(folder/"corruption-scores.csv")
     main = rows(ROOT/"validation/contamination-study/replicates.csv")
@@ -2007,6 +2058,7 @@ def main():
     verify_clustered_fix_study(ROOT/"validation/clustered-fix-study")
     verify_variance_check(ROOT/"validation/variance-check")
     verify_variance_mi_study(ROOT/"validation/variance-mi-study")
+    verify_outside_methods(ROOT/"validation/outside-methods-study")
     print("This verifies correspondence and repeatability, not inferential validity.")
 
 

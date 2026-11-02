@@ -28,6 +28,8 @@ Version 0.6.0 replaces the resampling in `catmech_reference(cluster = )` with a 
 
 Version 0.7.0 changes the default variance in `catmech_pool_lm(cluster = )` to a delete-one-cluster jackknife, after a [third planned test](../validation/VARIANCE_MI_SYNTHESIS.md) that it passed narrowly. The same test found that `catmech_reference(cluster = )` biases slopes toward zero in simulations when the audited value is a predictor, so that use now draws a warning. All of this round's work comes from one assistant, with no outside review.
 
+A later [comparison with outside methods](../validation/OUTSIDE_METHODS_SYNTHESIS.md) kept `catmech_reference(cluster = )` under a rule that could have retired it, and changed no code. The margin is narrow, since `mice` offers the same model and matched its accuracy once a default was turned off. That comparison was not neutral: the option's author set up every comparator.
+
 ## Current judgment
 
 | Question | Judgment |
@@ -39,7 +41,7 @@ Version 0.7.0 changes the default variance in `catmech_pool_lm(cluster = )` to a
 | Can it say how many records to audit? | Not validated. The planner gave a NO-GO, failing only at the 5% target. It is a documented calculation, built on classical theory. |
 | Does it repair missed errors with no new information? | No. It requires genuine reference measurements. |
 | Generally valid confidence intervals? | No. Failures are recorded for each workflow. With default intervals the oracle itself undercovered on ClinicalTrials.gov and on the Rwanda audit, and no method in the real-audit test held the oracle's clustered coverage at a 25% facility audit. The experimental clustered option came closer, and still reached only 89.0% on one of nine items, against 93.2% for a recount. |
-| Does it handle clustered audits? | Partly. `catmech_pool_lm(cluster = )` is a standard cluster-robust variance. `catmech_reference(cluster = )` is experimental: better worst-case coverage when the audited value is the outcome, some added error on rare items, two planned tests that came out PARTIAL, and bias when the audited value is a predictor. |
+| Does it handle clustered audits? | Partly. `catmech_pool_lm(cluster = )` is a standard cluster-robust variance. `catmech_reference(cluster = )` is experimental: better worst-case coverage when the audited value is the outcome, some added error on rare items, two planned tests that came out PARTIAL, and bias when the audited value is a predictor. A planned comparison kept it, narrowly, over `mice` and design-based methods. |
 | Real-data evidence? | Two public datasets with real recording differences, and two public audits: Rwanda facility counts and psychology effect sizes. None is a patient-level clinical source-data audit, and the ClinicalTrials.gov reference is not independent truth. |
 | Ready for a GitHub research release? | Yes, with the recorded limitations. |
 | Ready for a methods paper or clinical use? | No. A short software paper may be realistic after review. A methods claim is not supported. |
@@ -57,7 +59,7 @@ every connection among those methods.
 3. Test the hold-out advice prospectively, since it comes from the real-data study that suggested it.
 4. Consider non-constant variance, which remains out of scope. On the Rwanda audit it and clustering together cost the oracle up to 28 points of default coverage.
 5. Test the clustered option on a second health system. Every item in the one recount available has now been seen, and two planned tests have run on it.
-6. Test `catmech_reference(cluster = )` against outside methods, with a rule that can drop the option. So far it has been compared with nothing outside the package. Rare counts also remain unsolved, even with every row checked.
+6. Have someone who knows `mice` and `survey` review the [comparison with outside methods](../validation/OUTSIDE_METHODS_SYNTHESIS.md), since one author set up every method. Rare counts also remain unsolved, even with every row checked.
 7. Test whether checking errors against analysis covariates on audited rows can guide the choice of method. The real-audit results suggested this, so they cannot test it fairly, and at a 25% audit the check has low power.
 
 Neither reproducibility nor these validation checks are proof of inferential validity. AI-assisted review is disclosed, and no independent human peer review is implied.

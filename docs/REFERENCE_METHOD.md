@@ -155,7 +155,12 @@ narrowly. `cluster_variance = "cr1s"` gives the earlier default.
 **Use `cluster` in the fit only when the audited value is the analysis outcome.** In simulations with the audited value
 as a predictor, the option biased that slope toward zero, and most when errors shifted whole clusters. A new intercept
 drawn independently of a cluster's outcomes appears to act like added noise in a predictor, though that explanation has
-not been tested. `catmech_pool_lm()` warns about this use.
+not been tested. `catmech_pool_lm()` warns about this use. `mice` with `2l.lmer` and `2l.pan` attenuated the slope in the
+same cells, so this comes from the model, not from this implementation.
+
+The same model is available in `mice`, and a [planned comparison](../validation/OUTSIDE_METHODS_SYNTHESIS.md) found the same
+accuracy once the `mice` check that can drop the recorded value was off. This method draws its variance components in
+closed form, without MCMC or `lme4`, and its intervals were slightly wider.
 
 This is ordinary multilevel imputation (Schafer and Yucel, 2002,
 [doi:10.1198/106186002760180608](https://doi.org/10.1198/106186002760180608); Grund, Lüdtke and Robitzsch, 2018,

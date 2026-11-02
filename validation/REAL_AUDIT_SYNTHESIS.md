@@ -173,7 +173,7 @@ So the model's intervals are too narrow even when errors do not track a covariat
 
 Swap-in had lower recovery RMSE than recorded in all 20 cells, but that is largely arithmetic: its error is the cohort's reported gap minus the audited rows' share of it. With the pool fixed and only the audit redrawn, it beat recorded in 14 of 20 cells and lost on all four syphilis cells and both SMD cells. It is a baseline any method should have to beat where a gap is material, not a correction: it keeps most of the bias at 25%, and it gives no interval.
 
-**A design-weighted difference estimator** uses the same proxy as raking and the known probabilities. Its recovery RMSE was lower than linear MI's in 15 of 20 cells and never more than 5% higher, while raking's was higher in all 20. So the raking column reflects this implementation, whose auxiliaries were narrowed after the pilot. It is not a verdict on design-based correction.
+**A design-weighted difference estimator** uses the same proxy as raking and the known probabilities. Its recovery RMSE was lower than linear MI's in 15 of 20 cells and never more than 5% higher, while raking's was higher in all 20. So the raking column reflects this implementation, whose auxiliaries were narrowed after the pilot. It is not a verdict on design-based correction. *Correction, added later:* this estimator's correction term is zero by the normal equations, so it is least squares on fitted values and not a difference estimator. See the [later comparison](OUTSIDE_METHODS_SYNTHESIS.md#a-correction-to-an-earlier-write-up).
 
 ## Predictions, scored
 

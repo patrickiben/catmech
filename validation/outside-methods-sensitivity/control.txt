@@ -1,0 +1,2 @@
+Control: 390 requests with no logged event in the comparison, run again with eps = 0, reproduce it. Largest gap: estimate 4e-15, standard error 5e-16, degrees of freedom 4.26e-13.
+Raking under approx against full, 49493 requests: largest gap in the point estimate 5.11e-15.

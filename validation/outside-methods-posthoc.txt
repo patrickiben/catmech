@@ -1,0 +1,64 @@
+Post hoc: made after the results, enters no rule
+
+THE MICE DEFAULT, mice_2l_lmer at 25%: requests where mice dropped a predictor; RMSE and coverage on those cohorts under the default, with eps = 0, and for the option
+  lbw: 0 of 2,000
+  resus: 0 of 2,000
+  stillbirths: 120 of 2,000, compared on 91: default RMSE 0.0059, coverage 96.7; eps = 0 RMSE 0.0033, coverage 87.9; option RMSE 0.0033, coverage 87.9
+  deliveries: 1571 of 2,000, compared on 1571: default RMSE 0.2545, coverage 58.2; eps = 0 RMSE 0.0657, coverage 94.0; option RMSE 0.0659, coverage 94.2
+  anc1_early: 0 of 2,000
+  pnc: 158 of 2,000, compared on 158: default RMSE 0.2807, coverage 74.7; eps = 0 RMSE 0.0600, coverage 78.5; option RMSE 0.0603, coverage 84.2
+  syphilis: 8 of 2,000
+  iron: 120 of 2,000, compared on 114: default RMSE 0.1492, coverage 86.0; eps = 0 RMSE 0.1796, coverage 75.4; option RMSE 0.1778, coverage 75.4
+  anc4: 0 of 2,000
+  ancnewreg: 868 of 2,000, compared on 868: default RMSE 0.3640, coverage 79.5; eps = 0 RMSE 0.1158, coverage 91.5; option RMSE 0.1156, coverage 91.5
+  livebirths: 951 of 2,000, compared on 951: default RMSE 0.2479, coverage 57.5; eps = 0 RMSE 0.0638, coverage 95.0; option RMSE 0.0641, coverage 95.2
+
+OPTION AGAINST MICE_2L_LMER WITH EPS = 0, real items at 25%: coverage difference in points with Monte Carlo error, mean width ratio, RMSE ratio
+  lbw: +1.10 (MC error 0.42); option width over mice 1.067; mice RMSE over option 0.990
+  resus: +0.75 (MC error 0.40); option width over mice 1.078; mice RMSE over option 0.984
+  stillbirths: +0.45 (MC error 0.39); option width over mice 1.057; mice RMSE over option 0.999
+  deliveries: +0.25 (MC error 0.18); option width over mice 1.011; mice RMSE over option 0.995
+  anc1_early: +2.10 (MC error 0.45); option width over mice 1.098; mice RMSE over option 1.006
+  pnc: +2.30 (MC error 0.48); option width over mice 1.084; mice RMSE over option 1.015
+  syphilis: +2.00 (MC error 0.48); option width over mice 1.048; mice RMSE over option 1.003
+  iron: +2.46 (MC error 0.54); option width over mice 1.107; mice RMSE over option 0.994
+  anc4: +1.00 (MC error 0.41); option width over mice 1.064; mice RMSE over option 1.004
+  ancnewreg: +0.60 (MC error 0.26); option width over mice 1.046; mice RMSE over option 1.001
+  livebirths: +0.55 (MC error 0.28); option width over mice 1.031; mice RMSE over option 1.008
+  Mean distance from 95, mice minus option: 1.08 points; cohort resampling, 2000 draws, 2.5% to 97.5%: 0.76 to 1.27. This treats the 11 items as fixed.
+
+MICE_2L_LMER, first run: requests with a singular fit in at least one imputation, 21.4%
+
+RECORDED AGAINST THE OPTION, real items: RMSE ratio and recorded coverage
+  25%:
+    lbw: 1.271, coverage 65.7
+    resus: 2.107, coverage 63.0
+    stillbirths: 0.915, coverage 85.1
+    deliveries: 0.952, coverage 95.0
+    anc1_early: 2.053, coverage 40.6
+    pnc: 0.991, coverage 60.8
+    syphilis: 0.737, coverage 95.4
+    iron: 1.054, coverage 63.2
+    anc4: 2.102, coverage 45.3
+    ancnewreg: 0.956, coverage 90.4
+    livebirths: 0.835, coverage 95.5
+  50%:
+    lbw: 1.627, coverage 62.6
+    resus: 3.722, coverage 63.6
+    stillbirths: 1.292, coverage 84.2
+    deliveries: 1.007, coverage 95.4
+    anc1_early: 2.827, coverage 42.2
+    pnc: 1.306, coverage 62.0
+    syphilis: 0.856, coverage 95.2
+    iron: 1.445, coverage 64.4
+    anc4: 3.408, coverage 43.0
+    ancnewreg: 1.052, coverage 90.6
+    livebirths: 0.910, coverage 95.8
+
+STANDARD ERROR OVER THE SPREAD OF THE ESTIMATE, simulated shift cells
+  none_shift 25%: difference 0.83; raking, full 0.63; raking, approx 0.85; audited_only 0.99
+  none_shift 50%: difference 0.92; raking, full 0.50; raking, approx 0.93; audited_only 1.06
+  rwanda_shift 25%: difference 0.62; raking, full 0.63; raking, approx 0.76; audited_only 1.34
+  rwanda_shift 50%: difference 0.87; raking, full 0.53; raking, approx 0.88; audited_only 1.14
+  pairs_shift 25%: difference 0.36; raking, full 0.54; raking, approx 0.66; audited_only 1.48
+  pairs_shift 50%: difference 0.83; raking, full 0.54; raking, approx 0.90; audited_only 1.22
