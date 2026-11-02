@@ -1,0 +1,2 @@
+Check of the plan's fixed-dataset conditions, on four simulated cohorts with seeds used nowhere else.
+Largest gap: twophase weights against N_h / m_h 4.44e-16; difference estimate against survey 5.55e-16; relative gap in phase one variance, apart from the factor G / (G - 1) in the plan's form, 6.66e-16; relative gap in phase two variance 4.44e-16; fitted_value correction term 3.76e-16.

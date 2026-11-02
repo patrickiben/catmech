@@ -83,6 +83,8 @@ def bias(method, key):
 def paired_ratio(method, key):
     a, b = store[method][key], store[OPTION][key]
     both = [r for r in a if a[r] is not None and b.get(r) is not None]
+    if not both:
+        return float("nan")
     return math.sqrt(sum(a[r][0]**2 for r in both)/sum(b[r][0]**2 for r in both))
 
 
