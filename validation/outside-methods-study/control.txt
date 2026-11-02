@@ -1,0 +1,2 @@
+Control: the option run afresh through the package on the first 10 cohorts of every cell, 660 requests.
+Largest gap against the saved study: estimate 6.77e-15, standard error 2.22e-15, degrees of freedom 8.31e-13, target 4.44e-16; status mismatches 0.

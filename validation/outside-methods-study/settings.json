@@ -1,0 +1,13 @@
+{
+  "mode": "study",
+  "m": 20,
+  "reps_real_25": 2000,
+  "reps_other": 500,
+  "control_reps": 10,
+  "seeds": {
+    "covariate_cohort": 1700100000,
+    "covariate_imputation": 1710000000,
+    "lmer": 1950000000,
+    "pan": 1970000000
+  }
+}

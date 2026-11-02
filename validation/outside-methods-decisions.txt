@@ -1,0 +1,174 @@
+Scored against validation/OUTSIDE_METHODS_PLAN.md
+
+REQUESTS AND STATUSES
+  recorded: ok 49500; requests with a logged event from mice 0
+  audited_only: ok 49499, refused 1; requests with a logged event from mice 0
+  difference: ok 49500; requests with a logged event from mice 0
+  raking: ok 49493, failed 7; requests with a logged event from mice 0
+  mice_2l_lmer: ok 48496, failed 1004; requests with a logged event from mice 4424
+  mice_2l_pan: ok 49496, failed 4; requests with a logged event from mice 4424
+    audited_only: 1 x The audited rows have no residual variance.
+    mice_2l_lmer: 1003 x lmer does not run.
+    mice_2l_lmer: 1 x missing values in object
+    mice_2l_pan: 3 x No class variable
+    mice_2l_pan: 1 x missing values in object
+    raking: 7 x NA/NaN/Inf in foreign function call (arg 5)
+
+OPTION, the comparison point: real 25% at least 92 on 9 of 11, distance 1.47; real 50% at least 92 on 10 of 11, distance 1.25; simulated cells in limits 30 of 36
+
+DECISION RULE
+  audited_only:
+    N1 RMSE ratio, real 25%: 1.618 (FAIL)
+    N2 RMSE ratio, real 50%: 1.349 (FAIL)
+    N3 real 25%: at least 92 on 10, at most 98 on 11, distance 1.65 (pass)
+    N4 real 50%: at least 92 on 10, at most 98 on 11, distance 1.69 (pass)
+    N5 simulations: RMSE ratio 1.428, cells in limits 34 of 36 (FAIL)
+    N6 available: 100.00%, 100.00%, 100.00% (pass)
+    No worse: no
+  difference:
+    N1 RMSE ratio, real 25%: 1.199 (FAIL)
+    N2 RMSE ratio, real 50%: 1.136 (FAIL)
+    N3 real 25%: at least 92 on 0, at most 98 on 11, distance 15.86 (FAIL)
+    N4 real 50%: at least 92 on 2, at most 98 on 11, distance 6.16 (FAIL)
+    N5 simulations: RMSE ratio 1.083, cells in limits 2 of 36 (FAIL)
+    N6 available: 100.00%, 100.00%, 100.00% (pass)
+    No worse: no
+  raking:
+    N1 RMSE ratio, real 25%: 1.386 (FAIL)
+    N2 RMSE ratio, real 50%: 1.125 (FAIL)
+    N3 real 25%: at least 92 on 0, at most 98 on 11, distance 25.06 (FAIL)
+    N4 real 50%: at least 92 on 0, at most 98 on 11, distance 29.91 (FAIL)
+    N5 simulations: RMSE ratio 1.130, cells in limits 0 of 36 (FAIL)
+    N6 available: 99.97%, 100.00%, 100.00% (pass)
+    No worse: no
+  mice_2l_lmer:
+    N1 RMSE ratio, real 25%: 1.348 (FAIL)
+    N2 RMSE ratio, real 50%: 1.121 (FAIL)
+    N3 real 25%: at least 92 on 4, at most 98 on 11, distance 7.16 (FAIL)
+    N4 real 50%: at least 92 on 8, at most 98 on 11, distance 3.33 (FAIL)
+    N5 simulations: RMSE ratio 1.015, cells in limits 30 of 36 (pass)
+    N6 available: 100.00%, 100.00%, 99.98% (pass)
+    No worse: no
+  mice_2l_pan:
+    N1 RMSE ratio, real 25%: 1.353 (FAIL)
+    N2 RMSE ratio, real 50%: 1.127 (FAIL)
+    N3 real 25%: at least 92 on 6, at most 98 on 9, distance 4.74 (FAIL)
+    N4 real 50%: at least 92 on 8, at most 98 on 10, distance 3.07 (FAIL)
+    N5 simulations: RMSE ratio 1.016, cells in limits 33 of 36 (pass)
+    N6 available: 100.00%, 100.00%, 99.98% (pass)
+    No worse: no
+
+OUTCOME: KEEP. No comparator was no worse than the option.
+
+REAL ITEMS AT 25%: coverage, then RMSE ratio against the option
+  lbw          oracle 92.0/0.689; linear_mi 92.5/0.982; random_intercept 94.0/1.000; recorded 65.7/1.271; audited_only 95.9/1.383; difference 82.2/1.112; raking 73.2/1.185; mice_2l_lmer 92.9/0.990; mice_2l_pan 96.2/1.076
+  resus        oracle 96.7/0.342; linear_mi 96.0/0.965; random_intercept 96.7/1.000; recorded 63.0/2.107; audited_only 96.0/0.978; difference 76.7/1.939; raking 78.9/0.997; mice_2l_lmer 95.9/0.984; mice_2l_pan 98.0/1.055
+  stillbirths  oracle 96.8/0.604; linear_mi 94.3/0.960; random_intercept 95.1/1.000; recorded 85.2/0.915; audited_only 95.1/1.619; difference 90.3/0.990; raking 79.7/1.245; mice_2l_lmer 95.0/1.040; mice_2l_pan 99.9/1.280
+  deliveries   oracle 92.6/0.920; linear_mi 91.5/1.066; random_intercept 93.6/1.000; recorded 95.0/0.952; audited_only 94.0/2.398; difference 83.3/1.091; raking 70.8/1.779; mice_2l_lmer 65.3/3.413; mice_2l_pan 78.6/3.055
+  anc1_early   oracle 95.5/0.602; linear_mi 81.6/1.228; random_intercept 92.8/1.000; recorded 40.6/2.053; audited_only 95.2/1.552; difference 75.8/1.372; raking 70.8/1.336; mice_2l_lmer 90.7/1.006; mice_2l_pan 91.8/1.009
+  pnc          oracle 97.0/0.650; linear_mi 86.1/1.152; random_intercept 94.4/1.000; recorded 60.8/0.991; audited_only 96.3/1.374; difference 74.4/1.182; raking 62.5/1.352; mice_2l_lmer 91.8/1.496; mice_2l_pan 92.5/1.501
+  syphilis     oracle 96.0/0.715; linear_mi 84.2/1.071; random_intercept 90.0/1.000; recorded 95.4/0.737; audited_only 86.1/1.763; difference 80.8/1.030; raking 55.6/1.467; mice_2l_lmer 87.8/1.008; mice_2l_pan 87.5/1.022
+  iron         oracle 94.3/0.532; linear_mi 81.0/1.231; random_intercept 91.9/1.000; recorded 63.2/1.054; audited_only 95.8/1.443; difference 58.9/1.289; raking 56.7/1.410; mice_2l_lmer 90.0/0.979; mice_2l_pan 91.6/0.991
+  anc4         oracle 97.5/0.557; linear_mi 91.8/1.052; random_intercept 94.8/1.000; recorded 45.3/2.102; audited_only 92.9/1.583; difference 83.1/1.182; raking 71.7/1.366; mice_2l_lmer 93.8/1.004; mice_2l_pan 94.2/1.004
+  ancnewreg    oracle 95.7/0.830; linear_mi 88.8/1.173; random_intercept 94.2/1.000; recorded 90.4/0.956; audited_only 96.7/2.038; difference 79.6/1.192; raking 75.9/1.660; mice_2l_lmer 88.4/2.115; mice_2l_pan 94.2/1.833
+  livebirths   oracle 94.5/0.848; linear_mi 92.8/1.061; random_intercept 94.8/1.000; recorded 95.5/0.835; audited_only 94.8/2.167; difference 85.5/1.037; raking 73.4/1.634; mice_2l_lmer 76.4/2.458; mice_2l_pan 86.4/2.219
+
+REAL ITEMS AT 50%: coverage, then RMSE ratio against the option
+  lbw          oracle 93.2/0.860; linear_mi 91.8/1.002; random_intercept 93.4/1.000; recorded 62.6/1.627; audited_only 94.0/1.276; difference 85.6/1.016; raking 58.4/1.033; mice_2l_lmer 92.0/0.999; mice_2l_pan 93.4/1.006
+  resus        oracle 97.8/0.607; linear_mi 96.0/0.967; random_intercept 97.2/1.000; recorded 63.6/3.722; audited_only 94.6/0.987; difference 86.4/1.772; raking 71.6/0.957; mice_2l_lmer 95.4/0.988; mice_2l_pan 97.4/1.044
+  stillbirths  oracle 96.6/0.866; linear_mi 95.8/1.010; random_intercept 95.8/1.000; recorded 84.2/1.292; audited_only 95.6/1.402; difference 92.8/1.023; raking 65.0/1.059; mice_2l_lmer 95.4/1.012; mice_2l_pan 99.8/1.090
+  deliveries   oracle 94.2/0.988; linear_mi 93.4/1.049; random_intercept 94.8/1.000; recorded 95.4/1.007; audited_only 95.6/1.614; difference 88.8/1.062; raking 59.6/1.215; mice_2l_lmer 80.6/2.049; mice_2l_pan 83.4/1.982
+  anc1_early   oracle 96.4/0.778; linear_mi 90.4/1.103; random_intercept 95.6/1.000; recorded 42.2/2.827; audited_only 95.4/1.338; difference 90.2/1.227; raking 67.0/1.153; mice_2l_lmer 95.0/0.999; mice_2l_pan 95.8/0.998
+  pnc          oracle 97.6/0.900; linear_mi 88.8/1.150; random_intercept 94.4/1.000; recorded 62.0/1.306; audited_only 97.0/1.304; difference 88.4/1.183; raking 70.2/1.264; mice_2l_lmer 93.4/1.010; mice_2l_pan 93.6/1.002
+  syphilis     oracle 95.8/0.828; linear_mi 89.4/1.019; random_intercept 90.2/1.000; recorded 95.2/0.856; audited_only 85.2/1.468; difference 88.6/0.953; raking 57.0/1.153; mice_2l_lmer 90.0/1.006; mice_2l_pan 90.2/1.010
+  iron         oracle 94.0/0.748; linear_mi 88.6/1.094; random_intercept 95.0/1.000; recorded 64.4/1.445; audited_only 94.8/1.292; difference 84.6/1.127; raking 66.4/1.181; mice_2l_lmer 93.0/0.996; mice_2l_pan 95.4/1.003
+  anc4         oracle 97.6/0.880; linear_mi 97.2/1.054; random_intercept 97.4/1.000; recorded 43.0/3.408; audited_only 93.8/1.435; difference 95.2/1.166; raking 75.4/1.162; mice_2l_lmer 97.6/1.014; mice_2l_pan 97.6/1.024
+  ancnewreg    oracle 95.2/0.917; linear_mi 92.8/1.063; random_intercept 94.8/1.000; recorded 90.6/1.052; audited_only 96.4/1.334; difference 87.2/1.095; raking 65.6/1.090; mice_2l_lmer 93.0/1.196; mice_2l_pan 94.8/1.168
+  livebirths   oracle 94.6/0.933; linear_mi 92.4/1.033; random_intercept 94.6/1.000; recorded 95.8/0.910; audited_only 96.0/1.498; difference 89.8/1.042; raking 59.8/1.141; mice_2l_lmer 89.8/1.398; mice_2l_pan 91.8/1.360
+
+MEAN WIDTH RATIO AGAINST THE OPTION, real items, range over items
+  25% recorded: -48% to -3%
+  25% audited_only: +31% to +205%
+  25% difference: -38% to +14%
+  25% raking: -44% to -5%
+  25% mice_2l_lmer: -12% to +64%
+  25% mice_2l_pan: -6% to +110%
+  50% recorded: -34% to +72%
+  50% audited_only: +11% to +76%
+  50% difference: -19% to +27%
+  50% raking: -53% to -38%
+  50% mice_2l_lmer: -5% to +22%
+  50% mice_2l_pan: -2% to +46%
+
+DESCRIPTION: real items where recorded has lower RMSE than every audit-using method
+  25%: 6 of 11: stillbirths, deliveries, pnc, syphilis, ancnewreg, livebirths
+  50%: 2 of 11: syphilis, livebirths
+
+SIMULATED CELLS, AUDITED VALUE AS OUTCOME: coverage, then RMSE ratio against the option
+  none_outlier             25% oracle 93.2/0.621; linear_mi 91.0/1.024; random_intercept 95.8/1.000; recorded 95.0/0.871; audited_only 93.6/1.399; difference 89.2/1.310; raking 71.2/1.050; mice_2l_lmer 96.6/1.000; mice_2l_pan 96.6/1.011
+  none_outlier             50% oracle 94.2/0.759; linear_mi 92.2/0.982; random_intercept 97.0/1.000; recorded 95.6/1.003; audited_only 93.6/1.151; difference 90.6/1.121; raking 61.4/0.993; mice_2l_lmer 96.6/1.012; mice_2l_pan 96.6/1.001
+  none_rare                25% oracle 83.4/0.980; linear_mi 86.6/0.991; random_intercept 86.6/1.000; recorded 83.6/0.985; audited_only 85.4/1.876; difference 76.2/1.019; raking 49.6/1.068; mice_2l_lmer 86.2/1.210; mice_2l_pan 93.4/1.206
+  none_rare                50% oracle 84.4/1.001; linear_mi 82.8/1.000; random_intercept 83.2/1.000; recorded 82.4/1.000; audited_only 84.2/1.387; difference 75.4/1.013; raking 26.6/1.011; mice_2l_lmer 83.6/1.069; mice_2l_pan 85.4/1.053
+  none_row_only            25% oracle 92.8/0.684; linear_mi 95.0/1.006; random_intercept 96.8/1.000; recorded 95.4/0.763; audited_only 93.4/1.515; difference 89.4/1.077; raking 78.0/1.019; mice_2l_lmer 95.6/0.981; mice_2l_pan 94.4/0.995
+  none_row_only            50% oracle 96.4/0.821; linear_mi 96.4/0.997; random_intercept 97.2/1.000; recorded 95.4/0.980; audited_only 95.4/1.334; difference 94.4/1.026; raking 63.8/0.986; mice_2l_lmer 96.6/0.993; mice_2l_pan 97.4/1.004
+  none_shift               25% oracle 94.0/0.627; linear_mi 90.0/1.027; random_intercept 96.4/1.000; recorded 94.8/0.749; audited_only 93.0/1.448; difference 91.8/1.168; raking 78.6/1.080; mice_2l_lmer 96.6/1.005; mice_2l_pan 98.0/0.997
+  none_shift               50% oracle 94.8/0.823; linear_mi 93.2/0.991; random_intercept 97.6/1.000; recorded 95.0/1.047; audited_only 93.6/1.171; difference 92.8/1.071; raking 67.6/1.011; mice_2l_lmer 97.2/0.994; mice_2l_pan 97.8/1.001
+  none_shift_low           25% oracle 93.8/0.662; linear_mi 91.4/1.017; random_intercept 96.0/1.000; recorded 93.8/0.750; audited_only 94.8/1.419; difference 87.6/1.107; raking 77.2/1.035; mice_2l_lmer 94.0/1.000; mice_2l_pan 94.4/1.012
+  none_shift_low           50% oracle 93.0/0.851; linear_mi 93.2/0.993; random_intercept 95.4/1.000; recorded 93.4/1.021; audited_only 92.8/1.227; difference 91.8/1.069; raking 62.8/0.994; mice_2l_lmer 93.8/0.999; mice_2l_pan 94.6/0.991
+  none_under               25% oracle 95.0/0.617; linear_mi 90.8/0.994; random_intercept 94.6/1.000; recorded 38.8/1.523; audited_only 93.8/1.313; difference 89.6/0.936; raking 76.4/0.961; mice_2l_lmer 94.2/0.996; mice_2l_pan 95.4/0.990
+  none_under               50% oracle 92.6/0.833; linear_mi 92.6/1.018; random_intercept 95.6/1.000; recorded 44.4/1.923; audited_only 91.8/1.219; difference 89.8/0.994; raking 60.6/1.005; mice_2l_lmer 94.4/1.007; mice_2l_pan 95.0/1.002
+  pairs_outlier            25% oracle 94.6/0.562; linear_mi 91.0/1.117; random_intercept 98.6/1.000; recorded 95.8/0.772; audited_only 96.8/1.566; difference 58.2/1.408; raking 73.0/1.352; mice_2l_lmer 98.2/0.994; mice_2l_pan 97.6/1.021
+  pairs_outlier            50% oracle 96.6/0.725; linear_mi 94.4/1.011; random_intercept 98.8/1.000; recorded 97.2/1.086; audited_only 95.8/1.246; difference 89.2/1.167; raking 71.6/1.020; mice_2l_lmer 98.4/1.016; mice_2l_pan 98.6/1.013
+  pairs_rare               25% oracle 88.8/0.927; linear_mi 88.8/0.993; random_intercept 91.4/1.000; recorded 88.8/0.916; audited_only 92.8/2.135; difference 68.8/0.997; raking 62.6/1.566; mice_2l_lmer 91.0/1.109; mice_2l_pan 97.4/1.135
+  pairs_rare               50% oracle 90.0/0.994; linear_mi 88.2/1.003; random_intercept 89.4/1.000; recorded 88.2/1.003; audited_only 91.8/1.294; difference 76.2/1.002; raking 47.6/1.000; mice_2l_lmer 88.8/1.050; mice_2l_pan 91.4/1.044
+  pairs_row_only           25% oracle 95.4/0.563; linear_mi 96.6/0.985; random_intercept 98.0/1.000; recorded 95.6/0.644; audited_only 96.8/1.642; difference 75.0/1.040; raking 76.6/1.393; mice_2l_lmer 97.4/0.992; mice_2l_pan 97.8/0.998
+  pairs_row_only           50% oracle 96.2/0.862; linear_mi 96.2/1.010; random_intercept 97.6/1.000; recorded 96.6/1.007; audited_only 97.8/1.330; difference 90.6/1.049; raking 68.4/1.069; mice_2l_lmer 96.4/1.000; mice_2l_pan 97.4/1.000
+  pairs_shift              25% oracle 94.8/0.542; linear_mi 89.0/1.106; random_intercept 96.6/1.000; recorded 96.8/0.665; audited_only 97.6/1.473; difference 56.2/1.259; raking 73.8/1.259; mice_2l_lmer 95.2/1.025; mice_2l_pan 97.4/1.032
+  pairs_shift              50% oracle 97.4/0.799; linear_mi 94.6/1.016; random_intercept 97.8/1.000; recorded 96.4/1.026; audited_only 96.6/1.250; difference 89.8/1.089; raking 73.0/1.043; mice_2l_lmer 97.8/1.001; mice_2l_pan 98.6/1.006
+  pairs_shift_low          25% oracle 95.4/0.535; linear_mi 93.0/0.986; random_intercept 95.4/1.000; recorded 96.2/0.647; audited_only 96.8/1.567; difference 64.8/1.134; raking 66.8/1.334; mice_2l_lmer 94.4/1.022; mice_2l_pan 94.4/0.992
+  pairs_shift_low          50% oracle 95.6/0.847; linear_mi 95.8/0.993; random_intercept 96.6/1.000; recorded 95.4/1.002; audited_only 96.4/1.283; difference 87.8/1.069; raking 65.4/1.016; mice_2l_lmer 96.0/1.001; mice_2l_pan 96.4/0.993
+  pairs_under              25% oracle 96.4/0.580; linear_mi 89.8/1.067; random_intercept 96.6/1.000; recorded 39.8/1.437; audited_only 97.0/1.617; difference 68.8/1.026; raking 74.4/1.389; mice_2l_lmer 95.6/1.024; mice_2l_pan 95.4/0.999
+  pairs_under              50% oracle 96.0/0.813; linear_mi 95.0/0.997; random_intercept 96.6/1.000; recorded 40.0/2.045; audited_only 95.8/1.329; difference 89.4/0.986; raking 70.8/1.045; mice_2l_lmer 95.8/0.999; mice_2l_pan 96.0/0.991
+  rwanda_outlier           25% oracle 94.2/0.582; linear_mi 92.0/1.132; random_intercept 97.6/1.000; recorded 95.6/0.755; audited_only 96.4/1.579; difference 79.0/1.412; raking 80.4/1.374; mice_2l_lmer 97.0/0.989; mice_2l_pan 97.8/0.972
+  rwanda_outlier           50% oracle 91.8/0.748; linear_mi 91.6/1.000; random_intercept 94.6/1.000; recorded 94.4/1.015; audited_only 95.2/1.124; difference 85.8/1.139; raking 67.0/0.996; mice_2l_lmer 95.6/0.991; mice_2l_pan 95.4/1.002
+  rwanda_rare              25% oracle 88.4/0.927; linear_mi 90.6/0.988; random_intercept 92.0/1.000; recorded 89.8/0.920; audited_only 95.6/2.038; difference 76.0/0.988; raking 71.0/1.481; mice_2l_lmer 91.8/1.178; mice_2l_pan 96.4/1.194
+  rwanda_rare              50% oracle 90.0/1.002; linear_mi 89.6/1.001; random_intercept 90.0/1.000; recorded 89.6/0.994; audited_only 91.2/1.283; difference 79.0/1.017; raking 50.6/0.986; mice_2l_lmer 89.0/1.019; mice_2l_pan 92.4/1.018
+  rwanda_row_only          25% oracle 95.8/0.569; linear_mi 98.0/0.964; random_intercept 97.6/1.000; recorded 97.4/0.661; audited_only 97.8/1.572; difference 85.4/1.073; raking 80.6/1.260; mice_2l_lmer 97.0/0.979; mice_2l_pan 97.8/0.988
+  rwanda_row_only          50% oracle 95.8/0.834; linear_mi 97.6/0.997; random_intercept 98.0/1.000; recorded 95.8/0.954; audited_only 96.2/1.374; difference 90.2/1.040; raking 66.4/1.079; mice_2l_lmer 97.8/0.995; mice_2l_pan 98.0/0.979
+  rwanda_shift             25% oracle 96.2/0.547; linear_mi 89.4/1.085; random_intercept 98.6/1.000; recorded 96.8/0.701; audited_only 95.6/1.578; difference 80.8/1.209; raking 81.8/1.339; mice_2l_lmer 97.8/0.986; mice_2l_pan 97.8/1.005
+  rwanda_shift             50% oracle 96.8/0.783; linear_mi 95.0/1.005; random_intercept 98.8/1.000; recorded 95.2/1.020; audited_only 96.2/1.325; difference 91.8/1.056; raking 70.4/1.089; mice_2l_lmer 98.2/0.990; mice_2l_pan 98.8/1.008
+  rwanda_shift_low         25% oracle 95.4/0.570; linear_mi 92.6/0.979; random_intercept 97.2/1.000; recorded 94.2/0.700; audited_only 94.6/1.666; difference 82.8/1.062; raking 76.6/1.349; mice_2l_lmer 96.4/0.988; mice_2l_pan 95.8/0.982
+  rwanda_shift_low         50% oracle 93.2/0.846; linear_mi 92.8/1.010; random_intercept 94.6/1.000; recorded 94.0/0.971; audited_only 94.4/1.271; difference 89.0/1.052; raking 68.0/1.042; mice_2l_lmer 94.4/0.988; mice_2l_pan 94.6/0.996
+  rwanda_under             25% oracle 95.6/0.600; linear_mi 92.2/1.030; random_intercept 95.4/1.000; recorded 42.8/1.402; audited_only 95.8/1.771; difference 80.6/1.005; raking 80.8/1.390; mice_2l_lmer 95.0/1.003; mice_2l_pan 95.0/1.003
+  rwanda_under             50% oracle 94.8/0.769; linear_mi 94.0/1.013; random_intercept 97.4/1.000; recorded 48.6/1.757; audited_only 95.8/1.250; difference 86.2/0.995; raking 66.2/1.034; mice_2l_lmer 96.0/0.990; mice_2l_pan 96.0/1.001
+  control_one_row          25% oracle 94.0/0.686; linear_mi 94.4/1.000; random_intercept 94.4/1.000; recorded 93.4/0.810; audited_only 92.0/1.580; difference 93.2/1.013; raking 92.6/1.016; mice_2l_lmer nan/nan; mice_2l_pan 94.6/0.997
+  control_one_row          50% oracle 94.6/0.899; linear_mi 95.4/1.000; random_intercept 95.4/1.000; recorded 93.4/1.042; audited_only 94.2/1.226; difference 93.6/1.042; raking 93.8/0.987; mice_2l_lmer nan/nan; mice_2l_pan 95.8/0.994
+
+AUDITED VALUE AS PREDICTOR, no rule: bias %, coverage, RMSE, RMSE ratio against linear MI
+  covariate_row_only   25% oracle -0.0, 95.6, 0.0362, 0.679; linear_mi -0.0, 96.2, 0.0532, 1.000; random_intercept -2.6, 96.8, 0.0540, 1.016; recorded -26.8, 3.6, 0.1387, 2.606; audited_only -0.4, 96.0, 0.0764, 1.436; difference -0.0, 93.2, 0.0580, 1.089; raking -0.2, 85.8, 0.0611, 1.148; mice_2l_lmer +0.5, 97.0, 0.0532, 1.000; mice_2l_pan -0.4, 97.4, 0.0515, 0.967
+  covariate_row_only   50% oracle -0.4, 97.4, 0.0333, 0.825; linear_mi -0.5, 97.2, 0.0404, 1.000; random_intercept -1.2, 97.4, 0.0402, 0.995; recorded -26.7, 3.2, 0.1376, 3.405; audited_only -0.7, 96.4, 0.0501, 1.241; difference -0.4, 95.0, 0.0422, 1.045; raking -0.4, 74.4, 0.0416, 1.029; mice_2l_lmer +0.0, 97.0, 0.0406, 1.006; mice_2l_pan -0.5, 97.6, 0.0404, 0.999
+  covariate_shift      25% oracle -0.4, 96.4, 0.0369, 0.628; linear_mi -3.0, 95.4, 0.0587, 1.000; random_intercept -16.1, 84.4, 0.0971, 1.654; recorded -24.6, 12.4, 0.1290, 2.197; audited_only +0.0, 97.0, 0.0842, 1.434; difference -4.2, 89.0, 0.0643, 1.095; raking +0.2, 84.6, 0.0668, 1.137; mice_2l_lmer -12.0, 80.6, 0.0804, 1.369; mice_2l_pan -14.7, 81.6, 0.0929, 1.583
+  covariate_shift      50% oracle -0.3, 95.6, 0.0365, 0.817; linear_mi -1.1, 95.4, 0.0447, 1.000; random_intercept -10.1, 86.0, 0.0668, 1.495; recorded -24.9, 11.6, 0.1306, 2.921; audited_only -0.0, 95.4, 0.0549, 1.228; difference -1.6, 92.4, 0.0481, 1.077; raking -0.3, 76.8, 0.0468, 1.046; mice_2l_lmer -9.0, 86.8, 0.0636, 1.424; mice_2l_pan -10.5, 86.0, 0.0692, 1.548
+  covariate_under      25% oracle -0.0, 95.6, 0.0365, 0.665; linear_mi -2.1, 94.4, 0.0548, 1.000; random_intercept -7.8, 92.4, 0.0664, 1.211; recorded +9.6, 85.2, 0.0709, 1.292; audited_only -1.2, 96.2, 0.0828, 1.510; difference -3.1, 89.2, 0.0706, 1.287; raking -0.8, 87.0, 0.0619, 1.129; mice_2l_lmer -4.5, 92.8, 0.0571, 1.042; mice_2l_pan -6.2, 92.8, 0.0622, 1.134
+  covariate_under      50% oracle +0.0, 95.2, 0.0371, 0.893; linear_mi -0.4, 96.0, 0.0415, 1.000; random_intercept -3.8, 95.4, 0.0462, 1.111; recorded +9.8, 83.8, 0.0712, 1.714; audited_only +0.2, 97.2, 0.0523, 1.258; difference -1.0, 92.0, 0.0484, 1.165; raking +0.1, 71.8, 0.0429, 1.033; mice_2l_lmer -2.4, 96.6, 0.0438, 1.053; mice_2l_pan -3.4, 96.0, 0.0459, 1.106
+
+FITTED_VALUE, exploratory: RMSE ratio against linear MI and the option, real items
+  25%: against linear MI, geometric mean 0.998; against the option 1.079
+  50%: against linear MI, geometric mean 1.005; against the option 1.053
+
+SECONDS PER REQUEST, on one core of a busy machine, mean
+  recorded: 0.003
+  audited_only: 0.002
+  difference: 0.002
+  raking: 0.023
+  mice_2l_lmer: 0.544
+  mice_2l_pan: 0.236
+  random_intercept, from the control runs: 0.102
+
+PREDICTIONS
+  1. The outcome is RETIRE, through mice_2l_lmer: FAILED
+  2. raking fails N1: HELD
+  3. difference reaches 92% on at least the option's count at 25%, and fails N1: FAILED
+  4. audited_only has an N1 ratio above 1.20: HELD
+  5. mice_2l_pan's distance at 25% is within 0.50 points of mice_2l_lmer's: FAILED
+  6. recorded has lower RMSE than every audit-using method on at least three items at 25%: HELD
