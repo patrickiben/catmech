@@ -1,0 +1,19 @@
+primary opd ; elapsed 174 seconds
+primary deliveries ; elapsed 365 seconds
+primary anc ; elapsed 576 seconds
+primary postnatal ; elapsed 941 seconds
+primary immunization ; elapsed 1300 seconds
+primary ipt ; elapsed 1596 seconds
+primary fpmethods ; elapsed 1822 seconds
+primary counselling ; elapsed 2046 seconds
+primary exposedbabies ; elapsed 2324 seconds
+sensitivity opd ; elapsed 2455 seconds
+sensitivity deliveries ; elapsed 2562 seconds
+sensitivity anc ; elapsed 2591 seconds
+sensitivity postnatal ; elapsed 2615 seconds
+sensitivity immunization ; elapsed 2641 seconds
+sensitivity ipt ; elapsed 2677 seconds
+sensitivity fpmethods ; elapsed 2724 seconds
+sensitivity counselling ; elapsed 2768 seconds
+sensitivity exposedbabies ; elapsed 2801 seconds
+Completed study : 270000 requests; failed 7, ok 269993 

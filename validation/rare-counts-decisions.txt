@@ -1,0 +1,65 @@
+Scored against validation/RARE_COUNTS_PLAN.md
+
+PART 1, THE RECOUNT: coverage by reference distribution
+  rwanda_none_rare             cv3 93.5; cr2 93.3; wcr 94.4; boot 89.2; poisson 86.0; mean D 0.359; flagged 19.2%
+  pairs_none_rare              cv3 93.7; cr2 93.0; wcr 94.1; boot 88.2; poisson 86.7; mean D 0.344; flagged 18.8%
+  none_none_rare               cv3 93.8; cr2 94.5; wcr 95.0; boot 93.6; poisson 85.6; mean D 0.406; flagged 27.2%
+  rwanda_shape_2_rare          cv3 92.5; cr2 91.9; wcr 92.6; boot 88.4; poisson 87.7; mean D 0.416; flagged 29.9%
+  pairs_shape_2_rare           cv3 92.7; cr2 92.2; wcr 93.8; boot 88.6; poisson 86.4; mean D 0.402; flagged 27.1%
+  none_shape_2_rare            cv3 91.1; cr2 91.8; wcr 93.6; boot 90.6; poisson 86.3; mean D 0.448; flagged 35.8%
+  rwanda_shape_05_rare         cv3 87.9; cr2 87.7; wcr 90.4; boot 84.8; poisson 85.1; mean D 0.449; flagged 35.3%
+  pairs_shape_05_rare          cv3 89.3; cr2 88.7; wcr 89.9; boot 85.3; poisson 87.0; mean D 0.439; flagged 34.4%
+  none_shape_05_rare           cv3 87.7; cr2 89.5; wcr 91.2; boot 89.4; poisson 85.9; mean D 0.476; flagged 40.2%
+  rwanda_none_common           cv3 94.0; cr2 94.1; wcr 94.9; boot 90.8; poisson 64.3; mean D 0.354; flagged 18.6%
+  pairs_none_common            cv3 93.9; cr2 93.6; wcr 94.3; boot 89.4; poisson 61.9; mean D 0.345; flagged 17.0%
+  none_none_common             cv3 93.4; cr2 94.5; wcr 95.0; boot 92.8; poisson 61.7; mean D 0.393; flagged 24.6%
+  rwanda_shape_2_common        cv3 92.2; cr2 91.8; wcr 93.6; boot 89.5; poisson 85.5; mean D 0.439; flagged 33.1%
+  pairs_shape_2_common         cv3 92.3; cr2 91.7; wcr 93.8; boot 88.1; poisson 84.9; mean D 0.412; flagged 27.8%
+  none_shape_2_common          cv3 91.4; cr2 92.0; wcr 93.3; boot 92.5; poisson 81.4; mean D 0.485; flagged 42.5%
+  rwanda_shape_05_common       cv3 87.1; cr2 87.1; wcr 88.1; boot 84.0; poisson 83.9; mean D 0.462; flagged 39.8%
+  pairs_shape_05_common        cv3 89.7; cr2 89.1; wcr 90.5; boot 84.5; poisson 84.9; mean D 0.436; flagged 31.2%
+  none_shape_05_common         cv3 87.4; cr2 88.2; wcr 90.1; boot 87.7; poisson 84.8; mean D 0.486; flagged 41.8%
+
+P1: M0 93.67, shape 2 92.10, M5 88.30. Common level under cv3: no frailty 93.77, shape 2 91.97, shape 0.5 88.07
+OUTCOME P1: HEAVY TAILS
+
+P2: mean over rare shape 0.5 cells; at most 98 in all 18; mean over the other 15, and cv3's
+  cr2: 88.63; 18 of 18; 91.92 against 91.91, width over cv3 in those cells 0.99: not eligible
+  wcr: 90.50; 18 of 18; 93.14 against 91.91: not eligible
+  boot: 86.50; 18 of 18; 89.19 against 91.91, width over cv3 in those cells 1.26: not eligible
+  poisson: 86.00; 18 of 18; 80.80 against 91.91, width over cv3 in those cells nan: not eligible
+OUTCOME P2: none eligible
+
+PART 2, COUNT-AWARE IMPUTATION: coverage, then RMSE ratio against linear MI. Largest gap between these targets and the earlier study's: 0.0e+00
+  lbw              25% oracle 92.0/0.702; linear_mi 92.5/1.000; random_intercept 94.0/1.018; nb_mi 99.7/142724652910.764; pmm_recorded 83.2/1.026
+  lbw              50% oracle 93.2/0.859; linear_mi 91.8/1.000; random_intercept 93.4/0.998; nb_mi 99.6/64637907566.807; pmm_recorded 87.8/1.040
+  none_rare        25% oracle 83.4/0.989; linear_mi 86.6/1.000; random_intercept 86.6/1.009; nb_mi 96.0/518.468; pmm_recorded 72.4/0.882
+  none_rare        50% oracle 84.4/1.001; linear_mi 82.8/1.000; random_intercept 83.2/1.000; nb_mi 91.8/6.870; pmm_recorded 79.8/0.888
+  pairs_rare       25% oracle 88.8/0.933; linear_mi 88.8/1.000; random_intercept 91.4/1.007; nb_mi 99.8/749462605699.038; pmm_recorded 79.8/0.849
+  pairs_rare       50% oracle 90.0/0.991; linear_mi 88.2/1.000; random_intercept 89.4/0.997; nb_mi 97.8/343728679832.707; pmm_recorded 85.0/0.843
+  resus            25% oracle 96.7/0.354; linear_mi 96.0/1.000; random_intercept 96.7/1.036; nb_mi 100.0/981760807223.765; pmm_recorded 95.8/0.625
+  resus            50% oracle 97.8/0.628; linear_mi 96.0/1.000; random_intercept 97.2/1.035; nb_mi 99.8/271751711213.932; pmm_recorded 96.8/0.884
+  rwanda_rare      25% oracle 88.4/0.939; linear_mi 90.6/1.000; random_intercept 92.0/1.013; nb_mi 100.0/1394364613544.751; pmm_recorded 82.0/0.810
+  rwanda_rare      50% oracle 90.0/1.001; linear_mi 89.6/1.000; random_intercept 90.0/0.999; nb_mi 98.0/376094424072.573; pmm_recorded 85.6/0.831
+  stillbirths      25% oracle 96.8/0.630; linear_mi 94.3/1.000; random_intercept 95.1/1.042; nb_mi 100.0/9380423591509.318; pmm_recorded 93.0/0.788
+  stillbirths      50% oracle 96.6/0.858; linear_mi 95.8/1.000; random_intercept 95.8/0.990; nb_mi 100.0/4130423990201.090; pmm_recorded 97.0/0.877
+
+P3
+  nb_mi: distance 4.07 against linear MI 4.38, option 3.73, oracle 4.81; RMSE ratio 13755416239.478; at most 98 on 4 of 12; available 99.96%; width over linear MI 1919246962893.639: not eligible
+  pmm_recorded: distance 9.25 against linear MI 4.38, option 3.73, oracle 4.81; RMSE ratio 0.855; at most 98 on 12 of 12; available 99.99%; width over linear MI 0.831: not eligible
+    nb_mi: 1 x the leading minor of order 11 is not positive
+    nb_mi: 1 x the leading minor of order 12 is not positive
+    nb_mi: 1 x the leading minor of order 6 is not positive
+    nb_mi: 1 x the leading minor of order 9 is not positive
+    pmm_recorded: 1 x missing values in object
+  nb_mi fell back to Poisson on 71.0% of requests
+OUTCOME P3: none eligible
+
+P4: flagged requests in Part 1 5443 of 18000; coverage under cv3 flagged 97.0, unflagged 88.8; flagged in rare shape 0.5 cells 36.6%; flagged in Part 3 12.16% (real items 19.44%, simulated 9.49%)
+OUTCOME P4: NOT ADOPTED
+
+PREDICTIONS
+  1. P1 is HEAVY TAILS: HELD
+  2. No method in P2 is eligible, with boot_t the closest: FAILED
+  3. Neither candidate in P3 is eligible: HELD
+  4. The warning in P4 is adopted: FAILED

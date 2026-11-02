@@ -1152,6 +1152,51 @@ def verify_outside_methods(folder):
     print(f"{folder.name}: all {len(records)} planned requests and {replaced} rerun, sources hashed, three scored files regenerated identically, accuracy failures re-derived, controls passed: PASS")
 
 
+def verify_later_studies():
+    """Second health system, rare counts and independently written setups: sources, planned requests, scored output, posthoc numbers and the write-ups' numbers."""
+    import gzip
+    import re
+    import subprocess
+    import sys
+    def hashes(folder, frozen=None):
+        for row in rows(folder/"source-hashes.csv"):
+            candidate = (ROOT/"validation"/frozen/row["file"]) if frozen else None
+            path = candidate if candidate and candidate.exists() else ROOT/row["file"]
+            assert hashlib.sha256(path.read_bytes()).hexdigest() == row["sha256"], row["file"]
+    def count(path):
+        with gzip.open(path, "rt", newline="", encoding="utf-8") as stream:
+            return sum(1 for _ in csv.DictReader(stream))
+    run = lambda *args: subprocess.run([sys.executable, "-I", *map(str, args)], capture_output=True, text=True, check=True).stdout
+    decimals = lambda text: set(re.findall(r"(?<![\w.])\d+\.\d+(?![\d])", text))
+    read = lambda name: (ROOT/"validation"/name).read_text(encoding="utf-8")
+    def trace(name, *sources):
+        unsupported = sorted(decimals(re.sub(r"\]\([^)]*\)", "]", read(name)))-decimals("".join(read(s) for s in sources)))
+        assert not unsupported, (name, "Numbers with no source", unsupported)
+    second = ROOT/"validation/second-system-study"
+    hashes(second)
+    assert count(second/"replicates.csv.gz") == 270000
+    scored = run(ROOT/"tools/second-system-score.py", second)
+    assert scored.strip() == read("second-system-decisions.txt").strip() and "OUTCOME: MIXED" in scored
+    assert "the outcome is **MIXED**" in read("SECOND_SYSTEM_SYNTHESIS.md")
+    trace("SECOND_SYSTEM_SYNTHESIS.md", "second-system-decisions.txt", "second-system-posthoc.txt", "SECOND_SYSTEM_PLAN.md")
+    rare = ROOT/"validation/rare-counts-study"
+    hashes(rare)
+    assert (count(rare/"part1.csv.gz"), count(rare/"part2.csv.gz"), count(rare/"part3.csv.gz")) == (18000, 21000, 20500)
+    scored = run(ROOT/"tools/rare-counts-score.py", rare)
+    assert scored.strip() == read("rare-counts-decisions.txt").strip()
+    assert all(k in scored for k in ("OUTCOME P1: HEAVY TAILS", "OUTCOME P2: none eligible", "OUTCOME P3: none eligible", "OUTCOME P4: NOT ADOPTED"))
+    trace("RARE_COUNTS_SYNTHESIS.md", "rare-counts-decisions.txt", "independent-setups-posthoc.txt", "RARE_COUNTS_PLAN.md", "second-system-posthoc.txt")
+    setups = ROOT/"validation/independent-setups-study"
+    hashes(setups, "independent-setups-source")
+    assert count(setups/"replicates.csv.gz") == 148500 and count(setups/"zambia.csv.gz") == 54000
+    scored = run(ROOT/"tools/independent-setups-score.py", setups)
+    assert scored.strip() == read("independent-setups-decisions.txt").strip() and "OUTCOME: KEEP" in scored and "Control: this scorer reproduces" in scored
+    assert run(ROOT/"tools/independent-setups-posthoc.py").strip() == read("independent-setups-posthoc.txt").strip()
+    trace("INDEPENDENT_SETUPS_SYNTHESIS.md", "independent-setups-decisions.txt", "independent-setups-posthoc.txt", "INDEPENDENT_SETUPS_PLAN.md", "second-system-decisions.txt", "outside-methods-decisions.txt", "independent-setups/agent-reports.json")
+    assert decimals("A made-up 12.345 here.")-decimals(read("independent-setups-decisions.txt")), "Negative control: a made-up number went undetected"
+    print("Later studies: second health system, rare counts and independently written setups, all planned requests, sources hashed, scored files regenerated identically, numbers traced: PASS")
+
+
 def verify_contamination_supplement(folder):
     scores = rows(folder/"corruption-scores.csv")
     main = rows(ROOT/"validation/contamination-study/replicates.csv")
@@ -2061,6 +2106,7 @@ def main():
     verify_variance_check(ROOT/"validation/variance-check")
     verify_variance_mi_study(ROOT/"validation/variance-mi-study")
     verify_outside_methods(ROOT/"validation/outside-methods-study")
+    verify_later_studies()
     print("This verifies correspondence and repeatability, not inferential validity.")
 
 

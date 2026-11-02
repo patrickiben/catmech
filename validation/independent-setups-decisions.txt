@@ -1,0 +1,134 @@
+Scored against validation/INDEPENDENT_SETUPS_PLAN.md, with the rule of validation/OUTSIDE_METHODS_PLAN.md
+Control: this scorer reproduces the earlier study's N1, N3 and N5 for mice_2l_lmer.
+
+REQUESTS AND STATUSES
+  ind_mice: ok 49500
+  ind_survey: ok 49499, failed 1
+  ind_design: ok 49499, failed 1
+    ind_design: 1 x no estimable variance
+    ind_survey: 1 x no usable variance
+
+OPTION: real 25% at least 92 on 9 of 11, distance 1.47; real 50% at least 92 on 10 of 11, distance 1.25; simulated cells in limits 30 of 36
+
+DECISION RULE
+  ind_mice:
+    N1 RMSE ratio, real 25%: 1.012 (pass)
+    N2 RMSE ratio, real 50%: 1.009 (pass)
+    N3 real 25%: at least 92 on 11, at most 98 on 9, distance 1.68 (FAIL)
+    N4 real 50%: at least 92 on 11, at most 98 on 9, distance 1.62 (FAIL)
+    N5 simulations: RMSE ratio 0.960, cells in limits 33 of 36 (pass)
+    N6 available: 100.00%, 100.00%, 100.00% (pass)
+    No worse: no
+  ind_survey:
+    N1 RMSE ratio, real 25%: 1.141 (FAIL)
+    N2 RMSE ratio, real 50%: 1.106 (FAIL)
+    N3 real 25%: at least 92 on 11, at most 98 on 10, distance 2.02 (FAIL)
+    N4 real 50%: at least 92 on 11, at most 98 on 8, distance 2.00 (FAIL)
+    N5 simulations: RMSE ratio 0.998, cells in limits 36 of 36 (pass)
+    N6 available: 100.00%, 100.00%, 100.00% (pass)
+    No worse: no
+  ind_design:
+    N1 RMSE ratio, real 25%: 1.165 (FAIL)
+    N2 RMSE ratio, real 50%: 1.079 (FAIL)
+    N3 real 25%: at least 92 on 11, at most 98 on 10, distance 1.75 (FAIL)
+    N4 real 50%: at least 92 on 11, at most 98 on 6, distance 2.40 (FAIL)
+    N5 simulations: RMSE ratio 1.030, cells in limits 35 of 36 (pass)
+    N6 available: 100.00%, 100.00%, 100.00% (pass)
+    No worse: no
+
+OUTCOME: KEEP. No setup was no worse than the option.
+
+REAL ITEMS AT 25%: coverage, then RMSE ratio against the option
+  lbw          oracle 92.0/0.689; linear_mi 92.5/0.982; random_intercept 94.0/1.000; ind_mice 96.4/0.892; ind_survey 95.2/0.998; ind_design 97.2/1.069
+  resus        oracle 96.7/0.342; linear_mi 96.0/0.965; random_intercept 96.7/1.000; ind_mice 99.2/0.711; ind_survey 98.0/0.897; ind_design 98.4/1.054
+  stillbirths  oracle 96.8/0.604; linear_mi 94.3/0.960; random_intercept 95.1/1.000; ind_mice 98.0/0.789; ind_survey 98.2/0.975; ind_design 97.3/1.008
+  deliveries   oracle 92.6/0.920; linear_mi 91.5/1.066; random_intercept 93.6/1.000; ind_mice 93.3/1.076; ind_survey 96.4/1.133; ind_design 96.8/1.100
+  anc1_early   oracle 95.5/0.602; linear_mi 81.6/1.228; random_intercept 92.8/1.000; ind_mice 92.5/1.179; ind_survey 92.2/1.496; ind_design 97.2/1.408
+  pnc          oracle 97.0/0.650; linear_mi 86.1/1.152; random_intercept 94.4/1.000; ind_mice 92.7/1.239; ind_survey 95.9/1.537; ind_design 97.3/1.348
+  syphilis     oracle 96.0/0.715; linear_mi 84.2/1.071; random_intercept 90.0/1.000; ind_mice 94.0/0.922; ind_survey 97.2/1.005; ind_design 94.9/1.114
+  iron         oracle 94.3/0.532; linear_mi 81.0/1.231; random_intercept 91.9/1.000; ind_mice 94.2/1.458; ind_survey 96.6/1.310; ind_design 95.5/1.321
+  anc4         oracle 97.5/0.557; linear_mi 91.8/1.052; random_intercept 94.8/1.000; ind_mice 95.9/0.950; ind_survey 92.5/1.132; ind_design 96.0/1.162
+  ancnewreg    oracle 95.7/0.830; linear_mi 88.8/1.173; random_intercept 94.2/1.000; ind_mice 94.5/1.113; ind_survey 97.2/1.203; ind_design 96.0/1.224
+  livebirths   oracle 94.5/0.848; linear_mi 92.8/1.061; random_intercept 94.8/1.000; ind_mice 95.0/1.022; ind_survey 97.4/1.052; ind_design 97.4/1.081
+  width over the option, range: ind_mice -15% to +41%; ind_survey +15% to +91%; ind_design +50% to +189%
+
+REAL ITEMS AT 50%: coverage, then RMSE ratio against the option
+  lbw          oracle 93.2/0.860; linear_mi 91.8/1.002; random_intercept 93.4/1.000; ind_mice 94.8/0.971; ind_survey 95.8/1.015; ind_design 97.0/0.995
+  resus        oracle 97.8/0.607; linear_mi 96.0/0.967; random_intercept 97.2/1.000; ind_mice 99.0/0.802; ind_survey 99.6/0.913; ind_design 99.2/0.970
+  stillbirths  oracle 96.6/0.866; linear_mi 95.8/1.010; random_intercept 95.8/1.000; ind_mice 98.8/0.932; ind_survey 98.2/1.048; ind_design 98.2/1.042
+  deliveries   oracle 94.2/0.988; linear_mi 93.4/1.049; random_intercept 94.8/1.000; ind_mice 94.2/1.048; ind_survey 96.6/1.087; ind_design 97.0/1.044
+  anc1_early   oracle 96.4/0.778; linear_mi 90.4/1.103; random_intercept 95.6/1.000; ind_mice 96.6/1.112; ind_survey 94.4/1.340; ind_design 97.2/1.203
+  pnc          oracle 97.6/0.900; linear_mi 88.8/1.150; random_intercept 94.4/1.000; ind_mice 92.8/1.242; ind_survey 95.4/1.436; ind_design 98.2/1.307
+  syphilis     oracle 95.8/0.828; linear_mi 89.4/1.019; random_intercept 90.2/1.000; ind_mice 94.6/0.937; ind_survey 96.6/0.989; ind_design 94.0/1.019
+  iron         oracle 94.0/0.748; linear_mi 88.6/1.094; random_intercept 95.0/1.000; ind_mice 96.0/1.008; ind_survey 98.6/1.114; ind_design 96.0/1.153
+  anc4         oracle 97.6/0.880; linear_mi 97.2/1.054; random_intercept 97.4/1.000; ind_mice 97.8/1.053; ind_survey 96.8/1.166; ind_design 99.0/1.103
+  ancnewreg    oracle 95.2/0.917; linear_mi 92.8/1.063; random_intercept 94.8/1.000; ind_mice 95.6/1.034; ind_survey 97.0/1.100; ind_design 95.4/1.050
+  livebirths   oracle 94.6/0.933; linear_mi 92.4/1.033; random_intercept 94.6/1.000; ind_mice 95.4/1.018; ind_survey 96.8/1.056; ind_design 98.2/1.031
+  width over the option, range: ind_mice -4% to +13%; ind_survey +18% to +72%; ind_design +22% to +78%
+
+SIMULATED CELLS, AUDITED VALUE AS OUTCOME: coverage, then RMSE ratio against the option
+  none_outlier             25% oracle 93.2/0.621; linear_mi 91.0/1.024; random_intercept 95.8/1.000; ind_mice 96.4/1.040; ind_survey 96.2/1.050; ind_design 96.8/1.000
+  none_outlier             50% oracle 94.2/0.759; linear_mi 92.2/0.982; random_intercept 97.0/1.000; ind_mice 95.6/0.958; ind_survey 94.8/0.972; ind_design 96.2/0.964
+  none_rare                25% oracle 83.4/0.980; linear_mi 86.6/0.991; random_intercept 86.6/1.000; ind_mice 89.2/1.018; ind_survey 94.4/1.008; ind_design 89.0/1.014
+  none_rare                50% oracle 84.4/1.001; linear_mi 82.8/1.000; random_intercept 83.2/1.000; ind_mice 88.0/1.004; ind_survey 95.0/1.019; ind_design 88.8/1.017
+  none_row_only            25% oracle 92.8/0.684; linear_mi 95.0/1.006; random_intercept 96.8/1.000; ind_mice 96.8/1.032; ind_survey 93.4/1.059; ind_design 93.4/1.030
+  none_row_only            50% oracle 96.4/0.821; linear_mi 96.4/0.997; random_intercept 97.2/1.000; ind_mice 97.4/1.003; ind_survey 97.0/1.011; ind_design 97.0/0.999
+  none_shift               25% oracle 94.0/0.627; linear_mi 90.0/1.027; random_intercept 96.4/1.000; ind_mice 95.4/1.058; ind_survey 94.0/1.090; ind_design 93.8/1.091
+  none_shift               50% oracle 94.8/0.823; linear_mi 93.2/0.991; random_intercept 97.6/1.000; ind_mice 97.0/0.987; ind_survey 95.6/1.014; ind_design 96.4/0.998
+  none_shift_low           25% oracle 93.8/0.662; linear_mi 91.4/1.017; random_intercept 96.0/1.000; ind_mice 96.2/1.035; ind_survey 93.6/1.138; ind_design 94.0/1.019
+  none_shift_low           50% oracle 93.0/0.851; linear_mi 93.2/0.993; random_intercept 95.4/1.000; ind_mice 96.0/1.008; ind_survey 95.8/1.014; ind_design 95.6/1.014
+  none_under               25% oracle 95.0/0.617; linear_mi 90.8/0.994; random_intercept 94.6/1.000; ind_mice 95.8/0.973; ind_survey 94.0/1.052; ind_design 94.8/0.991
+  none_under               50% oracle 92.6/0.833; linear_mi 92.6/1.018; random_intercept 95.6/1.000; ind_mice 95.6/1.011; ind_survey 95.0/1.044; ind_design 94.4/1.020
+  pairs_outlier            25% oracle 94.6/0.562; linear_mi 91.0/1.117; random_intercept 98.6/1.000; ind_mice 97.2/0.911; ind_survey 96.4/0.976; ind_design 98.2/1.078
+  pairs_outlier            50% oracle 96.6/0.725; linear_mi 94.4/1.011; random_intercept 98.8/1.000; ind_mice 97.6/0.963; ind_survey 96.2/1.001; ind_design 96.4/1.002
+  pairs_rare               25% oracle 88.8/0.927; linear_mi 88.8/0.993; random_intercept 91.4/1.000; ind_mice 93.2/0.950; ind_survey 93.6/0.972; ind_design 95.2/1.007
+  pairs_rare               50% oracle 90.0/0.994; linear_mi 88.2/1.003; random_intercept 89.4/1.000; ind_mice 91.8/1.006; ind_survey 93.4/1.007; ind_design 92.6/1.008
+  pairs_row_only           25% oracle 95.4/0.563; linear_mi 96.6/0.985; random_intercept 98.0/1.000; ind_mice 99.2/0.795; ind_survey 96.4/0.835; ind_design 95.4/1.065
+  pairs_row_only           50% oracle 96.2/0.862; linear_mi 96.2/1.010; random_intercept 97.6/1.000; ind_mice 97.8/0.989; ind_survey 96.2/1.006; ind_design 96.6/0.994
+  pairs_shift              25% oracle 94.8/0.542; linear_mi 89.0/1.106; random_intercept 96.6/1.000; ind_mice 96.8/0.819; ind_survey 95.4/0.913; ind_design 94.6/1.140
+  pairs_shift              50% oracle 97.4/0.799; linear_mi 94.6/1.016; random_intercept 97.8/1.000; ind_mice 98.0/0.948; ind_survey 95.8/1.015; ind_design 96.6/1.022
+  pairs_shift_low          25% oracle 95.4/0.535; linear_mi 93.0/0.986; random_intercept 95.4/1.000; ind_mice 96.6/0.836; ind_survey 94.8/0.884; ind_design 92.8/1.096
+  pairs_shift_low          50% oracle 95.6/0.847; linear_mi 95.8/0.993; random_intercept 96.6/1.000; ind_mice 96.2/0.978; ind_survey 93.2/0.992; ind_design 96.6/0.998
+  pairs_under              25% oracle 96.4/0.580; linear_mi 89.8/1.067; random_intercept 96.6/1.000; ind_mice 95.2/0.944; ind_survey 94.6/1.047; ind_design 92.8/1.135
+  pairs_under              50% oracle 96.0/0.813; linear_mi 95.0/0.997; random_intercept 96.6/1.000; ind_mice 96.8/0.959; ind_survey 96.8/0.999; ind_design 95.6/0.989
+  rwanda_outlier           25% oracle 94.2/0.582; linear_mi 92.0/1.132; random_intercept 97.6/1.000; ind_mice 96.4/0.961; ind_survey 96.2/0.978; ind_design 96.4/1.057
+  rwanda_outlier           50% oracle 91.8/0.748; linear_mi 91.6/1.000; random_intercept 94.6/1.000; ind_mice 94.4/0.920; ind_survey 93.0/0.931; ind_design 94.0/0.963
+  rwanda_rare              25% oracle 88.4/0.927; linear_mi 90.6/0.988; random_intercept 92.0/1.000; ind_mice 93.8/0.951; ind_survey 93.8/0.991; ind_design 96.8/1.036
+  rwanda_rare              50% oracle 90.0/1.002; linear_mi 89.6/1.001; random_intercept 90.0/1.000; ind_mice 93.2/1.013; ind_survey 94.8/1.013; ind_design 94.0/1.026
+  rwanda_row_only          25% oracle 95.8/0.569; linear_mi 98.0/0.964; random_intercept 97.6/1.000; ind_mice 98.2/0.861; ind_survey 94.0/0.948; ind_design 95.8/1.006
+  rwanda_row_only          50% oracle 95.8/0.834; linear_mi 97.6/0.997; random_intercept 98.0/1.000; ind_mice 98.4/0.982; ind_survey 95.6/0.999; ind_design 96.8/1.016
+  rwanda_shift             25% oracle 96.2/0.547; linear_mi 89.4/1.085; random_intercept 98.6/1.000; ind_mice 94.8/0.954; ind_survey 93.2/1.026; ind_design 94.0/1.170
+  rwanda_shift             50% oracle 96.8/0.783; linear_mi 95.0/1.005; random_intercept 98.8/1.000; ind_mice 97.2/0.956; ind_survey 97.4/0.994; ind_design 96.4/1.024
+  rwanda_shift_low         25% oracle 95.4/0.570; linear_mi 92.6/0.979; random_intercept 97.2/1.000; ind_mice 97.4/0.892; ind_survey 94.8/0.961; ind_design 94.4/1.036
+  rwanda_shift_low         50% oracle 93.2/0.846; linear_mi 92.8/1.010; random_intercept 94.6/1.000; ind_mice 95.6/0.979; ind_survey 93.6/0.986; ind_design 94.8/1.011
+  rwanda_under             25% oracle 95.6/0.600; linear_mi 92.2/1.030; random_intercept 95.4/1.000; ind_mice 96.4/0.944; ind_survey 94.8/1.028; ind_design 94.2/1.078
+  rwanda_under             50% oracle 94.8/0.769; linear_mi 94.0/1.013; random_intercept 97.4/1.000; ind_mice 96.6/0.976; ind_survey 95.2/1.005; ind_design 94.8/1.016
+
+AUDITED VALUE AS PREDICTOR, no rule: bias %, coverage, RMSE, RMSE ratio against linear MI
+  covariate_row_only   25% oracle -0.0, 95.6, 0.0362, 0.679; linear_mi -0.0, 96.2, 0.0532, 1.000; random_intercept -2.6, 96.8, 0.0540, 1.016; ind_mice -0.9, 96.6, 0.0545, 1.023; ind_survey +1.9, 96.4, 0.0564, 1.060; ind_design +0.2, 96.6, 0.0580, 1.090
+  covariate_row_only   50% oracle -0.4, 97.4, 0.0333, 0.825; linear_mi -0.5, 97.2, 0.0404, 1.000; random_intercept -1.2, 97.4, 0.0402, 0.995; ind_mice -0.6, 97.4, 0.0400, 0.990; ind_survey +0.1, 97.2, 0.0410, 1.015; ind_design -0.3, 97.0, 0.0413, 1.021
+  covariate_shift      25% oracle -0.4, 96.4, 0.0369, 0.628; linear_mi -3.0, 95.4, 0.0587, 1.000; random_intercept -16.1, 84.4, 0.0971, 1.654; ind_mice +1.4, 94.6, 0.0559, 0.951; ind_survey +1.2, 97.6, 0.0578, 0.984; ind_design -3.2, 95.6, 0.0631, 1.074
+  covariate_shift      50% oracle -0.3, 95.6, 0.0365, 0.817; linear_mi -1.1, 95.4, 0.0447, 1.000; random_intercept -10.1, 86.0, 0.0668, 1.495; ind_mice +0.3, 96.2, 0.0421, 0.941; ind_survey -0.3, 96.8, 0.0447, 0.999; ind_design -1.1, 95.4, 0.0466, 1.044
+  covariate_under      25% oracle -0.0, 95.6, 0.0365, 0.665; linear_mi -2.1, 94.4, 0.0548, 1.000; random_intercept -7.8, 92.4, 0.0664, 1.211; ind_mice +0.4, 94.4, 0.0528, 0.963; ind_survey +1.0, 96.2, 0.0546, 0.996; ind_design -2.1, 95.6, 0.0576, 1.051
+  covariate_under      50% oracle +0.0, 95.2, 0.0371, 0.893; linear_mi -0.4, 96.0, 0.0415, 1.000; random_intercept -3.8, 95.4, 0.0462, 1.111; ind_mice +0.5, 96.8, 0.0422, 1.015; ind_survey +0.3, 97.2, 0.0421, 1.013; ind_design -0.5, 96.0, 0.0424, 1.022
+
+SECOND HEALTH SYSTEM, whole-cluster audits, description only: coverage and RMSE
+  district_33:
+    ind_mice: available 100.0%; mean distance 9.70; anc 98.8, counselling 97.7, deliveries 59.1, exposedbabies 63.0, fpmethods 94.8, immunization 98.2, ipt 97.7, opd 99.4, postnatal 97.4
+    ind_survey: available 100.0%; mean distance 5.83; anc 96.1, counselling 96.8, deliveries 69.4, exposedbabies 78.0, fpmethods 92.7, immunization 97.9, ipt 95.5, opd 94.1, postnatal 94.6
+    ind_design: available 100.0%; mean distance 8.46; anc 94.3, counselling 94.2, deliveries 64.9, exposedbabies 64.2, fpmethods 84.7, immunization 95.5, ipt 95.3, opd 94.4, postnatal 93.0
+  district_50:
+    ind_mice: available 100.0%; mean distance 10.34; anc 97.7, counselling 95.1, deliveries 57.7, exposedbabies 61.1, fpmethods 83.4, immunization 96.5, ipt 96.5, opd 98.7, postnatal 95.8
+    ind_survey: available 100.0%; mean distance 8.38; anc 95.5, counselling 93.8, deliveries 64.7, exposedbabies 71.5, fpmethods 84.5, immunization 97.9, ipt 94.0, opd 92.7, postnatal 91.8
+    ind_design: available 100.0%; mean distance 9.21; anc 95.7, counselling 94.1, deliveries 65.6, exposedbabies 64.5, fpmethods 77.8, immunization 97.2, ipt 95.5, opd 95.5, postnatal 94.0
+
+SECONDS PER REQUEST, mean
+  ind_mice: 0.091
+  ind_survey: 0.040
+  ind_design: 0.032
+
+PREDICTIONS
+  1. The outcome is KEEP: HELD
+  2. ind_mice has an N1 ratio at most 1.05, and fails N3: HELD
+  3. ind_survey and ind_design fail N1: HELD
+  4. ind_survey reaches 92% on more real items at 25% than the earlier raking recipe under approx, which reached none: HELD

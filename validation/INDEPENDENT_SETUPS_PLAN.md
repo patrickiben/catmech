@@ -41,3 +41,8 @@ The same 49,500 cohorts as the [comparison](OUTSIDE_METHODS_PLAN.md), with its s
 Three agents are not a survey of practice. They share a model with the author. They can read the same generator that this study's simulated cells use, so they could tune to it, as a diligent analyst would. The real items are held back from them, but those items have been seen by the author. No human has reviewed this.
 
 ## Amendments
+
+Made after the study ran and before any of its results were read. The original plan and scorer are kept in `independent-setups-source/`.
+
+**A fault in the scorer's control.** The control compares this scorer's values for `mice_2l_lmer` with the earlier study's saved ones. It searched the first mention of that method in the saved file, which is in the status list and not in the decision section, so it stopped although the values matched. It now searches the decision section. No condition or threshold changed.
+

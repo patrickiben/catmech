@@ -1,0 +1,31 @@
+part 1 rwanda_none_rare ; elapsed 5 seconds
+part 1 pairs_none_rare ; elapsed 12 seconds
+part 1 none_none_rare ; elapsed 16 seconds
+part 1 rwanda_shape_2_rare ; elapsed 21 seconds
+part 1 pairs_shape_2_rare ; elapsed 28 seconds
+part 1 none_shape_2_rare ; elapsed 31 seconds
+part 1 rwanda_shape_05_rare ; elapsed 37 seconds
+part 1 pairs_shape_05_rare ; elapsed 44 seconds
+part 1 none_shape_05_rare ; elapsed 47 seconds
+part 1 rwanda_none_common ; elapsed 52 seconds
+part 1 pairs_none_common ; elapsed 59 seconds
+part 1 none_none_common ; elapsed 63 seconds
+part 1 rwanda_shape_2_common ; elapsed 68 seconds
+part 1 pairs_shape_2_common ; elapsed 75 seconds
+part 1 none_shape_2_common ; elapsed 78 seconds
+part 1 rwanda_shape_05_common ; elapsed 83 seconds
+part 1 pairs_shape_05_common ; elapsed 89 seconds
+part 1 none_shape_05_common ; elapsed 92 seconds
+part 2 rwanda_rare 0.25 ; elapsed 102 seconds
+part 2 pairs_rare 0.25 ; elapsed 112 seconds
+part 2 none_rare 0.25 ; elapsed 121 seconds
+part 2 rwanda_rare 0.5 ; elapsed 131 seconds
+part 2 pairs_rare 0.5 ; elapsed 141 seconds
+part 2 none_rare 0.5 ; elapsed 150 seconds
+part 2 lbw 0.25 ; elapsed 189 seconds
+part 2 lbw 0.5 ; elapsed 199 seconds
+part 2 resus 0.25 ; elapsed 242 seconds
+part 2 resus 0.5 ; elapsed 252 seconds
+part 2 stillbirths 0.25 ; elapsed 292 seconds
+part 2 stillbirths 0.5 ; elapsed 302 seconds
+Completed study : 18000 + 21000 + 20500 requests; failed 5, ok 20995 

@@ -1,0 +1,20 @@
+Post hoc: made after the results, enters no rule
+
+THE MOST INFLUENTIAL DISTRICT, verified values: its clinics of the pool; the pool slope with and without it; share of cohorts that include it; coverage of the slope at clinic_25 when it is in the cohort and when it is not
+  opd: 26 of 114 clinics; slope 279.6, without it 587.3; in 63.4% of cohorts; oracle 92.3, 93.7; linear_mi 99.5, 97.8; random_intercept 99.2, 98.1
+  deliveries: 4 of 105 clinics; slope -75.7, without it 32.6; in 64.0% of cohorts; oracle 100.0, 0.0; linear_mi 86.4, 15.6; random_intercept 87.0, 19.2
+  anc: 27 of 100 clinics; slope 5.5, without it 74.1; in 63.7% of cohorts; oracle 91.5, 89.0; linear_mi 99.2, 98.1; random_intercept 98.4, 97.0
+  postnatal: 26 of 112 clinics; slope 3.8, without it 21.9; in 62.4% of cohorts; oracle 91.7, 86.4; linear_mi 99.2, 91.5; random_intercept 99.5, 90.4
+  immunization: 27 of 115 clinics; slope 19.2, without it 40.9; in 66.2% of cohorts; oracle 92.6, 91.4; linear_mi 98.2, 96.2; random_intercept 98.2, 96.2
+  ipt: 27 of 118 clinics; slope 15.2, without it 41.1; in 64.7% of cohorts; oracle 95.2, 87.0; linear_mi 98.6, 93.5; random_intercept 98.8, 92.9
+  fpmethods: 27 of 116 clinics; slope -73.7, without it 141.7; in 65.2% of cohorts; oracle 98.8, 10.6; linear_mi 98.6, 86.5; random_intercept 98.9, 88.2
+  counselling: 5 of 113 clinics; slope 36.1, without it 60.8; in 63.1% of cohorts; oracle 99.4, 76.7; linear_mi 99.5, 92.4; random_intercept 99.2, 92.7
+  exposedbabies: 4 of 78 clinics; slope -9.3, without it 5.4; in 65.8% of cohorts; oracle 99.5, 0.0; linear_mi 83.9, 25.7; random_intercept 88.3, 33.6
+
+WIDEST LINEAR MI INTERVALS, against the median width for that item and audit
+  anc district_33 replicate 62: width 3.8e+09, median 459, pooled df 0.176
+  opd district_33 replicate 339: width 1.7e+07, median 4.11e+03, pooled df 0.347
+  deliveries district_33 replicate 346: width 1.32e+06, median 329, pooled df 0.286
+  Share of linear MI requests with pooled df under 1: clinic_25 0.12%, clinic_50 0.00%, district_33 0.23%, district_50 0.01%
+
+REQUESTS WHERE EVERY AUDITED ROW AGREED, linear MI: 1

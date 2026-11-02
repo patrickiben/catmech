@@ -1,0 +1,16 @@
+{
+  "mode": "study",
+  "reps_real_25": 2000,
+  "reps_other": 500,
+  "reps_zambia": 1000,
+  "base": {
+    "ind_mice": 1260000000,
+    "ind_survey": 1270000000,
+    "ind_design": 1280000000
+  },
+  "seeds": {
+    "covariate_cohort": 1700100000,
+    "cohort": 2010000000,
+    "audit": 2020000000
+  }
+}

@@ -32,6 +32,8 @@ A later [comparison with outside methods](../validation/OUTSIDE_METHODS_SYNTHESI
 
 Version 0.7.1 follows an [overall check](../validation/OVERALL_QC.md) by five independent AI reviewers. It adds a warning when every audited row agrees and recorded values are kept, a warning when one cluster determines a coefficient, and a refusal when no between-cluster variance can be estimated. These cases gave badly wrong intervals with no signal before. Earlier study numbers are unchanged.
 
+Three later planned tests changed no package code. On a [second health system](../validation/SECOND_SYSTEM_SYNTHESIS.md) the outcome was mixed, with errors that barely clustered. The shortfall on count data came from [heavy-tailed cluster effects and not rarity](../validation/RARE_COUNTS_SYNTHESIS.md), with no fix found. [Comparators written by fresh agents](../validation/INDEPENDENT_SETUPS_SYNTHESIS.md) did not meet the rule, but the best looks better than the option on most measures, so the option is not the best available.
+
 ## Current judgment
 
 | Question | Judgment |
@@ -43,7 +45,7 @@ Version 0.7.1 follows an [overall check](../validation/OVERALL_QC.md) by five in
 | Can it say how many records to audit? | Not validated. The planner gave a NO-GO, failing only at the 5% target. It is a documented calculation, built on classical theory. |
 | Does it repair missed errors with no new information? | No. It requires genuine reference measurements. |
 | Generally valid confidence intervals? | No. Failures are recorded for each workflow. With default intervals the oracle itself undercovered on ClinicalTrials.gov and on the Rwanda audit, and no method in the real-audit test held the oracle's clustered coverage at a 25% facility audit. The experimental clustered option came closer, and under the variance then in use still reached only 89.0% on one of nine items, against 93.2% for a recount. |
-| Does it handle clustered audits? | Partly. `catmech_pool_lm(cluster = )` is a standard cluster-robust variance. `catmech_reference(cluster = )` is experimental: better worst-case coverage when the audited value is the outcome, some added error on rare items, two planned tests that came out PARTIAL, and bias when the audited value is a predictor. A planned comparison kept it, narrowly, over `mice` and design-based methods. |
+| Does it handle clustered audits? | Partly. `catmech_pool_lm(cluster = )` is a standard cluster-robust variance. `catmech_reference(cluster = )` is experimental: better worst-case coverage when the audited value is the outcome, some added error on rare items, two planned tests that came out PARTIAL, and bias when the audited value is a predictor. Planned comparisons kept it under their rule, narrowly, and an independently written setup looks better on most measures. |
 | Real-data evidence? | Two public datasets with real recording differences, and two public audits: Rwanda facility counts and psychology effect sizes. None is a patient-level clinical source-data audit, and the ClinicalTrials.gov reference is not independent truth. |
 | Ready for a GitHub research release? | Yes, with the recorded limitations. |
 | Ready for a methods paper or clinical use? | No. A short software paper may be realistic after review. A methods claim is not supported. |
@@ -60,8 +62,8 @@ every connection among those methods.
 2. Check simulated error rates and sizes against published audits. The main fixture uses 8% wrong records, which may be high for transcription errors.
 3. Test the hold-out advice prospectively, since it comes from the real-data study that suggested it.
 4. Consider non-constant variance, which remains out of scope. On the Rwanda audit it and clustering together cost the oracle up to 28 points of default coverage.
-5. Test the clustered option on a second health system. Every item in the one recount available has now been seen, and two planned tests have run on it.
-6. Have someone who knows `mice` and `survey` review the [comparison with outside methods](../validation/OUTSIDE_METHODS_SYNTHESIS.md), since one author set up every method. Rare counts also remain unsolved, even with every row checked.
+5. Test separate within-cluster and between-cluster slopes in the clustered option, on data not yet seen. Every item in both recounts has now been seen.
+6. Have someone who knows `mice` and `survey` review the [comparisons](../validation/INDEPENDENT_SETUPS_SYNTHESIS.md). Fresh agents reduce the problem of one author setting up every method, and they do not remove it. Heavy-tailed cluster effects also remain unsolved, even with every row checked.
 7. Test whether checking errors against analysis covariates on audited rows can guide the choice of method. The real-audit results suggested this, so they cannot test it fairly, and at a 25% audit the check has low power.
 
 Neither reproducibility nor these validation checks are proof of inferential validity. AI-assisted review is disclosed, and no independent human peer review is implied.

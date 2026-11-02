@@ -134,7 +134,8 @@ def judge(c):
 saved = (ROOT/"validation/outside-methods-decisions.txt").read_text(encoding="utf-8")
 control = judge("mice_2l_lmer")
 wanted = [f"N1 RMSE ratio, real 25%: {control[0]:.3f}", f"N3 real 25%: at least 92 on {control[2][0]}, at most 98 on {control[2][1]}, distance {control[2][2]:.2f}", f"N5 simulations: RMSE ratio {control[4][0]:.3f}, cells in limits {control[4][1]} of {len(outcome_cells)}"]
-block = saved[saved.index("  mice_2l_lmer:"):saved.index("  mice_2l_pan:")]
+rule = saved[saved.index("DECISION RULE"):]
+block = rule[rule.index("  mice_2l_lmer:"):rule.index("  mice_2l_pan:")]
 if len(rows("ind_mice", real25[0])) >= 2000:
     assert all(w in block for w in wanted), "This scorer does not reproduce the earlier study's values"
     control_text = "Control: this scorer reproduces the earlier study's N1, N3 and N5 for mice_2l_lmer."

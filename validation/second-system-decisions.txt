@@ -1,0 +1,121 @@
+Scored against validation/SECOND_SYSTEM_PLAN.md
+
+REQUESTS AND STATUSES
+  primary oracle: ok 36000
+  primary recorded: ok 36000
+  primary audited_only: ok 36000
+  primary linear_mi: ok 35999, failed 1
+  primary random_intercept: ok 35996, failed 4
+  primary mice_2l_lmer: ok 36000
+  sensitivity oracle: ok 18000
+  sensitivity linear_mi: ok 17999, failed 1
+  sensitivity random_intercept: ok 17999, failed 1
+    primary linear_mi: 1 x Trusted Gaussian regression has zero residual variance; no posterior draw is supported.
+    primary random_intercept: 3 x Audited clusters lost design support in imputation; audit more clusters.
+    primary random_intercept: 1 x The audited rows leave no residual variance.
+    sensitivity linear_mi: 1 x Trusted Gaussian regression has zero residual variance; no posterior draw is supported.
+    sensitivity random_intercept: 1 x The audited rows leave no residual variance.
+
+DECISION RULE: D is mean distance from 95 over nine items; R is the geometric mean RMSE of the option over linear MI
+  clinic_25: D option 7.98, D linear MI 8.99, R 1.005, available 99.99%: supports
+  district_50: D option 10.59, D linear MI 10.82, R 0.988, available 100.00%: neither
+
+OUTCOME: MIXED
+
+AUDIT clinic_25: coverage, then RMSE ratio against linear MI; last row is mean distance from 95, items at 92 or more, geometric mean ratio
+  opd            oracle 92.8/0.575; recorded 96.5/1.239; audited_only 96.5/1.472; linear_mi 98.9/1.000; random_intercept 98.8/0.991; mice_2l_lmer 98.6/1.015
+  deliveries     oracle 64.0/0.973; recorded 64.2/1.171; audited_only 32.5/2.547; linear_mi 60.9/1.000; random_intercept 62.6/1.022; mice_2l_lmer 60.3/1.019
+  anc            oracle 90.6/0.410; recorded 94.8/1.301; audited_only 94.9/0.808; linear_mi 98.8/1.000; random_intercept 97.9/0.968; mice_2l_lmer 98.1/0.969
+  postnatal      oracle 89.7/0.601; recorded 80.8/0.937; audited_only 91.1/1.179; linear_mi 96.3/1.000; random_intercept 96.1/1.029; mice_2l_lmer 94.6/1.015
+  immunization   oracle 92.2/0.475; recorded 95.1/1.435; audited_only 93.1/0.827; linear_mi 97.5/1.000; random_intercept 97.5/1.050; mice_2l_lmer 97.2/1.020
+  ipt            oracle 92.3/0.930; recorded 89.3/0.925; audited_only 93.7/1.572; linear_mi 96.8/1.000; random_intercept 96.7/0.999; mice_2l_lmer 96.3/1.006
+  fpmethods      oracle 68.1/0.760; recorded 74.0/1.116; audited_only 85.7/1.370; linear_mi 94.4/1.000; random_intercept 95.2/0.986; mice_2l_lmer 93.3/0.995
+  counselling    oracle 91.0/0.777; recorded 93.4/0.844; audited_only 89.7/1.479; linear_mi 96.9/1.000; random_intercept 96.8/0.986; mice_2l_lmer 95.9/0.989
+  exposedbabies  oracle 65.5/0.983; recorded 66.1/1.079; audited_only 39.3/2.247; linear_mi 64.0/1.000; random_intercept 69.6/1.018; mice_2l_lmer 63.1/1.001
+  summary        oracle 12.09, 3, 0.690; recorded 11.56, 4, 1.102; audited_only 15.72, 4, 1.403; linear_mi 8.99, 7, 1.000; random_intercept 7.98, 7, 1.005; mice_2l_lmer 8.87, 7, 1.003
+  available      oracle 100.00%; recorded 100.00%; audited_only 100.00%; linear_mi 100.00%; random_intercept 99.99%; mice_2l_lmer 100.00%
+  recorded kept, linear MI, share of requests: 
+  mean width against the option: oracle 0.583; recorded 0.791; audited_only 1.121; linear_mi 0.944; random_intercept 1.000; mice_2l_lmer 0.921
+
+AUDIT clinic_50: coverage, then RMSE ratio against linear MI; last row is mean distance from 95, items at 92 or more, geometric mean ratio
+  opd            oracle 92.8/0.788; recorded 96.5/1.697; audited_only 94.7/1.291; linear_mi 98.8/1.000; random_intercept 99.2/1.001; mice_2l_lmer 98.8/1.011
+  deliveries     oracle 64.0/0.997; recorded 64.2/1.201; audited_only 41.7/1.532; linear_mi 54.7/1.000; random_intercept 55.1/0.997; mice_2l_lmer 54.5/1.000
+  anc            oracle 90.6/0.529; recorded 94.8/1.680; audited_only 91.3/0.781; linear_mi 97.1/1.000; random_intercept 96.4/0.955; mice_2l_lmer 96.1/0.954
+  postnatal      oracle 89.7/0.814; recorded 80.8/1.269; audited_only 91.4/1.086; linear_mi 94.7/1.000; random_intercept 95.5/1.004; mice_2l_lmer 95.4/1.012
+  immunization   oracle 92.2/0.628; recorded 95.1/1.899; audited_only 94.4/0.786; linear_mi 96.8/1.000; random_intercept 96.8/1.017; mice_2l_lmer 97.0/1.025
+  ipt            oracle 92.3/0.984; recorded 89.3/0.978; audited_only 93.5/1.226; linear_mi 94.0/1.000; random_intercept 93.9/0.996; mice_2l_lmer 93.8/0.996
+  fpmethods      oracle 68.1/0.888; recorded 74.0/1.305; audited_only 79.3/1.100; linear_mi 86.7/1.000; random_intercept 85.1/1.001; mice_2l_lmer 84.7/1.006
+  counselling    oracle 91.0/0.921; recorded 93.4/1.001; audited_only 89.1/1.299; linear_mi 93.9/1.000; random_intercept 94.6/0.988; mice_2l_lmer 94.0/0.988
+  exposedbabies  oracle 65.5/0.983; recorded 66.1/1.079; audited_only 42.7/1.625; linear_mi 57.6/1.000; random_intercept 58.8/0.999; mice_2l_lmer 56.8/0.996
+  summary        oracle 12.09, 3, 0.820; recorded 11.56, 4, 1.310; audited_only 15.21, 3, 1.158; linear_mi 10.68, 6, 1.000; random_intercept 10.60, 6, 0.995; mice_2l_lmer 10.94, 6, 0.999
+  available      oracle 100.00%; recorded 100.00%; audited_only 100.00%; linear_mi 100.00%; random_intercept 100.00%; mice_2l_lmer 100.00%
+  recorded kept, linear MI, share of requests: 
+  mean width against the option: oracle 0.828; recorded 1.162; audited_only 1.121; linear_mi 1.007; random_intercept 1.000; mice_2l_lmer 0.989
+
+AUDIT district_33: coverage, then RMSE ratio against linear MI; last row is mean distance from 95, items at 92 or more, geometric mean ratio
+  opd            oracle 92.8/0.666; recorded 96.5/1.434; audited_only 90.0/1.406; linear_mi 99.1/1.000; random_intercept 98.2/1.062; mice_2l_lmer 98.5/1.084
+  deliveries     oracle 64.0/0.993; recorded 64.2/1.196; audited_only 41.2/2.215; linear_mi 54.4/1.000; random_intercept 54.8/0.998; mice_2l_lmer 53.9/0.997
+  anc            oracle 90.6/0.463; recorded 94.8/1.470; audited_only 88.1/0.829; linear_mi 97.2/1.000; random_intercept 97.5/0.909; mice_2l_lmer 97.8/0.918
+  postnatal      oracle 89.7/0.732; recorded 80.8/1.142; audited_only 86.4/1.301; linear_mi 95.5/1.000; random_intercept 95.6/0.974; mice_2l_lmer 95.3/0.971
+  immunization   oracle 92.2/0.603; recorded 95.1/1.821; audited_only 90.9/1.086; linear_mi 96.3/1.000; random_intercept 96.3/1.043; mice_2l_lmer 96.2/1.045
+  ipt            oracle 92.3/0.986; recorded 89.3/0.980; audited_only 90.1/1.627; linear_mi 95.3/1.000; random_intercept 95.7/0.971; mice_2l_lmer 96.0/0.966
+  fpmethods      oracle 68.1/0.839; recorded 74.0/1.233; audited_only 75.4/1.269; linear_mi 90.4/1.000; random_intercept 90.5/1.025; mice_2l_lmer 90.4/1.017
+  counselling    oracle 91.0/0.857; recorded 93.4/0.931; audited_only 84.7/1.561; linear_mi 95.7/1.000; random_intercept 96.6/0.920; mice_2l_lmer 96.8/0.922
+  exposedbabies  oracle 65.5/1.011; recorded 66.1/1.110; audited_only 44.6/2.234; linear_mi 57.6/1.000; random_intercept 58.5/0.994; mice_2l_lmer 57.3/0.992
+  summary        oracle 12.09, 3, 0.772; recorded 11.56, 4, 1.232; audited_only 18.18, 0, 1.438; linear_mi 10.19, 6, 1.000; random_intercept 10.12, 6, 0.987; mice_2l_lmer 10.44, 6, 0.989
+  available      oracle 100.00%; recorded 100.00%; audited_only 100.00%; linear_mi 99.99%; random_intercept 99.97%; mice_2l_lmer 100.00%
+  recorded kept, linear MI, share of requests: exposedbabies 0.1%
+  mean width against the option: oracle 0.737; recorded 1.022; audited_only 1.540; linear_mi 788.637; random_intercept 1.000; mice_2l_lmer 1.010
+
+AUDIT district_50: coverage, then RMSE ratio against linear MI; last row is mean distance from 95, items at 92 or more, geometric mean ratio
+  opd            oracle 92.8/0.821; recorded 96.5/1.768; audited_only 91.2/1.247; linear_mi 99.1/1.000; random_intercept 98.0/1.033; mice_2l_lmer 98.1/1.039
+  deliveries     oracle 64.0/0.996; recorded 64.2/1.199; audited_only 46.1/1.557; linear_mi 55.7/1.000; random_intercept 55.6/0.987; mice_2l_lmer 55.8/0.986
+  anc            oracle 90.6/0.610; recorded 94.8/1.936; audited_only 90.6/0.849; linear_mi 97.4/1.000; random_intercept 97.7/0.905; mice_2l_lmer 98.0/0.905
+  postnatal      oracle 89.7/0.871; recorded 80.8/1.358; audited_only 89.5/1.206; linear_mi 95.1/1.000; random_intercept 95.4/0.984; mice_2l_lmer 94.6/0.996
+  immunization   oracle 92.2/0.657; recorded 95.1/1.986; audited_only 90.9/0.932; linear_mi 95.3/1.000; random_intercept 95.5/1.043; mice_2l_lmer 94.9/1.036
+  ipt            oracle 92.3/0.983; recorded 89.3/0.977; audited_only 90.5/1.370; linear_mi 94.1/1.000; random_intercept 94.8/0.974; mice_2l_lmer 95.3/0.974
+  fpmethods      oracle 68.1/0.904; recorded 74.0/1.329; audited_only 66.3/1.215; linear_mi 82.4/1.000; random_intercept 82.9/1.017; mice_2l_lmer 83.1/1.009
+  counselling    oracle 91.0/0.940; recorded 93.4/1.022; audited_only 87.0/1.329; linear_mi 93.9/1.000; random_intercept 94.2/0.969; mice_2l_lmer 94.3/0.964
+  exposedbabies  oracle 65.5/1.006; recorded 66.1/1.104; audited_only 46.0/1.447; linear_mi 58.4/1.000; random_intercept 58.8/0.991; mice_2l_lmer 58.5/0.992
+  summary        oracle 12.09, 3, 0.853; recorded 11.56, 4, 1.363; audited_only 17.43, 0, 1.219; linear_mi 10.82, 6, 1.000; random_intercept 10.59, 6, 0.988; mice_2l_lmer 10.58, 6, 0.988
+  available      oracle 100.00%; recorded 100.00%; audited_only 100.00%; linear_mi 100.00%; random_intercept 100.00%; mice_2l_lmer 100.00%
+  recorded kept, linear MI, share of requests: 
+  mean width against the option: oracle 0.853; recorded 1.211; audited_only 1.242; linear_mi 1.001; random_intercept 1.000; mice_2l_lmer 0.998
+
+DESCRIPTION: items where recorded has lower RMSE than linear MI, and than every audit-using method
+  clinic_25: 3 and 3 of 9
+  clinic_50: 1 and 1 of 9
+  district_33: 2 and 0 of 9
+  district_50: 1 and 0 of 9
+
+SENSITIVITY, both-zero rows kept, 500 cohorts: D for oracle, linear MI, option; R option over linear MI
+  clinic_25: 11.40, 7.62, 7.51; 0.986
+  clinic_50: 11.40, 9.93, 9.89; 0.990
+  district_33: 11.40, 9.69, 9.80; 0.974
+  district_50: 11.40, 9.62, 9.51; 0.990
+
+ERROR INTRACLASS CORRELATION BY DISTRICT, description only
+  opd            clinics 114, disagree 63.2%, mean error -126.23, error SD 1102.83, ICC 0.192, mean verified 3387.6
+  deliveries     clinics 105, disagree 53.3%, mean error 7.04, error SD 72.64, ICC 0.080, mean verified 67.5
+  anc            clinics 100, disagree 58.0%, mean error 58.81, error SD 618.64, ICC 0.031, mean verified 112.4
+  postnatal      clinics 112, disagree 56.2%, mean error 3.12, error SD 41.94, ICC -0.063, mean verified 42.7
+  immunization   clinics 115, disagree 56.5%, mean error 48.34, error SD 380.74, ICC 0.014, mean verified 55.2
+  ipt            clinics 118, disagree 51.7%, mean error 1.10, error SD 21.52, ICC 0.112, mean verified 47.5
+  fpmethods      clinics 116, disagree 56.0%, mean error 38.97, error SD 273.22, ICC -0.015, mean verified 342.6
+  counselling    clinics 113, disagree 57.5%, mean error 3.15, error SD 42.62, ICC 0.201, mean verified 94.9
+  exposedbabies  clinics 78, disagree 56.4%, mean error 0.71, error SD 7.15, ICC 0.041, mean verified 7.5
+
+SECONDS PER REQUEST, mean
+  oracle: 0.016
+  recorded: 0.014
+  audited_only: 0.014
+  linear_mi: 0.144
+  random_intercept: 0.121
+  mice_2l_lmer: 0.598
+
+PREDICTIONS
+  1. The outcome is MIXED: HELD
+  2. The oracle reaches 92% on at most six of nine items at district_50: HELD
+  3. The option gives an interval on at least 95% of requests in every audit: HELD
+  4. recorded has a lower RMSE than linear_mi on at least five of nine items at clinic_25: FAILED
+  5. Linear MI reaches 92% on at least seven of nine items at clinic_50: FAILED

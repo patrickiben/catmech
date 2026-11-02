@@ -1,0 +1,32 @@
+Post hoc: made after the results, enters no rule
+
+ind_mice ABOVE 98 ON REAL ITEMS, with the recount's coverage; this alone failed N3 and N4
+  25%: resus 99.20, recount 96.65; stillbirths 98.05, recount 96.80
+  50%: resus 99.00, recount 97.80; stillbirths 98.80, recount 96.60
+
+MEAN WIDTH OVER THE OPTION'S, simulated cells: rare cells, other audited-outcome cells
+  ind_mice: 1.158, 0.964
+  ind_survey: 1.200, 1.005
+  ind_design: 1.307, 1.018
+
+MEAN COVERAGE ON THE SIX RARE CELLS
+  oracle: 87.50
+  linear_mi: 87.77
+  random_intercept: 88.77
+  ind_mice: 91.53
+  ind_survey: 94.17
+  ind_design: 92.73
+
+nb_mi IN THE RARE-COUNT TEST, median absolute error over linear MI's, and the largest absolute error, to separate typical behavior from blow-ups
+  lbw 25%: 2.411; 2.7e+10
+  lbw 50%: 1.423; 1.71e+10
+  none_rare 25%: 1.474; 165
+  none_rare 50%: 1.236; 1.98
+  pairs_rare 25%: 740849690273.134; 4.47e+10
+  pairs_rare 50%: 4.058; 2.97e+10
+  resus 25%: 64538862889.934; 5.06e+11
+  resus 50%: 1.436; 1.41e+10
+  rwanda_rare 25%: 383773933257.726; 4.52e+11
+  rwanda_rare 50%: 3.924; 5.38e+10
+  stillbirths 25%: 3048691911280.416; 9.21e+11
+  stillbirths 50%: 1763158847021.408; 1.14e+11

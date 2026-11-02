@@ -31,4 +31,5 @@ clustered-fix-study: all 210000 planned requests, 420 recomputed groups, seeds a
 variance-check: all 24500 planned requests, scored output regenerated identically, reading re-derived, numbers in the results traced, algebra record has 50 passes: PASS
 variance-mi-study: all 148500 planned requests, sources hashed, scored output and post-hoc table regenerated identically, the outcome re-derived as cv3, 148500 replayed through the package: PASS
 outside-methods-study: all 297000 planned requests and 58356 rerun, sources hashed, three scored files regenerated identically, accuracy failures re-derived, controls passed: PASS
+Later studies: second health system, rare counts and independently written setups, all planned requests, sources hashed, scored files regenerated identically, numbers traced: PASS
 This verifies correspondence and repeatability, not inferential validity.

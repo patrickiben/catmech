@@ -1,0 +1,12 @@
+{
+  "mode": "study",
+  "m": 20,
+  "reps": 1000,
+  "sensitivity_reps": 500,
+  "seeds": {
+    "cohort": 2010000000,
+    "audit": 2020000000,
+    "imputation": 2030000000,
+    "mice": 2040000000
+  }
+}
