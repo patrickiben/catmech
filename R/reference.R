@@ -117,7 +117,8 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #'   posterior that treats rows as independent. See details.
 #' @param cluster_strata Optional names of categorical columns within which audited
 #'   clusters are resampled, usually the strata of the audit. Every cluster must sit in one
-#'   stratum. A stratum with a single audited cluster keeps it in every resample.
+#'   stratum. A stratum with a single audited cluster keeps it in every resample. With few
+#'   audited clusters per stratum, resampling within strata understates variance. See details.
 #' @return A `catmech_result`. Its completed target contains exact gold references
 #'   or imputations; the original reference column is unchanged. The `mids`
 #'   observed target is the reference values with other rows missing. The manifest
@@ -170,9 +171,11 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #'
 #' `cluster` is experimental. Its planned test came out PARTIAL under a rule fixed in
 #' advance: on held-out items of a real facility recount at a 25% audit, it helped where
-#' the existing option undercovered and lost accuracy elsewhere. Seen only afterward, and
-#' not yet tested, the losses came on rare events, whose counts are small with many zeros.
-#' Treat it as a check, not a default. With about eight audited
+#' the existing option fell short and lost accuracy elsewhere. Post hoc and not yet tested,
+#' the losses fell on rare events whose residuals show no within-facility correlation.
+#' A bootstrap mean within a stratum of n audited clusters has (n - 1)/n of the usual
+#' variance, so `cluster_strata` understates variance when strata hold few audited
+#' clusters. Treat `cluster` as a check, not a default. With about eight audited
 #' clusters, an occasional fit has near-zero degrees of freedom and an extremely wide
 #' interval, so read the `df` column. See `validation/CLUSTERED_SYNTHESIS.md`.
 #' @export

@@ -100,6 +100,128 @@ def main():
         print(f"  {t['name']}: {100*t['diff_25']:+.1f} against {100*(t['existing_50']-t['existing']):+.1f}")
     print(f"The clustered option gained more on {sum(t['diff_25'] > t['existing_50']-t['existing'] for t in helped)} of {len(helped)}.")
 
+    study = {(r["analysis"], float(r["fraction"]), r["method"], r["replicate"]): r for r in rows("validation/clustered-study/replicates.csv")}
+    good = lambda r: r is not None and r["status"] == "ok"
+    print("Paired coverage difference, the clustered option at 25% minus the existing option at 50%, with MCSE; change in mean width from the option, and from doubling the audit:")
+    for t in helped:
+        pairs = [(study.get((t["name"], .25, "linear_mi_clustered", str(i))), study.get((t["name"], .5, "linear_mi", str(i)))) for i in range(1, 501)]
+        d = [float(a["coverage"])-float(b["coverage"]) for a, b in pairs if good(a) and good(b)]
+        width = lambda fraction, method: float(summary[(t["name"], fraction, method)]["mean_width"])
+        print(f"  {t['name']}: {100*st.mean(d):+.1f} ({100*st.stdev(d)/len(d)**.5:.1f}); {100*(width(.25, 'linear_mi_clustered')/width(.25, 'linear_mi')-1):+.0f}%, {100*(width(.5, 'linear_mi')/width(.25, 'linear_mi')-1):+.0f}%")
+
+    print()
+    print("THE EXISTING OPTION AGAINST THE SAME CONDITIONS")
+    full = {(r["analysis"], float(r["fraction"]), r["method"]): float(r["coverage"]) for r in rows("validation/clustered-study/summary.csv")}
+    held = [t for t in table if t["role"] == "held_out"]
+    print("Existing minus oracle coverage on the held-out items at 25%, points: " + ", ".join(f"{t['name']} {100*(t['existing']-t['oracle']):+.1f}" for t in held) + f". Within 5 points: {sum(abs(t['existing']-t['oracle']) <= .05 for t in held)} of {len(held)}.")
+    cells = sorted({(a, f) for a, f, _ in full if a.startswith(("g70", "g150"))})
+    meets = lambda method: sum(full[(a, f, method)] >= .92 and abs(full[(a, f, method)]-full[(a, f, "oracle")]) <= .03 for a, f in cells)
+    print(f"Simulation condition, cells with 70 or more clusters: existing {meets('linear_mi')} of {len(cells)}, clustered {meets('linear_mi_clustered')} of {len(cells)}.")
+    oracle_30 = [v for (a, _, m), v in full.items() if a.startswith("g30") and m == "oracle"]
+    print(f"Oracle coverage, the cluster-robust variance on complete data, with 30 clusters: mean {100*st.mean(oracle_30):.1f}%, lowest {100*min(oracle_30):.1f}%, {sum(v < .92 for v in oracle_30)} of {len(oracle_30)} cells under 92%.")
+
+    print()
+    print("SIMULATIONS")
+    simulated = [r for r in rows("validation/clustered-study/ratios.csv") if r["level"] == "simulation" and not r["analysis"].startswith("control")]
+    above = [r for r in simulated if float(r["recovery_lower"]) > 1]
+    below = [r for r in simulated if float(r["recovery_upper"]) < 1]
+    print(f"Of {len(simulated)} cells, recovery RMSE ratio clearly above 1 in {len(above)}: " + ", ".join(f"{r['analysis']} at {100*float(r['fraction']):.0f}% {float(r['recovery_ratio']):.3f}" for r in above) + ".")
+    print(f"Clearly below 1 in {len(below)}, of which {sum('tracking' in r['analysis'] for r in below)} have tracking errors.")
+    sim_icc = rows("validation/clustered-review/simulation-icc.csv")
+    for errors in ("iid", "persistent", "tracking"):
+        v = [float(r["residual_icc"]) for r in sim_icc if r["errors"] == errors]
+        print(f"Within-cluster correlation of the imputation model's residuals, {errors} errors: {min(v):.2f} to {max(v):.2f}.")
+
+    print()
+    print("VERY WIDE INTERVALS, 30 clusters at 25%")
+    for method in ("linear_mi", "linear_mi_clustered"):
+        wide, usual = [], []
+        for a in {a for a, _, _ in full if a.startswith("g30")}:
+            cell = [r for i in range(1, 501) if good(r := study.get((a, .25, method, str(i))))]
+            median = st.median(float(r["width"]) for r in cell)
+            for r in cell:
+                (wide if float(r["width"]) > 5*median else usual).append(float(r["recovery_error"]))
+        print(f"{method}: {len(wide)} requests over 5 times the cell median width, recovery RMSE {(st.mean(e*e for e in wide))**.5:.3f}; others {(st.mean(e*e for e in usual))**.5:.3f}.")
+    low_df = {m: [float(r["df"]) < 5 for i in range(1, 501) if good(r := study.get(("iron", .25, m, str(i))))] for m in ("linear_mi", "linear_mi_clustered")}
+    print(f"Iron at 25%, requests under 5 degrees of freedom: existing {100*st.mean(low_df['linear_mi']):.1f}%, clustered {100*st.mean(low_df['linear_mi_clustered']):.1f}%.")
+
+    print()
+    print("WIDTH RATIO WITHIN AN ITEM, 25%: coverage in the third of audits where the clustered interval is widest relative to the existing one, against the other two thirds")
+    worse = 0
+    for t in table:
+        pairs = [(study.get((t["name"], .25, "linear_mi", str(i))), study.get((t["name"], .25, "linear_mi_clustered", str(i)))) for i in range(1, 501)]
+        pairs = sorted(((float(b["width"])/float(a["width"]), float(a["coverage"]), float(b["coverage"])) for a, b in pairs if good(a) and good(b)))
+        k = len(pairs)//3
+        top, rest = pairs[-k:], pairs[:-k]
+        mean = lambda part, j: 100*st.mean(p[j] for p in part)
+        worse += mean(top, 1) < mean(rest, 1)
+        print(f"  {t['name']}: existing {mean(top, 1):.1f} against {mean(rest, 1):.1f}; clustered {mean(top, 2):.1f} against {mean(rest, 2):.1f}")
+    print(f"The existing option covered less in that third on {worse} of {len(table)} items.")
+
+    print()
+    print("WITHIN-FACILITY CORRELATION OF THE IMPUTATION MODEL'S RESIDUALS (recount on recorded value, covariate and catchment)")
+    pool_icc = {r["analysis"]: r for r in rows("validation/clustered-review/pool-icc.csv")}
+    print("Whole pool, with the same quantity leaving out the three facilities with the largest residuals:")
+    for t in table:
+        print(f"  {t['name']}: {float(pool_icc[t['name']]['icc']):+.2f}, {float(pool_icc[t['name']]['icc_without_three_facilities']):+.2f}")
+    print(f"First group: {min(float(pool_icc[t['name']]['icc']) for t in cost):+.2f} to {max(float(pool_icc[t['name']]['icc']) for t in cost):+.2f}. Second group: {min(float(pool_icc[t['name']]['icc']) for t in helped):+.2f} to {max(float(pool_icc[t['name']]['icc']) for t in helped):+.2f}.")
+    variants = rows("validation/clustered-review/variants.csv")
+    audited = {(r["analysis"], r["replicate"]): r["audited_icc"] for r in variants if r["variant"] == "control" and float(r["fraction"]) == .25}
+    print("Same quantity on each audit's own rows at 25%. Coverage gain in points, and recovery RMSE ratio, where it is at least .15 against below .15:")
+    pooled = []
+    for t in table:
+        hi, lo = [], []
+        for i in range(1, 501):
+            a, b, icc = study.get((t["name"], .25, "linear_mi", str(i))), study.get((t["name"], .25, "linear_mi_clustered", str(i))), audited.get((t["name"], str(i)), "NA")
+            if good(a) and good(b) and icc not in ("NA", ""):
+                row = (float(b["coverage"])-float(a["coverage"]), float(a["recovery_error"]), float(b["recovery_error"]), float(icc))
+                (hi if row[3] >= .15 else lo).append(row)
+                if t in helped:
+                    pooled.append(row)
+        ratio = lambda part: (sum(r[2]**2 for r in part)/sum(r[1]**2 for r in part))**.5
+        show = lambda part: f"{len(part)} audits {100*st.mean(r[0] for r in part):+.1f}, {ratio(part):.2f}" if part else "no audits"
+        print(f"  {t['name']}: {show(hi)}; {show(lo)}")
+    print("The six items of the second group pooled, by cutoff: " + "; ".join(f"{cut:.2f}: {100*st.mean(r[0] for r in pooled if r[3] >= cut):+.1f} against {100*st.mean(r[0] for r in pooled if r[3] < cut):+.1f}" for cut in (0, .1, .15, .2, .3)) + ".")
+
+    print()
+    print("RESAMPLING VARIANTS, unplanned, on the study's cohorts, audits and seeds")
+    chosen = {(r["analysis"], float(r["fraction"]), r["variant"], r["replicate"]): r for r in variants}
+    gaps = [abs(float(r["estimate"])-float(study[(r["analysis"], float(r["fraction"]), "linear_mi_clustered", r["replicate"])]["estimate"])) for r in variants if r["variant"] == "control" and r["status"] == "ok"]
+    mismatch = sum((r["status"] == "ok") != good(study[(r["analysis"], float(r["fraction"]), "linear_mi_clustered", r["replicate"])]) for r in variants if r["variant"] == "control")
+    print(f"Control: the package's stratified cluster resampling, rerun, against the study's saved records: {len(gaps)} requests, largest difference in estimate {max(gaps):.1e}, {mismatch} status differences.")
+    stratum = {}
+    for r in pool:
+        stratum.setdefault(r["hosp_id"], set()).add(r["facility_id"])
+    sizes = sorted(len(v) for v in stratum.values())
+    print(f"Facilities per catchment: {sizes}. Audited at 25%: {[max(1, round(.25*n)) for n in sizes]}, {sum(max(1, round(.25*n)) for n in sizes)} in all.")
+    print("At each audit size: coverage for existing, stratified clusters (the study), rows within strata, clusters without strata, rescaled (not a package feature), oracle; recovery RMSE ratio against existing for the last four methods; requests refused")
+    for fraction in (.25, .5):
+        print(f"  {100*fraction:.0f}%")
+        for t in table:
+            coverage, ratio, refused = [], [], []
+            for variant in ("control", "rows", "no_strata", "rescaled"):
+                pairs = [(study.get((t["name"], fraction, "linear_mi", str(i))), chosen.get((t["name"], fraction, variant, str(i))), study.get((t["name"], fraction, "oracle", str(i)))) for i in range(1, 501)]
+                returned = [(a, b, o) for a, b, o in pairs if b["status"] == "ok"]
+                target = float(pairs[0][2]["truth"])
+                coverage.append(100*st.mean(float(b["lower"]) <= target <= float(b["upper"]) for _, b, _ in returned))
+                both = [(a, b, o) for a, b, o in returned if good(a) and good(o)]
+                ratio.append((sum((float(b["estimate"])-float(o["estimate"]))**2 for _, b, o in both)/sum((float(a["estimate"])-float(o["estimate"]))**2 for a, _, o in both))**.5)
+                refused.append(500-len(returned))
+            print(f"    {t['name']}: {100*float(summary[(t['name'], fraction, 'linear_mi')]['coverage']):.1f}, " + ", ".join(f"{c:.1f}" for c in coverage) + f", {100*float(summary[(t['name'], fraction, 'oracle')]['coverage']):.1f}; " + ", ".join(f"{v:.3f}" for v in ratio) + f"; {refused}")
+    row_gain = []
+    for t_ in helped:
+        pairs = [(study.get((t_["name"], .25, "linear_mi", str(i))), chosen.get((t_["name"], .25, "rows", str(i)))) for i in range(1, 501)]
+        target = float(pairs[0][0]["truth"])
+        row_gain.append(100*(st.mean(float(b["lower"]) <= target <= float(b["upper"]) for _, b in pairs if b["status"] == "ok")-float(summary[(t_["name"], .25, "linear_mi")]["coverage"])))
+    print(f"Rows within strata minus existing, coverage at 25% on the second group: {min(row_gain):+.1f} to {max(row_gain):+.1f}.")
+    early = next(t_ for t_ in table if t_["name"] == "anc1_early")
+    print(f"anc1_early at 25%, oracle minus the study's stratified clusters: {100*(early['oracle']-early['clustered']):.1f} points.")
+    print("Median between-imputation variance, rescaled over the study's stratified clusters, at 25%:")
+    for t in table:
+        v = [float(chosen[(t["name"], .25, "rescaled", str(i))]["between_variance"])/float(chosen[(t["name"], .25, "control", str(i))]["between_variance"]) for i in range(1, 501)
+             if chosen[(t["name"], .25, "rescaled", str(i))]["status"] == "ok" and chosen[(t["name"], .25, "control", str(i))]["status"] == "ok" and float(chosen[(t["name"], .25, "control", str(i))]["between_variance"]) > 0]
+        print(f"  {t['name']}: {st.median(v):.2f}")
+
 
 if __name__ == "__main__":
     main()

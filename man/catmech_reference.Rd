@@ -58,7 +58,8 @@ posterior that treats rows as independent. See details.}
 
 \item{cluster_strata}{Optional names of categorical columns within which audited
 clusters are resampled, usually the strata of the audit. Every cluster must sit in one
-stratum. A stratum with a single audited cluster keeps it in every resample.}
+stratum. A stratum with a single audited cluster keeps it in every resample. With few
+audited clusters per stratum, resampling within strata understates variance. See details.}
 }
 \value{
 A `catmech_result`. Its completed target contains exact gold references
@@ -120,9 +121,11 @@ Miller, 2015). It is not a claim of a new method.
 
 `cluster` is experimental. Its planned test came out PARTIAL under a rule fixed in
 advance: on held-out items of a real facility recount at a 25% audit, it helped where
-the existing option undercovered and lost accuracy elsewhere. Seen only afterward, and
-not yet tested, the losses came on rare events, whose counts are small with many zeros.
-Treat it as a check, not a default. With about eight audited
+the existing option fell short and lost accuracy elsewhere. Post hoc and not yet tested,
+the losses fell on rare events whose residuals show no within-facility correlation.
+A bootstrap mean within a stratum of n audited clusters has (n - 1)/n of the usual
+variance, so `cluster_strata` understates variance when strata hold few audited
+clusters. Treat `cluster` as a check, not a default. With about eight audited
 clusters, an occasional fit has near-zero degrees of freedom and an extremely wide
 interval, so read the `df` column. See `validation/CLUSTERED_SYNTHESIS.md`.
 }

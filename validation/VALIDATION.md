@@ -12,7 +12,7 @@ audit. It is not clinical validation, a general coverage guarantee, or a claim t
 - **[Go/no-go simulation](merged-audit-pilot/README.md), 28,800 records.** NO-GO for transmitter-targeted auditing under spillover.
 - **[Audit planner test](AUDIT_PLAN_SYNTHESIS.md), 14,400 target fits and 7,200 plans.** NO-GO under a rule fixed in advance. Median error in predicting width was 11.3% to 16.8% at a 5% audit, against a 10% limit, and at most 7.8% elsewhere. The bootstrap interval for `k` undercovered. This is new in v0.4.1 and did not change any earlier result.
 - **[Test on real audit data](REAL_AUDIT_SYNTHESIS.md), 45,600 requests.** A Rwanda health-facility recount, with a psychology effect-size audit as a control. The model's advantage over linear MI was inconclusive under a rule fixed in advance: lower error on two of three slopes at a 25% audit, but it failed the coverage condition on all three. Where a reported slope differed from a recount of that one item it kept 38% to 73% of the gap, with clustered coverage of 35% to 72% against 90% to 97% for the oracle. Linear MI's coverage held up better, though at a 25% audit its point error clearly beat trusting reported values on only one of four slopes. Neither audit holds patient values. No package code changed.
-- **[Test of imputation for clustered audits](CLUSTERED_SYNTHESIS.md), 148,000 requests.** **PARTIAL** under a rule fixed in advance. On five held-out items of the same Rwanda recount at a 25% audit, `catmech_reference(cluster = )` moved coverage closer to the oracle's on all five and within 5 points on four, but only two of five met the accuracy condition. It helped where the existing option undercovered and raised error elsewhere; seen only afterward, and not yet tested, the losses came on rare events. It passed the simulation condition in 33 of 36 cells, though the existing option does not undercover in those simulations. The option is experimental.
+- **[Test of imputation for clustered audits](CLUSTERED_SYNTHESIS.md), 148,000 requests.** **PARTIAL** under a rule fixed in advance. On five held-out items of the same Rwanda recount at a 25% audit, `catmech_reference(cluster = )` moved coverage closer to the oracle's on all five and within 5 points on four, but only two of five met the accuracy condition. It helped where the existing option fell short and raised error elsewhere. It passed the simulation condition in 33 of 36 cells, but those simulations barely contain the clustering the option is for. The option is experimental. One independent AI reviewer confirmed the verdict, found no bug and corrected several readings; its leads on rare events, within-facility correlation and stratified resampling are post hoc.
 
 ## Software and independent checks
 
@@ -26,7 +26,8 @@ audit. It is not clinical validation, a general coverage guarantee, or a claim t
 | Post-study additions leave frozen runs alone | 12 of 12 runs identical to frozen v0.4.0 sources, rerun with v0.5.0 | `v0.5.0-checks/v0.4.0-postfreeze-check.txt` |
 | Clustered-audit study | Plain Python recomputes its 296 summary groups, held-out pool targets and verdict from raw records, and catches a corrupted summary; 11,998 development requests match the earlier study's estimates and clustered standard errors | `v0.5.0-checks/artifact-verification.log`, `clustered-pilot-check.txt` |
 | Cluster-robust variance | Matches a hand-written CR1 calculation, the unequal-variance form with one row per cluster, and Rubin's rules with clusters minus one | `../tests/testthat/test-clustered.R` |
-| Package change after the clustered study | One documentation comment in `R/reference.R`, stating the verdict; its code matches the frozen copy | `v0.5.0-checks/post-study-diff.txt` |
+| Review of the clustered test | One independent AI reviewer re-derived the results and found no error in the verdict, code or comparisons, and corrected several readings, listed in the write-up. A rerun of the study's own option reproduces all 8,998 of its returned requests exactly. This is not human peer review. | `CLUSTERED_SYNTHESIS.md`, `clustered-review/`, `clustered-posthoc.txt` |
+| Package change after the clustered study | Documentation comments in `R/reference.R`, stating the verdict and its limits; its code matches the frozen copy | `v0.5.0-checks/post-study-diff.txt` |
 | New `use_recorded` option | Matches the study's linear MI on the same real-data cohorts in RMSE, coverage and width | `recorded-option-check/comparison.csv` |
 | Serial and parallel pilots | Output files byte-identical between 1 and 14 workers | `contamination-pilot-check.txt` |
 | Supplement for a runner bug | 1,731 score records and 120 hold-out records recovered; every estimate matched the main study to within 1e-9 | `contamination-supplement/` |
@@ -52,7 +53,7 @@ Version 0.4.1 adds the audit planner and changes no existing function. Its [plan
 
 The [real-audit test](REAL_AUDIT_PLAN.md) came after that release and ran on package sources identical to `v0.4.1-source/`. Its plan discloses the descriptive looks that preceded it and two changes made after its pilots, before any estimate was seen. It took 16 minutes against an estimate of 21. Its swap-in comparison and the tables in `real-audit-review/` are post hoc, are labeled as such and are not part of any rule. The plan was not under version control before that run, so its timing rests on file hashes and timestamps.
 
-The [clustered-audit test](CLUSTERED_PLAN.md) adds the only package code since v0.4.1. Its plan was committed before the option existed, and no amendment was needed. It ran on the sources preserved in `v0.5.0-source/`, with hashes checked before and after, and took about 13 minutes. Its table of how common each event is, `clustered-posthoc.txt`, is post hoc and part of no rule. This round has had no independent review.
+The [clustered-audit test](CLUSTERED_PLAN.md) adds the only package code since v0.4.1. Its plan was committed before the option existed, and no amendment was needed. It ran on the sources preserved in `v0.5.0-source/`, with hashes checked before and after, and took about 13 minutes. The unplanned runs in `clustered-review/` and the table in `clustered-posthoc.txt` are post hoc and part of no rule. One independent AI reviewer read this round; no human has.
 
 ## Evidence limits
 
@@ -80,6 +81,7 @@ Rscript tools/real-audit-review-checks.R validation/my-real-audit-review
 Rscript tools/real-audit-replay.R validation/my-real-audit-replay
 Rscript tools/clustered-benchmark.R study validation/my-clustered-study
 python3 -I tools/clustered-score.py my-clustered-decisions.txt validation/my-clustered-study
+Rscript tools/clustered-review-checks.R validation/my-clustered-review
 python3 -I tools/clustered-posthoc.py
 python3 tools/verify-artifacts.py
 ```

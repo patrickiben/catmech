@@ -150,8 +150,11 @@ The approach combines the bootstrap at the imputation step (von Hippel and Bartl
 [doi:10.1214/20-STS793](https://doi.org/10.1214/20-STS793)) with the clustered bootstrap and cluster-robust
 inference (Cameron and Miller, 2015, [doi:10.3368/jhr.50.2.317](https://doi.org/10.3368/jhr.50.2.317)). It is not a
 new method. Its [planned test](../validation/CLUSTERED_SYNTHESIS.md) came out PARTIAL: it helped where the posterior
-draw undercovered and lost accuracy elsewhere. Seen only afterward, and not yet tested, the losses came on rare events. The test also
-could not say how much of the gain comes from clustering rather than unequal variance.
+draw fell short and lost accuracy elsewhere. Post hoc and not yet tested, the losses fell on rare events whose residuals
+show no within-facility correlation, and an unplanned rerun found that resampling single rows produced little of either the
+gain or the cost. Resampling within strata understates variance when few clusters per stratum are audited: a bootstrap mean
+within a stratum of n audited clusters has (n - 1)/n of the usual variance, and a stratum with one contributes none. Leaving
+out `cluster_strata` raised coverage in that rerun, and a rescaled bootstrap (Rao and Wu, 1988) is a lead that needs its own test.
 
 ## Predictive mean matching and analysis
 

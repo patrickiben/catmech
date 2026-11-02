@@ -865,6 +865,11 @@ def verify_clustered_study(folder):
     assert derived == verdict, (derived, verdict)
     synthesis = (ROOT/"validation/CLUSTERED_SYNTHESIS.md").read_text(encoding="utf-8")
     assert f"**{verdict}**" in synthesis, "Write-up does not state the verdict"
+    sources = scored+posthoc+(ROOT/"validation/CLUSTERED_PLAN.md").read_text(encoding="utf-8")
+    decimals = lambda text: set(re.findall(r"(?<![\w.])\d+\.\d+(?![\d])", text))
+    unsupported = sorted(decimals(re.sub(r"\[doi:[^\]]*\]\([^)]*\)", "", synthesis))-decimals(sources))
+    assert not unsupported, ("Numbers in the write-up with no source", unsupported)
+    assert decimals("A made-up 12.345 here.")-decimals(sources), "Negative control: a made-up number went undetected"
     print(f"{folder.name}: all {len(records)} planned requests, {len(summary)} recomputed groups, held-out targets recomputed, {matched} development requests match the earlier study, verdict re-derived as {verdict}, corrupted-summary control: PASS")
 
 

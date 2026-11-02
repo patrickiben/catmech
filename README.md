@@ -10,7 +10,7 @@
 - **What held up.** Keeping the recorded value pays. Linear MI's intervals were about half as wide as those from discarding it (0.102 against 0.205, and 0.154 against 0.297), with coverage near the all-references oracle (91.8% against 91.2%, and 93.9% against 94.9%).
 - **Where linear MI fails.** Under synthetic gross errors it covered 64.7%, against 94.0% for the model.
 - **A real audit was inconclusive.** On a [health-facility recount in Rwanda](validation/REAL_AUDIT_SYNTHESIS.md), the rule fixed in advance came out inconclusive at a 25% audit. The model had lower error than linear MI on two of three slopes, but where a reported slope differed from a recount of that item its intervals covered 35% to 72%, against 90% to 97% for the recount. Linear MI's coverage held up better (79.5% at worst), and it cost accuracy where reported values were close: 1.4 to 2.6 times the error of trusting them on the syphilis slope, depending on the measure. These are facility counts, not patient values, and gross errors remain untested on real data.
-- **Clustered audits: experimental.** `catmech_reference(cluster = )` resamples audited sites in each imputation. Under a [rule fixed in advance](validation/CLUSTERED_SYNTHESIS.md) it came out **PARTIAL** on five held-out Rwanda items at a 25% audit. Where linear MI fell short of a recount it helped, raising coverage from 87.0% to 91.4% and from 79.6% to 88.8%, with lower error. On the other three its error ran up to 14% higher. Seen only afterward, these are rare events, averaging 1.2 or fewer per facility-month, against about 20 to 40 where it helped. That pattern is untested.
+- **Clustered audits: experimental.** `catmech_reference(cluster = )` resamples audited sites in each imputation. Under a [rule fixed in advance](validation/CLUSTERED_SYNTHESIS.md) it came out **PARTIAL** on five held-out Rwanda items at a 25% audit. Where linear MI fell short of a recount it helped, raising coverage from 87.0% to 91.4% and from 79.6% to 88.8%, with lower error. On the other three its error ran up to 14% higher. An independent AI review then found that the losses fell on rare events whose residuals show no within-facility correlation, a pattern not yet tested, and that resampling within strata understates variance when few clusters per stratum are audited.
 - **Audit planning: not validated.** `catmech_audit_plan()` returned **NO-GO** under a rule fixed in advance. Its median error in predicting interval width missed the 10% limit at a 5% audit (11.3% to 16.8%). Larger targets stayed within 7.8%, but that pattern was not the test. It is a documented calculation, not a validated tool, so it is left out of the example below.
 
 ## Which method to start with
@@ -235,8 +235,8 @@ catmech_pool_lm(fit, outcome ~ lab_value + age + sex + inflammation, cluster = "
 ```
 
 That applies a CR1 variance to each completed dataset, then Rubin's rules with complete-data degrees of
-freedom of clusters minus one. To also resample audited clusters in each imputation, pass `cluster` to the fit,
-with `cluster_strata` if the audit was stratified. `catmech_pool_lm()` then uses that column by default:
+freedom of clusters minus one. It can still undercover with few clusters. To also resample audited clusters in
+each imputation, pass `cluster` to the fit. `catmech_pool_lm()` then uses that column by default:
 
 ```r
 fit_clustered <- catmech_reference(
@@ -248,7 +248,10 @@ catmech_pool_lm(fit_clustered, outcome ~ lab_value + age + sex + inflammation)
 ```
 
 The second option's [planned test](validation/CLUSTERED_SYNTHESIS.md) came out PARTIAL. It helped where the first
-undercovered and cost accuracy elsewhere, and its advantage faded at a 50% audit. Seen only afterward, the losses came on rare events, a pattern not yet tested. Treat it as a check, not a default.
+fell short of a recount and cost accuracy elsewhere. Post hoc and not yet tested, the losses fell on rare events whose
+residuals show no within-facility correlation. `cluster_strata` resamples within strata, which understates variance
+when few clusters per stratum are audited: in an unplanned rerun on a stratified audit, leaving it out raised coverage
+on all nine items, and raised error further on two rare ones. Treat the option as a check, not a default.
 Fewer than five audited clusters are refused. With about eight, an occasional fit has near-zero degrees of freedom
 and an extremely wide interval, so read the `df` column. See the [method](docs/REFERENCE_METHOD.md#clustered-audits-experimental).
 
@@ -368,6 +371,7 @@ Rscript tools/merged-audit-pilot.R study validation/merged-audit-pilot/my-study 
 Rscript tools/audit-plan-benchmark.R study validation/my-audit-plan-study
 Rscript tools/clustered-benchmark.R study validation/my-clustered-study
 python3 -I tools/clustered-score.py my-clustered-decisions.txt validation/my-clustered-study
+Rscript tools/clustered-review-checks.R validation/my-clustered-review
 python3 -I tools/clustered-posthoc.py
 python3 tools/verify-artifacts.py
 ```

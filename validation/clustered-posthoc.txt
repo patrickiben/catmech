@@ -41,3 +41,100 @@ Coverage gain in points on the second group, the clustered option at 25% against
   syphilis: +8.4 against +0.6
   iron: +11.2 against +5.1
 The clustered option gained more on 5 of 6.
+Paired coverage difference, the clustered option at 25% minus the existing option at 50%, with MCSE; change in mean width from the option, and from doubling the audit:
+  anc4: -4.4 (1.5); +16%, -20%
+  anc1_early: +0.8 (1.9); +31%, -20%
+  pnc: +7.6 (1.8); +30%, -22%
+  deliveries: +2.6 (1.4); +7%, +1%
+  syphilis: +7.8 (1.7); +11%, -12%
+  iron: +6.0 (2.1); +41%, -33%
+
+THE EXISTING OPTION AGAINST THE SAME CONDITIONS
+Existing minus oracle coverage on the held-out items at 25%, points: stillbirths +1.0, resus +2.0, lbw +3.6, anc1_early -16.0, deliveries -4.6. Within 5 points: 4 of 5.
+Simulation condition, cells with 70 or more clusters: existing 28 of 36, clustered 33 of 36.
+Oracle coverage, the cluster-robust variance on complete data, with 30 clusters: mean 90.4%, lowest 87.4%, 14 of 18 cells under 92%.
+
+SIMULATIONS
+Of 54 cells, recovery RMSE ratio clearly above 1 in 3: g30_icc50_iid at 25% 1.072, g70_icc50_iid at 25% 1.037, g150_icc50_iid at 25% 1.041.
+Clearly below 1 in 6, of which 4 have tracking errors.
+Within-cluster correlation of the imputation model's residuals, iid errors: -0.00 to 0.06.
+Within-cluster correlation of the imputation model's residuals, persistent errors: 0.00 to 0.06.
+Within-cluster correlation of the imputation model's residuals, tracking errors: 0.03 to 0.11.
+
+VERY WIDE INTERVALS, 30 clusters at 25%
+linear_mi: 13 requests over 5 times the cell median width, recovery RMSE 0.208; others 0.086.
+linear_mi_clustered: 31 requests over 5 times the cell median width, recovery RMSE 0.205; others 0.086.
+Iron at 25%, requests under 5 degrees of freedom: existing 6.4%, clustered 18.5%.
+
+WIDTH RATIO WITHIN AN ITEM, 25%: coverage in the third of audits where the clustered interval is widest relative to the existing one, against the other two thirds
+  stillbirths: existing 94.0 against 94.6; clustered 98.2 against 91.9
+  resus: existing 94.0 against 97.0; clustered 100.0 against 90.4
+  lbw: existing 89.2 against 93.4; clustered 94.0 against 87.7
+  anc4: existing 89.8 against 85.9; clustered 98.2 against 87.1
+  anc1_early: existing 76.5 against 81.1; clustered 95.8 against 85.3
+  pnc: existing 76.5 against 89.8; clustered 98.2 against 91.3
+  deliveries: existing 81.3 against 89.8; clustered 94.0 against 90.1
+  syphilis: existing 69.9 against 91.9; clustered 95.2 against 91.9
+  iron: existing 72.9 against 82.8; clustered 99.4 against 86.4
+The existing option covered less in that third on 8 of 9 items.
+
+WITHIN-FACILITY CORRELATION OF THE IMPUTATION MODEL'S RESIDUALS (recount on recorded value, covariate and catchment)
+Whole pool, with the same quantity leaving out the three facilities with the largest residuals:
+  stillbirths: +0.01, -0.04
+  resus: -0.05, -0.05
+  lbw: -0.16, -0.13
+  anc4: +0.37, +0.54
+  anc1_early: +0.67, +0.67
+  pnc: +0.37, +0.29
+  deliveries: +0.66, -0.01
+  syphilis: +0.20, +0.19
+  iron: +0.64, +0.36
+First group: -0.16 to +0.01. Second group: +0.20 to +0.67.
+Same quantity on each audit's own rows at 25%. Coverage gain in points, and recovery RMSE ratio, where it is at least .15 against below .15:
+  stillbirths: 2 audits +0.0, 1.04; 453 audits -0.4, 1.05
+  resus: 6 audits +0.0, 1.01; 494 audits -2.4, 1.11
+  lbw: no audits; 500 audits -2.2, 1.14
+  anc4: 171 audits +4.1, 0.89; 329 audits +3.3, 0.99
+  anc1_early: 445 audits +9.0, 0.86; 55 audits +10.9, 0.82
+  pnc: 150 audits +11.3, 0.77; 350 audits +6.9, 0.94
+  deliveries: 99 audits +19.2, 0.62; 401 audits +0.7, 1.04
+  syphilis: 121 audits +17.4, 0.82; 379 audits +5.5, 0.90
+  iron: 281 audits +14.9, 0.80; 217 audits +6.5, 0.98
+The six items of the second group pooled, by cutoff: 0.00: +10.8 against +3.1; 0.10: +11.6 against +3.9; 0.15: +11.5 against +4.6; 0.20: +11.7 against +4.9; 0.30: +12.0 against +5.6.
+
+RESAMPLING VARIANTS, unplanned, on the study's cohorts, audits and seeds
+Control: the package's stratified cluster resampling, rerun, against the study's saved records: 8998 requests, largest difference in estimate 0.0e+00, 0 status differences.
+Facilities per catchment: [5, 8, 9, 9, 11, 13, 14]. Audited at 25%: [1, 2, 2, 2, 3, 3, 4], 17 in all.
+At each audit size: coverage for existing, stratified clusters (the study), rows within strata, clusters without strata, rescaled (not a package feature), oracle; recovery RMSE ratio against existing for the last four methods; requests refused
+  25%
+    stillbirths: 94.4, 94.0, 95.0, 96.6, 96.4, 93.4; 1.050, 0.986, 1.014, 1.254; [0, 0, 0, 0]
+    resus: 96.0, 93.6, 95.2, 96.4, 96.6, 94.0; 1.104, 0.984, 1.172, 1.375; [0, 0, 0, 0]
+    lbw: 92.0, 89.8, 91.8, 92.8, 95.0, 88.4; 1.137, 0.983, 1.389, 1.446; [0, 0, 0, 0]
+    anc4: 87.2, 90.8, 90.0, 93.4, 94.6, 96.6; 0.970, 0.996, 0.941, 1.030; [0, 0, 0, 0]
+    anc1_early: 79.6, 88.8, 77.8, 94.4, 94.2, 95.6; 0.850, 1.007, 0.814, 0.833; [0, 0, 0, 0]
+    pnc: 85.4, 93.6, 88.6, 95.2, 95.4, 95.2; 0.894, 0.988, 0.943, 1.001; [0, 0, 0, 0]
+    deliveries: 87.0, 91.4, 87.8, 92.2, 91.8, 91.6; 0.903, 0.979, 0.886, 0.963; [0, 0, 0, 0]
+    syphilis: 84.6, 93.0, 87.0, 94.6, 95.8, 93.2; 0.868, 0.954, 0.836, 0.901; [0, 0, 0, 0]
+    iron: 79.5, 90.8, 78.9, 95.2, 93.6, 90.2; 0.855, 1.002, 0.888, 0.920; [2, 2, 2, 2]
+  50%
+    stillbirths: 94.0, 93.6, 93.4, 95.4, 95.0, 93.4; 1.028, 1.010, 1.032, 0.993; [0, 0, 0, 0]
+    resus: 95.8, 96.8, 97.4, 97.6, 96.8, 94.0; 1.045, 0.985, 1.076, 1.107; [0, 0, 0, 0]
+    lbw: 88.0, 87.0, 88.4, 89.8, 89.0, 88.4; 0.999, 0.987, 1.033, 1.050; [0, 0, 0, 0]
+    anc4: 95.2, 96.0, 95.4, 96.8, 96.0, 96.6; 0.978, 0.989, 0.965, 0.971; [0, 0, 0, 0]
+    anc1_early: 88.0, 92.4, 88.8, 93.4, 93.6, 95.6; 0.976, 1.015, 0.984, 0.959; [0, 0, 0, 0]
+    pnc: 86.0, 91.4, 88.0, 93.8, 91.8, 95.2; 0.939, 0.998, 0.955, 0.935; [0, 0, 0, 0]
+    deliveries: 88.8, 91.0, 89.4, 91.6, 91.2, 91.6; 0.964, 0.988, 0.964, 0.962; [0, 0, 0, 0]
+    syphilis: 85.2, 88.0, 86.2, 89.2, 89.0, 93.2; 0.984, 0.982, 0.968, 1.042; [0, 0, 0, 0]
+    iron: 84.6, 89.6, 85.0, 90.6, 92.4, 90.2; 0.964, 0.976, 0.957, 0.969; [0, 0, 0, 0]
+Rows within strata minus existing, coverage at 25% on the second group: -1.8 to +3.2.
+anc1_early at 25%, oracle minus the study's stratified clusters: 6.8 points.
+Median between-imputation variance, rescaled over the study's stratified clusters, at 25%:
+  stillbirths: 1.94
+  resus: 1.96
+  lbw: 2.15
+  anc4: 1.78
+  anc1_early: 1.54
+  pnc: 1.54
+  deliveries: 1.57
+  syphilis: 1.65
+  iron: 1.63

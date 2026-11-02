@@ -27,7 +27,7 @@ catmech is an R package that fills in unchecked values several plausible ways (m
 
 **Two more ideas failed their tests.** A merged paper would have argued that audits in cluster trials should follow the direction in which errors spread between sites. In simulation, audits helped, but direction added nothing. An audit-size planner's median error stayed within 7.8% for larger audits but missed the 10% limit at the smallest, 30 of 600 records. The rule had no exception for that pattern, so the verdict stands.
 
-**A clustered-audit option came out partial.** Resampling audited facilities in each imputation helped where the simple method fell short and raised error elsewhere. Seen only afterward, the losses came on rare events, a pattern still untested.
+**A clustered-audit option came out partial.** Resampling audited facilities in each imputation helped where the simple method fell short and raised error elsewhere. An independent AI review then found that the losses fell on rare events, which is untested, and that resampling within strata understates variance.
 
 ![Bar chart of typical error at a 25% audit. On ClinicalTrials.gov: discard recorded value 0.0539, new model 0.0308, simple linear MI 0.0286, all references 0.0275. On NHANES: 0.0785, 0.0408, 0.0409 and 0.0357.](case-study-figure.svg)
 
