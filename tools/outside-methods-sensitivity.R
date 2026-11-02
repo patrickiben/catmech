@@ -55,6 +55,8 @@ fit_raking_approx <- function(p) {
   term <- if (identical(term_of(p), "lab_value")) "value_r" else term_of(p)
   interval(unname(stats::coef(f)[term]), unname(survey::SE(f)[term]), survey::degf(calibrated), p$target)
 }
+# mice passes eps on to the imputation function, and 2l.lmer hands it to lmer, which rejects it.
+mice.impute.2l.lmer.all <- function(y, ry, x, type, wy = NULL, intercept = TRUE, eps = NULL, ...) mice::mice.impute.2l.lmer(y, ry, x, type, wy, intercept)
 fit_mice_all <- function(p, method, seed) {
   use <- unique(c(p$predictors, "lab_value", "gold_value", "cluster_id"))
   d <- p$input[, use, drop = FALSE]
@@ -85,7 +87,7 @@ run_one <- function(s, r, method) {
   # A first attempt stalled for 30 minutes on one cell, so each request runs in a child with a hard limit.
   job <- parallel::mcparallel(tryCatch(switch(method,
     raking = fit_raking_approx(p),
-    mice_2l_lmer = fit_mice_all(p, "2l.lmer", as.integer(SEEDS$lmer + s$number * 1e5 + r)),
+    mice_2l_lmer = fit_mice_all(p, "2l.lmer.all", as.integer(SEEDS$lmer + s$number * 1e5 + r)),
     mice_2l_pan = fit_mice_all(p, "2l.pan", as.integer(SEEDS$pan + s$number * 1e5 + r))), error = identity), silent = TRUE)
   collected <- parallel::mccollect(job, wait = FALSE, timeout = 60)
   if (is.null(collected)) {
