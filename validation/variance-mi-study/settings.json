@@ -1,0 +1,13 @@
+{
+  "mode": "study",
+  "m": 20,
+  "reps_real_25": 2000,
+  "reps_other": 500,
+  "wild_replications": 999,
+  "seeds": {
+    "covariate_cohort": 1700100000,
+    "covariate_imputation": 1710000000,
+    "covariate_wild": 1720000000,
+    "wild": 1730000000
+  }
+}

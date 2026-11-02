@@ -57,7 +57,7 @@ say(f"Requests: {len(records)}; " + ", ".join(f"{k} {v}" for k, v in sorted(stat
 if STUDY:
     with gzip.open(ROOT/"validation/clustered-fix-study/replicates.csv.gz", "rt", newline="", encoding="utf-8") as stream:
         saved = {(r["analysis"], float(r["fraction"]), r["method"], r["replicate"]): r for r in csv.DictReader(stream) if r["method"] in IMPUTERS}
-    largest, count = 0.0, 0
+    largest, count, floored, near_limit = 0.0, 0, 0, 0
     for r in records:
         s = saved.get((r["analysis"], float(r["fraction"]), r["imputer"], r["replicate"]))
         if s is None or r["level"] == "imputed_covariate":
@@ -65,9 +65,22 @@ if STUDY:
         assert s["status"] == r["status"], (r["analysis"], r["replicate"], r["imputer"])
         count += 1
         if r["status"] == "ok":
-            largest = max(largest, abs(float(r["estimate"])-float(s["estimate"])), abs(float(r["se_cr1s"])-float(s["se"])), abs(float(r["df_cr1s"])-float(s["df"])))
+            largest = max(largest, abs(float(r["estimate"])-float(s["estimate"])), abs(float(r["se_cr1s"])-float(s["se"])))
+            gap = abs(float(r["df_cr1s"])-float(s["df"]))
+            if r["imputer"] != "oracle" and 1.05*float(r["between"])/float(r["se_cr1s"])**2 < 1e-4:  # Amendment: the runner floors lambda at 1e-4 and mice does not.
+                assert gap < .01, gap
+                floored += gap > 1e-8
+            else:
+                largest = max(largest, gap)
     assert largest < 1e-8, largest
-    say(f"Control: {count} requests reproduce the replacement study under the current variance, largest difference {largest:.2e}.")
+    say(f"Control: {count} requests reproduce the replacement study under the current variance, largest difference {largest:.2e}, apart from {floored} requests with almost no between-imputation variance whose degrees of freedom differ by under 0.01.")
+    for r in records:
+        if r["status"] == "ok" and r["imputer"] != "oracle" and 1.05*float(r["between"])/float(r["se_cr1s"])**2 < 1e-4:
+            for v in VARIANCES:
+                half = float(r[f"width_{v}"])/2
+                near_limit += abs(abs(float(r["estimate"])-float(r["target"]))-half) < .0001*half
+    assert near_limit == 0, near_limit
+    say("Amendment check: no such request has an estimate within 0.01% of an interval limit, and the floor moves a limit by far less than that, so it changes no coverage.")
     with gzip.open(ROOT/"validation/variance-check/replicates.csv.gz", "rt", newline="", encoding="utf-8") as stream:
         earlier = {(r["analysis"], float(r["fraction"]), r["replicate"]): r for r in csv.DictReader(stream)}
     largest, count = 0.0, 0

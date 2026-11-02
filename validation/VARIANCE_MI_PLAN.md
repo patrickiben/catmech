@@ -79,4 +79,8 @@ Pustejovsky JE, Tipton E. *Journal of Business and Economic Statistics* 2018. [d
 
 ## Amendments
 
-None yet.
+Made after the study ran, when its control failed, and before any coverage, width or rule result was read. The original plan and scorer are kept in `variance-mi-source/`.
+
+**A fault in the runner.** The control on degrees of freedom failed by up to 0.0067. In requests with almost no between-imputation variance, mostly because every audited row agrees, the runner floors lambda at 1e-4, and `mice::pool.scalar` does not. The scorer now allows a gap under 0.01 where lambda is under 1e-4, and checks that none has an estimate within 0.01% of an interval limit, far more than the floor can move one, so this changes no coverage. A separate recalculation with exact degrees of freedom gave no coverage flips. The study was not rerun.
+
+**A status label.** One request is labeled an error. It is `linear_mi` on `stillbirths`, replicate 1927, refusing because its audited rows leave zero residual variance. The runner's list of refusal messages missed that wording, and it is a refusal.

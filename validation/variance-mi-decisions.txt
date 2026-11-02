@@ -1,0 +1,137 @@
+Scored from validation/variance-mi-study by tools/variance-mi-score.py
+Requests: 148500; error 1, ok 148486, refused 13
+Control: 90000 requests reproduce the replacement study under the current variance, largest difference 2.00e-12, apart from 108 requests with almost no between-imputation variance whose degrees of freedom differ by under 0.01.
+Amendment check: no such request has an estimate within 0.01% of an interval limit, and the floor moves a limit by far less than that, so it changes no coverage.
+Control: 24500 corrected recount requests reproduce the earlier scoring, largest difference 3.50e-15.
+
+REAL ITEMS AT 25%, RANDOM INTERCEPT AND LINEAR MI: coverage, percent; mean width; pooled df under cr2
+  lbw          n 2000: random intercept cr1s 92.5, cr2 96.2, cv3 94.0, wcr 92.9; linear MI cr1s 90.3, cr2 95.0, cv3 92.5, wcr 92.7; oracle cr1s 86.5, cr2 90.5, cv3 92.0, wcr 92.2
+               width, random intercept cr1s 0.060, cr2 0.076, cv3 0.064; linear MI cr1s 0.056, cr2 0.069, cv3 0.060; df cr2 7.6, cr1s 22.9
+  resus        n 2000: random intercept cr1s 96.2, cr2 98.7, cv3 96.7, wcr 88.4; linear MI cr1s 95.6, cr2 98.5, cv3 96.0, wcr 86.5; oracle cr1s 94.3, cr2 96.2, cv3 96.7, wcr 96.2
+               width, random intercept cr1s 0.056, cr2 0.110, cv3 0.057; linear MI cr1s 0.050, cr2 0.110, cv3 0.050; df cr2 4.3, cr1s 12.3
+  stillbirths  n 1999: random intercept cr1s 93.7, cr2 97.0, cv3 95.1, wcr 92.3; linear MI cr1s 93.1, cr2 96.2, cv3 94.3, wcr 91.8; oracle cr1s 94.3, cr2 96.6, cv3 96.8, wcr 95.5
+               width, random intercept cr1s 0.015, cr2 0.020, cv3 0.015; linear MI cr1s 0.013, cr2 0.018, cv3 0.014; df cr2 7.6, cr1s 23.3
+  deliveries   n 2000: random intercept cr1s 90.8, cr2 93.0, cv3 93.6, wcr 93.8; linear MI cr1s 87.6, cr2 90.6, cv3 91.5, wcr 91.3; oracle cr1s 90.1, cr2 91.9, cv3 92.6, wcr 92.2
+               width, random intercept cr1s 0.241, cr2 0.269, cv3 0.277; linear MI cr1s 0.235, cr2 0.262, cv3 0.271; df cr2 19.1, cr1s 59.5
+  anc1_early   n 2000: random intercept cr1s 91.6, cr2 94.2, cv3 92.8, wcr 85.7; linear MI cr1s 79.7, cr2 85.0, cv3 81.6, wcr 79.8; oracle cr1s 93.9, cr2 94.9, cv3 95.5, wcr 96.1
+               width, random intercept cr1s 0.290, cr2 0.332, cv3 0.305; linear MI cr1s 0.257, cr2 0.297, cv3 0.272; df cr2 8.9, cr1s 21.6
+  pnc          n 2000: random intercept cr1s 93.1, cr2 96.4, cv3 94.4, wcr 90.0; linear MI cr1s 84.4, cr2 91.9, cv3 86.1, wcr 83.7; oracle cr1s 94.5, cr2 96.5, cv3 97.0, wcr 97.2
+               width, random intercept cr1s 0.277, cr2 0.425, cv3 0.286; linear MI cr1s 0.240, cr2 0.708, cv3 0.249; df cr2 6.1, cr1s 17.9
+  syphilis     n 2000: random intercept cr1s 87.5, cr2 91.9, cv3 90.0, wcr 86.1; linear MI cr1s 81.7, cr2 86.5, cv3 84.2, wcr 83.2; oracle cr1s 93.3, cr2 95.2, cv3 96.0, wcr 96.5
+               width, random intercept cr1s 0.796, cr2 0.909, cv3 0.875; linear MI cr1s 0.750, cr2 0.852, cv3 0.836; df cr2 11.4, cr1s 29.8
+  iron         n 1994: random intercept cr1s 90.0, cr2 94.3, cv3 91.9, wcr 78.2; linear MI cr1s 79.0, cr2 86.8, cv3 81.0, wcr 74.1; oracle cr1s 91.8, cr2 93.8, cv3 94.3, wcr 93.8
+               width, random intercept cr1s 0.532, cr2 0.696, cv3 0.556; linear MI cr1s 0.502, cr2 0.862, cv3 0.518; df cr2 6.7, cr1s 17.6
+  anc4         n 2000: random intercept cr1s 93.3, cr2 95.8, cv3 94.8, wcr 92.8; linear MI cr1s 89.5, cr2 93.1, cv3 91.8, wcr 90.3; oracle cr1s 95.8, cr2 97.0, cv3 97.5, wcr 97.2
+               width, random intercept cr1s 0.347, cr2 0.398, cv3 0.369; linear MI cr1s 0.315, cr2 0.357, cv3 0.340; df cr2 9.5, cr1s 23.7
+  ancnewreg    n 2000: random intercept cr1s 91.8, cr2 94.8, cv3 94.2, wcr 94.1; linear MI cr1s 85.5, cr2 89.5, cv3 88.8, wcr 89.5; oracle cr1s 93.3, cr2 95.2, cv3 95.7, wcr 95.7
+               width, random intercept cr1s 0.480, cr2 0.545, cv3 0.532; linear MI cr1s 0.450, cr2 0.512, cv3 0.499; df cr2 13.6, cr1s 47.9
+  livebirths   n 2000: random intercept cr1s 92.0, cr2 94.6, cv3 94.8, wcr 93.8; linear MI cr1s 89.8, cr2 92.4, cv3 92.8, wcr 92.0; oracle cr1s 91.3, cr2 93.9, cv3 94.5, wcr 93.9
+               width, random intercept cr1s 0.276, cr2 0.313, cv3 0.307; linear MI cr1s 0.262, cr2 0.294, cv3 0.293; df cr2 16.5, cr1s 49.5
+
+REAL ITEMS AT 50%: coverage, percent
+  lbw          random intercept cr1s 88.8, cr2 93.8, cv3 93.4, wcr 93.2; linear MI cr1s 88.0, cr2 92.2, cv3 91.8, wcr 92.4
+  resus        random intercept cr1s 96.6, cr2 98.2, cv3 97.2, wcr 90.2; linear MI cr1s 95.8, cr2 97.4, cv3 96.0, wcr 91.2
+  stillbirths  random intercept cr1s 94.2, cr2 97.2, cv3 95.8, wcr 94.0; linear MI cr1s 94.0, cr2 96.8, cv3 95.8, wcr 93.8
+  deliveries   random intercept cr1s 91.2, cr2 94.6, cv3 94.8, wcr 95.2; linear MI cr1s 88.8, cr2 92.6, cv3 93.4, wcr 92.0
+  anc1_early   random intercept cr1s 94.2, cr2 96.0, cv3 95.6, wcr 92.6; linear MI cr1s 88.0, cr2 91.0, cv3 90.4, wcr 90.6
+  pnc          random intercept cr1s 92.8, cr2 96.0, cv3 94.4, wcr 92.4; linear MI cr1s 86.0, cr2 90.2, cv3 88.8, wcr 87.8
+  syphilis     random intercept cr1s 86.8, cr2 89.8, cv3 90.2, wcr 89.6; linear MI cr1s 85.2, cr2 88.8, cv3 89.4, wcr 89.2
+  iron         random intercept cr1s 92.8, cr2 95.0, cv3 95.0, wcr 89.0; linear MI cr1s 84.6, cr2 89.2, cv3 88.6, wcr 82.4
+  anc4         random intercept cr1s 96.8, cr2 97.6, cv3 97.4, wcr 96.8; linear MI cr1s 95.2, cr2 97.0, cv3 97.2, wcr 96.4
+  ancnewreg    random intercept cr1s 92.2, cr2 94.8, cv3 94.8, wcr 94.6; linear MI cr1s 88.4, cr2 92.4, cv3 92.8, wcr 92.4
+  livebirths   random intercept cr1s 91.6, cr2 94.0, cv3 94.6, wcr 93.8; linear MI cr1s 89.2, cr2 92.2, cv3 92.4, wcr 92.2
+
+SIMULATED CELLS: coverage, percent, under cr1s, cr2, cv3 and wcr
+  covariate_row_only     25% oracle 95.0, 95.4, 95.6; linear_mi 95.8, 96.4, 96.2; random_intercept 96.8, 96.8, 96.8
+  covariate_row_only     50% oracle 96.2, 96.8, 97.4; linear_mi 96.8, 97.2, 97.2; random_intercept 97.0, 97.4, 97.4
+  covariate_shift        25% oracle 95.0, 95.6, 96.4; linear_mi 94.4, 95.4, 95.4; random_intercept 80.4, 84.6, 84.4
+  covariate_shift        50% oracle 94.8, 95.4, 95.6; linear_mi 94.4, 95.4, 95.4; random_intercept 83.2, 85.6, 86.0
+  covariate_under        25% oracle 94.2, 94.8, 95.6; linear_mi 93.8, 94.2, 94.4; random_intercept 92.0, 92.6, 92.4
+  covariate_under        50% oracle 92.6, 94.4, 95.2; linear_mi 95.0, 95.6, 96.0; random_intercept 94.2, 95.0, 95.4
+  control_one_row        25% oracle 92.8, 94.8, 94.0, 94.4; linear_mi 94.4, 96.8, 94.4, 91.2; random_intercept 94.4, 96.8, 94.4, 91.2
+  control_one_row        50% oracle 93.8, 94.8, 94.6, 95.0; linear_mi 95.0, 96.6, 95.4, 93.6; random_intercept 95.0, 96.6, 95.4, 93.6
+  none_outlier           25% oracle 92.4, 94.4, 93.2, 94.2; linear_mi 89.6, 94.6, 91.0, 90.2; random_intercept 95.4, 97.6, 95.8, 94.8
+  none_outlier           50% oracle 93.2, 95.4, 94.2, 94.8; linear_mi 91.2, 94.6, 92.2, 91.4; random_intercept 96.6, 97.6, 97.0, 95.8
+  none_rare              25% oracle 80.2, 85.0, 83.4, 85.8; linear_mi 83.0, 89.6, 86.6, 89.0; random_intercept 84.0, 90.0, 86.6, 90.4
+  none_rare              50% oracle 82.2, 85.6, 84.4, 88.4; linear_mi 81.0, 86.6, 82.8, 87.2; random_intercept 81.0, 87.0, 83.2, 87.4
+  none_row_only          25% oracle 91.6, 94.8, 92.8, 94.4; linear_mi 95.0, 97.8, 95.0, 92.0; random_intercept 96.6, 98.8, 96.8, 95.2
+  none_row_only          50% oracle 95.2, 97.2, 96.4, 96.4; linear_mi 95.4, 98.2, 96.4, 96.2; random_intercept 95.8, 98.0, 97.2, 97.2
+  none_shift             25% oracle 92.2, 95.4, 94.0, 94.2; linear_mi 89.4, 93.2, 90.0, 90.2; random_intercept 96.0, 99.0, 96.4, 94.8
+  none_shift             50% oracle 93.8, 96.4, 94.8, 96.4; linear_mi 92.0, 96.0, 93.2, 94.0; random_intercept 96.2, 98.8, 97.6, 97.0
+  none_shift_low         25% oracle 91.8, 95.0, 93.8, 94.0; linear_mi 90.6, 96.4, 91.4, 91.4; random_intercept 95.4, 97.4, 96.0, 94.2
+  none_shift_low         50% oracle 92.0, 94.0, 93.0, 94.4; linear_mi 92.6, 95.8, 93.2, 93.6; random_intercept 94.4, 96.8, 95.4, 95.2
+  none_under             25% oracle 93.4, 95.6, 95.0, 95.4; linear_mi 89.4, 93.8, 90.8, 91.8; random_intercept 92.8, 97.4, 94.6, 95.2
+  none_under             50% oracle 91.4, 93.6, 92.6, 93.8; linear_mi 91.0, 94.2, 92.6, 93.0; random_intercept 94.0, 96.4, 95.6, 95.0
+  pairs_outlier          25% oracle 91.0, 93.6, 94.6, 93.2; linear_mi 87.6, 94.8, 91.0, 90.4; random_intercept 97.8, 98.6, 98.6, 96.8
+  pairs_outlier          50% oracle 93.6, 96.0, 96.6, 96.4; linear_mi 92.4, 96.2, 94.4, 94.0; random_intercept 97.0, 99.2, 98.8, 98.0
+  pairs_rare             25% oracle 84.0, 87.8, 88.8, 89.8; linear_mi 85.6, 90.0, 88.8, 91.6; random_intercept 88.6, 92.8, 91.4, 92.2
+  pairs_rare             50% oracle 82.6, 89.4, 90.0, 89.6; linear_mi 81.4, 89.4, 88.2, 88.8; random_intercept 82.6, 89.2, 89.4, 89.2
+  pairs_row_only         25% oracle 91.0, 94.6, 95.4, 94.6; linear_mi 95.8, 99.0, 96.6, 96.0; random_intercept 97.8, 99.4, 98.0, 97.2
+  pairs_row_only         50% oracle 93.8, 96.0, 96.2, 95.2; linear_mi 94.0, 98.0, 96.2, 94.8; random_intercept 95.6, 98.2, 97.6, 94.4
+  pairs_shift            25% oracle 90.6, 94.0, 94.8, 94.8; linear_mi 86.0, 91.8, 89.0, 89.4; random_intercept 94.6, 98.2, 96.6, 95.4
+  pairs_shift            50% oracle 94.2, 97.4, 97.4, 97.0; linear_mi 91.6, 95.4, 94.6, 93.6; random_intercept 96.4, 98.4, 97.8, 96.8
+  pairs_shift_low        25% oracle 92.0, 94.8, 95.4, 94.6; linear_mi 92.0, 95.4, 93.0, 92.6; random_intercept 94.8, 97.6, 95.4, 94.4
+  pairs_shift_low        50% oracle 90.0, 95.0, 95.6, 95.6; linear_mi 92.6, 96.6, 95.8, 93.6; random_intercept 94.6, 97.2, 96.6, 94.4
+  pairs_under            25% oracle 92.0, 96.0, 96.4, 95.2; linear_mi 87.0, 93.0, 89.8, 90.6; random_intercept 94.6, 98.2, 96.6, 96.8
+  pairs_under            50% oracle 92.6, 95.8, 96.0, 95.6; linear_mi 91.8, 95.2, 95.0, 94.4; random_intercept 93.4, 97.4, 96.6, 96.0
+  rwanda_outlier         25% oracle 91.4, 94.6, 94.2, 93.4; linear_mi 90.8, 95.2, 92.0, 90.8; random_intercept 96.6, 99.0, 97.6, 96.0
+  rwanda_outlier         50% oracle 88.4, 92.2, 91.8, 93.0; linear_mi 88.0, 93.2, 91.6, 90.2; random_intercept 93.2, 95.4, 94.6, 93.0
+  rwanda_rare            25% oracle 85.2, 88.2, 88.4, 90.8; linear_mi 88.0, 92.6, 90.6, 93.2; random_intercept 89.6, 94.8, 92.0, 95.2
+  rwanda_rare            50% oracle 85.2, 89.0, 90.0, 92.0; linear_mi 85.6, 90.8, 89.6, 90.8; random_intercept 85.8, 91.0, 90.0, 91.4
+  rwanda_row_only        25% oracle 93.2, 95.4, 95.8, 95.4; linear_mi 97.2, 98.8, 98.0, 97.0; random_intercept 97.2, 99.4, 97.6, 97.2
+  rwanda_row_only        50% oracle 92.8, 96.2, 95.8, 96.0; linear_mi 95.4, 97.8, 97.6, 95.4; random_intercept 96.6, 98.8, 98.0, 96.6
+  rwanda_shift           25% oracle 93.6, 96.0, 96.2, 97.2; linear_mi 87.8, 93.2, 89.4, 90.4; random_intercept 98.4, 99.8, 98.6, 97.4
+  rwanda_shift           50% oracle 93.6, 97.2, 96.8, 97.0; linear_mi 92.2, 96.0, 95.0, 94.0; random_intercept 98.0, 99.0, 98.8, 97.0
+  rwanda_shift_low       25% oracle 93.2, 95.4, 95.4, 95.4; linear_mi 91.2, 96.2, 92.6, 91.8; random_intercept 96.6, 98.4, 97.2, 96.8
+  rwanda_shift_low       50% oracle 88.4, 93.0, 93.2, 93.0; linear_mi 90.6, 95.0, 92.8, 92.4; random_intercept 91.8, 96.2, 94.6, 93.4
+  rwanda_under           25% oracle 92.4, 96.4, 95.6, 94.6; linear_mi 89.0, 94.4, 92.2, 91.8; random_intercept 93.8, 98.2, 95.4, 96.0
+  rwanda_under           50% oracle 92.4, 95.0, 94.8, 94.8; linear_mi 90.2, 95.2, 94.0, 93.0; random_intercept 94.6, 98.2, 97.4, 95.8
+
+MEANS BY SETTING: coverage, percent, cr1s, cr2, cv3
+  clustered          24 cells: oracle 92.1, 95.1, 94.8; linear_mi 90.3, 94.8, 92.4; random_intercept 95.3, 97.9, 96.6
+  rare counts         6 cells: oracle 83.2, 87.5, 87.5; linear_mi 84.1, 89.8, 87.8; random_intercept 85.3, 90.8, 88.8
+  row-only            8 cells: oracle 93.0, 95.5, 95.1; linear_mi 95.3, 97.9, 96.2; random_intercept 96.1, 98.2, 96.9
+  imputed covariate   6 cells: oracle 94.6, 95.4, 96.0; linear_mi 95.0, 95.7, 95.8; random_intercept 90.6, 92.0, 92.1
+
+MEAN DISTANCE FROM 95% ACROSS THE 11 ITEMS, points
+  oracle             25%: cr1s 2.48, cr2 1.52, cv3 1.51, wcr 1.57; 50%: cr1s 2.49, cr2 1.53, cv3 1.45, wcr 1.35
+  linear_mi          25%: cr1s 8.18, cr2 4.44, cv3 6.04, wcr 8.18; 50%: cr1s 5.80, cr2 3.42, cv3 3.31, wcr 4.31
+  random_intercept   25%: cr1s 3.18, cr2 1.49, cv3 1.47, wcr 5.18; 50%: cr1s 3.07, cr2 1.64, cv3 1.25, wcr 2.51
+  Mean recovery is unchanged by the variance, so accuracy results from the replacement study stand.
+
+DECISION RULE, using random_intercept unless stated
+  cr2:
+    R1 at 25%: at least 92% on 10 of 11, at most 98% on 10; holds True; lowest 91.9% on syphilis, highest 98.7% on resus
+    R2 at 50%: at least 92% on 10 of 11, at most 98% on 10; holds True
+    R3: mean distance 1.49 against 3.18; holds True
+    S1: within limits in 23 of 44; holds False
+    L1: linear MI at most 98% on 10 of 11 and in 41 of 44; holds True
+    W1: width ratio +12% to +95%, widest on resus; holds False
+    Eligible: False
+  cv3:
+    R1 at 25%: at least 92% on 9 of 11, at most 98% on 11; holds True; lowest 90.0% on syphilis, highest 96.7% on resus
+    R2 at 50%: at least 92% on 10 of 11, at most 98% on 11; holds True
+    R3: mean distance 1.47 against 3.18; holds True
+    S1: within limits in 36 of 44; holds True
+    L1: linear MI at most 98% on 11 of 11 and in 44 of 44; holds True
+    W1: width ratio +1% to +15%, widest on deliveries; holds True
+    Eligible: True
+OUTCOME: cv3
+  For comparison, the current variance with random_intercept: at least 92% on 6 of 11 at 25%, simulation limits in 40 of 44
+
+IMPUTED-COVARIATE CELLS, random_intercept: coverage under cr2 and cv3; under 92% in how many of 6
+  cr2: under 92% in 2 of 6
+  cv3: under 92% in 2 of 6
+
+PREDICTIONS
+  1. cr2 is eligible: False
+  2. cv3 fails W1 on at least one item: False (largest +15%)
+  3. syphilis below 92% under cr2 at 25%: True (91.9%)
+  4. resus above 98% under cv3 at 25%: False (96.7%)
+  5. cr2 gains less through imputation than on the recount: False (random intercept +3.11, oracle +2.06)
+  6. Pooled df under cr2 below 15 on all 11: False (range 4.3 to 19.1)
+
+VERY LOW DEGREES OF FREEDOM, random_intercept across all requests: share under 5
+  cr1s: 0.62% of 49493; smallest 2.05
+  cr2: 19.01% of 49493; smallest 0.12
+  cv3: 0.22% of 49493; smallest 2.65
