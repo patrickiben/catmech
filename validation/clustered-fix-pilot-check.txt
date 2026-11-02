@@ -1,0 +1,10 @@
+Engineering pilot of tools/clustered-fix-benchmark.R, separate seeds, three cohorts per scenario. Read for statuses and timing only.
+Requests: 1260; requests with warnings: 0; elapsed seconds, including ratios: 17
+  jackknife: ok 180
+  linear_mi: ok 180
+  linear_mi_clustered: ok 180
+  no_strata: ok 180
+  oracle: ok 180
+  random_intercept: ok 180
+  rao_wu: ok 180
+No engineering change was needed, and no coverage, width or error from the pilot was read.
