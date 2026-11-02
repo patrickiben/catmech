@@ -1,0 +1,350 @@
+Scored from validation/clustered-fix-study by tools/clustered-fix-score.py
+Requests: 210000; returned: 209988; refused: 12; other errors: 0
+  linear_mi: returned 29998 of 30000
+  linear_mi_clustered: returned 29998 of 30000
+  no_strata: returned 29998 of 30000
+  rao_wu: returned 29998 of 30000
+  jackknife: returned 29998 of 30000
+  random_intercept: returned 29998 of 30000
+
+SELECTION, SIMULATIONS ONLY
+  jackknife: not returned 0.00% of simulated requests; mean distance from 95% over 24 clustered cells 1.31 points; mean recovery ratio over 38 cells 1.013
+  random_intercept: not returned 0.00% of simulated requests; mean distance from 95% over 24 clustered cells 1.41 points; mean recovery ratio over 38 cells 0.994
+  linear_mi: mean distance from 95% over 24 clustered cells 4.72 points
+  linear_mi_clustered: mean distance from 95% over 24 clustered cells 1.43 points; mean recovery ratio over 38 cells 1.004
+  no_strata: mean distance from 95% over 24 clustered cells 1.92 points; mean recovery ratio over 38 cells 1.010
+  rao_wu: mean distance from 95% over 24 clustered cells 1.80 points; mean recovery ratio over 38 cells 1.199
+  SELECTED: random_intercept (within 0.5 points, so the lower mean recovery ratio decides)
+
+CONDITIONS FOR random_intercept AT A 25% AUDIT ON REAL ITEMS
+  lbw          coverage 93.6%, oracle 88.4%, existing 92.0%, first option 89.8%; within limits True; recovery ratio 1.054 [1.023, 1.087]; first option 1.137
+  resus        coverage 96.4%, oracle 94.0%, existing 96.0%, first option 93.6%; within limits True; recovery ratio 1.039 [1.000, 1.079]; first option 1.104
+  stillbirths  coverage 93.8%, oracle 93.4%, existing 94.4%, first option 94.0%; within limits True; recovery ratio 1.041 [1.004, 1.078]; first option 1.050
+  deliveries   coverage 90.4%, oracle 91.6%, existing 87.0%, first option 91.4%; within limits True; recovery ratio 0.902 [0.866, 0.936]; first option 0.903
+  anc1_early   coverage 91.0%, oracle 95.6%, existing 79.6%, first option 88.8%; within limits True; recovery ratio 0.748 [0.703, 0.797]; first option 0.850
+  pnc          coverage 92.8%, oracle 95.2%, existing 85.4%, first option 93.6%; within limits True; recovery ratio 0.945 [0.902, 0.984]; first option 0.894
+  syphilis     coverage 89.0%, oracle 93.2%, existing 84.6%, first option 93.0%; within limits False; recovery ratio 0.949 [0.910, 0.988]; first option 0.868
+  iron         coverage 91.0%, oracle 90.2%, existing 79.5%, first option 90.8%; within limits True; recovery ratio 0.808 [0.751, 0.868]; first option 0.855
+  anc4         coverage 92.2%, oracle 96.6%, existing 87.2%, first option 90.8%; within limits True; recovery ratio 0.948 [0.920, 0.979]; first option 0.970
+  Coverage holds: True (8 of 9 within limits, need 8 with anc1_early among them)
+  Accuracy holds: False (2 of 5 with upper limit at most 1.05, need 4)
+  ancnewreg    unused item: rows 207, wrong 32; coverage 91.4%, oracle 92.4%, existing 85.8%; within 5 points True; recovery ratio 0.774 [0.726, 0.827], at most 1.05 True
+  livebirths   unused item: rows 207, wrong 49; coverage 92.2%, oracle 91.8%, existing 90.2%; within 5 points True; recovery ratio 0.921 [0.887, 0.957], at most 1.05 True
+  Unused items hold: True
+
+CONDITIONS IN THE SIMULATIONS, 25% AND 50%
+  Outside limits: rwanda_shift 25%: 98.4%, oracle 93.6%
+  Simulation coverage holds: True (23 of 24 clustered cells, need 80%)
+  Upper limit above 1.05: rwanda_shift_low 25%: 1.023 [0.976, 1.071]
+  Upper limit above 1.05: pairs_shift_low 25%: 1.027 [0.976, 1.080]
+  Upper limit above 1.05: none_under 25%: 1.016 [0.983, 1.051]
+  Upper limit above 1.05: rwanda_rare 25%: 1.090 [1.045, 1.134]
+  Upper limit above 1.05: pairs_rare 25%: 1.027 [0.987, 1.067]
+  Upper limit above 1.05: none_rare 25%: 1.071 [1.035, 1.110]
+  Upper limit above 1.05: rwanda_row_only 25%: 1.040 [1.002, 1.079]
+  Upper limit above 1.05: pairs_row_only 25%: 1.013 [0.967, 1.060]
+  Upper limit above 1.05: rwanda_shift 50%: 1.023 [0.963, 1.085]
+  Upper limit above 1.05: none_shift 50%: 1.041 [0.985, 1.100]
+  Upper limit above 1.05: rwanda_under 50%: 1.013 [0.977, 1.052]
+  Upper limit above 1.05: rwanda_outlier 50%: 0.990 [0.924, 1.054]
+  Upper limit above 1.05: none_outlier 50%: 1.036 [0.980, 1.090]
+  Upper limit above 1.05: rwanda_rare 50%: 1.056 [1.023, 1.095]
+  Upper limit above 1.05: pairs_rare 50%: 1.023 [0.985, 1.065]
+  Upper limit above 1.05: none_rare 50%: 1.032 [0.985, 1.081]
+  Simulation accuracy holds: False (22 of 38 cells, need 80%)
+VERDICT: PARTIAL
+
+THE FIRST TEST'S COVERAGE CONDITION, FOR COMPARISON ONLY, ENTERS NO VERDICT
+  linear_mi_clustered  closer to oracle 5 of 5; within 5 points of oracle 4 of 5; this plan's limits 8 of 9; accuracy upper limit 2 of 5
+  no_strata            closer to oracle 2 of 5; within 5 points of oracle 5 of 5; this plan's limits 9 of 9; accuracy upper limit 2 of 5
+  rao_wu               closer to oracle 2 of 5; within 5 points of oracle 4 of 5; this plan's limits 9 of 9; accuracy upper limit 2 of 5
+  jackknife            closer to oracle 2 of 5; within 5 points of oracle 4 of 5; this plan's limits 9 of 9; accuracy upper limit 2 of 5
+  random_intercept     closer to oracle 3 of 5; within 5 points of oracle 4 of 5; this plan's limits 8 of 9; accuracy upper limit 2 of 5
+
+PREDICTIONS
+  1. Simulations select random_intercept: True (random_intercept)
+  2. rao_wu above 96% in most clustered cells of the stratified designs at 25%: True (7 of 8); range 94.8% to 99.0%
+  3. Both candidates closer to 95% than the first option on average: True (jackknife 1.31, random_intercept 1.41, linear_mi_clustered 1.43)
+  4. anc1_early at 25% at least 90%: True (91.0%)
+  5. Rare items, recovery ratio below the first option's on all three: True (lbw 1.054 against 1.137, resus 1.039 against 1.104, stillbirths 1.041 against 1.050)
+  6. Common items, recovery ratio at most 1.02 on all six: True (deliveries 0.902, anc1_early 0.748, pnc 0.945, syphilis 0.949, iron 0.808, anc4 0.948)
+  7. One-row controls, mean width within 5%: True (25% +0.0%, 50% +0.0%)
+  8. Unused items at 25%, coverage within 3 points of linear_mi: False (ancnewreg +5.6, livebirths +2.0)
+  9. Five items at 25%, mean width at most 40% wider: True (lbw +8%, resus +14%, stillbirths +10%, deliveries +3%, anc1_early +12%)
+  10. Fewer widths over five times the cell median than the first option: True (random_intercept 5, first option 24)
+
+REAL ITEMS: coverage, percent; mean width; recovery RMSE ratio against existing with 95% limits
+  five
+    lbw: rows 206, facilities 69, wrong 50, target 0.047, reported 0.031
+      25% coverage: oracle 88.4; existing 92.0; first 89.8; no strata 92.8; rao-wu 95.0; jackknife 93.6; random int 93.6
+      25% width: oracle 0.039; existing 0.055; first 0.056; no strata 0.070; rao-wu 0.076; jackknife 0.066; random int 0.060
+      25% ratio: first 1.137 [1.101, 1.174]; no strata 1.389 [1.332, 1.447]; rao-wu 1.446 [1.380, 1.517]; jackknife 1.031 [0.999, 1.065]; random int 1.054 [1.023, 1.087]
+      25% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 17.0
+      50% coverage: oracle 88.4; existing 88.0; first 87.0; no strata 89.8; rao-wu 89.0; jackknife 89.2; random int 88.8
+      50% width: oracle 0.039; existing 0.042; first 0.043; no strata 0.045; rao-wu 0.045; jackknife 0.044; random int 0.043
+      50% ratio: first 0.999 [0.974, 1.028]; no strata 1.033 [0.999, 1.069]; rao-wu 1.050 [1.014, 1.087]; jackknife 1.007 [0.981, 1.033]; random int 0.998 [0.976, 1.022]
+      50% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 33.0
+    resus: rows 207, facilities 69, wrong 71, target 0.007, reported 0.031
+      25% coverage: oracle 94.0; existing 96.0; first 93.6; no strata 96.4; rao-wu 96.6; jackknife 97.6; random int 96.4
+      25% width: oracle 0.018; existing 0.050; first 0.059; no strata 0.074; rao-wu 0.091; jackknife 0.087; random int 0.057
+      25% ratio: first 1.104 [1.054, 1.159]; no strata 1.172 [1.110, 1.239]; rao-wu 1.375 [1.288, 1.475]; jackknife 1.013 [0.973, 1.056]; random int 1.039 [1.000, 1.079]
+      25% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 17.0
+      50% coverage: oracle 94.0; existing 95.8; first 96.8; no strata 97.6; rao-wu 96.8; jackknife 97.8; random int 96.6
+      50% width: oracle 0.018; existing 0.028; first 0.030; no strata 0.033; rao-wu 0.033; jackknife 0.033; random int 0.030
+      50% ratio: first 1.045 [1.008, 1.083]; no strata 1.076 [1.026, 1.126]; rao-wu 1.107 [1.060, 1.159]; jackknife 1.037 [1.000, 1.077]; random int 1.049 [1.011, 1.091]
+      50% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 33.0
+    stillbirths: rows 207, facilities 69, wrong 9, target 0.008, reported 0.010
+      25% coverage: oracle 93.4; existing 94.4; first 94.0; no strata 96.6; rao-wu 96.4; jackknife 96.0; random int 93.8
+      25% width: oracle 0.009; existing 0.013; first 0.014; no strata 0.016; rao-wu 0.019; jackknife 0.018; random int 0.015
+      25% ratio: first 1.050 [0.995, 1.110]; no strata 1.014 [0.959, 1.074]; rao-wu 1.254 [1.157, 1.360]; jackknife 1.008 [0.968, 1.048]; random int 1.041 [1.004, 1.078]
+      25% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 17.0
+      50% coverage: oracle 93.4; existing 94.0; first 93.6; no strata 95.4; rao-wu 95.0; jackknife 95.0; random int 94.2
+      50% width: oracle 0.009; existing 0.010; first 0.010; no strata 0.010; rao-wu 0.010; jackknife 0.010; random int 0.010
+      50% ratio: first 1.028 [1.000, 1.059]; no strata 1.032 [0.999, 1.065]; rao-wu 0.993 [0.961, 1.027]; jackknife 1.003 [0.969, 1.040]; random int 1.007 [0.976, 1.042]
+      50% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 33.0
+    deliveries: rows 207, facilities 69, wrong 47, target 0.461, reported 0.499
+      25% coverage: oracle 91.6; existing 87.0; first 91.4; no strata 92.2; rao-wu 91.8; jackknife 92.2; random int 90.4
+      25% width: oracle 0.245; existing 0.234; first 0.249; no strata 0.256; rao-wu 0.242; jackknife 0.284; random int 0.240
+      25% ratio: first 0.903 [0.869, 0.935]; no strata 0.886 [0.850, 0.921]; rao-wu 0.963 [0.908, 1.020]; jackknife 1.010 [0.984, 1.038]; random int 0.902 [0.866, 0.936]
+      25% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 17.0
+      50% coverage: oracle 91.6; existing 88.8; first 91.0; no strata 91.6; rao-wu 91.2; jackknife 91.8; random int 91.2
+      50% width: oracle 0.245; existing 0.237; first 0.243; no strata 0.247; rao-wu 0.246; jackknife 0.251; random int 0.239
+      50% ratio: first 0.964 [0.949, 0.979]; no strata 0.964 [0.946, 0.979]; rao-wu 0.962 [0.943, 0.980]; jackknife 0.998 [0.982, 1.015]; random int 0.953 [0.924, 0.979]
+      50% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 33.0
+    anc1_early: rows 206, facilities 69, wrong 176, target 0.367, reported 0.524
+      25% coverage: oracle 95.6; existing 79.6; first 88.8; no strata 94.4; rao-wu 94.2; jackknife 93.8; random int 91.0
+      25% width: oracle 0.206; existing 0.257; first 0.337; no strata 0.400; rao-wu 0.412; jackknife 0.510; random int 0.289
+      25% ratio: first 0.850 [0.827, 0.874]; no strata 0.814 [0.785, 0.844]; rao-wu 0.833 [0.794, 0.872]; jackknife 1.041 [1.016, 1.067]; random int 0.748 [0.703, 0.797]
+      25% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 17.0
+      50% coverage: oracle 95.6; existing 88.0; first 92.4; no strata 93.4; rao-wu 93.6; jackknife 93.6; random int 94.2
+      50% width: oracle 0.206; existing 0.205; first 0.233; no strata 0.250; rao-wu 0.249; jackknife 0.269; random int 0.223
+      50% ratio: first 0.976 [0.957, 0.994]; no strata 0.984 [0.960, 1.008]; rao-wu 0.959 [0.934, 0.985]; jackknife 1.015 [0.995, 1.036]; random int 0.877 [0.817, 0.934]
+      50% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 33.0
+  development
+    pnc: rows 200, facilities 69, wrong 101, target 0.973, reported 1.035
+      25% coverage: oracle 95.2; existing 85.4; first 93.6; no strata 95.2; rao-wu 95.4; jackknife 94.2; random int 92.8
+      25% width: oracle 0.194; existing 0.237; first 0.307; no strata 0.397; rao-wu 0.372; jackknife 0.491; random int 0.272
+      25% ratio: first 0.894 [0.854, 0.934]; no strata 0.943 [0.898, 0.988]; rao-wu 1.001 [0.939, 1.069]; jackknife 1.036 [1.003, 1.068]; random int 0.945 [0.902, 0.984]
+      25% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 17.0
+      50% coverage: oracle 95.2; existing 86.0; first 91.4; no strata 93.8; rao-wu 91.8; jackknife 91.8; random int 92.8
+      50% width: oracle 0.194; existing 0.184; first 0.205; no strata 0.224; rao-wu 0.218; jackknife 0.233; random int 0.202
+      50% ratio: first 0.939 [0.916, 0.964]; no strata 0.955 [0.930, 0.981]; rao-wu 0.935 [0.907, 0.964]; jackknife 1.019 [0.998, 1.042]; random int 0.909 [0.876, 0.945]
+      50% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 33.0
+    syphilis: rows 206, facilities 69, wrong 84, target 0.579, reported 0.568
+      25% coverage: oracle 93.2; existing 84.6; first 93.0; no strata 94.6; rao-wu 95.8; jackknife 95.6; random int 89.0
+      25% width: oracle 0.716; existing 0.762; first 0.847; no strata 0.925; rao-wu 0.969; jackknife 1.095; random int 0.804
+      25% ratio: first 0.868 [0.836, 0.903]; no strata 0.836 [0.796, 0.879]; rao-wu 0.901 [0.853, 0.952]; jackknife 0.985 [0.947, 1.022]; random int 0.949 [0.910, 0.988]
+      25% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 17.0
+      50% coverage: oracle 93.2; existing 85.2; first 88.0; no strata 89.2; rao-wu 89.0; jackknife 90.2; random int 86.8
+      50% width: oracle 0.716; existing 0.668; first 0.703; no strata 0.726; rao-wu 0.726; jackknife 0.753; random int 0.671
+      50% ratio: first 0.984 [0.958, 1.009]; no strata 0.968 [0.946, 0.995]; rao-wu 1.042 [1.006, 1.083]; jackknife 1.040 [1.016, 1.066]; random int 1.019 [0.995, 1.044]
+      50% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 33.0
+    iron: rows 186, facilities 63, wrong 56, target 0.894, reported 1.020
+      25% coverage: oracle 90.2; existing 79.5; first 90.8; no strata 95.2; rao-wu 93.6; jackknife 94.8; random int 91.0
+      25% width: oracle 0.285; existing 0.480; first 0.678; no strata 0.903; rao-wu 0.886; jackknife 1.292; random int 0.518
+      25% ratio: first 0.855 [0.806, 0.903]; no strata 0.888 [0.836, 0.944]; rao-wu 0.920 [0.831, 1.025]; jackknife 1.057 [1.008, 1.110]; random int 0.808 [0.751, 0.868]
+      25% returned: oracle 500; existing 498; first 498; no strata 498; rao-wu 498; jackknife 498; random int 498; audited clusters 15.0
+      50% coverage: oracle 90.2; existing 84.6; first 89.6; no strata 90.6; rao-wu 92.4; jackknife 91.0; random int 92.8
+      50% width: oracle 0.285; existing 0.324; first 0.371; no strata 0.398; rao-wu 0.412; jackknife 0.403; random int 0.377
+      50% ratio: first 0.964 [0.944, 0.982]; no strata 0.957 [0.934, 0.982]; rao-wu 0.969 [0.946, 0.994]; jackknife 0.998 [0.978, 1.019]; random int 0.957 [0.911, 1.002]
+      50% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 30.0
+    anc4: rows 207, facilities 69, wrong 179, target 0.256, reported 0.435
+      25% coverage: oracle 96.6; existing 87.2; first 90.8; no strata 93.4; rao-wu 94.6; jackknife 91.4; random int 92.2
+      25% width: oracle 0.219; existing 0.313; first 0.362; no strata 0.413; rao-wu 0.485; jackknife 0.467; random int 0.347
+      25% ratio: first 0.970 [0.942, 1.000]; no strata 0.941 [0.904, 0.976]; rao-wu 1.030 [0.978, 1.083]; jackknife 1.006 [0.985, 1.027]; random int 0.948 [0.920, 0.979]
+      25% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 17.0
+      50% coverage: oracle 96.6; existing 95.2; first 96.0; no strata 96.8; rao-wu 96.0; jackknife 96.2; random int 96.8
+      50% width: oracle 0.219; existing 0.249; first 0.263; no strata 0.273; rao-wu 0.274; jackknife 0.282; random int 0.261
+      50% ratio: first 0.978 [0.954, 1.004]; no strata 0.965 [0.934, 0.997]; rao-wu 0.971 [0.940, 1.004]; jackknife 1.010 [0.984, 1.037]; random int 0.936 [0.902, 0.969]
+      50% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 33.0
+  unused
+    ancnewreg: rows 207, facilities 69, wrong 32, target 0.891, reported 0.947
+      25% coverage: oracle 92.4; existing 85.8; first 91.8; no strata 92.8; rao-wu 93.6; jackknife 93.4; random int 91.4
+      25% width: oracle 0.392; existing 0.450; first 0.547; no strata 0.574; rao-wu 0.606; jackknife 0.669; random int 0.482
+      25% ratio: first 0.906 [0.874, 0.941]; no strata 0.869 [0.830, 0.911]; rao-wu 0.935 [0.883, 0.995]; jackknife 1.017 [0.985, 1.049]; random int 0.774 [0.726, 0.827]
+      25% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 17.0
+      50% coverage: oracle 92.4; existing 88.4; first 91.0; no strata 91.4; rao-wu 91.4; jackknife 91.2; random int 92.2
+      50% width: oracle 0.392; existing 0.412; first 0.440; no strata 0.450; rao-wu 0.452; jackknife 0.461; random int 0.436
+      50% ratio: first 0.946 [0.922, 0.969]; no strata 0.938 [0.913, 0.963]; rao-wu 0.933 [0.906, 0.960]; jackknife 0.991 [0.967, 1.016]; random int 0.849 [0.799, 0.902]
+      50% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 33.0
+    livebirths: rows 207, facilities 69, wrong 49, target 0.459, reported 0.493
+      25% coverage: oracle 91.8; existing 90.2; first 94.2; no strata 95.4; rao-wu 95.0; jackknife 95.4; random int 92.2
+      25% width: oracle 0.255; existing 0.261; first 0.282; no strata 0.300; rao-wu 0.319; jackknife 0.330; random int 0.274
+      25% ratio: first 0.928 [0.895, 0.963]; no strata 0.919 [0.882, 0.957]; rao-wu 0.948 [0.889, 1.012]; jackknife 1.002 [0.970, 1.034]; random int 0.921 [0.887, 0.957]
+      25% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 17.0
+      50% coverage: oracle 91.8; existing 89.2; first 91.0; no strata 92.4; rao-wu 92.4; jackknife 92.6; random int 91.6
+      50% width: oracle 0.255; existing 0.251; first 0.256; no strata 0.262; rao-wu 0.261; jackknife 0.268; random int 0.255
+      50% ratio: first 0.973 [0.949, 0.998]; no strata 0.964 [0.940, 0.988]; rao-wu 0.985 [0.950, 1.019]; jackknife 0.991 [0.973, 1.010]; random int 0.994 [0.966, 1.021]
+      50% returned: oracle 500; existing 500; first 500; no strata 500; rao-wu 500; jackknife 500; random int 500; audited clusters 33.0
+
+SIMULATIONS: coverage, percent, then recovery ratio against existing, then mean width
+  rwanda_shift_low       25% clusters 17.0: oracle 93.2; existing 91.2; first 94.6; no strata 97.0; rao-wu 99.0; jackknife 95.0; random int 96.6
+                             ratio: first 1.007; no strata 1.006; rao-wu 1.268; jackknife 0.996; random int 1.023
+                             width: oracle 0.266; existing 0.476; first 0.600; no strata 0.801; rao-wu 1.226; jackknife 0.682; random int 0.581
+  pairs_shift_low        25% clusters 20.0: oracle 92.0; existing 92.0; first 94.6; no strata 98.0; rao-wu 96.8; jackknife 94.4; random int 94.8
+                             ratio: first 1.071; no strata 1.094; rao-wu 2.625; jackknife 1.016; random int 1.027
+                             width: oracle 0.245; existing 0.452; first 0.585; no strata 0.791; rao-wu 1.856; jackknife 0.585; random int 0.563
+  none_shift_low         25% clusters 18.0: oracle 91.8; existing 90.6; first 92.2; no strata 92.2; rao-wu 93.0; jackknife 94.0; random int 95.4
+                             ratio: first 0.986; no strata 0.986; rao-wu 0.991; jackknife 0.987; random int 0.988
+                             width: oracle 0.258; existing 0.387; first 0.417; no strata 0.417; rao-wu 0.430; jackknife 0.445; random int 0.446
+  rwanda_shift           25% clusters 17.0: oracle 93.6; existing 87.8; first 95.0; no strata 97.2; rao-wu 99.0; jackknife 95.2; random int 98.4
+                             ratio: first 0.981; no strata 0.990; rao-wu 1.079; jackknife 1.014; random int 0.902
+                             width: oracle 0.267; existing 0.421; first 0.602; no strata 0.736; rao-wu 0.941; jackknife 0.747; random int 0.573
+  pairs_shift            25% clusters 20.0: oracle 90.6; existing 86.0; first 95.6; no strata 98.0; rao-wu 94.8; jackknife 94.8; random int 94.6
+                             ratio: first 0.943; no strata 0.962; rao-wu 1.250; jackknife 1.019; random int 0.878
+                             width: oracle 0.246; existing 0.397; first 0.602; no strata 0.754; rao-wu 0.746; jackknife 0.637; random int 0.544
+  none_shift             25% clusters 18.0: oracle 92.2; existing 89.4; first 93.8; no strata 93.8; rao-wu 93.0; jackknife 92.4; random int 96.0
+                             ratio: first 1.032; no strata 1.032; rao-wu 1.035; jackknife 1.047; random int 0.963
+                             width: oracle 0.253; existing 0.366; first 0.451; no strata 0.451; rao-wu 0.462; jackknife 0.470; random int 0.467
+  rwanda_under           25% clusters 17.0: oracle 92.4; existing 89.0; first 93.6; no strata 95.4; rao-wu 97.6; jackknife 93.4; random int 93.8
+                             ratio: first 0.983; no strata 0.998; rao-wu 1.089; jackknife 1.034; random int 0.959
+                             width: oracle 0.260; existing 0.392; first 0.512; no strata 0.596; rao-wu 0.813; jackknife 0.611; random int 0.485
+  pairs_under            25% clusters 20.0: oracle 92.0; existing 87.0; first 94.8; no strata 97.6; rao-wu 97.4; jackknife 94.6; random int 94.6
+                             ratio: first 0.911; no strata 0.918; rao-wu 1.455; jackknife 1.010; random int 0.926
+                             width: oracle 0.245; existing 0.375; first 0.526; no strata 0.625; rao-wu 0.804; jackknife 0.580; random int 0.474
+  none_under             25% clusters 18.0: oracle 93.4; existing 89.4; first 93.2; no strata 93.2; rao-wu 94.0; jackknife 93.0; random int 92.8
+                             ratio: first 0.959; no strata 0.959; rao-wu 0.968; jackknife 0.997; random int 1.016
+                             width: oracle 0.257; existing 0.349; first 0.409; no strata 0.409; rao-wu 0.422; jackknife 0.442; random int 0.414
+  rwanda_outlier         25% clusters 17.0: oracle 91.4; existing 90.8; first 94.4; no strata 96.8; rao-wu 98.2; jackknife 95.4; random int 96.6
+                             ratio: first 0.976; no strata 0.987; rao-wu 1.104; jackknife 1.065; random int 0.835
+                             width: oracle 0.260; existing 0.447; first 0.618; no strata 0.737; rao-wu 1.007; jackknife 0.864; random int 0.565
+  pairs_outlier          25% clusters 20.0: oracle 91.0; existing 87.6; first 97.0; no strata 98.8; rao-wu 97.2; jackknife 95.8; random int 97.8
+                             ratio: first 0.948; no strata 0.925; rao-wu 1.221; jackknife 1.039; random int 0.870
+                             width: oracle 0.245; existing 0.417; first 0.610; no strata 0.777; rao-wu 0.743; jackknife 0.681; random int 0.547
+  none_outlier           25% clusters 18.0: oracle 92.4; existing 89.6; first 95.4; no strata 95.4; rao-wu 94.4; jackknife 94.4; random int 95.4
+                             ratio: first 0.963; no strata 0.963; rao-wu 0.976; jackknife 1.049; random int 0.955
+                             width: oracle 0.253; existing 0.380; first 0.452; no strata 0.452; rao-wu 0.457; jackknife 0.594; random int 0.471
+  rwanda_rare            25% clusters 17.0: oracle 85.2; existing 88.0; first 88.6; no strata 92.4; rao-wu 94.8; jackknife 91.2; random int 89.6
+                             ratio: first 1.049; no strata 1.105; rao-wu 1.322; jackknife 1.028; random int 1.090
+                             width: oracle 0.049; existing 0.052; first 0.055; no strata 0.059; rao-wu 0.070; jackknife 0.057; random int 0.055
+  pairs_rare             25% clusters 20.0: oracle 84.0; existing 85.6; first 87.6; no strata 91.4; rao-wu 94.0; jackknife 87.6; random int 88.6
+                             ratio: first 1.057; no strata 1.098; rao-wu 2.361; jackknife 0.980; random int 1.027
+                             width: oracle 0.045; existing 0.048; first 0.052; no strata 0.057; rao-wu 0.087; jackknife 0.052; random int 0.051
+  none_rare              25% clusters 18.0: oracle 80.2; existing 83.0; first 82.0; no strata 82.0; rao-wu 83.0; jackknife 84.0; random int 84.0
+                             ratio: first 0.998; no strata 0.998; rao-wu 1.007; jackknife 1.033; random int 1.071
+                             width: oracle 0.044; existing 0.045; first 0.046; no strata 0.046; rao-wu 0.046; jackknife 0.048; random int 0.047
+  rwanda_row_only        25% clusters 17.0: oracle 93.2; existing 97.2; first 95.8; no strata 98.2; rao-wu 98.6; jackknife 95.0; random int 97.2
+                             ratio: first 1.078; no strata 1.135; rao-wu 1.428; jackknife 0.996; random int 1.040
+                             width: oracle 0.222; existing 0.435; first 0.495; no strata 0.614; rao-wu 1.105; jackknife 0.519; random int 0.499
+  pairs_row_only         25% clusters 20.0: oracle 91.0; existing 95.8; first 96.8; no strata 98.6; rao-wu 96.6; jackknife 95.6; random int 97.8
+                             ratio: first 1.117; no strata 1.169; rao-wu 3.088; jackknife 1.003; random int 1.013
+                             width: oracle 0.208; existing 0.438; first 0.532; no strata 0.675; rao-wu 3.771; jackknife 0.496; random int 0.504
+  none_row_only          25% clusters 18.0: oracle 91.6; existing 95.0; first 95.0; no strata 95.0; rao-wu 94.8; jackknife 95.0; random int 96.6
+                             ratio: first 1.008; no strata 1.008; rao-wu 1.011; jackknife 0.985; random int 1.013
+                             width: oracle 0.218; existing 0.345; first 0.349; no strata 0.349; rao-wu 0.355; jackknife 0.368; random int 0.379
+  rwanda_shift_low       50% clusters 33.0: oracle 88.4; existing 90.6; first 91.2; no strata 91.6; rao-wu 92.4; jackknife 91.6; random int 91.8
+                             ratio: first 1.010; no strata 1.006; rao-wu 1.034; jackknife 1.034; random int 1.009
+                             width: oracle 0.260; existing 0.315; first 0.321; no strata 0.335; rao-wu 0.343; jackknife 0.334; random int 0.345
+  pairs_shift_low        50% clusters 40.0: oracle 90.0; existing 92.6; first 93.2; no strata 93.4; rao-wu 95.2; jackknife 94.6; random int 94.6
+                             ratio: first 0.973; no strata 0.984; rao-wu 1.002; jackknife 0.982; random int 0.992
+                             width: oracle 0.247; existing 0.292; first 0.298; no strata 0.314; rao-wu 0.322; jackknife 0.310; random int 0.317
+  none_shift_low         50% clusters 35.0: oracle 92.0; existing 92.6; first 92.8; no strata 92.8; rao-wu 93.2; jackknife 93.2; random int 94.4
+                             ratio: first 1.003; no strata 1.003; rao-wu 1.007; jackknife 0.995; random int 1.008
+                             width: oracle 0.254; existing 0.291; first 0.301; no strata 0.301; rao-wu 0.301; jackknife 0.307; random int 0.315
+  rwanda_shift           50% clusters 33.0: oracle 93.6; existing 92.2; first 94.8; no strata 95.6; rao-wu 95.8; jackknife 95.0; random int 98.0
+                             ratio: first 1.021; no strata 0.986; rao-wu 1.049; jackknife 1.011; random int 1.023
+                             width: oracle 0.262; existing 0.315; first 0.347; no strata 0.362; rao-wu 0.374; jackknife 0.361; random int 0.388
+  pairs_shift            50% clusters 40.0: oracle 94.2; existing 91.6; first 94.2; no strata 93.4; rao-wu 95.4; jackknife 94.0; random int 96.4
+                             ratio: first 0.996; no strata 0.997; rao-wu 0.998; jackknife 1.022; random int 0.957
+                             width: oracle 0.248; existing 0.292; first 0.320; no strata 0.338; rao-wu 0.351; jackknife 0.331; random int 0.358
+  none_shift             50% clusters 35.0: oracle 93.8; existing 92.0; first 93.6; no strata 93.6; rao-wu 94.2; jackknife 92.8; random int 96.2
+                             ratio: first 0.997; no strata 0.997; rao-wu 1.007; jackknife 1.019; random int 1.041
+                             width: oracle 0.246; existing 0.286; first 0.309; no strata 0.309; rao-wu 0.309; jackknife 0.312; random int 0.345
+  rwanda_under           50% clusters 33.0: oracle 92.4; existing 90.2; first 93.0; no strata 93.8; rao-wu 93.6; jackknife 92.4; random int 94.6
+                             ratio: first 1.008; no strata 1.006; rao-wu 1.027; jackknife 1.023; random int 1.013
+                             width: oracle 0.264; existing 0.311; first 0.335; no strata 0.350; rao-wu 0.355; jackknife 0.352; random int 0.353
+  pairs_under            50% clusters 40.0: oracle 92.6; existing 91.8; first 93.4; no strata 92.8; rao-wu 94.4; jackknife 93.6; random int 93.4
+                             ratio: first 0.999; no strata 0.998; rao-wu 0.993; jackknife 1.006; random int 0.992
+                             width: oracle 0.249; existing 0.289; first 0.312; no strata 0.327; rao-wu 0.332; jackknife 0.325; random int 0.327
+  none_under             50% clusters 35.0: oracle 91.4; existing 91.0; first 93.2; no strata 93.2; rao-wu 92.6; jackknife 92.6; random int 94.0
+                             ratio: first 0.978; no strata 0.978; rao-wu 0.977; jackknife 1.006; random int 0.985
+                             width: oracle 0.255; existing 0.295; first 0.316; no strata 0.316; rao-wu 0.317; jackknife 0.325; random int 0.324
+  rwanda_outlier         50% clusters 33.0: oracle 88.4; existing 88.0; first 89.4; no strata 91.4; rao-wu 91.4; jackknife 91.0; random int 93.2
+                             ratio: first 1.020; no strata 1.002; rao-wu 1.014; jackknife 1.017; random int 0.990
+                             width: oracle 0.258; existing 0.323; first 0.351; no strata 0.366; rao-wu 0.382; jackknife 0.372; random int 0.402
+  pairs_outlier          50% clusters 40.0: oracle 93.6; existing 92.4; first 95.0; no strata 95.2; rao-wu 96.4; jackknife 95.8; random int 97.0
+                             ratio: first 0.992; no strata 0.987; rao-wu 1.024; jackknife 1.026; random int 0.982
+                             width: oracle 0.243; existing 0.300; first 0.332; no strata 0.348; rao-wu 0.373; jackknife 0.349; random int 0.381
+  none_outlier           50% clusters 35.0: oracle 93.2; existing 91.2; first 93.6; no strata 93.6; rao-wu 93.8; jackknife 94.0; random int 96.6
+                             ratio: first 0.995; no strata 0.995; rao-wu 0.999; jackknife 1.001; random int 1.036
+                             width: oracle 0.256; existing 0.308; first 0.333; no strata 0.333; rao-wu 0.334; jackknife 0.345; random int 0.380
+  rwanda_rare            50% clusters 33.0: oracle 85.2; existing 85.6; first 85.2; no strata 85.2; rao-wu 86.0; jackknife 85.2; random int 85.8
+                             ratio: first 1.050; no strata 1.049; rao-wu 1.064; jackknife 1.003; random int 1.056
+                             width: oracle 0.051; existing 0.051; first 0.050; no strata 0.051; rao-wu 0.051; jackknife 0.051; random int 0.051
+  pairs_rare             50% clusters 40.0: oracle 82.6; existing 81.4; first 81.8; no strata 81.4; rao-wu 82.8; jackknife 81.8; random int 82.6
+                             ratio: first 1.005; no strata 1.015; rao-wu 1.036; jackknife 1.004; random int 1.023
+                             width: oracle 0.047; existing 0.047; first 0.047; no strata 0.047; rao-wu 0.047; jackknife 0.047; random int 0.047
+  none_rare              50% clusters 35.0: oracle 82.2; existing 81.0; first 81.0; no strata 81.0; rao-wu 81.0; jackknife 81.4; random int 81.0
+                             ratio: first 1.010; no strata 1.010; rao-wu 1.001; jackknife 0.988; random int 1.032
+                             width: oracle 0.045; existing 0.044; first 0.044; no strata 0.044; rao-wu 0.044; jackknife 0.045; random int 0.045
+  rwanda_row_only        50% clusters 33.0: oracle 92.8; existing 95.4; first 94.6; no strata 95.6; rao-wu 95.8; jackknife 94.4; random int 96.6
+                             ratio: first 1.008; no strata 1.012; rao-wu 1.017; jackknife 1.011; random int 1.012
+                             width: oracle 0.225; existing 0.288; first 0.282; no strata 0.292; rao-wu 0.297; jackknife 0.290; random int 0.304
+  pairs_row_only         50% clusters 40.0: oracle 93.8; existing 94.0; first 93.4; no strata 94.6; rao-wu 94.6; jackknife 94.0; random int 95.6
+                             ratio: first 1.014; no strata 1.022; rao-wu 1.034; jackknife 1.014; random int 1.010
+                             width: oracle 0.208; existing 0.257; first 0.253; no strata 0.263; rao-wu 0.268; jackknife 0.261; random int 0.270
+  none_row_only          50% clusters 35.0: oracle 95.2; existing 95.4; first 95.4; no strata 95.4; rao-wu 95.8; jackknife 95.2; random int 95.8
+                             ratio: first 0.990; no strata 0.990; rao-wu 1.005; jackknife 1.011; random int 1.015
+                             width: oracle 0.217; existing 0.260; first 0.258; no strata 0.258; rao-wu 0.259; jackknife 0.261; random int 0.269
+  control_one_row        25% clusters 52.0: oracle 92.8; existing 94.4; first 93.6; no strata 93.6; rao-wu 93.4; jackknife 94.0; random int 94.4
+                             ratio: first 1.002; no strata 1.002; rao-wu 1.006; jackknife 1.010; random int 1.000
+                             width: oracle 0.216; existing 0.316; first 0.312; no strata 0.312; rao-wu 0.314; jackknife 0.320; random int 0.316
+  control_one_row        50% clusters 105.0: oracle 93.8; existing 95.0; first 95.0; no strata 95.0; rao-wu 94.8; jackknife 94.6; random int 95.0
+                             ratio: first 1.001; no strata 1.001; rao-wu 0.987; jackknife 0.998; random int 1.000
+                             width: oracle 0.217; existing 0.253; first 0.249; no strata 0.249; rao-wu 0.249; jackknife 0.252; random int 0.253
+
+MEANS BY GROUP: coverage over cells, percent
+  clustered, rwanda design   25%: oracle 92.7; existing 89.7; first 94.4; no strata 96.6; rao-wu 98.4; jackknife 94.8; random int 96.4
+  clustered, rwanda design   50%: oracle 90.7; existing 90.3; first 92.1; no strata 93.1; rao-wu 93.3; jackknife 92.5; random int 94.4
+  clustered, pairs design    25%: oracle 91.4; existing 88.1; first 95.5; no strata 98.1; rao-wu 96.5; jackknife 94.9; random int 95.4
+  clustered, pairs design    50%: oracle 92.6; existing 92.1; first 94.0; no strata 93.7; rao-wu 95.3; jackknife 94.5; random int 95.3
+  clustered, no strata       25%: oracle 92.5; existing 89.8; first 93.7; no strata 93.7; rao-wu 93.6; jackknife 93.5; random int 94.9
+  clustered, no strata       50%: oracle 92.6; existing 91.7; first 93.3; no strata 93.3; rao-wu 93.5; jackknife 93.2; random int 95.3
+  rare counts                25%: oracle 83.1; existing 85.5; first 86.1; no strata 88.6; rao-wu 90.6; jackknife 87.6; random int 87.4
+  rare counts                50%: oracle 83.3; existing 82.7; first 82.7; no strata 82.5; rao-wu 83.3; jackknife 82.8; random int 83.1
+  row-only errors            25%: oracle 91.9; existing 96.0; first 95.9; no strata 97.3; rao-wu 96.7; jackknife 95.2; random int 97.2
+  row-only errors            50%: oracle 93.9; existing 94.9; first 94.5; no strata 95.2; rao-wu 95.4; jackknife 94.5; random int 96.0
+  one-row controls           25%: oracle 92.8; existing 94.4; first 93.6; no strata 93.6; rao-wu 93.4; jackknife 94.0; random int 94.4
+  one-row controls           50%: oracle 93.8; existing 95.0; first 95.0; no strata 95.0; rao-wu 94.8; jackknife 94.6; random int 95.0
+
+BETWEEN-IMPUTATION VARIANCE: median over the cell, divided by the squared recovery RMSE, on clustered cells at 25% and 50%
+  rwanda_shift_low       25%: existing 0.60; first 0.89; no strata 1.40; rao-wu 1.58; jackknife 0.96; random int 0.92
+  pairs_shift_low        25%: existing 0.63; first 0.99; no strata 1.53; rao-wu 0.82; jackknife 0.88; random int 1.00
+  none_shift_low         25%: existing 0.56; first 0.72; no strata 0.72; rao-wu 0.74; jackknife 0.75; random int 0.86
+  rwanda_shift           25%: existing 0.29; first 0.77; no strata 1.12; rao-wu 1.55; jackknife 0.85; random int 0.88
+  pairs_shift            25%: existing 0.25; first 0.85; no strata 1.30; rao-wu 0.75; jackknife 0.70; random int 0.78
+  none_shift             25%: existing 0.38; first 0.68; no strata 0.68; rao-wu 0.71; jackknife 0.70; random int 0.82
+  rwanda_under           25%: existing 0.26; first 0.58; no strata 0.84; rao-wu 1.18; jackknife 0.67; random int 0.55
+  pairs_under            25%: existing 0.27; first 0.92; no strata 1.35; rao-wu 0.90; jackknife 0.72; random int 0.67
+  none_under             25%: existing 0.24; first 0.51; no strata 0.51; rao-wu 0.55; jackknife 0.55; random int 0.47
+  rwanda_outlier         25%: existing 0.25; first 0.52; no strata 0.72; rao-wu 0.85; jackknife 0.51; random int 0.82
+  pairs_outlier          25%: existing 0.24; first 0.65; no strata 1.00; rao-wu 0.81; jackknife 0.47; random int 0.74
+  none_outlier           25%: existing 0.29; first 0.45; no strata 0.45; rao-wu 0.47; jackknife 0.44; random int 0.62
+  rwanda_shift_low       50%: existing 0.52; first 0.57; no strata 0.70; rao-wu 0.72; jackknife 0.61; random int 0.74
+  pairs_shift_low        50%: existing 0.57; first 0.73; no strata 0.86; rao-wu 0.93; jackknife 0.84; random int 0.90
+  none_shift_low         50%: existing 0.56; first 0.63; no strata 0.63; rao-wu 0.63; jackknife 0.72; random int 0.77
+  rwanda_shift           50%: existing 0.40; first 0.64; no strata 0.84; rao-wu 0.85; jackknife 0.80; random int 0.87
+  pairs_shift            50%: existing 0.34; first 0.55; no strata 0.70; rao-wu 0.86; jackknife 0.61; random int 0.81
+  none_shift             50%: existing 0.47; first 0.66; no strata 0.66; rao-wu 0.70; jackknife 0.68; random int 0.88
+  rwanda_under           50%: existing 0.27; first 0.45; no strata 0.55; rao-wu 0.60; jackknife 0.53; random int 0.55
+  pairs_under            50%: existing 0.24; first 0.43; no strata 0.58; rao-wu 0.64; jackknife 0.50; random int 0.52
+  none_under             50%: existing 0.24; first 0.42; no strata 0.42; rao-wu 0.44; jackknife 0.44; random int 0.44
+  rwanda_outlier         50%: existing 0.27; first 0.34; no strata 0.47; rao-wu 0.48; jackknife 0.43; random int 0.60
+  pairs_outlier          50%: existing 0.32; first 0.48; no strata 0.59; rao-wu 0.68; jackknife 0.56; random int 0.77
+  none_outlier           50%: existing 0.26; first 0.38; no strata 0.38; rao-wu 0.39; jackknife 0.42; random int 0.59
+
+EXTREME WIDTHS: requests over five times their cell median, and smallest degrees of freedom
+  real       jackknife            over 5x median 53 of 10998; smallest df 0.69
+  real       linear_mi            over 5x median 3 of 10998; smallest df 1.96
+  real       linear_mi_clustered  over 5x median 7 of 10998; smallest df 1.35
+  real       no_strata            over 5x median 17 of 10998; smallest df 0.81
+  real       oracle               over 5x median 0 of 11000; smallest df 62.00
+  real       random_intercept     over 5x median 1 of 10998; smallest df 2.20
+  real       rao_wu               over 5x median 22 of 10998; smallest df 0.82
+  simulation jackknife            over 5x median 66 of 19000; smallest df 0.69
+  simulation linear_mi            over 5x median 6 of 19000; smallest df 1.71
+  simulation linear_mi_clustered  over 5x median 17 of 19000; smallest df 0.79
+  simulation no_strata            over 5x median 21 of 19000; smallest df 0.56
+  simulation oracle               over 5x median 5 of 19000; smallest df 68.00
+  simulation random_intercept     over 5x median 4 of 19000; smallest df 2.05
+  simulation rao_wu               over 5x median 69 of 19000; smallest df 0.42

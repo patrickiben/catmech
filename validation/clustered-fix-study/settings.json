@@ -1,0 +1,33 @@
+{
+  "mode": "study",
+  "workers": 14,
+  "m": 20,
+  "fractions": [0.25, 0.5],
+  "reps": 500,
+  "ratio_resamples": 2000,
+  "ratio_seed": 1500000000,
+  "held_out": {
+    "cohort": 860100000,
+    "selection": 870100000,
+    "imputation": 880000000
+  },
+  "development": {
+    "cohort": 400100000,
+    "selection": 410100000,
+    "imputation": 420000000
+  },
+  "simulation": {
+    "cohort": 1300100000,
+    "imputation": 1310000000
+  },
+  "simulation_parameters": {
+    "b0": 2,
+    "b1": 0.6,
+    "size_log_mean": 3,
+    "size_log_sd": 0.5,
+    "x_noise_sd": 3,
+    "cluster_variance": 20,
+    "row_variance": 80,
+    "stratum_sd": 2
+  }
+}
