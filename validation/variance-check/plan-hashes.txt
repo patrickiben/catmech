@@ -1,0 +1,4 @@
+6f0db520a82097171b53d76969a52bd36105c949aed6a970ea4b3350797692a3  validation/VARIANCE_CHECK_PLAN.md
+ad01060c50a6a104636c44f07706fe4acb6e3c9f70ee4ac6ffffd9dd9f13b7f2  tools/oracle-variance-check.R
+af1a4d489e9c216054c554c8ef3422822df6e14de5edda7974da62b09ff72e80  tools/oracle-variance-score.py
+Sun Nov  1 23:59:56 EST 2026

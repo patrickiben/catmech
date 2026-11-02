@@ -61,6 +61,8 @@ Coverage is clustered coverage of the pool slope, in percent, on 500 cohorts. Ra
 
 **The first test's own coverage condition would not have held.** The replacement is closer to the oracle than the existing option on only three of five items, because on `lbw` and `resus` it rose further above an oracle that was already lower. Under that condition this would be NO-GO. The plan replaced it with fixed limits before any real result with these candidates, for the reason it gives, but readers should know the difference matters here. The first option scores 5 of 5 on the old condition and 8 of 9 on the new one.
 
+**The verdict sits within simulation noise of NO-GO.** With 500 cohorts, the Monte Carlo standard error of coverage near 90% is 1.34 points. `deliveries`, at 90.4%, cleared the 90% limit by less than that, and it fell short of the oracle's 91.6%, so a slightly lower result would have made the count seven of nine and the verdict NO-GO. Read PARTIAL as not clearly different from NO-GO on coverage. This was added after a literature search raised it, and the plan did not size its rule for this.
+
 ## Reading the result
 
 **Against the first option, the replacement is better on error and steadiness, and about even on coverage.** Post hoc, at 25% it had the lower recovery ratio on six of nine items and the higher on `pnc` and `syphilis`, with `deliveries` level. It was closer to 95% on four items and farther on four, with `resus` level. At a 50% audit the coverage gain is larger: mean distance from 95% across the nine items was 3.07 points, against 3.87 for the first option and 5.71 for the existing one.

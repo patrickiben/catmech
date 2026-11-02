@@ -55,6 +55,7 @@ every connection among those methods.
 3. Test the hold-out advice prospectively, since it comes from the real-data study that suggested it.
 4. Consider non-constant variance, which remains out of scope. On the Rwanda audit it and clustering together cost the oracle up to 28 points of default coverage.
 5. Test the clustered option on a second health system. Every item in the one recount available has now been seen, and two planned tests have run on it.
-6. Test whether checking errors against analysis covariates on audited rows can guide the choice of method. The real-audit results suggested this, so they cannot test it fairly, and at a 25% audit the check has low power.
+6. Try the [corrected cluster-robust variances](../validation/VARIANCE_CHECK_RESULTS.md) through imputation. They repaired most of the complete-data shortfall, but none is proven with imputed data, and rare counts remain unsolved.
+7. Test whether checking errors against analysis covariates on audited rows can guide the choice of method. The real-audit results suggested this, so they cannot test it fairly, and at a 25% audit the check has low power.
 
 Neither reproducibility nor these validation checks are proof of inferential validity. AI-assisted review is disclosed, and no independent human peer review is implied.

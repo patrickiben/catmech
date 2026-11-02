@@ -10,7 +10,7 @@
 - **What held up.** Keeping the recorded value pays. Linear MI's intervals were about half as wide as those from discarding it (0.102 against 0.205, and 0.154 against 0.297), with coverage near the all-references oracle (91.8% against 91.2%, and 93.9% against 94.9%).
 - **Where linear MI fails.** Under synthetic gross errors it covered 64.7%, against 94.0% for the model.
 - **A real audit was inconclusive.** On a [health-facility recount in Rwanda](validation/REAL_AUDIT_SYNTHESIS.md), the rule fixed in advance came out inconclusive at a 25% audit. The model had lower error than linear MI on two of three slopes, but where a reported slope differed from a recount of that item its intervals covered 35% to 72%, against 90% to 97% for the recount. Linear MI's coverage held up better (79.5% at worst), and it cost accuracy where reported values were close: 1.4 to 2.6 times the error of trusting them on the syphilis slope, depending on the measure. These are facility counts, not patient values, and gross errors remain untested on real data.
-- **Clustered audits: experimental.** `catmech_reference(cluster = )` adds a random intercept for each audited site. It replaced a [first version](validation/CLUSTERED_SYNTHESIS.md) that resampled sites, in which resampling within strata understated variance. Under a [new rule fixed in advance](validation/CLUSTERED_FIX_SYNTHESIS.md) the replacement, like the first version, came out **PARTIAL**, on a Rwanda recount at a 25% audit. On six common items where linear MI fell short of a recount, it raised coverage (from 79.6% to 91.0% on early antenatal visits) with lower error, though `syphilis` reached only 89.0%. On three rare items its error ran 4% to 5% higher, which failed the accuracy condition. This round has had no outside review.
+- **Clustered audits: experimental.** `catmech_reference(cluster = )` adds a random intercept for each audited site. It replaced a [first version](validation/CLUSTERED_SYNTHESIS.md) that resampled sites, in which resampling within strata understated variance. Under a [new rule fixed in advance](validation/CLUSTERED_FIX_SYNTHESIS.md) the replacement, like the first version, came out **PARTIAL**, on a Rwanda recount at a 25% audit. On six common items where linear MI fell short of a recount, it raised coverage (from 79.6% to 91.0% on early antenatal visits) with lower error, though `syphilis` reached only 89.0%. On three rare items its error ran 4% to 5% higher, which failed the accuracy condition. That verdict sits within simulation noise of NO-GO, and this round has had no outside review.
 - **Audit planning: not validated.** `catmech_audit_plan()` returned **NO-GO** under a rule fixed in advance. Its median error in predicting interval width missed the 10% limit at a 5% audit (11.3% to 16.8%). Larger targets stayed within 7.8%, but that pattern was not the test. It is a documented calculation, not a validated tool, so it is left out of the example below.
 
 ## Which method to start with
@@ -235,7 +235,8 @@ catmech_pool_lm(fit, outcome ~ lab_value + age + sex + inflammation, cluster = "
 ```
 
 That applies a CR1 variance to each completed dataset, then Rubin's rules with complete-data degrees of
-freedom of clusters minus one. It can still undercover with few clusters. To also add a random intercept for the
+freedom of clusters minus one. It can undercover even with every row checked and 69 clusters, and
+[corrected variances](validation/VARIANCE_CHECK_RESULTS.md) repaired most of that on complete data, though they have not been tried through imputation. To also add a random intercept for the
 cluster to the imputation model, pass `cluster` to the fit. `catmech_pool_lm()` then uses that column by default:
 
 ```r
@@ -379,6 +380,9 @@ Rscript tools/clustered-fix-benchmark.R study validation/my-clustered-fix-study
 python3 -I tools/clustered-fix-score.py my-clustered-fix-decisions.txt validation/my-clustered-fix-study
 python3 -I tools/clustered-fix-posthoc.py
 Rscript tools/clustered-fix-replay.R validation/my-clustered-fix-replay
+Rscript tools/oracle-variance-check.R validation/my-variance-check
+python3 -I tools/oracle-variance-score.py my-variance-decisions.txt validation/my-variance-check
+Rscript tools/check-cluster-algebra.R my-cluster-algebra-check.txt
 python3 tools/verify-artifacts.py
 ```
 

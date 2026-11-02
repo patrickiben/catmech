@@ -1008,6 +1008,38 @@ def verify_clustered_fix_study(folder):
     print(f"{folder.name}: all {len(records)} planned requests, {len(summary)} recomputed groups, seeds and pool targets recomputed, {matched_first} requests match the first study, {matched_review} match the review, selection and verdict re-derived as {selected} and {verdict}, {replayed} replayed through the package, corrupted-summary control: PASS")
 
 
+def verify_variance_check(folder):
+    """Recount under corrected variances: planned requests, the study's estimates, scored output, reading, write-up numbers and the algebra record."""
+    import gzip
+    import re
+    import subprocess
+    import sys
+    with gzip.open(folder/"replicates.csv.gz", "rt", newline="", encoding="utf-8") as stream:
+        records = list(csv.DictReader(stream))
+    assert len(records) == 24500 and len({(r["analysis"], r["fraction"], r["replicate"]) for r in records}) == 24500, "Missing or duplicate requests"
+    for row in open(folder/"plan-hashes.txt", encoding="utf-8").read().splitlines()[:3]:
+        digest, name = row.split(None, 1)
+        assert hashlib.sha256((ROOT/name.strip()).read_bytes()).hexdigest() == digest, name
+    scored = subprocess.run([sys.executable, "-I", str(ROOT/"tools/oracle-variance-score.py")], capture_output=True, text=True, check=True).stdout
+    assert scored.strip() == (ROOT/"validation/variance-check-decisions.txt").read_text(encoding="utf-8").strip(), "Scored output differs from the saved decisions"
+    assert "CANDIDATES: cr2, cv3, wcr" in scored
+    groups = {}
+    for r in records:
+        groups.setdefault((r["level"], r["analysis"], r["fraction"]), []).append(r)
+    real = [g for k, g in groups.items() if k[0] != "simulation"]
+    rate = lambda g, field: sum(r[field] == "TRUE" for r in g)/len(g)
+    assert sum(rate(g, "cover_cr1s") >= .92 for g in real) == 7, "Reading of the current variance changed"
+    results = (ROOT/"validation/VARIANCE_CHECK_RESULTS.md").read_text(encoding="utf-8")
+    algebra = (ROOT/"validation/cluster-algebra-check.txt").read_text(encoding="utf-8")
+    assert "Failures: 0" in algebra and algebra.count("\nPASS") == 43 and "All 43 scored checks passed" in results
+    sources = scored+algebra+(ROOT/"validation/VARIANCE_CHECK_PLAN.md").read_text(encoding="utf-8")+(ROOT/"validation/CLUSTERED_FIX_SYNTHESIS.md").read_text(encoding="utf-8")
+    decimals = lambda text: set(re.findall(r"(?<![\w.])\d+\.\d+(?![\d])", text))
+    known = {"5.3"}  # Mean of one Zambia item, whose data are not in this repository.
+    unsupported = sorted(decimals(re.sub(r"\]\([^)]*\)", "]", results))-decimals(sources)-known)
+    assert not unsupported, ("Numbers in the results with no source", unsupported)
+    print(f"{folder.name}: all {len(records)} planned requests, scored output regenerated identically, reading re-derived, numbers in the results traced, algebra record has 43 passes: PASS")
+
+
 def verify_contamination_supplement(folder):
     scores = rows(folder/"corruption-scores.csv")
     main = rows(ROOT/"validation/contamination-study/replicates.csv")
@@ -1914,6 +1946,7 @@ def main():
     verify_real_audit_study(ROOT/"validation/real-audit-study")
     verify_clustered_study(ROOT/"validation/clustered-study")
     verify_clustered_fix_study(ROOT/"validation/clustered-fix-study")
+    verify_variance_check(ROOT/"validation/variance-check")
     print("This verifies correspondence and repeatability, not inferential validity.")
 
 

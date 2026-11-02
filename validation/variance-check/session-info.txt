@@ -1,0 +1,22 @@
+cv3 against refits, cr2 and its degrees of freedom against explicit matrices, cr2 against HC2 with one row per cluster, and the wild bootstrap against brute-force refits: PASS
+Requests: 24500
+Elapsed seconds: 90.1
+R version 4.6.0 (2026-04-24)
+Platform: aarch64-apple-darwin23
+Running under: macOS 27.0.1
+
+Matrix products: default
+BLAS:   /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRblas.0.dylib 
+LAPACK: /Library/Frameworks/R.framework/Versions/4.6/Resources/lib/libRlapack.dylib;  LAPACK version 3.12.1
+
+locale:
+[1] en_US/en_US/en_US/C/en_US/en_US
+
+time zone: America/New_York
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+loaded via a namespace (and not attached):
+[1] compiler_4.6.0 parallel_4.6.0 jsonlite_2.0.0

@@ -1,0 +1,77 @@
+Scored from validation/variance-check by tools/oracle-variance-score.py
+Requests: 24500. Control: 24500 estimates and cr1s standard errors match the study's oracle rows, largest difference 1.21e-14.
+
+REAL ITEMS: coverage, percent; mean width; mean standard error over empirical SD; Satterthwaite df; largest partial leverage
+  lbw          coverage cr1s 88.4, cr2 91.6, cv3 93.2, wcr 94.0; width cr1s 0.039, cr2 0.045, cv3 0.048; SE ratio cr1s 0.92, cr2 1.01, cv3 1.13; df 18.4 of 69 clusters; leverage 0.14
+  resus        coverage cr1s 94.0, cr2 97.4, cv3 97.8, wcr 97.0; width cr1s 0.018, cr2 0.020, cv3 0.021; SE ratio cr1s 0.99, cr2 1.05, cv3 1.13; df 18.7 of 69 clusters; leverage 0.13
+  stillbirths  coverage cr1s 93.4, cr2 96.0, cv3 96.6, wcr 95.0; width cr1s 0.009, cr2 0.010, cv3 0.010; SE ratio cr1s 0.96, cr2 1.01, cv3 1.09; df 18.4 of 69 clusters; leverage 0.14
+  deliveries   coverage cr1s 91.6, cr2 93.6, cv3 94.2, wcr 93.4; width cr1s 0.245, cr2 0.272, cv3 0.284; SE ratio cr1s 1.03, cr2 1.10, cv3 1.19; df 22.6 of 69 clusters; leverage 0.11
+  anc1_early   coverage cr1s 95.6, cr2 96.0, cv3 96.4, wcr 96.6; width cr1s 0.206, cr2 0.228, cv3 0.237; SE ratio cr1s 1.17, cr2 1.24, cv3 1.35; df 22.6 of 69 clusters; leverage 0.11
+  pnc          coverage cr1s 95.2, cr2 97.4, cv3 97.6, wcr 97.6; width cr1s 0.194, cr2 0.221, cv3 0.230; SE ratio cr1s 1.07, cr2 1.15, cv3 1.27; df 18.2 of 69 clusters; leverage 0.14
+  syphilis     coverage cr1s 93.2, cr2 94.8, cv3 95.8, wcr 96.6; width cr1s 0.716, cr2 0.810, cv3 0.863; SE ratio cr1s 1.10, cr2 1.19, cv3 1.32; df 22.9 of 69 clusters; leverage 0.11
+  iron         coverage cr1s 90.2, cr2 93.6, cv3 94.0, wcr 92.8; width cr1s 0.285, cr2 0.319, cv3 0.332; SE ratio cr1s 0.95, cr2 1.01, cv3 1.10; df 19.6 of 63 clusters; leverage 0.12
+  anc4         coverage cr1s 96.6, cr2 97.2, cv3 97.6, wcr 97.2; width cr1s 0.219, cr2 0.241, cv3 0.250; SE ratio cr1s 1.10, cr2 1.17, cv3 1.26; df 22.5 of 69 clusters; leverage 0.11
+  ancnewreg    coverage cr1s 92.4, cr2 94.4, cv3 95.2, wcr 95.6; width cr1s 0.392, cr2 0.438, cv3 0.450; SE ratio cr1s 0.94, cr2 0.99, cv3 1.08; df 19.0 of 69 clusters; leverage 0.14
+  livebirths   coverage cr1s 91.8, cr2 94.2, cv3 94.6, wcr 94.8; width cr1s 0.255, cr2 0.283, cv3 0.296; SE ratio cr1s 1.04, cr2 1.11, cv3 1.21; df 23.0 of 69 clusters; leverage 0.11
+
+SIMULATED CELLS: coverage, percent; SE ratio; Satterthwaite df
+  rwanda_shift_low       25% coverage cr1s 93.2, cr2 95.4, cv3 95.4, wcr 95.6; SE ratio cr1s 0.95, cr2 1.01, cv3 1.11; df 15.5
+  pairs_shift_low        25% coverage cr1s 92.0, cr2 94.8, cv3 95.4, wcr 94.6; SE ratio cr1s 0.93, cr2 1.00, cv3 1.10; df 17.9
+  none_shift_low         25% coverage cr1s 91.8, cr2 95.0, cv3 93.8, wcr 94.0; SE ratio cr1s 0.90, cr2 0.93, cv3 0.97; df 15.1
+  rwanda_shift           25% coverage cr1s 93.6, cr2 96.0, cv3 96.2, wcr 96.6; SE ratio cr1s 0.99, cr2 1.06, cv3 1.16; df 15.9
+  pairs_shift            25% coverage cr1s 90.6, cr2 94.0, cv3 94.8, wcr 94.8; SE ratio cr1s 0.90, cr2 0.97, cv3 1.06; df 18.2
+  none_shift             25% coverage cr1s 92.2, cr2 95.4, cv3 94.0, wcr 94.6; SE ratio cr1s 0.94, cr2 0.97, cv3 1.02; df 15.0
+  rwanda_under           25% coverage cr1s 92.4, cr2 96.4, cv3 95.6, wcr 95.0; SE ratio cr1s 0.90, cr2 0.96, cv3 1.05; df 15.3
+  pairs_under            25% coverage cr1s 92.0, cr2 96.0, cv3 96.4, wcr 95.2; SE ratio cr1s 0.93, cr2 0.99, cv3 1.10; df 17.9
+  none_under             25% coverage cr1s 93.4, cr2 95.6, cv3 95.0, wcr 95.2; SE ratio cr1s 0.95, cr2 0.98, cv3 1.03; df 15.1
+  rwanda_outlier         25% coverage cr1s 91.4, cr2 94.6, cv3 94.2, wcr 94.2; SE ratio cr1s 0.89, cr2 0.95, cv3 1.03; df 15.9
+  pairs_outlier          25% coverage cr1s 91.0, cr2 93.6, cv3 94.6, wcr 93.8; SE ratio cr1s 0.90, cr2 0.96, cv3 1.06; df 17.6
+  none_outlier           25% coverage cr1s 92.4, cr2 94.4, cv3 93.2, wcr 93.8; SE ratio cr1s 0.91, cr2 0.94, cv3 0.98; df 14.7
+  rwanda_rare            25% coverage cr1s 85.2, cr2 88.2, cv3 88.4, wcr 90.8; SE ratio cr1s 0.81, cr2 0.88, cv3 0.99; df 15.7
+  pairs_rare             25% coverage cr1s 84.0, cr2 87.8, cv3 88.8, wcr 89.8; SE ratio cr1s 0.80, cr2 0.88, cv3 0.98; df 17.5
+  none_rare              25% coverage cr1s 80.2, cr2 85.0, cv3 83.4, wcr 86.6; SE ratio cr1s 0.78, cr2 0.83, cv3 0.88; df 15.4
+  rwanda_row_only        25% coverage cr1s 93.2, cr2 95.4, cv3 95.8, wcr 95.4; SE ratio cr1s 0.95, cr2 1.02, cv3 1.11; df 15.3
+  pairs_row_only         25% coverage cr1s 91.0, cr2 94.6, cv3 95.4, wcr 94.0; SE ratio cr1s 0.91, cr2 0.97, cv3 1.07; df 17.5
+  none_row_only          25% coverage cr1s 91.6, cr2 94.8, cv3 92.8, wcr 94.2; SE ratio cr1s 0.91, cr2 0.94, cv3 0.98; df 15.2
+  rwanda_shift_low       50% coverage cr1s 88.4, cr2 93.0, cv3 93.2, wcr 92.8; SE ratio cr1s 0.84, cr2 0.90, cv3 0.98; df 15.5
+  pairs_shift_low        50% coverage cr1s 90.0, cr2 95.0, cv3 95.6, wcr 95.4; SE ratio cr1s 0.90, cr2 0.96, cv3 1.06; df 18.3
+  none_shift_low         50% coverage cr1s 92.0, cr2 94.0, cv3 93.0, wcr 94.2; SE ratio cr1s 0.90, cr2 0.93, cv3 0.97; df 15.2
+  rwanda_shift           50% coverage cr1s 93.6, cr2 97.2, cv3 96.8, wcr 96.8; SE ratio cr1s 0.96, cr2 1.02, cv3 1.12; df 15.5
+  pairs_shift            50% coverage cr1s 94.2, cr2 97.4, cv3 97.4, wcr 96.8; SE ratio cr1s 0.95, cr2 1.02, cv3 1.13; df 18.2
+  none_shift             50% coverage cr1s 93.8, cr2 96.4, cv3 94.8, wcr 96.4; SE ratio cr1s 0.94, cr2 0.97, cv3 1.01; df 14.9
+  rwanda_under           50% coverage cr1s 92.4, cr2 95.0, cv3 94.8, wcr 94.8; SE ratio cr1s 0.91, cr2 0.97, cv3 1.06; df 15.4
+  pairs_under            50% coverage cr1s 92.6, cr2 95.8, cv3 96.0, wcr 95.6; SE ratio cr1s 0.94, cr2 1.00, cv3 1.11; df 18.6
+  none_under             50% coverage cr1s 91.4, cr2 93.6, cv3 92.6, wcr 94.2; SE ratio cr1s 0.91, cr2 0.94, cv3 0.98; df 14.9
+  rwanda_outlier         50% coverage cr1s 88.4, cr2 92.2, cv3 91.8, wcr 92.8; SE ratio cr1s 0.82, cr2 0.87, cv3 0.95; df 15.7
+  pairs_outlier          50% coverage cr1s 93.6, cr2 96.0, cv3 96.6, wcr 96.0; SE ratio cr1s 0.99, cr2 1.06, cv3 1.16; df 17.6
+  none_outlier           50% coverage cr1s 93.2, cr2 95.4, cv3 94.2, wcr 94.8; SE ratio cr1s 0.93, cr2 0.96, cv3 1.00; df 15.4
+  rwanda_rare            50% coverage cr1s 85.2, cr2 89.0, cv3 90.0, wcr 91.6; SE ratio cr1s 0.77, cr2 0.84, cv3 0.94; df 15.4
+  pairs_rare             50% coverage cr1s 82.6, cr2 89.4, cv3 90.0, wcr 89.6; SE ratio cr1s 0.67, cr2 0.74, cv3 0.84; df 17.4
+  none_rare              50% coverage cr1s 82.2, cr2 85.6, cv3 84.4, wcr 88.4; SE ratio cr1s 0.78, cr2 0.83, cv3 0.90; df 14.7
+  rwanda_row_only        50% coverage cr1s 92.8, cr2 96.2, cv3 95.8, wcr 96.2; SE ratio cr1s 0.90, cr2 0.96, cv3 1.05; df 15.8
+  pairs_row_only         50% coverage cr1s 93.8, cr2 96.0, cv3 96.2, wcr 95.4; SE ratio cr1s 0.92, cr2 0.99, cv3 1.09; df 17.5
+  none_row_only          50% coverage cr1s 95.2, cr2 97.2, cv3 96.4, wcr 97.0; SE ratio cr1s 1.02, cr2 1.06, cv3 1.10; df 14.8
+  control_one_row        25% coverage cr1s 92.8, cr2 94.8, cv3 94.0, wcr 94.4; SE ratio cr1s 0.96, cr2 0.97, cv3 0.99; df 34.9
+  control_one_row        50% coverage cr1s 93.8, cr2 94.8, cv3 94.6, wcr 94.6; SE ratio cr1s 0.94, cr2 0.96, cv3 0.97; df 35.1
+
+MEANS BY SETTING: coverage, percent
+  clustered        24 cells: cr1s 92.1, cr2 95.1, cv3 94.8, wcr 94.9
+  rare counts       6 cells: cr1s 83.2, cr2 87.5, cv3 87.5, wcr 89.5
+  row-only errors   8 cells: cr1s 93.0, cr2 95.5, cv3 95.1, wcr 95.2
+  Real items, mean distance from 95%, points: cr1s 2.49, cr2 1.53, cv3 1.45, wcr 1.42
+  Real items, lowest coverage: cr1s 88.4, cr2 91.6, cv3 93.2, wcr 92.8
+
+READING FIXED IN ADVANCE
+  cr1s: real items at least 92% on 7 of 11, at most 98% on all True; simulated cells within limits 22 of 38; candidate False
+  cr2: real items at least 92% on 10 of 11, at most 98% on all True; simulated cells within limits 32 of 38; candidate True
+  cv3: real items at least 92% on 11 of 11, at most 98% on all True; simulated cells within limits 31 of 38; candidate True
+  wcr: real items at least 92% on 11 of 11, at most 98% on all True; simulated cells within limits 32 of 38; candidate True
+  CANDIDATES: cr2, cv3, wcr
+
+PREDICTIONS
+  1. cr2 and cv3 raise lbw to at least 92%: False (cr2 91.6, cv3 93.2)
+  2. No variance reaches a mean of 92% on rare cells: True (cr1s 83.2, cr2 87.5, cv3 87.5, wcr 89.5)
+  3. cv3 wider than cr2 wider than cr1s on all 11: True (11 of 11)
+  4. wcr within 2 points of cv3 on at least nine: True (11 of 11)
+  5. cr1s SE ratio below 1 on at least nine: False (5 of 11)
+  6. At least one candidate: True (3)

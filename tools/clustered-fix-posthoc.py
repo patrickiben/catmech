@@ -82,6 +82,8 @@ say("ALL REQUESTS: widths over five times their cell median; smallest degrees of
 for m in METHODS:
     group = [r for k, r in summary.items() if k[2] == m]
     say(f"  {m:20s} {sum(int(float(r['wide_requests'])) for r in group)} of {sum(int(r['returned_intervals']) for r in group)}; smallest df {min(float(r['smallest_df']) for r in group):.2f}")
+say()
+say(f"MONTE CARLO ERROR: standard error of coverage near 90% with 500 cohorts, {100*(.9*.1/500)**.5:.2f} points")
 text = "\n".join(OUT)+"\n"
 if len(sys.argv) > 1:
     Path(sys.argv[1]).write_text(text, encoding="utf-8")

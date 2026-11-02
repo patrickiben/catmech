@@ -51,3 +51,5 @@ ALL REQUESTS: widths over five times their cell median; smallest degrees of free
   rao_wu               91 of 29998; smallest df 0.42
   jackknife            119 of 29998; smallest df 0.69
   random_intercept     5 of 29998; smallest df 2.05
+
+MONTE CARLO ERROR: standard error of coverage near 90% with 500 cohorts, 1.34 points
