@@ -1,0 +1,2 @@
+Engineering pilot with separate seeds, 3 cohorts per cell, 594 requests and 162 on the second system, read for statuses and timing only.
+All requests gave an interval. It forced no change, and no agent was asked to repair anything. The scorer ran end to end on its output, with the numbers discarded.
