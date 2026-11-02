@@ -1,0 +1,3 @@
+Engineering pilot with separate seeds, 14 cohorts per cell, 924 per method, read for statuses and timing only.
+Statuses: 5,516 ok, 28 with no interval, all mice_2l_lmer on control_one_row with the message "lmer does not run". Elapsed 50 seconds.
+The runner was then changed to count singular-fit messages, and a further pilot of 2 cohorts per cell confirmed it runs.
