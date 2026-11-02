@@ -79,7 +79,7 @@ fit_mice_all <- function(p, method, seed) {
   out$singular <- singular
   out
 }
-run_one <- function(s, r, method, kept) {
+run_one <- function(s, r, method) {
   p <- cohort(s, r)
   started <- Sys.time()
   got <- tryCatch(switch(method,
@@ -104,9 +104,9 @@ for (s in cells) {
   for (m in c("mice_2l_lmer", "mice_2l_pan")) {
     h <- here[here$method == m, ]
     again <- h$logged > 0 | h$status != "ok"
-    if (s$analysis != "control_one_row") jobs <- rbind(jobs, data.frame(r = h$replicate[again], method = m, stringsAsFactors = FALSE))
+    if (s$analysis != "control_one_row") jobs <- rbind(jobs, data.frame(r = h$replicate[again], method = rep(m, sum(again)), stringsAsFactors = FALSE))
     usable <- h$replicate[!again]
-    if (length(usable)) control <- rbind(control, data.frame(r = utils::head(sort(usable), 3L), method = m, stringsAsFactors = FALSE))
+    if (length(usable)) control <- rbind(control, data.frame(r = utils::head(sort(usable), 3L), method = rep(m, min(3L, length(usable))), stringsAsFactors = FALSE))
   }
   all_jobs <- rbind(jobs, control)
   batch <- parallel::mclapply(seq_len(nrow(all_jobs)), function(i) run_one(s, all_jobs$r[i], all_jobs$method[i]), mc.cores = 14L, mc.preschedule = TRUE, mc.set.seed = FALSE)
