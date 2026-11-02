@@ -1,0 +1,12 @@
+shift_low  rwanda  residual ICC  0.202; mean target  14.48; wrong rows 1.00; slope, reference 0.5983, recorded 0.5980
+shift_low  pairs   residual ICC  0.200; mean target  16.22; wrong rows 1.00; slope, reference 0.6001, recorded 0.5994
+shift      rwanda  residual ICC  0.599; mean target  15.14; wrong rows 1.00; slope, reference 0.6002, recorded 0.5982
+shift      pairs   residual ICC  0.599; mean target  15.24; wrong rows 1.00; slope, reference 0.6027, recorded 0.6022
+under      rwanda  residual ICC  0.491; mean target  16.24; wrong rows 1.00; slope, reference 0.6002, recorded 0.4501
+under      pairs   residual ICC  0.477; mean target  15.60; wrong rows 1.00; slope, reference 0.5992, recorded 0.4511
+outlier    rwanda  residual ICC  0.616; mean target  15.54; wrong rows 1.00; slope, reference 0.5980, recorded 0.6012
+outlier    pairs   residual ICC  0.615; mean target  16.19; wrong rows 1.00; slope, reference 0.5995, recorded 0.5983
+rare       rwanda  residual ICC  0.043; mean target   0.69; wrong rows 0.14; slope, reference 0.0204, recorded 0.0199
+rare       pairs   residual ICC  0.049; mean target   0.62; wrong rows 0.13; slope, reference 0.0201, recorded 0.0196
+row_only   rwanda  residual ICC  0.005; mean target  16.18; wrong rows 1.00; slope, reference 0.5963, recorded 0.5976
+row_only   pairs   residual ICC  0.000; mean target  14.52; wrong rows 1.00; slope, reference 0.6004, recorded 0.6000
