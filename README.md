@@ -108,9 +108,9 @@ and [validation record](validation/VALIDATION.md).
 
 The [commands above](#try-it) install the dependencies and then the package. Run the second
 command from the repository directory, or build the source archive with `R CMD build .` and
-install it with `R CMD INSTALL catmech_0.5.0.tar.gz`. R 4.1 or later is required. GitHub Actions
-is configured for Linux, macOS and Windows; local checks do not establish that
-the remote workflow has passed.
+install it with `R CMD INSTALL catmech_0.5.0.tar.gz`. R 4.1 or later is required, although only R 4.6
+has been tested. GitHub Actions checks Linux, macOS and Windows, and all three passed. See the
+[validation record](validation/VALIDATION.md).
 
 ## Flags with no references: declare a trust policy
 

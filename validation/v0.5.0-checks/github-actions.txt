@@ -1,0 +1,34 @@
+GitHub Actions, workflow R-CMD-check, run 41367315359
+https://github.com/patrickiben/catmech/actions/runs/41367315359
+Commit 85235121065d266681e18c09a7f9f8ec96c4a359. R CMD check --no-manual --as-cran, warnings treated as errors.
+Conclusion: success on all three jobs.
+
+check (ubuntu-latest)
+  * using R version 4.6.2 (2026-10-29)
+  * using platform: x86_64-pc-linux-gnu
+  * checking examples ... OK
+  * checking tests ...
+  Running ‘testthat.R’ 
+  * DONE
+  Status: OK
+  [ FAIL 0 | WARN 0 | SKIP 0 | PASS 651 ]
+
+check (windows-latest)
+  * using R version 4.6.2 (2026-10-29 ucrt)
+  * using platform: x86_64-w64-mingw32
+  * checking examples ... OK
+  * checking tests ...
+  Running 'testthat.R' [183s]
+  * DONE
+  Status: OK
+  [ FAIL 0 | WARN 0 | SKIP 0 | PASS 651 ]
+
+check (macos-latest)
+  * using R version 4.6.2 (2026-10-29)
+  * using platform: aarch64-apple-darwin23
+  * checking examples ... OK
+  * checking tests ...
+  Running ‘testthat.R’ 
+  * DONE
+  Status: OK
+  [ FAIL 0 | WARN 0 | SKIP 0 | PASS 651 ]
