@@ -1,0 +1,2 @@
+Engineering pilot with separate seeds, 14 cohorts per item and audit, 4,536 requests, read for statuses and timing only.
+Statuses: 4,535 ok, 1 with no interval: mice_2l_lmer with the message "lmer does not run". Elapsed 32 seconds. It forced no change. The scorer ran end to end on its output, with the numbers discarded.
