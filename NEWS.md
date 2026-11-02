@@ -1,3 +1,10 @@
+# catmech 0.7.0
+
+- `catmech_pool_lm(cluster = )` now uses a delete-one-cluster jackknife variance (`cv3`) by default, with complete-data degrees of freedom of clusters minus one. Intervals with `cluster` get somewhat wider, and `cluster_variance = "cr1s"` reproduces the earlier default. Calls without `cluster` are numerically unchanged.
+- A prospective test, with its plan committed before its runner existed, chose this under a rule fixed in advance. On 11 real items at a 25% audit, with the random-intercept option, mean distance of coverage from 95% went from 3.18 to 1.47 points, and widths rose by up to 15%. It passed narrowly, meeting two conditions exactly. CR2 with Satterthwaite degrees of freedom failed through imputation, with widths up by as much as 95%, although it did well with every row checked. See `validation/VARIANCE_MI_SYNTHESIS.md`.
+- `catmech_pool_lm()` now warns when a fit from `catmech_reference(cluster = )` has the audited value as a predictor. In new simulated cells, that use biased the slope toward zero by up to 16%, with coverage as low as 84.4%. Use `cluster` in the fit only when the audited value is the outcome. This was not known before, and the README's earlier example showed the harmful use.
+- `catmech_reference(cluster = )` stays experimental, and earlier verdicts stand, because point estimates do not change. No package dependency was added.
+
 # catmech 0.6.0
 
 - `catmech_reference(cluster = )` now adds a random intercept for the cluster, with its variance components drawn in each imputation, instead of resampling audited clusters. This removes the flaw in the earlier version, where resampling within strata understated variance. Results for calls with `cluster` change. `cluster_strata` is removed, so put strata in `predictors`. This is ordinary multilevel imputation in closed form, and not a new method.

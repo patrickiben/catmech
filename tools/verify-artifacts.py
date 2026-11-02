@@ -1031,13 +1031,72 @@ def verify_variance_check(folder):
     assert sum(rate(g, "cover_cr1s") >= .92 for g in real) == 7, "Reading of the current variance changed"
     results = (ROOT/"validation/VARIANCE_CHECK_RESULTS.md").read_text(encoding="utf-8")
     algebra = (ROOT/"validation/cluster-algebra-check.txt").read_text(encoding="utf-8")
-    assert "Failures: 0" in algebra and algebra.count("\nPASS") == 43 and "All 43 scored checks passed" in results
+    assert "Failures: 0" in algebra and algebra.count("\nPASS") == 50 and "All 50 scored checks passed" in results
     sources = scored+algebra+(ROOT/"validation/VARIANCE_CHECK_PLAN.md").read_text(encoding="utf-8")+(ROOT/"validation/CLUSTERED_FIX_SYNTHESIS.md").read_text(encoding="utf-8")
     decimals = lambda text: set(re.findall(r"(?<![\w.])\d+\.\d+(?![\d])", text))
     known = {"5.3"}  # Mean of one Zambia item, whose data are not in this repository.
     unsupported = sorted(decimals(re.sub(r"\]\([^)]*\)", "]", results))-decimals(sources)-known)
     assert not unsupported, ("Numbers in the results with no source", unsupported)
-    print(f"{folder.name}: all {len(records)} planned requests, scored output regenerated identically, reading re-derived, numbers in the results traced, algebra record has 43 passes: PASS")
+    print(f"{folder.name}: all {len(records)} planned requests, scored output regenerated identically, reading re-derived, numbers in the results traced, algebra record has 50 passes: PASS")
+
+
+def verify_variance_mi_study(folder):
+    """Corrected variances through imputation: planned requests, sources, scored output, the rule's outcome, the replay and the write-up's numbers."""
+    import gzip
+    import re
+    import subprocess
+    import sys
+    for row in rows(folder/"source-hashes.csv"):
+        candidate = ROOT/"validation/variance-mi-source"/row["file"]
+        path = candidate if candidate.exists() else ROOT/row["file"]
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == row["sha256"], row["file"]
+    with gzip.open(folder/"replicates.csv.gz", "rt", newline="", encoding="utf-8") as stream:
+        records = list(csv.DictReader(stream))
+    assert len(records) == 148500 and len({(r["level"], r["analysis"], r["fraction"], r["replicate"], r["imputer"]) for r in records}) == 148500, "Missing or duplicate requests"
+    scored = subprocess.run([sys.executable, "-I", str(ROOT/"tools/variance-mi-score.py")], capture_output=True, text=True, check=True).stdout
+    assert scored.strip() == (ROOT/"validation/variance-mi-decisions.txt").read_text(encoding="utf-8").strip(), "Scored output differs from the saved decisions"
+    posthoc = subprocess.run([sys.executable, "-I", str(ROOT/"tools/variance-mi-posthoc.py")], capture_output=True, text=True, check=True).stdout
+    assert posthoc.strip() == (ROOT/"validation/variance-mi-posthoc.txt").read_text(encoding="utf-8").strip(), "Post-hoc output differs from the saved table"
+    groups = {}
+    for r in records:
+        if r["status"] == "ok":
+            groups.setdefault((r["level"], r["analysis"], float(r["fraction"]), r["imputer"]), []).append(r)
+    items = sorted({k[1] for k in groups if k[0] not in ("simulation", "imputed_covariate")})
+    assert len(items) == 11
+    cells = sorted({k[:3] for k in groups if k[0] in ("simulation", "imputed_covariate")})
+    assert len(cells) == 44
+    real = {(k[1], k[2], k[3]): g for k, g in groups.items() if k[0] not in ("simulation", "imputed_covariate")}
+    cover = lambda g, v: sum(float(r[f"cover_{v}"]) for r in g)/len(g)
+    width = lambda g, v: sum(float(r[f"width_{v}"]) for r in g)/len(g)
+    distance = lambda v: sum(abs(cover(real[(a, .25, "random_intercept")], v)-.95) for a in items)/11
+    eligible = {}
+    for v in ("cr2", "cv3"):
+        c25 = [cover(real[(a, .25, "random_intercept")], v) for a in items]
+        c50 = [cover(real[(a, .5, "random_intercept")], v) for a in items]
+        inside = sum((cover(groups[k+("random_intercept",)], v) >= .92 or cover(groups[k+("random_intercept",)], v) >= cover(groups[k+("oracle",)], v)) and cover(groups[k+("random_intercept",)], v) <= .98 for k in cells)
+        linear = sum(cover(real[(a, .25, "linear_mi")], v) <= .98 for a in items) >= 10 and sum(cover(groups[k+("linear_mi",)], v) <= .98 for k in cells) >= .9*44
+        wide = all(width(real[(a, .25, "random_intercept")], v)/width(real[(a, .25, "random_intercept")], "cr1s") <= 1.30 for a in items)
+        eligible[v] = sum(x >= .92 for x in c25) >= 9 and sum(x <= .98 for x in c25) >= 10 and sum(x >= .92 for x in c50) >= 8 and sum(x <= .98 for x in c50) >= 10 and distance("cr1s")-distance(v) >= .005 and inside >= .8*44 and linear and wide
+    assert eligible == {"cr2": False, "cv3": True}, eligible
+    assert "OUTCOME: cv3" in scored
+    saved = {(r["analysis"], float(r["fraction"]), r["replicate"], r["imputer"]): r for r in records}
+    replayed = 0
+    with gzip.open(ROOT/"validation/variance-mi-replay/replay.csv.gz", "rt", newline="", encoding="utf-8") as stream:
+        for r in csv.DictReader(stream):
+            now = saved[(r["analysis"], float(r["fraction"]), r["replicate"], r["imputer"])]
+            assert (r["status"] == "ok") == (now["status"] == "ok"), r["analysis"]
+            if r["status"] == "ok":
+                assert abs(float(r["estimate"])-float(now["estimate"])) < 1e-8 and abs(float(r["se"])-float(now["se_cv3"])) < 1e-8 and abs(float(r["df"])-float(now["df_cv3"])) < .01, (r["analysis"], r["replicate"])
+            replayed += 1
+    assert replayed == 148500, replayed
+    synthesis = (ROOT/"validation/VARIANCE_MI_SYNTHESIS.md").read_text(encoding="utf-8")
+    assert "the outcome is **CV3**" in synthesis, "Write-up does not state the outcome"
+    sources = scored+posthoc+(ROOT/"validation/VARIANCE_MI_PLAN.md").read_text(encoding="utf-8")+(ROOT/"validation/variance-mi-replay/README.md").read_text(encoding="utf-8")
+    decimals = lambda text: set(re.findall(r"(?<![\w.])\d+\.\d+(?![\d])", text))
+    unsupported = sorted(decimals(re.sub(r"\]\([^)]*\)", "]", synthesis))-decimals(sources))
+    assert not unsupported, ("Numbers in the write-up with no source", unsupported)
+    assert decimals("A made-up 12.345 here.")-decimals(sources), "Negative control: a made-up number went undetected"
+    print(f"{folder.name}: all {len(records)} planned requests, sources hashed, scored output and post-hoc table regenerated identically, the outcome re-derived as cv3, {replayed} replayed through the package: PASS")
 
 
 def verify_contamination_supplement(folder):
@@ -1947,6 +2006,7 @@ def main():
     verify_clustered_study(ROOT/"validation/clustered-study")
     verify_clustered_fix_study(ROOT/"validation/clustered-fix-study")
     verify_variance_check(ROOT/"validation/variance-check")
+    verify_variance_mi_study(ROOT/"validation/variance-mi-study")
     print("This verifies correspondence and repeatability, not inferential validity.")
 
 

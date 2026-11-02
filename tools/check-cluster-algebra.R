@@ -13,6 +13,7 @@ moments <- get("catmech_reference_cluster_moments", ns)
 gls_fit <- get("catmech_reference_cluster_gls", ns)
 fill <- get("catmech_reference_cluster_fill", ns)
 cr1s <- get("catmech_cluster_vcov", ns)
+jackknife <- get("catmech_cluster_jackknife", ns)
 lines <- character(); failures <- 0L
 report <- function(name, value, limit) {
   ok <- is.finite(value) && value <= limit
@@ -80,6 +81,9 @@ for (name in names(DATA)) {
   for (g in unique(d$id)) for (i in which(d$id == g)) for (j in which(d$id == g)) total <- total + e[i] * e[j] * tcrossprod(d$X[i, ], d$X[j, ])
   by_hand <- B %*% total %*% B * (d$G / (d$G - 1)) * ((d$n - 1) / (d$n - 3))
   report(sprintf("%s: CR1S variance against a hand-written double sum", name), max(abs(cr1s(model, d$id) - by_hand)), 1e-8)
+  full <- stats::coef(model)
+  deltas <- t(vapply(unique(d$id), function(g) stats::coef(stats::lm(y ~ x + w, data = frame[frame$id != g, ])) - full, numeric(3)))
+  report(sprintf("%s: CV3 variance against delete-one-cluster refits", name), max(abs(jackknife(model, d$id) - crossprod(deltas) * (d$G - 1) / d$G)), 1e-8)
 }
 
 # The fill's draws against a separate implementation with explicit V matrices, sharing no package code.
@@ -136,7 +140,7 @@ ids <- rep(seq_len(30L), each = 3L); x <- stats::rnorm(90L); truth <- x + stats:
 recorded <- truth + stats::rnorm(90L, 0, .5)
 d <- data.frame(id = ids, x = x, recorded = recorded, gold = ifelse(ids <= 12L, truth, NA_real_))
 result <- catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE, cluster = "id", m = 10L, seed = 7L)
-pooled <- catmech_pool_lm(result, recorded ~ x)
+pooled <- catmech_pool_lm(result, recorded ~ x, cluster_variance = "cr1s")
 pooled <- pooled[pooled$term == "x", ]
 fits <- lapply(result$completed, function(z) stats::lm(recorded ~ x, data = z))
 q <- vapply(fits, function(f) unname(stats::coef(f)["x"]), numeric(1))
@@ -152,6 +156,14 @@ mit <- mitools::MIcombine(lapply(fits, stats::coef), u_mats, df.complete = nu_co
 report("Pooling: estimate against mitools", abs(pooled$estimate - unname(mit$coefficients["x"])), 1e-10)
 report("Pooling: standard error against mitools", abs(pooled$std.error - sqrt(mit$variance["x", "x"])), 1e-10)
 mit_df <- unname(mit$df["x"])
+default <- catmech_pool_lm(result, recorded ~ x)
+default <- default[default$term == "x", ]
+u_cv3 <- vapply(seq_along(fits), function(j) jackknife(fits[[j]], result$completed[[j]]$id)["x", "x"], numeric(1))
+t_cv3 <- mean(u_cv3) + (1 + 1 / m_imp) * b_var
+g_cv3 <- (1 + 1 / m_imp) * b_var / t_cv3
+report("Pooling, default variance: estimate against hand-written Rubin's rules", abs(default$estimate - mean(q)), 1e-10)
+report("Pooling, default variance: standard error against hand-written Rubin's rules", abs(default$std.error - sqrt(t_cv3)), 1e-10)
+report("Pooling, default variance: degrees of freedom against hand-written Barnard-Rubin", abs(default$df - 1 / (g_cv3^2 / (m_imp - 1) + 1 / ((nu_com + 1) / (nu_com + 3) * nu_com * (1 - g_cv3)))), 1e-8)
 lines <- c(lines, sprintf("NOTE Pooling: degrees of freedom %.4f in catmech and %.4f in mitools, which may use a different formula, so this is reported and not scored", pooled$df, mit_df))
 
 header <- c("Independent numerical checks of the random-intercept imputation and cluster-robust pooling.",

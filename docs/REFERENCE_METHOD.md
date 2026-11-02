@@ -147,9 +147,15 @@ regression: `target = x'beta + c_i + e_ij`. If the audit is stratified, put the 
 
 Records with no recorded value use the same steps without that predictor. If the audited rows cannot separate the two
 variances, as with one row per cluster, the intercept variance is zero. Fewer than five audited clusters are refused.
-`catmech_pool_lm()` applies a CR1 variance to each completed dataset and pools by Rubin's rules, with complete-data
-degrees of freedom of clusters minus one. A fit made without `cluster` can still use that variance through
-`catmech_pool_lm(cluster = )`.
+`catmech_pool_lm()` applies a delete-one-cluster jackknife variance (`cv3`) to each completed dataset and pools by
+Rubin's rules, with complete-data degrees of freedom of clusters minus one. A fit made without `cluster` can still use
+that variance through `catmech_pool_lm(cluster = )`. A [planned test](../validation/VARIANCE_MI_SYNTHESIS.md) chose it
+narrowly. `cluster_variance = "cr1s"` gives the earlier default.
+
+**Use `cluster` in the fit only when the audited value is the analysis outcome.** In simulations with the audited value
+as a predictor, the option biased that slope toward zero, and most when errors shifted whole clusters. A new intercept
+drawn independently of a cluster's outcomes appears to act like added noise in a predictor, though that explanation has
+not been tested. `catmech_pool_lm()` warns about this use.
 
 This is ordinary multilevel imputation (Schafer and Yucel, 2002,
 [doi:10.1198/106186002760180608](https://doi.org/10.1198/106186002760180608); Grund, Lüdtke and Robitzsch, 2018,

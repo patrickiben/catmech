@@ -1,0 +1,1 @@
+dce8cede2d354e33136e6c32d299711a5be38e770e7ed763490f563cb63ab306  catmech_0.7.0.tar.gz

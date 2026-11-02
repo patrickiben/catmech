@@ -1,0 +1,12 @@
+Package sources after the corrected-variance study, against the frozen copy in validation/variance-mi-source.
+R/analysis.R changed
+R/audit-plan.R byte-identical to the frozen copy
+R/contamination.R byte-identical to the frozen copy
+R/impute.R byte-identical to the frozen copy
+R/imputer.R byte-identical to the frozen copy
+R/model.R byte-identical to the frozen copy
+R/reference.R changed
+R/simulate.R byte-identical to the frozen copy
+R/spec.R byte-identical to the frozen copy
+R/analysis.R: cv3 becomes the default for catmech_pool_lm(cluster = ), cluster_variance keeps the earlier form, and a warning covers a fit with cluster that has the audited value as a predictor.
+R/reference.R: documentation comments only.

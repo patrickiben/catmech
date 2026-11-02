@@ -52,7 +52,8 @@ agrees exactly, those records keep their recorded value, as `spec$recorded_fit` 
 \item{cluster}{With `use_recorded = TRUE`, the name of a complete column identifying
 audit clusters, such as a site or facility. The imputation model then adds a random
 intercept for the cluster, instead of treating rows as independent. If the audit is
-stratified, put the strata in `predictors`. See details.}
+stratified, put the strata in `predictors`. Do not use it when the audited value will
+be a predictor in the analysis. See details.}
 }
 \value{
 A `catmech_result`. Its completed target contains exact gold references
@@ -124,4 +125,9 @@ error on the three rare items ran 4% to 5% above the option without `cluster`, a
 accuracy conditions failed. Treat `cluster` as a check, not a default. Read the `df` column,
 since very wide intervals remain possible with few audited clusters. See
 `validation/CLUSTERED_FIX_SYNTHESIS.md`.
+
+In later simulations where the audited value was a predictor in the analysis and errors
+shifted whole clusters, `cluster` biased that slope toward zero and covered far less than
+a fit without it, because a new intercept acts like added noise in a predictor.
+[catmech_pool_lm()] warns about this use. See `validation/VARIANCE_MI_SYNTHESIS.md`.
 }

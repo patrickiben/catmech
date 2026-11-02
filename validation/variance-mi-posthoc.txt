@@ -1,0 +1,22 @@
+Post hoc: made after the results, enters no rule
+
+IMPUTED-COVARIATE CELLS: relative bias of the slope, percent; RMSE; RMSE ratio against linear MI; coverage under cv3
+  covariate_shift      25%: oracle bias -0.4, RMSE 0.0369, coverage 96.4; linear_mi bias -3.0, RMSE 0.0587, coverage 95.4; random_intercept bias -16.1, RMSE 0.0971, coverage 84.4; RMSE ratio 1.654
+  covariate_shift      50%: oracle bias -0.3, RMSE 0.0365, coverage 95.6; linear_mi bias -1.1, RMSE 0.0447, coverage 95.4; random_intercept bias -10.1, RMSE 0.0668, coverage 86.0; RMSE ratio 1.495
+  covariate_under      25%: oracle bias -0.0, RMSE 0.0365, coverage 95.6; linear_mi bias -2.1, RMSE 0.0548, coverage 94.4; random_intercept bias -7.8, RMSE 0.0664, coverage 92.4; RMSE ratio 1.211
+  covariate_under      50%: oracle bias +0.0, RMSE 0.0371, coverage 95.2; linear_mi bias -0.4, RMSE 0.0415, coverage 96.0; random_intercept bias -3.8, RMSE 0.0462, coverage 95.4; RMSE ratio 1.111
+  covariate_row_only   25%: oracle bias -0.0, RMSE 0.0362, coverage 95.6; linear_mi bias -0.0, RMSE 0.0532, coverage 96.2; random_intercept bias -2.6, RMSE 0.0540, coverage 96.8; RMSE ratio 1.016
+  covariate_row_only   50%: oracle bias -0.4, RMSE 0.0333, coverage 97.4; linear_mi bias -0.5, RMSE 0.0404, coverage 97.2; random_intercept bias -1.2, RMSE 0.0402, coverage 97.4; RMSE ratio 0.995
+
+REAL ITEMS AT 25%, 2,000 COHORTS: items at 92% or more, of 11; lowest coverage; mean width ratio against cr1s
+  oracle             cr1s: 7 items; lowest 86.5% on lbw; width ratio +0% to +0%
+  oracle             cr2: 9 items; lowest 90.5% on lbw; width ratio +10% to +15%
+  oracle             cv3: 10 items; lowest 92.0% on lbw; width ratio +13% to +21%
+  linear_mi          cr1s: 2 items; lowest 79.0% on iron; width ratio +0% to +0%
+  linear_mi          cr2: 5 items; lowest 85.0% on anc1_early; width ratio +12% to +195%
+  linear_mi          cv3: 4 items; lowest 81.0% on iron; width ratio +1% to +15%
+  random_intercept   cr1s: 6 items; lowest 87.5% on syphilis; width ratio +0% to +0%
+  random_intercept   cr2: 10 items; lowest 91.9% on syphilis; width ratio +12% to +95%
+  random_intercept   cv3: 9 items; lowest 90.0% on syphilis; width ratio +1% to +15%
+
+MONTE CARLO ERROR OF COVERAGE, points: at 92% with 2,000 cohorts 0.61, at 92% with 500 cohorts 1.21

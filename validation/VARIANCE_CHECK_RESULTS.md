@@ -1,6 +1,6 @@
 # Scoring the recount under corrected variances, and related checks
 
-These are three checks from 2026-11-02, after a literature search. None changes package code or an earlier verdict. No outside reviewer has read them.
+These are three checks from 2026-11-02, after a literature search. None changes package code or an earlier verdict. No outside reviewer has read them. A [later test](VARIANCE_MI_SYNTHESIS.md) carried these variances through imputation and changed the package's default.
 
 ## The recount under corrected variances
 
@@ -33,7 +33,7 @@ Limits: 500 cohorts give a Monte Carlo standard error of about 1 point, and thre
 
 ## Independent numerical checks
 
-[All 43 scored checks passed](cluster-algebra-check.txt) on fixed datasets. Variance components match a one-way analysis of variance and `lme4` REML in a balanced layout. At REML components, generalized least squares matches `lme4` fixed effects and covariance and an explicit inverse. Conditional intercept means and variances match `lme4`. The CR1S variance matches a hand-written double sum. Rubin's rules and Barnard-Rubin degrees of freedom match a hand calculation, and the estimate and standard error match `mitools`, whose degrees of freedom differ slightly (21.5928 against 21.2917 in one case), which is reported and not scored. The sampler's draws match a separate implementation with explicit matrices, within Monte Carlo limits.
+[All 50 scored checks passed](cluster-algebra-check.txt) on fixed datasets, seven of them added when `cv3` entered the package. Variance components match a one-way analysis of variance and `lme4` REML in a balanced layout. At REML components, generalized least squares matches `lme4` fixed effects and covariance and an explicit inverse. Conditional intercept means and variances match `lme4`. The CR1S variance matches a hand-written double sum, and the package's `cv3` matches delete-one-cluster refits. Rubin's rules and Barnard-Rubin degrees of freedom match a hand calculation, and the estimate and standard error match `mitools`, whose degrees of freedom differ slightly (21.5928 against 21.2917 in one case), which is reported and not scored. The sampler's draws match a separate implementation with explicit matrices, within Monte Carlo limits.
 
 This catches coding errors. It does not validate the method. The separate implementation uses the same moment formula, so a wrong choice of formula would pass, and `pan`, `jomo` and `brms` have not been compared. Whether the draw of the intercept variance is well calibrated remains untested.
 

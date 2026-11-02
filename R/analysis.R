@@ -13,10 +13,14 @@
 #'   sensitivity engine or experimental partial-reference PMM. Results retain a
 #'   sensitivity-only label; this does not establish their inferential validity.
 #' @param cluster Optional name of a complete column in the completed data identifying
-#'   clusters. Each completed analysis then uses a CR1 cluster-robust variance, pooled
-#'   by Rubin's rules with complete-data degrees of freedom of clusters minus one. A fit
+#'   clusters. Each completed analysis then uses a cluster-robust variance, pooled by
+#'   Rubin's rules with complete-data degrees of freedom of clusters minus one. A fit
 #'   from `catmech_reference(cluster = )` uses its own column by default. With few
-#'   clusters these intervals can be too narrow.
+#'   clusters, or a few influential ones, these intervals can be too narrow.
+#' @param cluster_variance With `cluster`, `"cv3"` (the default) for the delete-one-cluster
+#'   jackknife, or `"cr1s"` for the form with factor (G / (G - 1)) ((n - 1) / (n - p)), the
+#'   default through version 0.6.0. A planned test chose `"cv3"`, narrowly, as documented
+#'   in `validation/VARIANCE_MI_SYNTHESIS.md`. It gives wider intervals than `"cr1s"`.
 #' @details When the workflow declares that no target cells were imputed, all
 #'   completed analysis frames must agree and ordinary complete-data t intervals
 #'   are returned. A zero estimated between-imputation variance alone does not
@@ -31,7 +35,9 @@
 #'   when a cluster-robust variance was used.
 #' @export
 catmech_pool_lm <- function(result, formula, conf_level = 0.95,
-                            allow_sensitivity = FALSE, cluster = NULL) {
+                            allow_sensitivity = FALSE, cluster = NULL,
+                            cluster_variance = c("cv3", "cr1s")) {
+  cluster_variance <- match.arg(cluster_variance)
   if (!inherits(result, "catmech_result")) stop("Expected a catmech_result.", call. = FALSE)
   if (!inherits(formula, "formula")) stop("formula must be an R formula.", call. = FALSE)
   if (!is.numeric(conf_level) || length(conf_level) != 1L ||
@@ -92,6 +98,9 @@ catmech_pool_lm <- function(result, formula, conf_level = 0.95,
   reference_pmm_sensitivity <- identical(engine, "reference_pmm") && !no_imputation
   if (reference_pmm_sensitivity && !allow_sensitivity)
     stop("Partial-reference PMM is experimental and showed undercoverage in validation. Set allow_sensitivity=TRUE only for sensitivity calculations.", call. = FALSE)
+  if (!is.null(result[["spec"]][["cluster"]]) && !is.null(result[["spec"]][["value"]]) &&
+      result[["spec"]][["value"]] %in% all.vars(stats::delete.response(stats::terms(formula))))
+    warning("catmech_reference(cluster = ) gives an unaudited cluster a new intercept, which biased slopes toward zero in simulations when the audited value was a predictor. Prefer a fit without cluster, pooled with catmech_pool_lm(cluster = ). See validation/VARIANCE_MI_SYNTHESIS.md.", call. = FALSE)
   cluster_name <- if (is.null(cluster)) result[["spec"]][["cluster"]] else cluster
   robust <- NULL
   if (!is.null(cluster_name)) {
@@ -102,7 +111,7 @@ catmech_pool_lm <- function(result, formula, conf_level = 0.95,
     if (anyNA(ids)) stop("cluster must not contain missing values.", call. = FALSE)
     clusters <- length(unique(ids))
     if (clusters < 2L) stop("A cluster-robust variance needs at least two clusters.", call. = FALSE)
-    robust <- lapply(fits, catmech_cluster_vcov, ids = ids)
+    robust <- lapply(fits, if (cluster_variance == "cv3") catmech_cluster_jackknife else catmech_cluster_vcov, ids = ids)
   }
   output <- lapply(terms, function(term) {
     Q <- vapply(fits, function(f) unname(stats::coef(f)[term]), numeric(1))
@@ -127,6 +136,7 @@ catmech_pool_lm <- function(result, formula, conf_level = 0.95,
       stringsAsFactors = FALSE)
     if (!is.null(robust)) {
       row$clusters <- clusters
+      row$cluster_variance <- cluster_variance
       row$interpretation <- paste0(row$interpretation, "_cluster_robust")
     }
     row
@@ -134,7 +144,27 @@ catmech_pool_lm <- function(result, formula, conf_level = 0.95,
   do.call(rbind, output)
 }
 
-# CR1 cluster-robust covariance of one fitted linear model.
+# Delete-one-cluster jackknife covariance of one fitted linear model (CV3), by the closed
+# form for each deletion. A singular block, from a cluster that alone determines a
+# coefficient, uses a pseudoinverse.
+catmech_cluster_jackknife <- function(fit, ids) {
+  x <- stats::model.matrix(fit)
+  e <- stats::residuals(fit)
+  bread <- chol2inv(qr.R(fit$qr))
+  units <- split(seq_len(nrow(x)), as.character(ids))
+  out <- matrix(0, ncol(x), ncol(x), dimnames = list(colnames(x), colnames(x)))
+  for (u in units) {
+    xg <- x[u, , drop = FALSE]
+    block <- eigen(diag(length(u)) - xg %*% bread %*% t(xg), symmetric = TRUE)
+    keep <- block$values > 1e-10
+    inverse <- block$vectors[, keep, drop = FALSE] %*% (t(block$vectors[, keep, drop = FALSE]) / block$values[keep])
+    out <- out + tcrossprod(bread %*% crossprod(xg, inverse %*% e[u]))
+  }
+  g <- length(units)
+  out * (g - 1) / g
+}
+
+# Cluster-robust covariance of one fitted linear model with factor (G / (G - 1)) ((n - 1) / (n - p)).
 catmech_cluster_vcov <- function(fit, ids) {
   x <- stats::model.matrix(fit)
   n <- nrow(x); k <- ncol(x)
