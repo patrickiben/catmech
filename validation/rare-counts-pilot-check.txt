@@ -1,0 +1,2 @@
+Engineering pilot with separate seeds, 14 cohorts per cell, read for statuses and timing only.
+Part 1: 252 requests, all ok, with no missing bootstrap, wild or Poisson results. Part 2: 336 requests, all ok. Part 3: 574 requests. It forced no change. The scorer ran end to end on its output, with the numbers discarded.
