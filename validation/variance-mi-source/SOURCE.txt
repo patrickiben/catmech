@@ -1,0 +1,2 @@
+Package sources at the test of corrected variances through imputation, before any variance moved into the package.
+Hashes are in validation/variance-mi-study/source-hashes.csv.

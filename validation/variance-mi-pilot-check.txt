@@ -1,0 +1,6 @@
+Engineering pilot of tools/variance-mi-benchmark.R, separate seeds, three cohorts per cell. Read for statuses and timing only.
+Requests with warnings: 0
+  linear_mi: ok 198
+  oracle: ok 198
+  random_intercept: ok 198
+No engineering change was needed, and no coverage, width or error from the pilot was read.
