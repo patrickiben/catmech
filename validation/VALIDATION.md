@@ -73,7 +73,7 @@ The [corrected-variance test](VARIANCE_MI_PLAN.md) changes the default in `catme
 
 The [comparison with outside methods](OUTSIDE_METHODS_PLAN.md) changes no package code. Its plan, runner and scorer were committed before it ran, and it took about 49 minutes. A [rerun of two comparator settings](OUTSIDE_METHODS_SENSITIVITY_PLAN.md) was planned after results were read, and it cannot change the outcome. It took three attempts, and its plan records why. 
 
-Version 0.7.1 adds warnings and refusals from the [overall check](OVERALL_QC.md). The package sources that the comparison ran on are kept in `outside-methods-source/`. Replaying all 148,500 requests of the corrected-variance study through it reproduces the saved results (`v0.7.1-checks/variance-mi-replay.txt`). The GitHub Actions record above is for version 0.7.0 until the new commit has run there.
+Version 0.7.1 adds warnings and refusals from the [overall check](OVERALL_QC.md). The package sources that the comparison ran on are kept in `outside-methods-source/`. Replaying all 148,500 requests of the corrected-variance study through it reproduces the saved results (`v0.7.1-checks/variance-mi-replay.txt`). GitHub Actions also passed on Ubuntu, macOS and Windows at version 0.7.1 (`v0.7.1-checks/github-actions.txt`), at its commit before the history rewrite.
 
 ## Evidence limits
 
