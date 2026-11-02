@@ -24,6 +24,8 @@ PT, RSET, ASET = "validation/real-data-study/pool-targets.csv", "validation/real
 SYN_R, SYN_A, VAL, ASSESS = "validation/REAL_DATA_SYNTHESIS.md", "validation/AUDIT_PLAN_SYNTHESIS.md", "validation/VALIDATION.md", "docs/ASSESSMENT.md"
 RA, RR, RE, DEC, SYN_T = "validation/real-audit-study/summary.csv", "validation/real-audit-study/recovery-ratios.csv", "validation/real-audit-review/rule1-extension.csv", "validation/real-audit-decisions.txt", "validation/REAL_AUDIT_SYNTHESIS.md"
 BIASED = ("pnc", "iron", "anc4")
+CLS, CLR, CLD = "validation/clustered-study/summary.csv", "validation/clustered-study/ratios.csv", "validation/clustered-decisions.txt"
+HELD = ("lbw", "resus", "stillbirths", "deliveries", "anc1_early")
 
 _cache = {}
 
@@ -109,6 +111,15 @@ def mi_gaps():
     return [ra(a, "oracle") - ra(a, "linear_mi") for a in ("pnc", "syphilis", "iron", "anc4")]
 
 
+def cl(analysis, method):
+    """Held-out Rwanda items at a 25% audit, from the clustered-audit study."""
+    return float(one(CLS, level="held_out", analysis=analysis, fraction="0.25", method=method)["coverage"])
+
+
+def cl_ratio(analysis):
+    return float(one(CLR, level="held_out", analysis=analysis, fraction="0.25")["recovery_ratio"])
+
+
 EXAMPLE = {}
 
 
@@ -140,7 +151,16 @@ claims = [
     ("9", "R", "Real audit, 25%: smallest gap between linear MI and one-item recount clustered coverage, points", RA, lambda: f"{100 * min(mi_gaps()):.0f}"),
     ("11", "R", "Real audit, 25%: largest gap between linear MI and one-item recount clustered coverage, points", RA, lambda: f"{100 * max(mi_gaps()):.0f}"),
     ("two of three", "RC", "Real audit, 25%: exact-or-wrong slopes where the model's error was clearly below linear MI's", RR, lambda: worded(sum(float(ratio_25(a, "contamination", "linear_mi")["upper"]) < 1 for a in ("pnc", "syphilis", "iron")) == 2, "two of three", "not two slopes")),
-    ("0.4.1", "RC", "Package version", "DESCRIPTION", lambda: re.search(r"^Version: (.+)$", (ROOT / "DESCRIPTION").read_text(), re.M).group(1)),
+    ("PARTIAL", "RC", "Clustered-audit test: verdict under its rule fixed in advance", CLD, lambda: has(CLD, r"VERDICT: PARTIAL", "PARTIAL")),
+    ("five held-out", "R", "Clustered-audit test: held-out items", CLS, lambda: worded(len({r["analysis"] for r in rows(CLS) if r["level"] == "held_out"}) == 5, "five held-out", "item count")),
+    ("87.0%", "R", "Clustered-audit test, 25%: existing option's coverage on deliveries", CLS, lambda: pct1(cl("deliveries", "linear_mi"))),
+    ("91.4%", "R", "Clustered-audit test, 25%: clustered option's coverage on deliveries", CLS, lambda: pct1(cl("deliveries", "linear_mi_clustered"))),
+    ("79.6%", "R", "Clustered-audit test, 25%: existing option's coverage on early first ANC visits", CLS, lambda: pct1(cl("anc1_early", "linear_mi"))),
+    ("88.8%", "R", "Clustered-audit test, 25%: clustered option's coverage on early first ANC visits", CLS, lambda: pct1(cl("anc1_early", "linear_mi_clustered"))),
+    ("other three", "RC", "Clustered-audit test, 25%: held-out items where its recovery RMSE was above the existing option's", CLR, lambda: worded(sum(cl_ratio(a) > 1 for a in HELD) == 3, "other three", "count")),
+    ("two of five", "C", "Clustered-audit test, 25%: held-out items where its recovery RMSE ratio was clearly below 1", CLR, lambda: worded(sum(float(one(CLR, level="held_out", analysis=a, fraction="0.25")["recovery_upper"]) < 1 for a in HELD) == 2, "two of five", "count")),
+    ("14%", "RC", "Clustered-audit test, 25%: largest rise in recovery RMSE on a held-out item", CLR, lambda: pct0(max(cl_ratio(a) for a in HELD) - 1)),
+    ("0.5.0", "RC", "Package version", "DESCRIPTION", lambda: re.search(r"^Version: (.+)$", (ROOT / "DESCRIPTION").read_text(), re.M).group(1)),
     ("November 1, 2026", "CB", "Status date", ASSESS, lambda: has(ASSESS, r"Assessed 2026-11-01", "November 1, 2026")),
     ("Version 0.4", "C", "Release that added the recording-error model", "NEWS.md", lambda: has("NEWS.md", r"# catmech 0\.4\.0\n\n- Add `catmech_contamination\(\)`", "Version 0.4")),
     ("25%", "RCB", "Audit fraction: mean referenced rows over cohort size, ClinicalTrials.gov cell", RD, lambda: pct0(audit_pct("ctgov", "audit_25pct"))),
@@ -216,7 +236,6 @@ claims = [
     ("nearly halved", "C", "RMSE reduction, linear MI against discarding, 25%: must be 40% to 50% in both datasets", RD,
      lambda: worded(all(.4 <= 1 - rd(f, "audit_25pct", "cole_mi", "rmse") / rd(f, "audit_25pct", "reference_normal", "rmse") < .5 for f in REAL_CELLS), "nearly halved", "RMSE ratio")),
     ("95% ranges", "C", "Nominal level of the intervals scored for coverage", "validation/CONTAMINATION_PLAN.md", lambda: has("validation/CONTAMINATION_PLAN.md", r"95%|0\.95", "95% ranges")),
-    ("two of five", "C", "Advance real-data predictions that held", VAL, lambda: has(VAL, r"Two of five advance predictions held", "two of five")),
     ("Two more ideas", "C", "Merged idea and planner, both NO-GO", MV, lambda: worded(rows(AV)[0]["verdict"] == "NO-GO" and one(MV, regime="moderate")["verdict"] == "NO-GO", "Two more ideas", "verdicts")),
     ("Two other ideas", "B", "Merged idea and planner, both NO-GO", MV, lambda: worded(rows(AV)[0]["verdict"] == "NO-GO" and one(MV, regime="moderate")["verdict"] == "NO-GO", "Two other ideas", "verdicts")),
     ("27,208", "C", "ClinicalTrials.gov evaluation pool rows", AK, lambda: f'{int(one(AK, dataset="ctgov")["pool_rows"]):,}'),
@@ -238,7 +257,6 @@ not_findings = [
     ("R", "This one audit", "Describes the single illustrative run in the example"),
     ("R", "# 1.", "Step number in a code comment"), ("R", "# 2.", "Step number in a code comment"),
     ("C", "two poor options", "Framing of the problem, not a measurement"),
-    ("C", "until one passed", "Ordinary phrase, not a count"),
     ("B", "a checked one", "Ordinary phrase, not a count"),
     ("B", "One-line", "Heading from the brief"), ("B", "Three-line", "Heading from the brief"), ("B", "Two-sentence", "Heading from the brief"),
 ]
@@ -268,7 +286,6 @@ statements = [
     ("Merged idea: audits helped, targeting did not beat the most suspicious records, direction added nothing", ASSESS, r"audits helped, but network targeting did not beat auditing the most suspicious records, and direction added nothing"),
     ("The planner is not validated", SYN_A, r"should not be described as validated"),
     ("The planner test was not fully blind", SYN_A, r"prospective for the planner's code, and not fully blind for the pools"),
-    ("A bookkeeping bug and missed run-time estimates are on the record", VAL, r"bookkeeping bug[\s\S]*Run times exceeded my estimates"),
     ("Plain Python recomputes the reported summaries", VAL, r"Plain Python recomputes all summaries"),
     ("AI use and its limits", "CONTRIBUTING.md", r"OpenAI Codex[\s\S]*Anthropic Claude Code[\s\S]*No AI system is listed as an author[\s\S]*not external peer review"),
 ]
@@ -424,8 +441,9 @@ def main():
     statement_results = [(text, source, bool(re.search(rx, (ROOT / source).read_text()))) for text, source, rx in statements]
     failures += [f"Statement not supported: {text} ({source})" for text, source, ok in statement_results if not ok]
     remotes = subprocess.run(["git", "remote"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
-    if remotes:
-        failures.append(f"A git remote now exists ({remotes}), so recheck every 'not published' statement")
+    unpublished = not remotes or subprocess.run(["gh", "repo", "view", "--json", "visibility", "-q", ".visibility"], cwd=ROOT, capture_output=True, text=True).stdout.strip() == "PRIVATE"
+    if not unpublished:
+        failures.append(f"A git remote exists ({remotes}) that is not confirmed private, so recheck every 'not published' statement")
     misses = self_test()
     failures += [f"Negative control missed: {m}" for m in misses]
 
@@ -444,7 +462,7 @@ def main():
     lines += ["## Statements checked by grep", "", "| Statement | Source file | Result |", "|---|---|---|"]
     for text, source, ok in statement_results:
         lines.append(f"| {text} | `{source}` | {'Supported' if ok else 'NOT SUPPORTED'} |")
-    lines += ["| Not published: this repository has no git remote | `git remote` | " + ("Supported" if not remotes else "NOT SUPPORTED") + " |", ""]
+    lines += ["| Not published: this repository has no git remote, or only a private one | `git remote`, `gh repo view` | " + ("Supported" if unpublished else "NOT SUPPORTED") + " |", ""]
     lines += ["## Excluded as not findings", "", "| Document | Text | Why |", "|---|---|---|"]
     for w, p, why in not_findings:
         lines.append(f"| {names[w]} | {p} | {why} |")

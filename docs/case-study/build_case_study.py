@@ -86,19 +86,20 @@ CSS = """
 * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 html, body { margin: 0; padding: 0; background: var(--sheet); color: var(--ink); font: 8.75pt/1.36 'Helvetica Neue', Helvetica, Arial, sans-serif; }
 .page { width: 8.5in; }
-header { background: var(--navy); color: var(--on-navy); padding: .29in .45in .22in; }
+header { background: var(--navy); color: var(--on-navy); padding: .27in .45in .2in; }
 h1 { font: 600 20.5pt/1.12 'Avenir Next', 'Helvetica Neue', sans-serif; margin: .03in 0 .05in; letter-spacing: -.005em; }
 .intro { color: var(--on-navy2); font-size: 8.8pt; line-height: 1.34; margin: 0; max-width: 7.3in; }
 .intro strong { color: var(--on-navy); font-weight: 600; }
-.strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: .08in; margin-top: .13in; }
+.strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: .08in; margin-top: .13in; }
 .tile { background: var(--card); border: 1px solid var(--line); border-radius: 5px; padding: .075in .09in .085in; }
-.tile b { display: block; font-weight: 500; font-size: 7.7pt; line-height: 1.22; color: var(--on-navy); min-height: 2.45em; }
+.tile b { display: block; font-weight: 500; font-size: 7.7pt; line-height: 1.22; color: var(--on-navy); }
 .chip { display: inline-block; font: 700 7.5pt/1 'Avenir Next', 'Helvetica Neue', sans-serif; padding: .028in .06in; border-radius: 3px; margin: .035in 0 .045in; }
 .chip.good { background: var(--accent); color: #fff; } .chip.mixed { background: var(--warn); color: #1c1402; } .chip.stop { background: var(--crit); color: #fff; }
 .tile span.note { display: block; font-size: 7.4pt; line-height: 1.26; color: var(--on-navy2); }
-main { display: grid; grid-template-columns: 1fr 1fr; column-gap: .27in; padding: .15in .45in .07in; }
-h2 { font: 600 10.2pt/1.15 'Avenir Next', 'Helvetica Neue', sans-serif; color: var(--ink); margin: .105in 0 .035in; padding-bottom: .02in; border-bottom: 1px solid var(--hair); }
-main section:first-child h2, .col > section:first-child h2 { margin-top: 0; }
+main { column-count: 2; column-gap: .27in; padding: .15in .45in .07in; }
+h2 { font: 600 10.2pt/1.15 'Avenir Next', 'Helvetica Neue', sans-serif; color: var(--ink); margin: .105in 0 .035in; padding-bottom: .02in; border-bottom: 1px solid var(--hair); break-after: avoid; }
+main section:first-child h2 { margin-top: 0; }
+figure, .sidebar, li { break-inside: avoid; }
 p { margin: 0 0 .055in; }
 strong { font-weight: 600; }
 ul { margin: 0 0 .05in; padding-left: .135in; } li { margin-bottom: .032in; } li::marker { color: var(--ink2); }
@@ -115,7 +116,7 @@ code { font: 6.7pt 'SF Mono', Menlo, monospace; }
 
 def build_html(md):
     title, intro, table, sections = parse(md)
-    chips = {"Model looked strong": "good", "Model lost or tied": "mixed", "Inconclusive": "mixed", "NO-GO": "stop"}
+    chips = {"Model looked strong": "good", "Model lost or tied": "mixed", "Inconclusive": "mixed", "PARTIAL": "mixed", "NO-GO": "stop"}
     tiles = "".join(f'<div class="tile"><b>{inline(t)}</b><span class="chip {chips[r]}">{inline(r)}</span><span class="note">{inline(n)}</span></div>'
                     for t, r, n in table)
     def section(name, cls=""):
@@ -133,8 +134,8 @@ def build_html(md):
 <header><h1>{inline(title)}</h1><p class="intro">{inline(intro)}</p>
 <div class="strip">{tiles}</div></header>
 <main>
-<div class="col">{section("The problem")}{section("What was built")}<section><h2>What the evidence showed</h2>{evidence_html}</section></div>
-<div class="col"><section><h2>Typical error, simple method against new model</h2>{figure}</section>{section("The decision")}{section("What this shows about how Patrick works")}{section("Technical sidebar", "sidebar")}</div>
+{section("The problem")}{section("What was built")}<section><h2>What the evidence showed</h2>{evidence_html}</section>
+<section><h2>Typical error, simple method against new model</h2>{figure}</section>{section("The decision")}{section("Technical sidebar", "sidebar")}
 </main>
 <footer><p><strong>Limits and AI disclosure.</strong> {limits[0].replace("<p>", "").replace("</p>", "")}</p>{limits[1]}</footer>
 </div></body></html>

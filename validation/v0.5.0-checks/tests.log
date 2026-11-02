@@ -1,0 +1,11 @@
+Unit suite: assertions 651 failed 0 errors 0 skipped 0 warnings 0 
+                 file  nb
+      test-analysis.R  38
+           test-api.R  40
+    test-audit-plan.R  83
+     test-clustered.R  53
+ test-contamination.R 170
+       test-imputer.R  56
+         test-model.R  64
+     test-reference.R 130
+          test-spec.R  17

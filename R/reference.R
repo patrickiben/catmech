@@ -167,6 +167,13 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #' Pool with [catmech_pool_lm()], which uses a cluster-robust variance for such a fit.
 #' The approach combines established ideas (von Hippel and Bartlett, 2021; Cameron and
 #' Miller, 2015). It is not a claim of a new method.
+#'
+#' `cluster` is experimental. Its planned test came out PARTIAL under a rule fixed in
+#' advance: on held-out items of a real facility recount at a 25% audit, it helped where
+#' the existing option undercovered and lost accuracy elsewhere, and a single audit cannot
+#' show which case applies. Treat it as a check, not a default. With about eight audited
+#' clusters, an occasional fit has near-zero degrees of freedom and an extremely wide
+#' interval, so read the `df` column. See `validation/CLUSTERED_SYNTHESIS.md`.
 #' @export
 catmech_reference <- function(data, value, reference, predictors,
                               method = c("normal", "pmm", "pmm_abb"), donors = 5L,

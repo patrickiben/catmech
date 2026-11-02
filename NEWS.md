@@ -1,3 +1,10 @@
+# catmech 0.5.0
+
+- Add `cluster` and `cluster_strata` to `catmech_reference(use_recorded = TRUE)`, which resample audited clusters in each imputation, and `cluster` to `catmech_pool_lm()`, a CR1 cluster-robust variance pooled with complete-data degrees of freedom of clusters minus one. These combine established ideas and are not a new method.
+- A prospective test, with its plan committed before the option existed, came out **PARTIAL** under a rule fixed in advance. On five held-out items of a Rwanda facility recount at a 25% audit, coverage moved closer to the oracle's on all five and came within 5 points on four. The accuracy condition failed, met by two of five. The gain came where linear imputation undercovered, and error rose elsewhere. `catmech_reference(cluster = )` is therefore experimental and is not a recommended default. See `validation/CLUSTERED_SYNTHESIS.md`.
+- Calls without `cluster` are numerically unchanged: 18 of 18 runs match frozen v0.3.1, and 12 of 12 match frozen v0.4.0. No package dependency was added.
+- Credit the real-audit data sources in the README, and state how they were copied in `validation/real-audit/README.md`.
+
 # catmech 0.4.1
 
 - Add `catmech_audit_plan()`, which estimates from a random pilot how much narrower one coefficient's interval would be at each audit fraction, keeping or discarding the recorded value, and how

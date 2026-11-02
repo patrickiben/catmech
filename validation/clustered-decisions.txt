@@ -1,0 +1,166 @@
+Scored from validation/clustered-study by tools/clustered-score.py
+Requests: 148000; returned: 147996; refused: 4; other errors: 0
+
+HELD-OUT RWANDA ITEMS AT A 25% FACILITY AUDIT
+  lbw          coverage: clustered 89.8%, package 92.0%, oracle 88.4%, closer True, within 5 points True; paired difference -2.2 (MCSE 1.2); recovery ratio 1.137 [1.104, 1.176], at most 1.05 False; pool ratio 1.043 [1.019, 1.069]
+  resus        coverage: clustered 93.6%, package 96.0%, oracle 94.0%, closer True, within 5 points True; paired difference -2.4 (MCSE 1.2); recovery ratio 1.104 [1.058, 1.159], at most 1.05 False; pool ratio 1.101 [1.057, 1.145]
+  stillbirths  coverage: clustered 94.0%, package 94.4%, oracle 93.4%, closer True, within 5 points True; paired difference -0.4 (MCSE 0.9); recovery ratio 1.050 [0.995, 1.116], at most 1.05 False; pool ratio 1.036 [0.995, 1.084]
+  deliveries   coverage: clustered 91.4%, package 87.0%, oracle 91.6%, closer True, within 5 points True; paired difference +4.4 (MCSE 1.0); recovery ratio 0.903 [0.870, 0.934], at most 1.05 True; pool ratio 0.931 [0.912, 0.949]
+  anc1_early   coverage: clustered 88.8%, package 79.6%, oracle 95.6%, closer True, within 5 points False; paired difference +9.2 (MCSE 1.5); recovery ratio 0.850 [0.827, 0.875], at most 1.05 True; pool ratio 0.886 [0.864, 0.909]
+  Coverage holds: True (closer 5 of 5, within 5 points 4 of 5, need 4 of 5 each)
+  Accuracy holds: False (2 of 5, need 4 of 5)
+
+SIMULATIONS WITH 70 OR MORE CLUSTERS, 25% AND 50%: coverage at least 92% and within 3 points of the oracle
+  Passing 33 of 36 cells (92%, need 80%). Simulation holds: True
+VERDICT: PARTIAL
+
+PREDICTIONS
+  1. Closer to the oracle in at least 4 of 5: True (5 of 5)
+  2. Width 15% to 60% wider in all five: False; lbw +1%, resus +19%, stillbirths +9%, deliveries +7%, anc1_early +31%
+  3. Recovery RMSE no worse than 5% in at least 4 of 5: False (2 of 5)
+  4. With 30 clusters at 25%, coverage below 92% in most cells: False (0 of 9); range 92.8% to 96.8%
+  5. Control width within 5%: True; 25% -0.9%, 50% -0.5%
+  6. Coverage gap between methods shrinks from 25% to 50%: 4 of 5, tied on 1; lbw 2.2 to 1.0, resus 2.4 to 1.0, stillbirths 0.4 to 0.4, deliveries 4.4 to 2.2, anc1_early 9.2 to 4.4
+
+TABLES: coverage, mean width, recovery RMSE, bias, for oracle, recorded, package linear MI, clustered linear MI
+  held_out
+    lbw: rows 206, facilities 69, wrong 50, target 0.047, reported 0.031
+      25%: oracle 88.4%, 0.039, 0.000, -0.000; recorded 55.2%, 0.039, 0.017, -0.017; linear_mi 92.0%, 0.055, 0.011, +0.000; linear_mi_clustered 89.8%, 0.056, 0.012, +0.000; returned 500
+      50%: oracle 88.4%, 0.039, 0.000, -0.000; recorded 55.2%, 0.039, 0.017, -0.017; linear_mi 88.0%, 0.042, 0.006, -0.001; linear_mi_clustered 87.0%, 0.043, 0.006, -0.001; returned 500
+    resus: rows 207, facilities 69, wrong 71, target 0.007, reported 0.031
+      25%: oracle 94.0%, 0.018, 0.000, +0.000; recorded 48.2%, 0.047, 0.027, +0.026; linear_mi 96.0%, 0.050, 0.012, +0.005; linear_mi_clustered 93.6%, 0.059, 0.014, +0.008; returned 500
+      50%: oracle 94.0%, 0.018, 0.000, +0.000; recorded 48.2%, 0.047, 0.027, +0.026; linear_mi 95.8%, 0.028, 0.005, +0.001; linear_mi_clustered 96.8%, 0.030, 0.006, +0.002; returned 500
+    stillbirths: rows 207, facilities 69, wrong 9, target 0.008, reported 0.010
+      25%: oracle 93.4%, 0.009, 0.000, -0.000; recorded 78.4%, 0.009, 0.003, +0.002; linear_mi 94.4%, 0.013, 0.003, -0.001; linear_mi_clustered 94.0%, 0.014, 0.003, -0.001; returned 500
+      50%: oracle 93.4%, 0.009, 0.000, -0.000; recorded 78.4%, 0.009, 0.003, +0.002; linear_mi 94.0%, 0.010, 0.001, -0.000; linear_mi_clustered 93.6%, 0.010, 0.001, -0.000; returned 500
+    deliveries: rows 207, facilities 69, wrong 47, target 0.461, reported 0.499
+      25%: oracle 91.6%, 0.245, 0.000, -0.010; recorded 91.8%, 0.229, 0.043, +0.024; linear_mi 87.0%, 0.234, 0.042, +0.002; linear_mi_clustered 91.4%, 0.249, 0.038, +0.009; returned 500
+      50%: oracle 91.6%, 0.245, 0.000, -0.010; recorded 91.8%, 0.229, 0.043, +0.024; linear_mi 88.8%, 0.237, 0.028, -0.005; linear_mi_clustered 91.0%, 0.243, 0.027, -0.002; returned 500
+    anc1_early: rows 206, facilities 69, wrong 176, target 0.367, reported 0.524
+      25%: oracle 95.6%, 0.206, 0.000, -0.000; recorded 31.6%, 0.235, 0.156, +0.149; linear_mi 79.6%, 0.257, 0.087, +0.022; linear_mi_clustered 88.8%, 0.337, 0.074, +0.017; returned 500
+      50%: oracle 95.6%, 0.206, 0.000, -0.000; recorded 31.6%, 0.235, 0.156, +0.149; linear_mi 88.0%, 0.205, 0.045, +0.009; linear_mi_clustered 92.4%, 0.233, 0.044, +0.009; returned 500
+  development
+    pnc: rows 200, facilities 69, wrong 101, target 0.973, reported 1.035
+      25%: oracle 95.2%, 0.194, 0.000, -0.008; recorded 50.8%, 0.128, 0.078, +0.059; linear_mi 85.4%, 0.237, 0.072, -0.007; linear_mi_clustered 93.6%, 0.307, 0.064, -0.005; returned 500
+      50%: oracle 95.2%, 0.194, 0.000, -0.008; recorded 50.8%, 0.128, 0.078, +0.059; linear_mi 86.0%, 0.184, 0.044, -0.007; linear_mi_clustered 91.4%, 0.205, 0.041, -0.007; returned 500
+    syphilis: rows 206, facilities 69, wrong 84, target 0.579, reported 0.568
+      25%: oracle 93.2%, 0.716, 0.000, +0.012; recorded 92.6%, 0.708, 0.076, +0.003; linear_mi 84.6%, 0.762, 0.182, +0.059; linear_mi_clustered 93.0%, 0.847, 0.158, +0.048; returned 500
+      50%: oracle 93.2%, 0.716, 0.000, +0.012; recorded 92.6%, 0.708, 0.076, +0.003; linear_mi 85.2%, 0.668, 0.106, +0.048; linear_mi_clustered 88.0%, 0.703, 0.104, +0.054; returned 500
+    iron: rows 186, facilities 63, wrong 56, target 0.894, reported 1.020
+      25%: oracle 90.2%, 0.285, 0.000, +0.008; recorded 54.6%, 0.260, 0.139, +0.128; linear_mi 79.5%, 0.480, 0.156, +0.014; linear_mi_clustered 90.8%, 0.678, 0.134, +0.017; returned 498
+      50%: oracle 90.2%, 0.285, 0.000, +0.008; recorded 54.6%, 0.260, 0.139, +0.128; linear_mi 84.6%, 0.324, 0.085, +0.017; linear_mi_clustered 89.6%, 0.371, 0.082, +0.017; returned 500
+    anc4: rows 207, facilities 69, wrong 179, target 0.256, reported 0.435
+      25%: oracle 96.6%, 0.219, 0.000, -0.000; recorded 27.6%, 0.289, 0.186, +0.180; linear_mi 87.2%, 0.313, 0.085, +0.003; linear_mi_clustered 90.8%, 0.362, 0.082, +0.005; returned 500
+      50%: oracle 96.6%, 0.219, 0.000, -0.000; recorded 27.6%, 0.289, 0.186, +0.180; linear_mi 95.2%, 0.249, 0.041, -0.001; linear_mi_clustered 96.0%, 0.263, 0.040, -0.000; returned 500
+  simulation: label, fraction, audited clusters, coverage oracle, recorded, package, clustered; width package, clustered; recovery RMSE package, clustered; recorded bias; returned
+    control_one_row          25%  52.0: 92.6, 93.0, 93.8, 93.4; 0.268, 0.265; 0.0363, 0.0368; +0.000; 500
+    control_one_row          50% 105.0: 93.2, 92.6, 93.4, 93.4; 0.233, 0.232; 0.0207, 0.0207; +0.005; 500
+    g150_icc00_iid           25%  38.0: 95.6, 94.8, 96.2, 95.0; 0.183, 0.183; 0.0244, 0.0246; +0.002; 500
+    g150_icc00_iid           50%  75.0: 95.6, 93.6, 95.0, 95.0; 0.161, 0.161; 0.0149, 0.0147; +0.003; 500
+    g150_icc00_persistent    25%  38.0: 94.2, 94.4, 93.8, 94.2; 0.183, 0.184; 0.0272, 0.0267; +0.000; 500
+    g150_icc00_persistent    50%  75.0: 93.2, 92.0, 93.0, 93.4; 0.159, 0.159; 0.0148, 0.0148; +0.003; 500
+    g150_icc00_tracking      25%  38.0: 92.6, 37.6, 92.6, 92.4; 0.195, 0.203; 0.0367, 0.0359; +0.099; 500
+    g150_icc00_tracking      50%  75.0: 94.0, 38.4, 92.8, 93.4; 0.166, 0.170; 0.0210, 0.0207; +0.099; 500
+    g150_icc20_iid           25%  38.0: 94.4, 93.0, 95.4, 95.2; 0.201, 0.202; 0.0258, 0.0258; -0.004; 500
+    g150_icc20_iid           50%  75.0: 93.6, 92.4, 92.2, 92.0; 0.181, 0.181; 0.0162, 0.0159; -0.004; 500
+    g150_icc20_persistent    25%  38.0: 95.0, 92.8, 95.0, 95.6; 0.202, 0.203; 0.0265, 0.0262; +0.001; 500
+    g150_icc20_persistent    50%  75.0: 91.4, 91.8, 92.4, 91.2; 0.180, 0.180; 0.0141, 0.0140; +0.001; 500
+    g150_icc20_tracking      25%  38.0: 93.4, 52.6, 91.2, 92.0; 0.211, 0.221; 0.0372, 0.0359; +0.094; 500
+    g150_icc20_tracking      50%  75.0: 94.8, 45.4, 94.0, 94.4; 0.186, 0.189; 0.0223, 0.0217; +0.100; 500
+    g150_icc50_iid           25%  38.0: 94.6, 94.6, 91.0, 92.2; 0.221, 0.224; 0.0267, 0.0278; +0.001; 500
+    g150_icc50_iid           50%  75.0: 92.8, 93.4, 92.8, 93.2; 0.208, 0.208; 0.0160, 0.0158; -0.004; 500
+    g150_icc50_persistent    25%  38.0: 94.0, 93.4, 93.8, 93.6; 0.224, 0.227; 0.0285, 0.0283; +0.001; 500
+    g150_icc50_persistent    50%  75.0: 92.4, 92.2, 92.0, 93.0; 0.207, 0.207; 0.0159, 0.0156; +0.000; 500
+    g150_icc50_tracking      25%  38.0: 92.6, 54.8, 90.8, 92.4; 0.228, 0.239; 0.0363, 0.0350; +0.099; 500
+    g150_icc50_tracking      50%  75.0: 93.6, 59.0, 94.2, 94.6; 0.212, 0.215; 0.0217, 0.0217; +0.100; 500
+    g30_icc00_iid            25%   8.0: 91.0, 90.2, 94.0, 95.2; 0.533, 0.588; 0.0826, 0.0831; +0.007; 500
+    g30_icc00_iid            50%  15.0: 89.2, 89.2, 91.4, 91.0; 0.385, 0.386; 0.0407, 0.0401; +0.003; 500
+    g30_icc00_persistent     25%   8.0: 91.0, 91.0, 94.2, 96.8; 0.868, 0.638; 0.0811, 0.0814; +0.006; 500
+    g30_icc00_persistent     50%  15.0: 90.6, 89.4, 92.6, 92.2; 0.390, 0.391; 0.0407, 0.0416; -0.006; 500
+    g30_icc00_tracking       25%   8.0: 93.8, 78.8, 94.8, 94.8; 0.556, 82870.389; 0.0860, 0.0867; +0.093; 500
+    g30_icc00_tracking       50%  15.0: 89.8, 79.2, 91.6, 92.4; 0.401, 0.405; 0.0513, 0.0506; +0.097; 500
+    g30_icc20_iid            25%   8.0: 88.2, 87.8, 94.4, 95.2; 0.561, 0.695; 0.0821, 0.0834; +0.005; 500
+    g30_icc20_iid            50%  15.0: 89.4, 91.2, 91.0, 91.0; 0.425, 0.429; 0.0410, 0.0402; +0.000; 500
+    g30_icc20_persistent     25%   8.0: 90.0, 91.0, 94.8, 94.6; 0.544, 15.718; 0.0843, 0.0839; -0.002; 500
+    g30_icc20_persistent     50%  15.0: 89.8, 90.2, 89.8, 90.4; 0.436, 0.443; 0.0408, 0.0399; +0.000; 500
+    g30_icc20_tracking       25%   8.0: 93.2, 82.4, 93.2, 93.8; 0.560, 0.620; 0.0898, 0.0918; +0.100; 500
+    g30_icc20_tracking       50%  15.0: 87.4, 76.6, 89.0, 90.0; 0.433, 0.441; 0.0493, 0.0494; +0.101; 500
+    g30_icc50_iid            25%   8.0: 90.6, 90.4, 92.4, 92.8; 0.586, 0.676; 0.0848, 0.0909; +0.002; 500
+    g30_icc50_iid            50%  15.0: 90.2, 90.0, 92.2, 91.8; 0.479, 0.482; 0.0464, 0.0457; +0.007; 500
+    g30_icc50_persistent     25%   8.0: 92.2, 91.2, 93.8, 95.0; 0.702, 0.657; 0.0832, 0.0853; +0.004; 500
+    g30_icc50_persistent     50%  15.0: 92.8, 93.6, 93.4, 93.4; 0.504, 0.508; 0.0431, 0.0429; +0.006; 500
+    g30_icc50_tracking       25%   8.0: 89.4, 83.2, 91.4, 93.0; 0.603, 0.696; 0.1007, 0.1011; +0.098; 500
+    g30_icc50_tracking       50%  15.0: 88.6, 79.6, 89.8, 90.2; 0.484, 0.492; 0.0530, 0.0518; +0.106; 500
+    g70_icc00_iid            25%  18.0: 95.0, 94.6, 94.8, 94.6; 0.285, 0.286; 0.0424, 0.0430; +0.002; 500
+    g70_icc00_iid            50%  35.0: 91.2, 92.2, 93.6, 93.8; 0.237, 0.238; 0.0215, 0.0220; -0.002; 500
+    g70_icc00_persistent     25%  18.0: 93.4, 93.4, 95.6, 96.4; 0.279, 0.282; 0.0431, 0.0429; -0.001; 500
+    g70_icc00_persistent     50%  35.0: 93.0, 93.4, 94.2, 94.4; 0.242, 0.241; 0.0239, 0.0241; -0.003; 500
+    g70_icc00_tracking       25%  18.0: 93.2, 60.2, 93.6, 94.4; 0.298, 0.312; 0.0522, 0.0509; +0.102; 500
+    g70_icc00_tracking       50%  35.0: 93.8, 64.8, 94.2, 94.6; 0.244, 0.248; 0.0296, 0.0285; +0.102; 500
+    g70_icc20_iid            25%  18.0: 94.8, 94.2, 94.0, 94.0; 0.308, 0.312; 0.0411, 0.0422; -0.002; 500
+    g70_icc20_iid            50%  35.0: 90.8, 89.8, 91.0, 90.4; 0.265, 0.265; 0.0230, 0.0235; -0.005; 500
+    g70_icc20_persistent     25%  18.0: 93.6, 93.2, 95.0, 95.2; 0.311, 0.315; 0.0457, 0.0458; -0.000; 500
+    g70_icc20_persistent     50%  35.0: 93.2, 92.6, 93.6, 94.0; 0.266, 0.267; 0.0229, 0.0227; +0.003; 500
+    g70_icc20_tracking       25%  18.0: 90.6, 67.4, 91.4, 92.2; 0.320, 0.330; 0.0530, 0.0521; +0.100; 500
+    g70_icc20_tracking       50%  35.0: 93.4, 69.0, 92.8, 93.2; 0.276, 0.279; 0.0322, 0.0318; +0.102; 500
+    g70_icc50_iid            25%  18.0: 91.2, 91.0, 91.4, 92.0; 0.341, 0.353; 0.0454, 0.0471; -0.001; 500
+    g70_icc50_iid            50%  35.0: 93.2, 93.0, 92.8, 93.0; 0.306, 0.307; 0.0257, 0.0247; -0.000; 500
+    g70_icc50_persistent     25%  18.0: 90.6, 92.0, 90.6, 91.8; 0.343, 0.349; 0.0477, 0.0476; -0.002; 500
+    g70_icc50_persistent     50%  35.0: 93.8, 94.0, 93.4, 93.0; 0.307, 0.308; 0.0228, 0.0220; +0.001; 500
+    g70_icc50_tracking       25%  18.0: 93.8, 77.0, 91.6, 92.4; 0.346, 0.363; 0.0532, 0.0523; +0.095; 500
+    g70_icc50_tracking       50%  35.0: 95.0, 77.0, 92.0, 93.2; 0.318, 0.323; 0.0318, 0.0315; +0.097; 500
+
+SIMULATION SUMMARY BY FACTOR: mean coverage of clustered against package
+  30 clusters        cells 18: oracle 90.4%, package 92.4%, clustered 93.0%
+  70 clusters        cells 18: oracle 93.0%, package 93.1%, clustered 93.5%
+  150 clusters       cells 18: oracle 93.8%, package 93.2%, clustered 93.5%
+  iid errors         cells 18: oracle 92.3%, package 93.1%, clustered 93.2%
+  persistent errors  cells 18: oracle 92.5%, package 93.4%, clustered 93.8%
+  tracking errors    cells 18: oracle 92.4%, package 92.3%, clustered 93.0%
+
+DEVELOPMENT RECORD AT 25% AND 50%, enters no rule: recovery ratio, clustered against package; paired coverage difference
+  pnc       25%: 0.894 [0.856, 0.933]; +8.2 (MCSE 1.5)
+  pnc       50%: 0.939 [0.915, 0.964]; +5.4 (MCSE 1.1)
+  syphilis  25%: 0.868 [0.835, 0.902]; +8.4 (MCSE 1.4)
+  syphilis  50%: 0.984 [0.959, 1.009]; +2.8 (MCSE 0.9)
+  iron      25%: 0.855 [0.808, 0.904]; +11.2 (MCSE 1.9)
+  iron      50%: 0.964 [0.945, 0.984]; +5.0 (MCSE 1.2)
+  anc4      25%: 0.970 [0.943, 0.999]; +3.6 (MCSE 1.0)
+  anc4      50%: 0.978 [0.954, 1.003]; +0.8 (MCSE 0.6)
+
+HELD-OUT AT 50%: recovery ratio, clustered against package; paired coverage difference
+  lbw          0.999 [0.974, 1.028]; -1.0 (MCSE 0.8)
+  resus        1.045 [1.009, 1.084]; +1.0 (MCSE 0.7)
+  stillbirths  1.028 [1.001, 1.058]; -0.4 (MCSE 0.7)
+  deliveries   0.964 [0.948, 0.978]; +2.2 (MCSE 0.8)
+  anc1_early   0.976 [0.957, 0.994]; +4.4 (MCSE 1.0)
+
+EXTREME WIDTHS: where mean width is far from the median, by method and level. Width over 5 times the cell median; smallest degrees of freedom; largest width
+  iron                     25% linear_mi            median 0.412, over 5x median 3 of 498, largest 2.6, smallest df 2.00
+  iron                     25% linear_mi_clustered  median 0.554, over 5x median 4 of 498, largest 4.2, smallest df 1.35
+  pnc                      25% linear_mi_clustered  median 0.255, over 5x median 2 of 500, largest 1.5, smallest df 1.69
+  syphilis                 25% linear_mi_clustered  median 0.803, over 5x median 1 of 500, largest 4.5, smallest df 4.10
+  g30_icc00_iid            25% linear_mi            median 0.487, over 5x median 1 of 500, largest 3.4, smallest df 1.34
+  g30_icc00_iid            25% linear_mi_clustered  median 0.502, over 5x median 3 of 500, largest 4.8, smallest df 1.19
+  g30_icc00_persistent     25% linear_mi            median 0.459, over 5x median 3 of 500, largest 179.3, smallest df 0.45
+  g30_icc00_persistent     25% linear_mi_clustered  median 0.491, over 5x median 2 of 500, largest 39.1, smallest df 0.56
+  g30_icc00_tracking       25% linear_mi            median 0.499, over 5x median 4 of 500, largest 3.9, smallest df 1.03
+  g30_icc00_tracking       25% linear_mi_clustered  median 0.521, over 5x median 8 of 500, largest 41434873.0, smallest df 0.16
+  g30_icc20_iid            25% linear_mi            median 0.524, over 5x median 2 of 500, largest 3.3, smallest df 1.38
+  g30_icc20_iid            25% linear_mi_clustered  median 0.547, over 5x median 7 of 500, largest 11.5, smallest df 0.84
+  g30_icc20_persistent     25% linear_mi_clustered  median 0.519, over 5x median 3 of 500, largest 7543.0, smallest df 0.30
+  g30_icc20_tracking       25% linear_mi            median 0.522, over 5x median 1 of 500, largest 4.4, smallest df 1.11
+  g30_icc20_tracking       25% linear_mi_clustered  median 0.545, over 5x median 3 of 500, largest 7.3, smallest df 1.00
+  g30_icc50_iid            25% linear_mi            median 0.538, over 5x median 1 of 500, largest 3.7, smallest df 1.38
+  g30_icc50_iid            25% linear_mi_clustered  median 0.574, over 5x median 2 of 500, largest 13.0, smallest df 0.86
+  g30_icc50_persistent     25% linear_mi            median 0.553, over 5x median 1 of 500, largest 59.1, smallest df 0.57
+  g30_icc50_persistent     25% linear_mi_clustered  median 0.577, over 5x median 2 of 500, largest 17.3, smallest df 0.82
+  g30_icc50_tracking       25% linear_mi_clustered  median 0.609, over 5x median 1 of 500, largest 5.4, smallest df 1.15
+  development  linear_mi            over 5x median 3 of 3998; largest over median 6.4; smallest df 2.00
+  development  linear_mi_clustered  over 5x median 7 of 3998; largest over median 7.6; smallest df 1.35
+  held_out     linear_mi            over 5x median 0 of 5000; largest over median 3.5; smallest df 1.96
+  held_out     linear_mi_clustered  over 5x median 0 of 5000; largest over median 4.8; smallest df 2.18
+  simulation   linear_mi            over 5x median 13 of 28000; largest over median 390.5; smallest df 0.45
+  simulation   linear_mi_clustered  over 5x median 31 of 28000; largest over median 79504502.6; smallest df 0.16
+  Median width, clustered over package, held-out at 25%: lbw 1.022, resus 1.146, stillbirths 1.080, deliveries 1.047, anc1_early 1.271
+  Median width over the 30-cluster cells at 25%, clustered over package: 1.031, 1.069, 1.045, 1.045, 1.027, 1.044, 1.067, 1.043, 1.064

@@ -1,0 +1,13 @@
+Comparison of frozen v0.4.0 study sources with current sources: 12 of 12 workflow runs identical.
+contamination 21 identical
+shifted 21 identical
+noisy 21 identical
+bootstrap 21 identical
+contamination 22 identical
+shifted 22 identical
+noisy 22 identical
+bootstrap 22 identical
+contamination 23 identical
+shifted 23 identical
+noisy 23 identical
+bootstrap 23 identical

@@ -133,6 +133,26 @@ information. A validation sample containing no references in a relevant
 missing-measurement subgroup cannot by itself verify extrapolation to that
 subgroup.
 
+### Clustered audits: experimental
+
+With `use_recorded = TRUE`, `cluster = "site"` changes how parameter uncertainty enters the imputations. For
+each imputation, audited clusters are resampled with replacement, within `cluster_strata` if given. The
+recorded-value regression is fitted to that resample, and unaudited rows get its prediction plus normal noise with
+its residual variance. This replaces the posterior draw, which treats rows as independent. Records with no
+recorded value use the same steps without that predictor. The noise itself stays independent across rows.
+
+Fewer than five audited clusters are refused. A resample that loses design support is redrawn up to 100 times,
+then refused. A stratum with a single audited cluster keeps it in every resample. `catmech_pool_lm()` applies a CR1
+variance to each completed dataset and pools by Rubin's rules, with complete-data degrees of freedom of clusters
+minus one. A fit made without `cluster` can still use that variance through `catmech_pool_lm(cluster = )`.
+
+The approach combines the bootstrap at the imputation step (von Hippel and Bartlett, 2021,
+[doi:10.1214/20-STS793](https://doi.org/10.1214/20-STS793)) with the clustered bootstrap and cluster-robust
+inference (Cameron and Miller, 2015, [doi:10.3368/jhr.50.2.317](https://doi.org/10.3368/jhr.50.2.317)). It is not a
+new method. Its [planned test](../validation/CLUSTERED_SYNTHESIS.md) came out PARTIAL: it helped where the posterior
+draw undercovered and lost accuracy elsewhere, and a single audit cannot show which case applies. The test also
+could not say how much of the gain comes from clustering rather than unequal variance.
+
 ## Predictive mean matching and analysis
 
 `method = "pmm"` uses the public `mice` predictive mean matching implementation,

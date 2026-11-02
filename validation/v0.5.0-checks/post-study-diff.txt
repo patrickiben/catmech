@@ -1,0 +1,11 @@
+R/reference.R code lines identical to the frozen copy; the only change after the study is a documentation comment.
+R/analysis.R byte-identical to the frozen copy
+R/audit-plan.R byte-identical to the frozen copy
+R/contamination.R byte-identical to the frozen copy
+R/impute.R byte-identical to the frozen copy
+R/imputer.R byte-identical to the frozen copy
+R/model.R byte-identical to the frozen copy
+R/simulate.R byte-identical to the frozen copy
+R/spec.R byte-identical to the frozen copy
+NAMESPACE byte-identical to the frozen copy
+DESCRIPTION byte-identical to the frozen copy

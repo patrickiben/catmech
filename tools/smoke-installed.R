@@ -228,3 +228,13 @@ stopifnot(identical(audit_plan_example$audit_plan$status, "no_flags"),
           all(diff(audit_plan_example$audit_plan$table$relative_width) < 0),
           audit_plan_example$audit_plan$answer$records <= nrow(audit_plan_example$audit_data))
 cat("Bundled main-model, reference, legacy, contamination and audit-plan examples: PASS\n")
+
+cluster_data <- data.frame(site = rep(seq_len(40), each = 3), x = stats::rnorm(120))
+cluster_data$recorded <- cluster_data$x + stats::rnorm(120)
+cluster_data$reference <- ifelse(cluster_data$site <= 15, cluster_data$recorded + stats::rnorm(120, sd = .1), NA_real_)
+clustered <- catmech::catmech_reference(cluster_data, "recorded", "reference", "x", use_recorded = TRUE,
+                                        cluster = "site", m = 5, seed = 1)
+clustered_pool <- catmech::catmech_pool_lm(clustered, recorded ~ x)
+stopifnot(identical(clustered$spec$audited_clusters, 15L), all(clustered_pool$clusters == 40L),
+          all(endsWith(clustered_pool$interpretation, "_cluster_robust")))
+cat("Clustered option: PASS\n")

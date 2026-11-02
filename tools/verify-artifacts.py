@@ -761,6 +761,111 @@ def verify_real_audit_study(folder, require_study=True):
         print(f"Real-audit write-up: scored output regenerated identically, post-hoc table tied to the study, Rule 2 re-derived, {triples} table entries checked by position, {limits} ratio intervals found in the scored output, replay from seeds matches, relabeled and rescaled results caught: PASS")
 
 
+def verify_clustered_summary(summary, groups):
+    close = lambda a, b: math.isclose(float(a), b, rel_tol=1e-7, abs_tol=1e-9)
+    for row in summary:
+        group = groups[(row["scenario"], row["method"])]
+        good = [r for r in group if r["status"] == "ok"]
+        assert int(row["requested"]) == len(group) and int(row["returned_intervals"]) == len(good), row["scenario"]
+        assert int(row["refused"]) == sum(r["status"] == "refused" for r in group) and int(row["other_errors"]) == sum(r["status"] == "error" for r in group), row["scenario"]
+        assert close(row["coverage"], sum(float(r["coverage"]) for r in good)/len(good)), ("coverage", row["scenario"], row["method"])
+        assert close(row["mean_width"], sum(float(r["width"]) for r in good)/len(good)), ("width", row["scenario"], row["method"])
+        assert close(row["recovery_rmse"], math.sqrt(sum(float(r["recovery_error"])**2 for r in good)/len(good))), ("recovery", row["scenario"], row["method"])
+        assert close(row["rmse"], math.sqrt(sum(float(r["error"])**2 for r in good)/len(good))), ("rmse", row["scenario"], row["method"])
+
+
+def verify_clustered_study(folder):
+    """Clustered-audit study: planned requests, seeds, targets, summaries, the earlier study's estimates, and the verdict."""
+    import re
+    import subprocess
+    import sys
+    for row in rows(folder/"source-hashes.csv"):
+        candidate = ROOT/"validation/v0.5.0-source"/row["file"]
+        path = candidate if candidate.exists() else ROOT/row["file"]
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == row["sha256"], row["file"]
+    settings = json.loads((folder/"settings.json").read_text())
+    assert settings["mode"] == "study" and settings["reps"] == 500 and settings["m"] == 20
+    assert not (folder/"checkpoint.rds").exists()
+    records = rows(folder/"replicates.csv")
+    held = ["lbw", "resus", "stillbirths", "deliveries", "anc1_early"]
+    development = ["pnc", "syphilis", "iron", "anc4"]
+    grid = rows(folder/"simulation-grid.csv")
+    assert len(grid) == 56
+    labels = [(("control_one_row" if g["rows"] == "1" else f"g{g['clusters']}_icc{round(100*float(g['icc'])):02d}_{g['errors']}"), float(g["fraction"])) for g in grid]
+    expected = set()
+    for level, names in [("held_out", held), ("development", development)]:
+        for name in names:
+            for fraction in [.25, .5]:
+                expected |= {(level, name, fraction, m, str(r)) for m in ["oracle", "recorded", "linear_mi", "linear_mi_clustered"] for r in range(1, 501)}
+    for label, fraction in labels:
+        expected |= {("simulation", label, fraction, m, str(r)) for m in ["oracle", "recorded", "linear_mi", "linear_mi_clustered"] for r in range(1, 501)}
+    actual = {(r["level"], r["analysis"], float(r["fraction"]), r["method"], r["replicate"]) for r in records}
+    assert actual == expected and len(actual) == len(records), "Missing, duplicate or unplanned requests"
+    seeds = {name: i for i, name in enumerate(held, 1)}
+    for r in records:
+        if r["level"] == "held_out":
+            fraction_index = 1 if float(r["fraction"]) == .25 else 2
+            assert int(r["imputation_seed"]) == 880000000+seeds[r["analysis"]]*1000000+fraction_index*100000+int(r["replicate"])
+    centers = [r for r in rows(ROOT/"validation/real-audit/rwanda-pool.csv") if r["facility_type"] == "health_center"]
+    number = lambda r, *names: None if any(r[n] == "" for n in names) else sum(float(r[n]) for n in names)
+    definitions = {"lbw": (("lbw_notpremature_h", "lbw_premature_h"), ("lbw_r",), "hf_deliveries_h"), "resus": (("newborns_nocryres_succ_h",), ("nocry_res_success_r",), "hf_deliveries_h"),
+                   "stillbirths": (("sbmacerated_h", "sbfresh_h"), ("sbmacerated_r", "sbfresh_r"), "hf_deliveries_h"), "deliveries": (("hf_deliveries_h",), ("hf_deliveries_r",), "ancnewreg_h"),
+                   "anc1_early": (("anc1vis1trim_h",), ("anc1vis_16weeks_r",), "ancnewreg_h")}
+    saved = {(r["level"], r["analysis"]): r for r in rows(folder/"pool-targets.csv")}
+    for name, (w, reference, x) in definitions.items():
+        frame = [(r["hosp_id"], number(r, *w), number(r, *reference), float(r[x])) for r in centers if number(r, *w) is not None and number(r, *reference) is not None and r[x] != ""]
+        assert int(saved[("held_out", name)]["rows"]) == len(frame), name
+        assert int(saved[("held_out", name)]["wrong_rows"]) == sum(abs(a[1]-a[2]) > 1e-8 for a in frame), name
+        assert math.isclose(float(saved[("held_out", name)]["target_coefficient"]), real_audit_slope(frame, 2), rel_tol=1e-7), name
+        assert math.isclose(float(saved[("held_out", name)]["recorded_coefficient"]), real_audit_slope(frame, 1), rel_tol=1e-7), name
+    groups = {}
+    for r in records:
+        groups.setdefault((r["scenario"], r["method"]), []).append(r)
+    summary = rows(folder/"summary.csv")
+    assert len(summary) == len(groups)
+    verify_clustered_summary(summary, groups)
+    wrong = [dict(r) for r in summary]
+    wrong[0]["coverage"] = str(float(wrong[0]["coverage"])+.1)
+    try:
+        verify_clustered_summary(wrong, groups)
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError("Negative control: corrupted clustered summary went undetected")
+    earlier = {}
+    for r in rows(ROOT/"validation/real-audit-study/replicates.csv"):
+        if r["level"] == "rwanda_month" and r["method"] in ("oracle", "recorded", "linear_mi"):
+            earlier[(r["analysis"], float(r["fraction"]), r["replicate"], r["method"])] = r
+    matched = 0
+    for r in records:
+        if r["level"] == "development" and r["method"] != "linear_mi_clustered":
+            old = earlier[(r["analysis"], float(r["fraction"]), r["replicate"], r["method"])]
+            assert r["status"] == old["status"], r["scenario"]
+            if r["status"] == "ok":
+                assert abs(float(r["estimate"])-float(old["estimate"])) < 1e-8 and abs(float(r["se"])-float(old["se_cluster"])) < 1e-8, (r["scenario"], r["replicate"], r["method"])
+                matched += 1
+    scored = subprocess.run([sys.executable, "-I", str(ROOT/"tools/clustered-score.py")], capture_output=True, text=True, check=True).stdout
+    assert scored.strip() == (ROOT/"validation/clustered-decisions.txt").read_text(encoding="utf-8").strip(), "Scored output differs from the saved decisions"
+    verdict = re.search(r"VERDICT: (\S+)", scored).group(1)
+    lookup = {(r["level"], r["analysis"], float(r["fraction"]), r["method"]): float(r["coverage"]) for r in summary}
+    ratio = {r["analysis"]: float(r["recovery_upper"]) for r in rows(folder/"ratios.csv") if r["level"] == "held_out" and float(r["fraction"]) == .25}
+    closer = sum(abs(lookup[("held_out", a, .25, "linear_mi_clustered")]-lookup[("held_out", a, .25, "oracle")]) < abs(lookup[("held_out", a, .25, "linear_mi")]-lookup[("held_out", a, .25, "oracle")]) for a in held)
+    near = sum(abs(lookup[("held_out", a, .25, "linear_mi_clustered")]-lookup[("held_out", a, .25, "oracle")]) <= .05 for a in held)
+    accurate = sum(ratio[a] <= 1.05 for a in held)
+    eligible = [(g, float(g["fraction"])) for g in grid if g["rows"] == "3" and int(g["clusters"]) >= 70]
+    passing = 0
+    for g, fraction in eligible:
+        label = f"g{g['clusters']}_icc{round(100*float(g['icc'])):02d}_{g['errors']}"
+        c, o = lookup[("simulation", label, fraction, "linear_mi_clustered")], lookup[("simulation", label, fraction, "oracle")]
+        passing += c >= .92 and abs(c-o) <= .03
+    coverage_holds = closer >= 4 and near >= 4
+    derived = "GO" if coverage_holds and accurate >= 4 and passing >= .8*len(eligible) else "PARTIAL" if coverage_holds else "NO-GO"
+    assert derived == verdict, (derived, verdict)
+    synthesis = (ROOT/"validation/CLUSTERED_SYNTHESIS.md").read_text(encoding="utf-8")
+    assert f"**{verdict}**" in synthesis, "Write-up does not state the verdict"
+    print(f"{folder.name}: all {len(records)} planned requests, {len(summary)} recomputed groups, held-out targets recomputed, {matched} development requests match the earlier study, verdict re-derived as {verdict}, corrupted-summary control: PASS")
+
+
 def verify_contamination_supplement(folder):
     scores = rows(folder/"corruption-scores.csv")
     main = rows(ROOT/"validation/contamination-study/replicates.csv")
@@ -1665,6 +1770,7 @@ def main():
     verify_sponsor_clustering(ROOT/"validation/sponsor-clustering/development", "development")
     verify_sponsor_clustering(ROOT/"validation/sponsor-clustering/evaluation", "evaluation")
     verify_real_audit_study(ROOT/"validation/real-audit-study")
+    verify_clustered_study(ROOT/"validation/clustered-study")
     print("This verifies correspondence and repeatability, not inferential validity.")
 
 
