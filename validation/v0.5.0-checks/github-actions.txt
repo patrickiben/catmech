@@ -1,7 +1,17 @@
-GitHub Actions, workflow R-CMD-check, run 41372041604
-https://github.com/patrickiben/catmech/actions/runs/41372041604
-Commit 90b1da2ede029c25027376aa9c82e55efef7eae2. R CMD check --no-manual --as-cran, warnings treated as errors.
+GitHub Actions, workflow R-CMD-check, run 41375702930
+https://github.com/patrickiben/catmech/actions/runs/41375702930
+Commit 4db0ee1c29395940d055f8e2e1974b44f1846608. R CMD check --no-manual --as-cran, warnings treated as errors.
 Conclusion: success on all three jobs.
+
+check (macos-latest)
+  * using R version 4.6.2 (2026-10-29)
+  * using platform: aarch64-apple-darwin23
+  * checking examples ... OK
+  * checking tests ...
+  Running ‘testthat.R’ 
+  * DONE
+  Status: OK
+  [ FAIL 0 | WARN 0 | SKIP 0 | PASS 651 ]
 
 check (ubuntu-latest)
   * using R version 4.6.2 (2026-10-29)
@@ -18,19 +28,9 @@ check (windows-latest)
   * using platform: x86_64-w64-mingw32
   * checking examples ... OK
   * checking tests ...
-  Running 'testthat.R' [184s]
+  Running 'testthat.R'
   * DONE
   Status: OK
   [ FAIL 0 | WARN 0 | SKIP 0 | PASS 651 ]
 
-check (macos-latest)
-  * using R version 4.6.2 (2026-10-29)
-  * using platform: aarch64-apple-darwin23
-  * checking examples ... OK
-  * checking tests ...
-  Running ‘testthat.R’ 
-  * DONE
-  Status: OK
-  [ FAIL 0 | WARN 0 | SKIP 0 | PASS 651 ]
-
-The first run, 41367315359 at commit 85235121065d266681e18c09a7f9f8ec96c4a359, also succeeded on all three jobs.
+Earlier runs also succeeded on all three jobs: 41367315359 at commit 85235121065d266681e18c09a7f9f8ec96c4a359, and 41372041604 at commit 90b1da2ede029c25027376aa9c82e55efef7eae2.
