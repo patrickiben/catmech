@@ -30,6 +30,10 @@ Fixed before the rerun:
 2. `mice_2l_lmer` with `eps = 0` still fails N3, reaching 92% on fewer than nine items at 25%.
 3. `raking` with `approx` still fails N1, which is certain since its estimates do not change, and stays below 92% on at least nine items at 25%.
 
+## Amendment
+
+The first attempt at this rerun stalled for about 30 minutes on `iron` at 25%, with five workers spinning, and it was stopped with no results saved. Hand checks of the seven cohorts where `raking` had failed, and of 12 `mice` requests, did not find the cause. So each request now runs in a child process with a limit of 60 seconds, and a request over the limit counts as no interval, with that message. Nothing else changes.
+
 ## Limits
 
 These two settings were chosen after seeing results that looked wrong, and the option's own recipe has had many more rounds of this attention. `difference` also undercovers, with standard errors as low as 0.36 of the spread in the design with two audited clusters per stratum. That looks like unadjusted leverage from stratum effects, which is not tested here, and it is not corrected. It fails N1 regardless. No reviewer has seen this.

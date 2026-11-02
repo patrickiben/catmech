@@ -82,10 +82,21 @@ fit_mice_all <- function(p, method, seed) {
 run_one <- function(s, r, method) {
   p <- cohort(s, r)
   started <- Sys.time()
-  got <- tryCatch(switch(method,
+  # A first attempt stalled for 30 minutes on one cell, so each request runs in a child with a hard limit.
+  job <- parallel::mcparallel(tryCatch(switch(method,
     raking = fit_raking_approx(p),
     mice_2l_lmer = fit_mice_all(p, "2l.lmer", as.integer(SEEDS$lmer + s$number * 1e5 + r)),
-    mice_2l_pan = fit_mice_all(p, "2l.pan", as.integer(SEEDS$pan + s$number * 1e5 + r))), error = identity)
+    mice_2l_pan = fit_mice_all(p, "2l.pan", as.integer(SEEDS$pan + s$number * 1e5 + r))), error = identity), silent = TRUE)
+  collected <- parallel::mccollect(job, wait = FALSE, timeout = 60)
+  if (is.null(collected)) {
+    tools::pskill(job$pid, tools::SIGKILL)
+    parallel::mccollect(job, wait = TRUE)
+    got <- simpleError("exceeded the 60 second limit")
+  } else {
+    got <- collected[[1L]]
+    parallel::mccollect(job, wait = TRUE)
+    if (is.null(got)) got <- simpleError("the child returned nothing")
+  }
   seconds <- as.numeric(difftime(Sys.time(), started, units = "secs"))
   failed <- inherits(got, "error")
   data.frame(level = s$level, analysis = s$analysis, fraction = s$fraction, replicate = r, method = method, status = if (!failed) "ok" else "failed", message = if (failed) substr(conditionMessage(got), 1L, 120L) else "",
