@@ -1,6 +1,6 @@
 # Overall check before a possible public release
 
-Done 2026-11-02 at commit `baca9df`, by five independent AI reviewers working from a fresh clone, covering code, statistics, evidence, documents and release readiness. They saw the code and not the assistant's conclusions. No human took part, so this is not peer review. The assistant that wrote most of this repository then checked each finding against the code and data, and made the fixes. No reviewer has read the fixes.
+Done 2026-11-02 at commit `423a272`, by five independent AI reviewers working from a fresh clone, covering code, statistics, evidence, documents and release readiness. They saw the code and not the assistant's conclusions. No human took part, so this is not peer review. The assistant that wrote most of this repository then checked each finding against the code and data, and made the fixes. No reviewer has read the fixes.
 
 ## What held up
 

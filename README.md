@@ -427,7 +427,7 @@ python3 tools/verify-artifacts.py
 
 Use new output directories. The `outside-methods` runners also need `survey`, `lme4` and `pan`, and `tools/check-cluster-algebra.R` needs `lme4` and `mitools`. [Validation](validation/VALIDATION.md) lists further commands, including the real-audit study. `tools/clustered-benchmark.R`, `tools/clustered-review-checks.R` and
 `tools/clustered-fix-benchmark.R` ran on the resampling that version 0.6.0 replaced, so run those three from commit
-`a010ede`. `tools/clustered-fix-replay.R` needs the variance that was the default through 0.6.0, so run it from `a762333`. Archived v0.1 to v0.5.0 sources retain the historical
+`8c81044`. `tools/clustered-fix-replay.R` needs the variance that was the default through 0.6.0, so run it from `8982952`. Archived v0.1 to v0.5.0 sources retain the historical
 benchmark inputs; their hashes are checked against those frozen versions. A fresh
 ClinicalTrials.gov download will differ from the dated pool because the registry changes.
 The v0.3.1 guards reject unsupported analyses and gate experimental reference-PMM
