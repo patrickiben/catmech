@@ -24,7 +24,7 @@ Conditions use `random_intercept` unless stated. The 11 real items have 2,000 co
 
 ## What changed with the variance
 
-Coverage in percent, at 25%, on 2,000 cohorts. The current variance here is the one that was the default through 0.6.0.
+Coverage in percent, at 25%, on 2,000 cohorts. The current variance here is the one that was the default before this change.
 
 | Item | Recount, current | Recount, `cv3` | Random intercept, current | Random intercept, `cv3` | Linear MI, current | Linear MI, `cv3` |
 |---|---|---|---|---|---|---|

@@ -44,7 +44,7 @@ audit. It is not clinical validation, a general coverage guarantee, or a claim t
 | Real-audit replay | 600 requests across all six methods, replayed from seeds with the runner's own functions, match the saved study; relabeled or rescaled results are caught | `real-audit-replay/`, `tools/verify-artifacts.py` |
 | Review of the real-audit test | Three independent AI reviewers found no error in the rule or tables and corrected several readings, listed in the write-up. This is not human peer review. | `REAL_AUDIT_SYNTHESIS.md`, `real-audit-review/` |
 | CRT port | Reproduces deposited naive results closely; adjusted RMSE 0.158 against 0.149 and coverage 0.946 against 0.963 | `merged-audit-pilot/reproduce/port-check.csv` |
-| GitHub Actions | Recorded by the commit after this one | `v0.7.0-checks/github-actions.txt`, `../.github/workflows/R-CMD-check.yaml` |
+| GitHub Actions | Passed on Ubuntu, macOS and Windows with R 4.6.2, `--as-cran` and warnings treated as errors: 679 assertions with no failures, warnings or skips, and status OK with no notes, at commit `001858c`. The one commit after it records this result, repairs a write-up sentence that the local verifier had flagged, and refreshes that verifier's log. It changes no code, and it skipped the workflow | `v0.7.0-checks/github-actions.txt`, `../.github/workflows/R-CMD-check.yaml` |
 
 The local environment is R 4.6.0, mice 3.19.0 and posterior 1.7.0 on Apple silicon macOS. No new package dependency was added. Exact session records accompany each study. Minimum-version R and a fresh-container restore have not been tested. The GitHub workflow checks the package on the current R release on three platforms, but every study ran only on this machine.
 

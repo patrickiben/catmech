@@ -29,14 +29,5 @@ Real-audit write-up: scored output regenerated identically, post-hoc table tied 
 clustered-study: all 148000 planned requests, 296 recomputed groups, held-out targets recomputed, 11998 development requests match the earlier study, verdict re-derived as PARTIAL, corrupted-summary control: PASS
 clustered-fix-study: all 210000 planned requests, 420 recomputed groups, seeds and pool targets recomputed, 27000 requests match the first study, 18000 match the review, selection and verdict re-derived as random_intercept and PARTIAL, 30000 replayed through the package, corrupted-summary control: PASS
 variance-check: all 24500 planned requests, scored output regenerated identically, reading re-derived, numbers in the results traced, algebra record has 50 passes: PASS
-Traceback (most recent call last):
-  File "/Users/patrickiben/Documents/catmech/tools/verify-artifacts.py", line 2014, in <module>
-    main()
-    ~~~~^^
-  File "/Users/patrickiben/Documents/catmech/tools/verify-artifacts.py", line 2009, in main
-    verify_variance_mi_study(ROOT/"validation/variance-mi-study")
-    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/patrickiben/Documents/catmech/tools/verify-artifacts.py", line 1097, in verify_variance_mi_study
-    assert not unsupported, ("Numbers in the write-up with no source", unsupported)
-           ^^^^^^^^^^^^^^^
-AssertionError: ('Numbers in the write-up with no source', ['0.6'])
+variance-mi-study: all 148500 planned requests, sources hashed, scored output and post-hoc table regenerated identically, the outcome re-derived as cv3, 148500 replayed through the package: PASS
+This verifies correspondence and repeatability, not inferential validity.
