@@ -169,7 +169,8 @@ all of them, for reasons not established.
 The same model is available in `mice`, and a [planned comparison](../validation/OUTSIDE_METHODS_SYNTHESIS.md) found the same
 accuracy once the `mice` check that can drop the recorded value was off. This method draws its variance components in
 closed form, without MCMC or `lme4`, and its intervals were slightly wider. An [independently written setup](../validation/INDEPENDENT_SETUPS_SYNTHESIS.md) with separate
-within-cluster and between-cluster slopes looks better on most measures. That has not been tested in this package.
+within-cluster and between-cluster slopes looks better on most measures. [Adding those slopes alone](../validation/WITHIN_BETWEEN_SYNTHESIS.md) was tested and not adopted: it
+raised error on small real audits when the audited value was the outcome, so what else separates that setup remains open.
 
 This is the usual random-intercept imputation model (Schafer and Yucel, 2002,
 [doi:10.1198/106186002760180608](https://doi.org/10.1198/106186002760180608); Grund, Lüdtke and Robitzsch, 2018,

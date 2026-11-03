@@ -1,0 +1,213 @@
+Control passed
+guard lbw 0.25 ; elapsed 29 seconds
+guard lbw 0.5 ; elapsed 35 seconds
+guard resus 0.25 ; elapsed 57 seconds
+guard resus 0.5 ; elapsed 63 seconds
+guard stillbirths 0.25 ; elapsed 85 seconds
+guard stillbirths 0.5 ; elapsed 91 seconds
+guard deliveries 0.25 ; elapsed 116 seconds
+guard deliveries 0.5 ; elapsed 122 seconds
+guard anc1_early 0.25 ; elapsed 148 seconds
+guard anc1_early 0.5 ; elapsed 153 seconds
+guard pnc 0.25 ; elapsed 178 seconds
+guard pnc 0.5 ; elapsed 184 seconds
+guard syphilis 0.25 ; elapsed 209 seconds
+guard syphilis 0.5 ; elapsed 216 seconds
+guard iron 0.25 ; elapsed 240 seconds
+guard iron 0.5 ; elapsed 249 seconds
+guard anc4 0.25 ; elapsed 273 seconds
+guard anc4 0.5 ; elapsed 279 seconds
+guard ancnewreg 0.25 ; elapsed 300 seconds
+guard ancnewreg 0.5 ; elapsed 305 seconds
+guard livebirths 0.25 ; elapsed 326 seconds
+guard livebirths 0.5 ; elapsed 331 seconds
+guard rwanda_shift_low 0.25 ; elapsed 336 seconds
+guard pairs_shift_low 0.25 ; elapsed 341 seconds
+guard none_shift_low 0.25 ; elapsed 345 seconds
+guard rwanda_shift 0.25 ; elapsed 350 seconds
+guard pairs_shift 0.25 ; elapsed 355 seconds
+guard none_shift 0.25 ; elapsed 360 seconds
+guard rwanda_under 0.25 ; elapsed 364 seconds
+guard pairs_under 0.25 ; elapsed 369 seconds
+guard none_under 0.25 ; elapsed 374 seconds
+guard rwanda_outlier 0.25 ; elapsed 380 seconds
+guard pairs_outlier 0.25 ; elapsed 386 seconds
+guard none_outlier 0.25 ; elapsed 390 seconds
+guard rwanda_rare 0.25 ; elapsed 395 seconds
+guard pairs_rare 0.25 ; elapsed 401 seconds
+guard none_rare 0.25 ; elapsed 406 seconds
+guard rwanda_row_only 0.25 ; elapsed 411 seconds
+guard pairs_row_only 0.25 ; elapsed 416 seconds
+guard none_row_only 0.25 ; elapsed 422 seconds
+guard rwanda_shift_low 0.5 ; elapsed 427 seconds
+guard pairs_shift_low 0.5 ; elapsed 432 seconds
+guard none_shift_low 0.5 ; elapsed 436 seconds
+guard rwanda_shift 0.5 ; elapsed 442 seconds
+guard pairs_shift 0.5 ; elapsed 447 seconds
+guard none_shift 0.5 ; elapsed 452 seconds
+guard rwanda_under 0.5 ; elapsed 457 seconds
+guard pairs_under 0.5 ; elapsed 464 seconds
+guard none_under 0.5 ; elapsed 470 seconds
+guard rwanda_outlier 0.5 ; elapsed 476 seconds
+guard pairs_outlier 0.5 ; elapsed 482 seconds
+guard none_outlier 0.5 ; elapsed 488 seconds
+guard rwanda_rare 0.5 ; elapsed 494 seconds
+guard pairs_rare 0.5 ; elapsed 500 seconds
+guard none_rare 0.5 ; elapsed 505 seconds
+guard rwanda_row_only 0.5 ; elapsed 510 seconds
+guard pairs_row_only 0.5 ; elapsed 517 seconds
+guard none_row_only 0.5 ; elapsed 523 seconds
+guard control_one_row 0.25 ; elapsed 532 seconds
+guard control_one_row 0.5 ; elapsed 543 seconds
+guard covariate_shift 0.25 ; elapsed 550 seconds
+guard covariate_under 0.25 ; elapsed 556 seconds
+guard covariate_row_only 0.25 ; elapsed 561 seconds
+guard covariate_shift 0.5 ; elapsed 567 seconds
+guard covariate_under 0.5 ; elapsed 573 seconds
+guard covariate_row_only 0.5 ; elapsed 579 seconds
+zambia opd ; elapsed 605 seconds
+zambia deliveries ; elapsed 631 seconds
+zambia anc ; elapsed 658 seconds
+zambia postnatal ; elapsed 685 seconds
+zambia immunization ; elapsed 711 seconds
+zambia ipt ; elapsed 738 seconds
+zambia fpmethods ; elapsed 766 seconds
+zambia counselling ; elapsed 793 seconds
+zambia exposedbabies ; elapsed 823 seconds
+snap benefit_on_size 10 13 ; elapsed 865 seconds
+snap benefit_on_size 10 26 ; elapsed 909 seconds
+snap benefit_on_size 40 13 ; elapsed 1041 seconds
+snap benefit_on_size 40 26 ; elapsed 1163 seconds
+snap benefit_on_gross 10 13 ; elapsed 1201 seconds
+snap benefit_on_gross 10 26 ; elapsed 1240 seconds
+snap benefit_on_gross 40 13 ; elapsed 1381 seconds
+snap benefit_on_gross 40 26 ; elapsed 1537 seconds
+snap gross_on_benefit 10 13 ; elapsed 1598 seconds
+snap gross_on_benefit 10 26 ; elapsed 1662 seconds
+snap gross_on_benefit 40 13 ; elapsed 1849 seconds
+snap gross_on_benefit 40 26 ; elapsed 2046 seconds
+fresh o_control_errorfree 0.25 ; elapsed 2071 seconds
+fresh o_control_errorfree 0.5 ; elapsed 2097 seconds
+fresh o_noise_noclusters 0.25 ; elapsed 2125 seconds
+fresh o_noise_noclusters 0.5 ; elapsed 2153 seconds
+fresh o_easy_large 0.25 ; elapsed 2201 seconds
+fresh o_easy_large 0.5 ; elapsed 2252 seconds
+fresh o_pairs_k150 0.25 ; elapsed 2288 seconds
+fresh o_pairs_k150 0.5 ; elapsed 2319 seconds
+fresh o_offset_x_within 0.25 ; elapsed 2341 seconds
+fresh o_offset_x_within 0.5 ; elapsed 2366 seconds
+fresh o_offset_x_site 0.25 ; elapsed 2386 seconds
+fresh o_offset_x_site 0.5 ; elapsed 2405 seconds
+fresh o_offset_few_unbal 0.25 ; elapsed 2421 seconds
+fresh o_offset_few_unbal 0.5 ; elapsed 2438 seconds
+fresh o_calib_slope 0.25 ; elapsed 2462 seconds
+fresh o_calib_slope 0.5 ; elapsed 2484 seconds
+fresh o_regress_to_mean 0.25 ; elapsed 2508 seconds
+fresh o_regress_to_mean 0.5 ; elapsed 2529 seconds
+fresh o_bias_by_x 0.25 ; elapsed 2553 seconds
+fresh o_bias_by_x 0.5 ; elapsed 2578 seconds
+fresh o_site_bias_by_x 0.25 ; elapsed 2596 seconds
+fresh o_site_bias_by_x 0.5 ; elapsed 2615 seconds
+fresh o_hetero_value 0.25 ; elapsed 2639 seconds
+fresh o_hetero_value 0.5 ; elapsed 2666 seconds
+fresh o_digit_preference 0.25 ; elapsed 2692 seconds
+fresh o_digit_preference 0.5 ; elapsed 2720 seconds
+fresh o_decimal_slip 0.25 ; elapsed 2753 seconds
+fresh o_decimal_slip 0.5 ; elapsed 2785 seconds
+fresh o_unit_mixup_sites 0.25 ; elapsed 2807 seconds
+fresh o_unit_mixup_sites 0.5 ; elapsed 2831 seconds
+fresh o_lod_floor 0.25 ; elapsed 2855 seconds
+fresh o_lod_floor 0.5 ; elapsed 2877 seconds
+fresh o_counts_underreport 0.25 ; elapsed 2903 seconds
+fresh o_counts_underreport 0.5 ; elapsed 2929 seconds
+fresh o_counts_inflate_pay 0.25 ; elapsed 2955 seconds
+fresh o_counts_inflate_pay 0.5 ; elapsed 2982 seconds
+fresh o_claims_lognormal 0.25 ; elapsed 3013 seconds
+fresh o_claims_lognormal 0.5 ; elapsed 3044 seconds
+fresh o_heavy_t3_k30 0.25 ; elapsed 3063 seconds
+fresh o_heavy_t3_k30 0.5 ; elapsed 3085 seconds
+fresh o_contextual 0.25 ; elapsed 3106 seconds
+fresh o_contextual 0.5 ; elapsed 3125 seconds
+fresh o_size_informative 0.25 ; elapsed 3148 seconds
+fresh o_size_informative 0.5 ; elapsed 3171 seconds
+fresh o_random_slope_k25 0.25 ; elapsed 3190 seconds
+fresh o_random_slope_k25 0.5 ; elapsed 3210 seconds
+fresh o_strata_one_bad 0.25 ; elapsed 3248 seconds
+fresh o_strata_one_bad 0.5 ; elapsed 3286 seconds
+fresh o_strata_slopes 0.25 ; elapsed 3315 seconds
+fresh o_strata_slopes 0.5 ; elapsed 3344 seconds
+fresh o_copy_forward 0.25 ; elapsed 3394 seconds
+fresh o_copy_forward 0.5 ; elapsed 3444 seconds
+fresh o_fabricated_sites 0.25 ; elapsed 3485 seconds
+fresh o_fabricated_sites 0.5 ; elapsed 3526 seconds
+fresh o_threshold_gaming 0.25 ; elapsed 3560 seconds
+fresh o_threshold_gaming 0.5 ; elapsed 3591 seconds
+fresh o_zero_for_blank 0.25 ; elapsed 3618 seconds
+fresh o_zero_for_blank 0.5 ; elapsed 3643 seconds
+fresh o_drift_within_run 0.25 ; elapsed 3676 seconds
+fresh o_drift_within_run 0.5 ; elapsed 3706 seconds
+fresh o_tiny_k20_n3 0.25 ; elapsed 3720 seconds
+fresh o_tiny_k20_n3 0.5 ; elapsed 3736 seconds
+fresh o_quadratic_truth 0.25 ; elapsed 3767 seconds
+fresh o_quadratic_truth 0.5 ; elapsed 3805 seconds
+fresh o_two_tier_k150 0.25 ; elapsed 3903 seconds
+fresh o_two_tier_k150 0.5 ; elapsed 4009 seconds
+fresh p_control_errorfree 0.25 ; elapsed 4043 seconds
+fresh p_control_errorfree 0.5 ; elapsed 4073 seconds
+fresh p_noise_noclusters 0.25 ; elapsed 4138 seconds
+fresh p_noise_noclusters 0.5 ; elapsed 4213 seconds
+fresh p_easy_large 0.25 ; elapsed 4362 seconds
+fresh p_easy_large 0.5 ; elapsed 4473 seconds
+fresh p_low_reliability 0.25 ; elapsed 4533 seconds
+fresh p_low_reliability 0.5 ; elapsed 4588 seconds
+fresh p_offset_mixed 0.25 ; elapsed 4626 seconds
+fresh p_offset_mixed 0.5 ; elapsed 4656 seconds
+fresh p_site_dominant 0.25 ; elapsed 4677 seconds
+fresh p_site_dominant 0.5 ; elapsed 4697 seconds
+fresh p_offset_few_unbal 0.25 ; elapsed 4713 seconds
+fresh p_offset_few_unbal 0.5 ; elapsed 4733 seconds
+fresh p_calib_slope 0.25 ; elapsed 4762 seconds
+fresh p_calib_slope 0.5 ; elapsed 4792 seconds
+fresh p_berkson_nominal 0.25 ; elapsed 4826 seconds
+fresh p_berkson_nominal 0.5 ; elapsed 4861 seconds
+fresh p_differential_outcome 0.25 ; elapsed 4907 seconds
+fresh p_differential_outcome 0.5 ; elapsed 4952 seconds
+fresh p_shared_site_quality 0.25 ; elapsed 4987 seconds
+fresh p_shared_site_quality 0.5 ; elapsed 5018 seconds
+fresh p_bias_by_x 0.25 ; elapsed 5053 seconds
+fresh p_bias_by_x 0.5 ; elapsed 5090 seconds
+fresh p_decimal_slip 0.25 ; elapsed 5143 seconds
+fresh p_decimal_slip 0.5 ; elapsed 5193 seconds
+fresh p_lod_floor 0.25 ; elapsed 5229 seconds
+fresh p_lod_floor 0.5 ; elapsed 5266 seconds
+fresh p_digit_preference 0.25 ; elapsed 5308 seconds
+fresh p_digit_preference 0.5 ; elapsed 5356 seconds
+fresh p_contextual_truth 0.25 ; elapsed 5393 seconds
+fresh p_contextual_truth 0.5 ; elapsed 5431 seconds
+fresh p_log_dose 0.25 ; elapsed 5477 seconds
+fresh p_log_dose 0.5 ; elapsed 5531 seconds
+fresh p_threshold_gaming 0.25 ; elapsed 5585 seconds
+fresh p_threshold_gaming 0.5 ; elapsed 5637 seconds
+fresh p_heavy_t3_k30 0.25 ; elapsed 5668 seconds
+fresh p_heavy_t3_k30 0.5 ; elapsed 5698 seconds
+fresh p_size_informative 0.25 ; elapsed 5738 seconds
+fresh p_size_informative 0.5 ; elapsed 5782 seconds
+fresh p_strata_one_bad 0.25 ; elapsed 5868 seconds
+fresh p_strata_one_bad 0.5 ; elapsed 5967 seconds
+fresh p_random_slope_k25 0.25 ; elapsed 6008 seconds
+fresh p_random_slope_k25 0.5 ; elapsed 6056 seconds
+fresh p_copy_forward 0.25 ; elapsed 6178 seconds
+fresh p_copy_forward 0.5 ; elapsed 6299 seconds
+fresh p_fabricated_sites 0.25 ; elapsed 6358 seconds
+fresh p_fabricated_sites 0.5 ; elapsed 6414 seconds
+fresh p_counts_underreport 0.25 ; elapsed 6531 seconds
+fresh p_counts_underreport 0.5 ; elapsed 6648 seconds
+fresh p_x_site_level 0.25 ; elapsed 6681 seconds
+fresh p_x_site_level 0.5 ; elapsed 6718 seconds
+fresh p_zero_for_blank 0.25 ; elapsed 6787 seconds
+fresh p_zero_for_blank 0.5 ; elapsed 6852 seconds
+fresh p_two_tier_k150 0.25 ; elapsed 6969 seconds
+fresh p_two_tier_k150 0.5 ; elapsed 7073 seconds
+fresh p_tiny_k20_n3 0.25 ; elapsed 7096 seconds
+fresh p_tiny_k20_n3 0.5 ; elapsed 7123 seconds
+Completed study : 49500 guard, 36000 Zambia, 444000 deciding; statuses failed 3003, ok 440997 

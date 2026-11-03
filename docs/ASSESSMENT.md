@@ -34,6 +34,8 @@ Version 0.7.1 follows an [overall check](../validation/OVERALL_QC.md) by five in
 
 Three later planned tests changed no package code. On a [second health system](../validation/SECOND_SYSTEM_SYNTHESIS.md) the outcome was mixed, with errors that barely clustered. The shortfall on count data came from [heavy-tailed cluster effects and not rarity](../validation/RARE_COUNTS_SYNTHESIS.md), with no fix found. [Comparators written by fresh agents](../validation/INDEPENDENT_SETUPS_SYNTHESIS.md) did not meet the rule, but the best looks better than the option on most measures, so the option is not the best available.
 
+A [later test of separate within-cluster and between-cluster slopes](../validation/WITHIN_BETWEEN_SYNTHESIS.md), on new SNAP quality-control reviews and a new simulation, was **not adopted**, and it changed no package code. With the audited value as a predictor, coverage and bias improved, though linear MI kept lower bias in simulation. With it as the outcome, error rose: 1.258 times the option's on real items at a 25% audit, and the new simulation's outcome class missed the accuracy limit at 1.026. The slopes alone also did not match the fresh agent's setup that prompted the test. SNAP's errors barely cluster by state, and no human has reviewed this.
+
 ## Current judgment
 
 | Question | Judgment |
@@ -62,7 +64,7 @@ every connection among those methods.
 2. Check simulated error rates and sizes against published audits. The main fixture uses 8% wrong records, which may be high for transcription errors.
 3. Test the hold-out advice prospectively, since it comes from the real-data study that suggested it.
 4. Consider non-constant variance, which remains out of scope. On the Rwanda audit it and clustering together cost the oracle up to 28 points of default coverage.
-5. Test separate within-cluster and between-cluster slopes in the clustered option, on data not yet seen. Every item in both recounts has now been seen.
+5. Find what else separates the fresh agent's setup from the option, now that [separate slopes alone](../validation/WITHIN_BETWEEN_SYNTHESIS.md) did not match it. Any such test needs data not yet seen, since both recounts, SNAP and the new simulation have all been seen.
 6. Have someone who knows `mice` and `survey` review the [comparisons](../validation/INDEPENDENT_SETUPS_SYNTHESIS.md). Fresh agents reduce the problem of one author setting up every method, and they do not remove it. Heavy-tailed cluster effects also remain unsolved, even with every row checked.
 7. Test whether checking errors against analysis covariates on audited rows can guide the choice of method. The real-audit results suggested this, so they cannot test it fairly, and at a 25% audit the check has low power.
 

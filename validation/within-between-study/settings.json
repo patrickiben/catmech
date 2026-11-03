@@ -1,0 +1,24 @@
+{
+  "mode": "study",
+  "m": 20,
+  "reps_real_25": 2000,
+  "reps_other": 500,
+  "reps_zambia": 1000,
+  "reps_snap": 1000,
+  "reps_fresh": 500,
+  "base": {
+    "guard": 1400000000,
+    "linear_mi": 1300000000,
+    "random_intercept": 1310000000,
+    "within_between": 1320000000,
+    "ind_mice": 1330000000
+  },
+  "seeds": {
+    "covariate_cohort": 1700100000,
+    "cohort": 2010000000,
+    "audit": 2020000000,
+    "snap_cohort": 2100000000,
+    "snap_audit": 2110000000,
+    "fresh": 2120000000
+  }
+}

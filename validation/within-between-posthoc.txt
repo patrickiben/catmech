@@ -1,0 +1,9 @@
+SNAP POOL
+  reviews 18316; states 53; share with an error 35.5%; mean error 7.89 dollars; standard deviation of error 51.40 dollars
+  intraclass correlation of the error by state, by moments: 0.007
+
+COHORT BOOTSTRAP, 500 draws: difference in distance, candidate minus option, then RMSE ratio, each with a 95% interval
+  snap outcome: distance +0.11 (-0.15 to +0.35); ratio 1.003 (1.001 to 1.005)
+  snap predictor: distance -4.10 (-4.80 to -3.47); ratio 0.993 (0.986 to 1.000)
+  fresh outcome: distance -0.46 (-0.60 to -0.24); ratio 1.026 (1.021 to 1.030)
+  fresh predictor: distance -2.22 (-2.48 to -1.94); ratio 0.968 (0.963 to 0.972)

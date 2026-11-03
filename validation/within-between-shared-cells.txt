@@ -1,0 +1,15 @@
+POST HOC. Written after the results were read. It enters no rule.
+
+PREDICTION 4: new simulation, predictor class, mean absolute relative bias %
+  all 58 cells: candidate 5.06, option 7.62, ind_mice refused on 4
+  the 54 cells with ind_mice: candidate 3.88, ind_mice 2.10, option 6.59
+
+RMSE RATIO, candidate over option, geometric mean across cells, by audit size
+  snap outcome: 25% 1.003; 50% 1.002
+  snap predictor: 25% 0.985; 50% 1.001
+  fresh outcome: 25% 1.048; 50% 1.004
+  fresh predictor: 25% 0.984; 50% 0.952
+
+GUARD REQUESTS WITH NO INTERVAL, candidate then the option's saved count
+  iron 25%: 6, 6
+  stillbirths 25%: 1, 1

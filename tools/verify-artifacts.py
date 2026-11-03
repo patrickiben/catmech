@@ -1194,7 +1194,16 @@ def verify_later_studies():
     assert run(ROOT/"tools/independent-setups-posthoc.py").strip() == read("independent-setups-posthoc.txt").strip()
     trace("INDEPENDENT_SETUPS_SYNTHESIS.md", "independent-setups-decisions.txt", "independent-setups-posthoc.txt", "INDEPENDENT_SETUPS_PLAN.md", "second-system-decisions.txt", "outside-methods-decisions.txt", "independent-setups/agent-reports.json")
     assert decimals("A made-up 12.345 here.")-decimals(read("independent-setups-decisions.txt")), "Negative control: a made-up number went undetected"
-    print("Later studies: second health system, rare counts and independently written setups, all planned requests, sources hashed, scored files regenerated identically, numbers traced: PASS")
+    slopes = ROOT/"validation/within-between-study"
+    hashes(slopes)
+    assert (count(slopes/"guard.csv.gz"), count(slopes/"zambia.csv.gz"), count(slopes/"deciding.csv.gz")) == (49500, 36000, 444000)
+    scored = run(ROOT/"tools/within-between-score.py", slopes)
+    assert scored.strip() == read("within-between-decisions.txt").strip() and "OUTCOME: NOT ADOPTED" in scored and "Control: this scorer reproduces" in scored
+    assert "the outcome is **NOT ADOPTED**" in read("WITHIN_BETWEEN_SYNTHESIS.md")
+    assert run(ROOT/"tools/within-between-posthoc.py", slopes).strip() == read("within-between-posthoc.txt").strip()
+    assert run(ROOT/"tools/within-between-shared-cells.py", slopes).strip() == read("within-between-shared-cells.txt").strip()
+    trace("WITHIN_BETWEEN_SYNTHESIS.md", "within-between-decisions.txt", "within-between-posthoc.txt", "within-between-shared-cells.txt", "WITHIN_BETWEEN_PLAN.md")
+    print("Later studies: second health system, rare counts, independently written setups and separate slopes, all planned requests, sources hashed, scored files regenerated identically, numbers traced: PASS")
 
 
 def verify_contamination_supplement(folder):
