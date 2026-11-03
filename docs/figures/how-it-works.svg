@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 300" role="img" aria-labelledby="t d" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 330" width="1000" height="330" role="img" aria-labelledby="t d" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
   <title id="t">How catmech works</title>
   <desc id="d">Five panels from left to right. One: a table where every row has a recorded value and only audited rows have a checked value. Two: on audited rows, a regression of the checked value on the recorded value and the other variables. Three: each unaudited row's checked value is drawn 20 times from that model. Four: the analysis runs on each of the 20 completed copies. Five: Rubin's rules combine them into one estimate whose interval includes the spread between copies.</desc>
   <style>
@@ -14,91 +14,86 @@
     }
     text { font-size: 13px; } .h { font-size: 14px; font-weight: 600; } .s { font-size: 12px; }
   </style>
-  <rect class="bg" x="0" y="0" width="960" height="300"/>
+  <rect class="bg" x="0" y="0" width="1000" height="330"/>
 
-  <!-- 1. Records -->
-  <rect class="card" x="8" y="8" width="176" height="284" rx="8"/>
-  <text class="ink h" x="20" y="32">1. Your records</text>
-  <text class="muted s" x="34" y="56">recorded</text>
-  <text class="muted s" x="106" y="56">checked</text>
-  <g>
-    <rect class="cell" x="34" y="66" width="56" height="14" rx="2"/><rect class="empty" x="106" y="66" width="56" height="14" rx="2"/>
-    <rect class="cell" x="34" y="86" width="56" height="14" rx="2"/><rect class="check" x="106" y="86" width="56" height="14" rx="2"/>
-    <rect class="cell" x="34" y="106" width="56" height="14" rx="2"/><rect class="empty" x="106" y="106" width="56" height="14" rx="2"/>
-    <rect class="cell" x="34" y="126" width="56" height="14" rx="2"/><rect class="empty" x="106" y="126" width="56" height="14" rx="2"/>
-    <rect class="cell" x="34" y="146" width="56" height="14" rx="2"/><rect class="check" x="106" y="146" width="56" height="14" rx="2"/>
-    <rect class="cell" x="34" y="166" width="56" height="14" rx="2"/><rect class="empty" x="106" y="166" width="56" height="14" rx="2"/>
-    <rect class="cell" x="34" y="186" width="56" height="14" rx="2"/><rect class="empty" x="106" y="186" width="56" height="14" rx="2"/>
-    <rect class="cell" x="34" y="206" width="56" height="14" rx="2"/><rect class="check" x="106" y="206" width="56" height="14" rx="2"/>
-  </g>
-  <text class="muted s" x="20" y="246">Every row has a recorded</text>
-  <text class="muted s" x="20" y="262">value. Audited rows also</text>
-  <text class="muted s" x="20" y="278">have a checked one.</text>
+  <rect class="card" x="8" y="8" width="180" height="314" rx="8"/>
+  <text class="ink h" x="22" y="32">1. Your records</text>
+  <text class="muted s" x="22" y="248">Every row has a</text>
+  <text class="muted s" x="22" y="264">recorded value.</text>
+  <text class="muted s" x="22" y="280">Audited rows also</text>
+  <text class="muted s" x="22" y="296">have a checked one.</text>
+  <path class="arrow" d="M191 140 H 200" stroke-width="2"/><path class="head" d="M200 135 L207 140 L200 145 Z"/>
+  <text class="muted s" x="32" y="58">recorded</text>
+  <text class="muted s" x="108" y="58">checked</text>
+  <rect class="cell" x="32" y="68" width="60" height="14" rx="2"/><rect class="empty" x="108" y="68" width="60" height="14" rx="2"/>
+  <rect class="cell" x="32" y="88" width="60" height="14" rx="2"/><rect class="check" x="108" y="88" width="60" height="14" rx="2"/>
+  <rect class="cell" x="32" y="108" width="60" height="14" rx="2"/><rect class="empty" x="108" y="108" width="60" height="14" rx="2"/>
+  <rect class="cell" x="32" y="128" width="60" height="14" rx="2"/><rect class="empty" x="108" y="128" width="60" height="14" rx="2"/>
+  <rect class="cell" x="32" y="148" width="60" height="14" rx="2"/><rect class="check" x="108" y="148" width="60" height="14" rx="2"/>
+  <rect class="cell" x="32" y="168" width="60" height="14" rx="2"/><rect class="empty" x="108" y="168" width="60" height="14" rx="2"/>
+  <rect class="cell" x="32" y="188" width="60" height="14" rx="2"/><rect class="empty" x="108" y="188" width="60" height="14" rx="2"/>
+  <rect class="cell" x="32" y="208" width="60" height="14" rx="2"/><rect class="check" x="108" y="208" width="60" height="14" rx="2"/>
 
-  <path class="arrow" d="M186 150 H 200" stroke-width="2"/><path class="head" d="M200 145 L208 150 L200 155 Z"/>
+  <rect class="card" x="210" y="8" width="180" height="314" rx="8"/>
+  <text class="ink h" x="224" y="32">2. Learn</text>
+  <text class="muted s" x="224" y="248">On audited rows, fit</text>
+  <text class="muted s" x="224" y="264">checked on recorded</text>
+  <text class="muted s" x="224" y="280">and other variables.</text>
+  <path class="arrow" d="M393 140 H 402" stroke-width="2"/><path class="head" d="M402 135 L409 140 L402 145 Z"/>
+  <line class="axis" x1="240" y1="208" x2="374" y2="208"/><line class="axis" x1="240" y1="208" x2="240" y2="56"/>
+  <text class="muted s" x="282" y="226">recorded</text>
+  <text class="muted s" x="0" y="0" transform="translate(232 166) rotate(-90)">checked</text>
+  <line class="line" x1="248" y1="196" x2="366" y2="70" stroke-width="2"/>
+  <circle class="check" cx="256" cy="182" r="4"/>
+  <circle class="check" cx="270" cy="176" r="4"/>
+  <circle class="check" cx="284" cy="150" r="4"/>
+  <circle class="check" cx="300" cy="144" r="4"/>
+  <circle class="check" cx="316" cy="116" r="4"/>
+  <circle class="check" cx="330" cy="112" r="4"/>
+  <circle class="check" cx="346" cy="88" r="4"/>
+  <circle class="check" cx="308" cy="132" r="4"/>
 
-  <!-- 2. Learn -->
-  <rect class="card" x="210" y="8" width="176" height="284" rx="8"/>
-  <text class="ink h" x="222" y="32">2. Learn</text>
-  <line class="axis" x1="236" y1="208" x2="366" y2="208"/><line class="axis" x1="236" y1="208" x2="236" y2="62"/>
-  <text class="muted s" x="270" y="226">recorded</text>
-  <text class="muted s" x="0" y="0" transform="translate(228 166) rotate(-90)">checked</text>
-  <line class="line" x1="244" y1="196" x2="358" y2="76" stroke-width="2"/>
-  <circle class="check" cx="252" cy="182" r="4"/><circle class="check" cx="266" cy="176" r="4"/><circle class="check" cx="280" cy="150" r="4"/>
-  <circle class="check" cx="296" cy="144" r="4"/><circle class="check" cx="312" cy="116" r="4"/><circle class="check" cx="326" cy="112" r="4"/>
-  <circle class="check" cx="342" cy="88" r="4"/><circle class="check" cx="304" cy="132" r="4"/>
-  <text class="muted s" x="222" y="246">On audited rows, regress</text>
-  <text class="muted s" x="222" y="262">checked on recorded and the</text>
-  <text class="muted s" x="222" y="278">other variables.</text>
+  <rect class="card" x="412" y="8" width="180" height="314" rx="8"/>
+  <text class="ink h" x="426" y="32">3. Fill in 20 ways</text>
+  <text class="muted s" x="426" y="248">Draw each missing</text>
+  <text class="muted s" x="426" y="264">checked value from</text>
+  <text class="muted s" x="426" y="280">the model, with its</text>
+  <text class="muted s" x="426" y="296">uncertainty.</text>
+  <path class="arrow" d="M595 140 H 604" stroke-width="2"/><path class="head" d="M604 135 L611 140 L604 145 Z"/>
+  <rect class="copy" x="458" y="50" width="100" height="132" rx="4"/>
+  <rect class="copy" x="450" y="58" width="100" height="132" rx="4"/>
+  <rect class="copy" x="442" y="66" width="100" height="132" rx="4"/>
+  <rect class="cell" x="454" y="78" width="36" height="12" rx="2"/><rect class="check" x="498" y="78" width="36" height="12" rx="2" opacity=".45"/>
+  <rect class="cell" x="454" y="96" width="36" height="12" rx="2"/><rect class="check" x="498" y="96" width="36" height="12" rx="2"/>
+  <rect class="cell" x="454" y="114" width="36" height="12" rx="2"/><rect class="check" x="498" y="114" width="36" height="12" rx="2" opacity=".45"/>
+  <rect class="cell" x="454" y="132" width="36" height="12" rx="2"/><rect class="check" x="498" y="132" width="36" height="12" rx="2" opacity=".45"/>
+  <rect class="cell" x="454" y="150" width="36" height="12" rx="2"/><rect class="check" x="498" y="150" width="36" height="12" rx="2"/>
+  <rect class="cell" x="454" y="168" width="36" height="12" rx="2"/><rect class="check" x="498" y="168" width="36" height="12" rx="2" opacity=".45"/>
+  <text class="ink h" x="548" y="218">×20</text>
 
-  <path class="arrow" d="M388 150 H 402" stroke-width="2"/><path class="head" d="M402 145 L410 150 L402 155 Z"/>
+  <rect class="card" x="614" y="8" width="180" height="314" rx="8"/>
+  <text class="ink h" x="628" y="32">4. Analyze each</text>
+  <text class="muted s" x="628" y="248">Run your analysis</text>
+  <text class="muted s" x="628" y="264">on every completed</text>
+  <text class="muted s" x="628" y="280">copy.</text>
+  <path class="arrow" d="M797 140 H 806" stroke-width="2"/><path class="head" d="M806 135 L813 140 L806 145 Z"/>
+  <line class="bar" x1="672" y1="62" x2="722" y2="62" stroke-width="1.5"/><circle class="dot" cx="696" cy="62" r="3"/>
+  <line class="bar" x1="680" y1="80" x2="732" y2="80" stroke-width="1.5"/><circle class="dot" cx="706" cy="80" r="3"/>
+  <line class="bar" x1="664" y1="98" x2="716" y2="98" stroke-width="1.5"/><circle class="dot" cx="690" cy="98" r="3"/>
+  <line class="bar" x1="676" y1="116" x2="726" y2="116" stroke-width="1.5"/><circle class="dot" cx="701" cy="116" r="3"/>
+  <line class="bar" x1="670" y1="134" x2="720" y2="134" stroke-width="1.5"/><circle class="dot" cx="695" cy="134" r="3"/>
+  <line class="bar" x1="684" y1="152" x2="736" y2="152" stroke-width="1.5"/><circle class="dot" cx="710" cy="152" r="3"/>
+  <line class="bar" x1="668" y1="170" x2="718" y2="170" stroke-width="1.5"/><circle class="dot" cx="693" cy="170" r="3"/>
+  <line class="bar" x1="674" y1="188" x2="726" y2="188" stroke-width="1.5"/><circle class="dot" cx="700" cy="188" r="3"/>
 
-  <!-- 3. Fill in -->
-  <rect class="card" x="412" y="8" width="176" height="284" rx="8"/>
-  <text class="ink h" x="424" y="32">3. Fill in 20 ways</text>
-  <rect class="copy" x="456" y="62" width="96" height="132" rx="4"/>
-  <rect class="copy" x="448" y="70" width="96" height="132" rx="4"/>
-  <rect class="copy" x="440" y="78" width="96" height="132" rx="4"/>
-  <g>
-    <rect class="cell" x="450" y="90" width="34" height="12" rx="2"/><rect class="check" x="492" y="90" width="34" height="12" rx="2" opacity=".45"/>
-    <rect class="cell" x="450" y="108" width="34" height="12" rx="2"/><rect class="check" x="492" y="108" width="34" height="12" rx="2"/>
-    <rect class="cell" x="450" y="126" width="34" height="12" rx="2"/><rect class="check" x="492" y="126" width="34" height="12" rx="2" opacity=".45"/>
-    <rect class="cell" x="450" y="144" width="34" height="12" rx="2"/><rect class="check" x="492" y="144" width="34" height="12" rx="2" opacity=".45"/>
-    <rect class="cell" x="450" y="162" width="34" height="12" rx="2"/><rect class="check" x="492" y="162" width="34" height="12" rx="2"/>
-    <rect class="cell" x="450" y="180" width="34" height="12" rx="2"/><rect class="check" x="492" y="180" width="34" height="12" rx="2" opacity=".45"/>
-  </g>
-  <text class="ink h" x="556" y="216">×20</text>
-  <text class="muted s" x="424" y="246">Draw each missing checked</text>
-  <text class="muted s" x="424" y="262">value from the model, with</text>
-  <text class="muted s" x="424" y="278">its uncertainty, 20 times.</text>
-
-  <path class="arrow" d="M590 150 H 604" stroke-width="2"/><path class="head" d="M604 145 L612 150 L604 155 Z"/>
-
-  <!-- 4. Analyze each -->
-  <rect class="card" x="614" y="8" width="160" height="284" rx="8"/>
-  <text class="ink h" x="626" y="32">4. Analyze each</text>
-  <g stroke-width="1.5">
-    <line class="bar" x1="662" y1="70" x2="712" y2="70"/><circle class="dot" cx="686" cy="70" r="3"/>
-    <line class="bar" x1="670" y1="88" x2="722" y2="88"/><circle class="dot" cx="696" cy="88" r="3"/>
-    <line class="bar" x1="654" y1="106" x2="706" y2="106"/><circle class="dot" cx="680" cy="106" r="3"/>
-    <line class="bar" x1="666" y1="124" x2="716" y2="124"/><circle class="dot" cx="691" cy="124" r="3"/>
-    <line class="bar" x1="660" y1="142" x2="710" y2="142"/><circle class="dot" cx="685" cy="142" r="3"/>
-    <line class="bar" x1="674" y1="160" x2="726" y2="160"/><circle class="dot" cx="700" cy="160" r="3"/>
-    <line class="bar" x1="658" y1="178" x2="708" y2="178"/><circle class="dot" cx="683" cy="178" r="3"/>
-    <line class="bar" x1="664" y1="196" x2="716" y2="196"/><circle class="dot" cx="690" cy="196" r="3"/>
-  </g>
-  <text class="muted s" x="626" y="246">Run your analysis on</text>
-  <text class="muted s" x="626" y="262">every completed copy.</text>
-
-  <path class="arrow" d="M776 150 H 790" stroke-width="2"/><path class="head" d="M790 145 L798 150 L790 155 Z"/>
-
-  <!-- 5. Combine -->
-  <rect class="card" x="800" y="8" width="152" height="284" rx="8"/>
-  <text class="ink h" x="812" y="32">5. Combine</text>
-  <line class="final" x1="836" y1="132" x2="920" y2="132" stroke-width="3"/>
-  <line class="final" x1="836" y1="124" x2="836" y2="140" stroke-width="2"/><line class="final" x1="920" y1="124" x2="920" y2="140" stroke-width="2"/>
-  <circle class="finaldot" cx="878" cy="132" r="6"/>
-  <text class="muted s" x="812" y="246">One estimate. Its interval</text>
-  <text class="muted s" x="812" y="262">adds how much the copies</text>
-  <text class="muted s" x="812" y="278">disagree (Rubin's rules).</text>
+  <rect class="card" x="816" y="8" width="180" height="314" rx="8"/>
+  <text class="ink h" x="830" y="32">5. Combine</text>
+  <text class="muted s" x="830" y="248">One estimate. Its</text>
+  <text class="muted s" x="830" y="264">interval adds how</text>
+  <text class="muted s" x="830" y="280">much the copies</text>
+  <text class="muted s" x="830" y="296">disagree (Rubin's</text>
+  <text class="muted s" x="830" y="312">rules).</text>
+  <line class="final" x1="862" y1="132" x2="950" y2="132" stroke-width="3"/>
+  <line class="final" x1="862" y1="124" x2="862" y2="140" stroke-width="2"/><line class="final" x1="950" y1="124" x2="950" y2="140" stroke-width="2"/>
+  <circle class="finaldot" cx="906" cy="132" r="6"/>
 </svg>
