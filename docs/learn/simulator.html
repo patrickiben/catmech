@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>catmech Audit Simulator</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="A teaching simulation of record audits: choose the errors and the audit, then compare five ways to estimate a slope against the truth.">
+<link rel="icon" href="data:,">
+<style>
+/* Layout concept: a Mission Control bench. Controls on the left rail, one study and many studies side by side,
+   readouts first and prose folded away. Palette shared with the Record Audit Planner (docs/audit-planner). */
+:root {
+  --bg: #f4f6f9; --surface: #ffffff; --surface-2: #eef2f6; --surface-3: #e4e9ef;
+  --line: #d7dee7; --line-2: #c3ccd8; --control: #7d8a9b;
+  --ink: #121a24; --text: #1f2a37; --muted: #4d5a69; --faint: #5b6878;
+  --accent: #0b7268; --accent-ink: #075b53; --accent-soft: rgba(11,114,104,.08); --accent-ring: rgba(11,114,104,.30); --on-accent: #ffffff;
+  --green: #1d6b3c; --amber: #8a5300; --red: #b42318;
+  --green-soft: rgba(29,107,60,.10); --amber-soft: rgba(138,83,0,.10); --red-soft: rgba(180,35,24,.10);
+  --point: rgba(77,90,105,.30); --point-audit: #0b7268; --truth: #b42318;
+  --glow: rgba(11,114,104,.06); --bar-bg: rgba(244,246,249,.88);
+  --shadow-1: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08);
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --wrap: 1240px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b0f15; --surface: #111721; --surface-2: #161e2a; --surface-3: #1c2533;
+  --line: #222c3b; --line-2: #2e3a4d; --control: #62718a;
+  --ink: #e8eef6; --text: #c9d3e1; --muted: #98a5b8; --faint: #8593a8;
+  --accent: #3ad7c8; --accent-ink: #8ff0e6; --accent-soft: rgba(58,215,200,.12); --accent-ring: rgba(58,215,200,.35); --on-accent: #06231f;
+  --green: #4fd394; --amber: #f0b450; --red: #ff7a7a;
+  --green-soft: rgba(79,211,148,.14); --amber-soft: rgba(240,180,80,.14); --red-soft: rgba(255,122,122,.14);
+  --point: rgba(152,165,184,.30); --point-audit: #3ad7c8; --truth: #ff7a7a;
+  --glow: rgba(122,164,255,.10); --bar-bg: rgba(11,15,21,.84);
+  --shadow-1: inset 0 1px 0 rgba(255,255,255,.035), 0 1px 2px rgba(0,0,0,.45);
+  color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #0b0f15; --surface: #111721; --surface-2: #161e2a; --surface-3: #1c2533;
+  --line: #222c3b; --line-2: #2e3a4d; --control: #62718a;
+  --ink: #e8eef6; --text: #c9d3e1; --muted: #98a5b8; --faint: #8593a8;
+  --accent: #3ad7c8; --accent-ink: #8ff0e6; --accent-soft: rgba(58,215,200,.12); --accent-ring: rgba(58,215,200,.35); --on-accent: #06231f;
+  --green: #4fd394; --amber: #f0b450; --red: #ff7a7a;
+  --green-soft: rgba(79,211,148,.14); --amber-soft: rgba(240,180,80,.14); --red-soft: rgba(255,122,122,.14);
+  --point: rgba(152,165,184,.30); --point-audit: #3ad7c8; --truth: #ff7a7a;
+  --glow: rgba(122,164,255,.10); --bar-bg: rgba(11,15,21,.84);
+  --shadow-1: inset 0 1px 0 rgba(255,255,255,.035), 0 1px 2px rgba(0,0,0,.45);
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 400 15px/1.5 var(--sans);
+  background-image: radial-gradient(1100px 480px at 50% -10%, var(--glow), transparent 62%); background-repeat: no-repeat; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bar-bg); }
+a { color: var(--accent-ink); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wrap { max-width: var(--wrap); margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bar-bg); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.topbar .wrap { display: flex; align-items: center; gap: 12px; min-height: 52px; flex-wrap: wrap; padding-block: 6px; }
+.brand { font-weight: 700; color: var(--ink); letter-spacing: .01em; }
+.brand span { color: var(--muted); font-weight: 500; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font: 600 11px/1 var(--sans); text-transform: uppercase; letter-spacing: .08em;
+  padding: 6px 9px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--muted); background: var(--surface); }
+.chip.teach { border-color: var(--accent-ring); color: var(--accent-ink); background: var(--accent-soft); }
+.topbar nav { margin-left: auto; display: flex; gap: 14px; font-size: 14px; }
+
+.strip { display: flex; flex-wrap: wrap; gap: 8px 22px; padding-block: 14px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.strip b { color: var(--ink); font-family: var(--mono); font-weight: 600; }
+
+header.intro { padding-block: 18px 6px; }
+h1 { font-size: clamp(22px, 3vw, 30px); line-height: 1.15; margin: 0 0 6px; color: var(--ink); text-wrap: balance; letter-spacing: -.01em; }
+.lede { margin: 0; max-width: 70ch; color: var(--muted); }
+
+.bench { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 18px; padding-block: 16px 28px; align-items: start; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow-1); min-width: 0; }
+.panel > h2, .panel > .head { margin: 0; padding: 14px 16px 0; }
+h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); font-weight: 650; }
+.panel .body { padding: 12px 16px 16px; }
+.rail { display: grid; gap: 14px; }
+.results { display: grid; gap: 18px; min-width: 0; }
+
+fieldset { border: 0; margin: 0 0 16px; padding: 0; min-width: 0; }
+legend { font-weight: 600; color: var(--ink); font-size: 14px; margin-bottom: 8px; padding: 0; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.seg label { position: relative; display: block; }
+.seg input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.seg span { display: block; text-align: center; padding: 8px 6px; border: 1px solid var(--line-2); border-radius: 7px; font-size: 13px; color: var(--text); background: var(--surface-2); line-height: 1.25; }
+.seg input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+.seg input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.seg.stack { grid-template-columns: 1fr; }
+#error-group label:first-child { grid-column: 1 / -1; }
+.seg.stack span { text-align: left; padding: 8px 10px; }
+.range { display: grid; gap: 4px; margin-bottom: 14px; }
+.range .row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.range label { font-weight: 600; color: var(--ink); font-size: 14px; }
+.range output { font: 600 14px var(--mono); color: var(--accent-ink); }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+.hint { font-size: 12px; color: var(--faint); margin: 0; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+button, select { font: inherit; }
+.btn { border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent); padding: 8px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; }
+.btn.ghost { background: transparent; color: var(--accent-ink); }
+.btn:disabled { opacity: .55; cursor: progress; }
+select { border: 1px solid var(--line-2); background: var(--surface-2); color: var(--text); border-radius: 7px; padding: 7px 8px; font-size: 14px; }
+.presets { display: grid; gap: 6px; }
+.presets button { text-align: left; border: 1px solid var(--line); background: var(--surface-2); color: var(--text); border-radius: 8px; padding: 8px 10px; cursor: pointer; font-size: 13px; line-height: 1.35; }
+.presets button b { display: block; color: var(--ink); font-size: 13px; }
+.presets button:hover { border-color: var(--accent-ring); }
+
+.split { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+@media (min-width: 1240px) { .split { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); } }
+.readout { font-size: 13.5px; color: var(--muted); margin: 0 0 8px; }
+.readout b { color: var(--ink); font-family: var(--mono); }
+svg { display: block; width: 100%; height: auto; }
+svg text { fill: var(--muted); font: 12px var(--sans); }
+svg .lbl { fill: var(--ink); font-weight: 600; }
+svg .num { font-family: var(--mono); font-size: 11.5px; fill: var(--text); }
+svg .axis { stroke: var(--line-2); }
+svg .grid { stroke: var(--line); }
+svg .truth { stroke: var(--truth); stroke-dasharray: 4 3; }
+svg .ci { stroke: var(--muted); stroke-width: 2.5; stroke-linecap: round; }
+svg .ci.hit { stroke: var(--accent); }
+svg .ci.miss { stroke: var(--red); }
+svg .est { fill: var(--surface); stroke-width: 2.5; }
+svg .est.hit { stroke: var(--accent); }
+svg .est.miss { stroke: var(--red); }
+svg .pt { fill: var(--point); }
+svg .pt.aud { fill: var(--point-audit); }
+svg .diag { stroke: var(--line-2); stroke-dasharray: 3 3; }
+svg .bar-bg { fill: var(--surface-2); }
+svg .bar { fill: var(--accent); }
+svg .bar.warn { fill: var(--amber); }
+svg .bar.bad { fill: var(--red); }
+svg .band { fill: var(--green-soft); }
+svg .target { stroke: var(--green); stroke-width: 1.5; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 8px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; white-space: normal; }
+th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 650; }
+td { font-family: var(--mono); color: var(--text); }
+td:first-child { font-family: var(--sans); color: var(--ink); font-weight: 600; }
+.fn { font: 500 11.5px var(--mono); color: var(--muted); margin-top: 2px; white-space: normal; }
+tbody th { text-transform: none; letter-spacing: 0; font-size: 13.5px; color: var(--ink); font-weight: 600; }
+.pill { display: inline-block; font: 650 11px/1 var(--sans); letter-spacing: .05em; text-transform: uppercase; padding: 4px 7px; border-radius: 999px; }
+.pill.good { color: var(--green); background: var(--green-soft); }
+.pill.warn { color: var(--amber); background: var(--amber-soft); }
+.pill.bad { color: var(--red); background: var(--red-soft); }
+.pill.na { color: var(--muted); background: var(--surface-2); }
+.progress { height: 4px; border-radius: 4px; background: var(--surface-2); overflow: hidden; margin: 2px 0 10px; }
+.progress div { height: 100%; width: 0; background: var(--accent); transition: width .15s linear; }
+.notes { display: grid; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
+.notes li { padding: 9px 12px; border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 7px 7px 0; font-size: 14px; color: var(--text); }
+.notes li.warn { border-left-color: var(--amber); background: var(--amber-soft); }
+.notes li.bad { border-left-color: var(--red); background: var(--red-soft); }
+details { border-top: 1px solid var(--line); }
+details summary { cursor: pointer; padding: 12px 16px; font-weight: 600; color: var(--ink); }
+details .body { padding-top: 0; }
+details p, details li { max-width: 72ch; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); margin-top: 6px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+footer { border-top: 1px solid var(--line); padding-block: 18px 28px; font-size: 13px; color: var(--muted); }
+footer p { max-width: 80ch; margin: 0 0 8px; }
+@media (max-width: 980px) {
+  .bench { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <div class="brand">catmech <span>Audit simulator</span></div>
+    <span class="chip teach" title="Simulated data, computed in your browser">Teaching simulation</span>
+    <nav aria-label="Pages"><a href="index.html">Guide</a><a href="#about">About this model</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="strip" id="strip" aria-label="Current scenario">
+    <span>People <b>600</b></span>
+    <span>Audited <b id="s-audit">25%</b></span>
+    <span>Errors <b id="s-error">Random errors</b></span>
+    <span>Who is audited <b id="s-who">Random records</b></span>
+    <span>True slope <b>0.130</b> mmHg per kg</span>
+  </div>
+
+  <header class="intro">
+    <h1 id="title">When does a small audit help?</h1>
+    <p class="lede">Each simulated study has 600 people with a recorded weight that may be wrong. An audit checks some of them. Five methods then estimate how blood pressure rises with true weight.</p>
+  </header>
+
+  <div class="bench">
+    <section class="rail" aria-label="Settings">
+      <section class="panel">
+        <h2>Set up the study</h2>
+        <div class="body">
+          <fieldset>
+            <legend>Errors in the recorded weight</legend>
+            <div class="seg" id="error-group">
+              <label><input type="radio" name="error" id="error-none" value="none"><span>No errors</span></label>
+              <label><input type="radio" name="error" id="error-noise" value="noise" checked><span>Random errors</span></label>
+              <label><input type="radio" name="error" id="error-slips" value="slips"><span>Decimal slips</span></label>
+              <label><input type="radio" name="error" id="error-rare" value="rare"><span>Rare slips only</span></label>
+              <label><input type="radio" name="error" id="error-site" value="site"><span>Bad scales by site</span></label>
+            </div>
+          </fieldset>
+          <div class="range" id="size-row">
+            <div class="row"><label for="size" id="size-label">Typical error</label><output id="size-out" for="size">3 kg</output></div>
+            <input type="range" id="size" min="1" max="10" step="1" value="3">
+            <p class="hint" id="size-hint">People under-report by about 1 kg on average, with this much spread.</p>
+          </div>
+          <div class="range">
+            <div class="row"><label for="fraction">Audit size</label><output id="fraction-out" for="fraction">25%</output></div>
+            <input type="range" id="fraction" min="5" max="50" step="5" value="25">
+            <p class="hint" id="fraction-hint">150 of 600 records checked against the source.</p>
+          </div>
+          <fieldset>
+            <legend>Who is audited</legend>
+            <div class="seg stack">
+              <label><input type="radio" name="who" id="who-random" value="random" checked><span>Random records</span></label>
+              <label><input type="radio" name="who" id="who-sites" value="sites"><span>Whole sites at random</span></label>
+              <label><input type="radio" name="who" id="who-recorded" value="recorded"><span>Heavier recorded weights more often</span></label>
+            </div>
+          </fieldset>
+          <div class="actions">
+            <button class="btn" id="new-study" type="button">New study</button>
+            <label for="reps" class="hint" style="margin-left:auto">Studies to repeat</label>
+            <select id="reps"><option value="100">100</option><option value="200" selected>200</option><option value="500">500</option></select>
+          </div>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Try these</h2>
+        <div class="body presets" id="presets">
+          <button type="button" data-preset="keep"><b>Random errors, 25% audit</b>Compare all five methods</button>
+          <button type="button" data-preset="slips"><b>Decimal slips, 5% audit</b>2% of weights typed ten times too large</button>
+          <button type="button" data-preset="clean"><b>Rare slips only, 5% audit</b>An audit that often finds no errors</button>
+          <button type="button" data-preset="sites"><b>Bad scales, whole sites audited</b>By site, 25% of sites</button>
+        </div>
+      </section>
+    </section>
+
+    <div class="results" id="results">
+      <section class="panel" aria-labelledby="one-h">
+        <div class="head"><h2 id="one-h">One study</h2></div>
+        <div class="body">
+          <p class="readout" id="one-readout" aria-live="polite"></p>
+          <div class="split">
+            <div>
+              <svg id="one-chart" viewBox="0 0 560 270" role="img" aria-label="Estimates from one study"></svg>
+              <div class="legend"><span><i style="background:var(--accent)"></i>Interval contains the true slope</span><span><i style="background:var(--red)"></i>Misses it</span><span><i style="background:var(--truth);border-radius:0;height:2px;width:14px"></i>True slope</span><span>Hollow dot: the estimate</span></div>
+            </div>
+            <div>
+              <svg id="scatter" viewBox="0 0 360 250" style="max-width:460px" role="img" aria-label="Recorded against true weight"></svg>
+              <div class="legend"><span><i style="background:var(--point-audit)"></i>Audited</span><span><i style="background:var(--point)"></i>Not audited</span><span>On the dashed line, recorded equals true</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="many-h">
+        <div class="head"><h2 id="many-h">Over many studies</h2></div>
+        <div class="body">
+          <p class="readout" id="many-readout" aria-live="polite">Running studies.</p>
+          <div class="progress" aria-hidden="true"><div id="bar"></div></div>
+          <svg id="cover-chart" viewBox="0 0 560 200" role="img" aria-label="Coverage of each method over many studies"></svg>
+          <div class="table-wrap" tabindex="0" role="region" aria-label="Results over many studies">
+            <table id="many-table">
+              <caption class="hint" style="caption-side:bottom;text-align:left;padding-top:8px">Coverage is the share of studies whose 95% interval contains the true slope; 95% is the target. Holds: within simulation noise of 95%, the shaded band in the chart. Short: below the band. Fails: below 85%. Typical error is the root mean squared error of the estimate. Every run uses the same seed, so it repeats exactly.</caption>
+              <thead><tr><th scope="col">Method</th><th scope="col">Coverage</th><th scope="col">Typical error</th><th scope="col">Average width</th><th scope="col">Reading</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <ul class="notes" id="notes"></ul>
+        </div>
+        <details id="about" open>
+          <summary>About this model</summary>
+          <div class="body">
+            <p><b>What it is.</b> A classroom model written in JavaScript that runs in your browser. Each study draws 600 people in 30 sites of 20, with age, true weight and systolic blood pressure, where pressure rises 0.130 mmHg per kg of true weight. Recorded weight equals true weight plus the chosen error.</p>
+            <p><b>The five methods.</b> <i>Trust the recorded value</i> fits the analysis on recorded weights. <i>Audited records only</i> drops everyone else. <i>Fill in without the recorded value</i> is the package's default, <code>catmech_reference()</code>. <i>Fill in from the recorded value</i> is the recommended start, <code>catmech_reference(use_recorded = TRUE)</code>, with 20 completed copies pooled by Rubin's rules. <i>Every record checked</i> is a benchmark that no real study has.</p>
+            <p><b>How it was checked.</b> The filling-in and pooling follow the package's steps and were compared with the R package on 140 simulated studies at 25% and 5% audits. Least squares, one imputation draw with fixed random numbers, the pooling of the package's own completed copies, and the 18 studies where the audit found no disagreement all matched to rounding error. The random imputations matched the package's on average, within simulation noise. See <code>docs/learn/qa/cross-check.txt</code>.</p>
+            <p><b>What it leaves out.</b> The package's error model, <code>catmech_contamination()</code>, its clustered option, cluster-robust intervals, and audits selected on the true weight itself, which the package's simulations found harmful (74.0% coverage for linear imputation). Its numbers are not the package's validation results, which the <a href="index.html">guide</a> summarizes.</p>
+          </div>
+        </details>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Simulated people, not real records. Its numbers are not the package's validation results. No one outside this project has reviewed this simulator or the package.</p>
+    <p>catmech is an experimental R package. The simulator follows its linear imputation, checked against the package in <code>docs/learn/qa/</code>.</p>
+  </div>
+</footer>
+
+<script src="linear-mi.js"></script>
+<script src="audit-sim.js"></script>
+<script>
+(function () {
+  "use strict";
+  const S = window.AuditSim, MI = window.LinearMI;
+  const $ = (id) => document.getElementById(id);
+  const fmt = (x, d = 3) => (Number.isFinite(x) ? x.toFixed(d) : "none");
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, parent, text) => {
+    const node = document.createElementNS(NS, tag);
+    Object.entries(attrs || {}).forEach(([k, v]) => node.setAttribute(k, v));
+    if (text !== undefined) node.textContent = text;
+    if (parent) parent.appendChild(node);
+    return node;
+  };
+  const SIZE = {
+    noise: { label: "Typical error", unit: " kg", min: 1, max: 10, value: 3, hint: "People under-report by about 1 kg on average, with this much spread." },
+    site: { label: "Scale error by site", unit: " kg", min: 1, max: 10, value: 4, hint: "Each site's scale is off by a fixed amount, typically this much." },
+    slips: { label: "Records with an extra digit", unit: "%", min: 1, max: 10, value: 2, hint: "Weight typed ten times too large, as 750 for 75. Other records carry small errors." },
+    rare: { label: "Records with an extra digit", unit: "%", min: 1, max: 10, value: 1, hint: "Weight typed ten times too large. Every other record is exactly right." }
+  };
+  let studySeed = 1, runToken = 0;
+
+  function opts() {
+    const error = document.querySelector("input[name=error]:checked").value;
+    const size = Number($("size").value);
+    return { error, selection: document.querySelector("input[name=who]:checked").value,
+      fraction: Number($("fraction").value) / 100, size, share: size / 100 };
+  }
+
+  function syncControls(resetSize) {
+    const o = opts(), conf = SIZE[o.error];
+    $("size-row").hidden = !conf;
+    if (conf) {
+      $("size-label").textContent = conf.label;
+      $("size").min = conf.min; $("size").max = conf.max;
+      if (resetSize) $("size").value = conf.value;
+      $("size-out").textContent = $("size").value + conf.unit;
+      $("size-hint").textContent = conf.hint;
+    }
+    const pct = Number($("fraction").value);
+    $("fraction-out").textContent = pct + "%";
+    $("fraction-hint").textContent = o.selection === "sites"
+      ? `${Math.max(2, Math.round(pct / 100 * S.SITES))} of ${S.SITES} sites, every record in them, checked against the source.`
+      : `${Math.max(8, Math.round(pct / 100 * S.PEOPLE))} of ${S.PEOPLE} records checked against the source.`;
+    $("s-audit").textContent = pct + "%";
+    $("s-error").textContent = S.ERRORS[o.error] + (conf ? `, ${$("size").value}${conf.unit}` : "");
+    $("s-who").textContent = S.SELECTION[o.selection];
+  }
+
+  function fitWidth(svg, height) {
+    const W = Math.round(Math.max(340, Math.min(560, svg.getBoundingClientRect().width || 560)));
+    svg.setAttribute("viewBox", `0 0 ${W} ${height}`);
+    return W;
+  }
+
+  function axisTicks(lo, hi, n) {
+    const step0 = (hi - lo) / n, mag = Math.pow(10, Math.floor(Math.log10(step0)));
+    const step = [1, 2, 2.5, 5, 10].map((k) => k * mag).find((s) => s >= step0);
+    const out = [];
+    for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-12; v += step) out.push(+v.toFixed(10));
+    return out;
+  }
+
+  const last = { one: null, many: null };
+
+  function drawOne(res) {
+    last.one = res;
+    const svg = $("one-chart");
+    svg.textContent = "";
+    // Draw at the chart's real width, so text stays readable on a phone.
+    const W = fitWidth(svg, 270), left = W < 480 ? 150 : 168, right = W - 12, top = 22, rowH = 42;
+    const vals = [S.TRUTH];
+    S.METHODS.forEach(({ key }) => { const r = res[key]; if (r && !r.error) vals.push(r.lower, r.upper); });
+    let lo = Math.min(...vals), hi = Math.max(...vals);
+    const pad = (hi - lo) * 0.08 || 0.05; lo -= pad; hi += pad;
+    const x = (v) => left + (v - lo) / (hi - lo) * (right - left);
+    axisTicks(lo, hi, 5).forEach((t) => {
+      el("line", { x1: x(t), x2: x(t), y1: top - 8, y2: top + rowH * 5 - 10, class: "grid" }, svg);
+      el("text", { x: x(t), y: top + rowH * 5 + 6, "text-anchor": "middle" }, svg, t.toFixed(2));
+    });
+    el("text", { x: (left + right) / 2, y: top + rowH * 5 + 24, "text-anchor": "middle" }, svg, "Slope, mmHg per kg");
+    el("line", { x1: x(S.TRUTH), x2: x(S.TRUTH), y1: top - 12, y2: top + rowH * 5 - 6, class: "truth", "stroke-width": 2 }, svg);
+    el("text", { x: x(S.TRUTH), y: 12, "text-anchor": "middle", class: "lbl" }, svg, "true 0.130");
+    const desc = [];
+    S.METHODS.forEach(({ key, short }, i) => {
+      const y = top + i * rowH + 12, r = res[key];
+      el("text", { x: 0, y: y + 4, class: "lbl" }, svg, short);
+      if (!r || r.error) {
+        el("text", { x: left, y: y + 4 }, svg, "No interval: " + (r ? r.error : "not run"));
+        desc.push(`${short}: no interval`);
+        return;
+      }
+      const hit = r.lower <= S.TRUTH && S.TRUTH <= r.upper ? "hit" : "miss";
+      el("line", { x1: x(r.lower), x2: x(r.upper), y1: y, y2: y, class: "ci " + hit }, svg);
+      el("circle", { cx: x(r.estimate), cy: y, r: 5, class: "est " + hit }, svg);
+      el("text", { x: 0, y: y + 18, class: "num" }, svg, `${fmt(r.estimate)} (${fmt(r.lower)} to ${fmt(r.upper)})${r.kept ? " kept recorded" : ""}`);
+      desc.push(`${short}: ${fmt(r.estimate)}, interval ${fmt(r.lower)} to ${fmt(r.upper)}, ${hit === "hit" ? "contains" : "misses"} the true slope`);
+    });
+    svg.setAttribute("aria-label", "Estimates from one study. " + desc.join(". ") + ".");
+  }
+
+  function drawScatter(study, audited) {
+    const svg = $("scatter");
+    svg.textContent = "";
+    const left = 40, right = 350, top = 10, bottom = 210;
+    const cap = 160;
+    const t = study.truth, r = study.recorded;
+    const lo = Math.floor(Math.min(...t, ...r.filter((v) => v <= cap)) / 10) * 10, hi = cap;
+    const x = (v) => left + (Math.min(v, hi) - lo) / (hi - lo) * (right - left);
+    const y = (v) => bottom - (v - lo) / (hi - lo) * (bottom - top);
+    axisTicks(lo, hi, 4).forEach((v) => {
+      el("line", { x1: x(v), x2: x(v), y1: top, y2: bottom, class: "grid" }, svg);
+      el("line", { x1: left, x2: right, y1: y(v), y2: y(v), class: "grid" }, svg);
+      el("text", { x: x(v), y: bottom + 14, "text-anchor": "middle" }, svg, String(v));
+      el("text", { x: left - 6, y: y(v) + 4, "text-anchor": "end" }, svg, String(v));
+    });
+    el("line", { x1: x(lo), y1: y(lo), x2: x(hi), y2: y(hi), class: "diag" }, svg);
+    let off = 0;
+    for (let pass = 0; pass < 2; pass++) {
+      t.forEach((tv, i) => {
+        if ((pass === 1) !== audited[i]) return;
+        if (r[i] > hi) { off += 1; return; }
+        el("circle", { cx: x(r[i]).toFixed(1), cy: y(tv).toFixed(1), r: audited[i] ? 2.6 : 2, class: audited[i] ? "pt aud" : "pt" }, svg);
+      });
+    }
+    el("text", { x: (left + right) / 2, y: 242, "text-anchor": "middle" }, svg, "Recorded weight, kg");
+    el("text", { x: 12, y: (top + bottom) / 2, "text-anchor": "middle", transform: `rotate(-90 12 ${(top + bottom) / 2})` }, svg, "True weight, kg");
+    if (off) el("text", { x: right, y: top + 12, "text-anchor": "end", class: "lbl" }, svg, `${off} recorded above ${hi} kg, off the chart`);
+    svg.setAttribute("aria-label", `Recorded against true weight for 600 people; points on the dashed line were recorded correctly.${off ? ` ${off} records were recorded above ${hi} kg.` : ""}`);
+  }
+
+  function newStudy() {
+    const o = opts();
+    const random = MI.rng(100003 * studySeed++ + 17);
+    const study = S.makeStudy(o, random);
+    const audited = S.chooseAudit(study, o, random);
+    const res = S.estimate(study, audited, 20, random);
+    let n = 0, disagree = 0, slips = 0;
+    audited.forEach((a, i) => {
+      if (!a) return;
+      n += 1;
+      if (Math.abs(study.recorded[i] - study.truth[i]) > 1) disagree += 1;
+      if (study.recorded[i] > 5 * study.truth[i]) slips += 1;
+    });
+    $("one-readout").innerHTML = `Audited <b>${n}</b> records · <b>${disagree}</b> off by more than 1 kg` +
+      (o.error === "slips" || o.error === "rare" ? ` · <b>${slips}</b> decimal slips found` : "") +
+      (res.linear && res.linear.kept ? ` · <b>every audited record agreed</b>, so filling in kept the recorded values` : "");
+    drawScatter(study, audited);
+    drawOne(res);
+  }
+
+  // Holds when coverage is within simulation noise of 95%, the band drawn on the chart.
+  function reading(row) {
+    if (!row.ok) return ["na", "No interval"];
+    const moe = 196 * Math.sqrt(0.95 * 0.05 / row.ok);
+    if (row.coverage >= 95 - moe) return ["good", "Holds"];
+    if (row.coverage >= 85) return ["warn", "Short"];
+    return ["bad", "Fails"];
+  }
+
+  function drawMany(rows, done, total) {
+    last.many = [rows, done, total];
+    const svg = $("cover-chart");
+    svg.textContent = "";
+    const W = fitWidth(svg, 200), left = W < 480 ? 132 : 168, right = W - 40, top = 16, rowH = 34;
+    const x = (v) => left + v / 100 * (right - left);
+    const moe = done ? 196 * Math.sqrt(0.95 * 0.05 / done) : 0;
+    el("rect", { x: x(Math.max(0, 95 - moe)), y: top - 8, width: x(Math.min(100, 95 + moe)) - x(Math.max(0, 95 - moe)), height: rowH * 5, class: "band" }, svg);
+    [0, 25, 50, 75, 100].forEach((v) => el("text", { x: x(v), y: top + rowH * 5 + 8, "text-anchor": "middle" }, svg, v + "%"));
+    const desc = [];
+    rows.forEach((row, i) => {
+      const y = top + i * rowH;
+      el("text", { x: 0, y: y + 12, class: "lbl" }, svg, row.short);
+      el("rect", { x: left, y, width: right - left, height: 16, rx: 3, class: "bar-bg" }, svg);
+      const [tone] = reading(row);
+      if (row.ok) {
+        el("rect", { x: left, y, width: Math.max(1, x(row.coverage) - left), height: 16, rx: 3, class: "bar" + (tone === "warn" ? " warn" : tone === "bad" ? " bad" : "") }, svg);
+        el("text", { x: right + 6, y: y + 12, class: "num" }, svg, row.coverage.toFixed(0) + "%");
+        desc.push(`${row.short} ${row.coverage.toFixed(0)}%`);
+      }
+    });
+    el("line", { x1: x(95), x2: x(95), y1: top - 10, y2: top + rowH * 5 - 6, class: "target" }, svg);
+    el("text", { x: x(95), y: 8, "text-anchor": "middle" }, svg, "95% target");
+    svg.setAttribute("aria-label", `Coverage over ${done} studies: ` + desc.join(", ") + ". The shaded band is the noise expected around 95%.");
+
+    const body = $("many-table").tBodies[0];
+    body.textContent = "";
+    rows.forEach((row) => {
+      const tr = document.createElement("tr");
+      const [tone, word] = reading(row);
+      const cells = [row.label, row.ok ? row.coverage.toFixed(1) + "%" : "none", fmt(row.rmse), fmt(row.width)];
+      cells.forEach((c, i) => { const td = document.createElement(i ? "td" : "th"); if (!i) td.scope = "row"; td.textContent = c; tr.appendChild(td); });
+      const fn = { default: "catmech_reference()", linear: "catmech_reference(use_recorded = TRUE), the recommended start" }[row.key];
+      if (fn) { const small = document.createElement("div"); small.className = "fn"; small.textContent = fn; tr.firstChild.appendChild(small); }
+      const td = document.createElement("td");
+      const pill = document.createElement("span");
+      pill.className = "pill " + tone; pill.textContent = word;
+      td.appendChild(pill);
+      if (row.ok < done) td.appendChild(document.createTextNode(` ${done - row.ok} without`));
+      tr.appendChild(td);
+      body.appendChild(tr);
+    });
+    $("bar").style.width = (100 * done / total).toFixed(0) + "%";
+  }
+
+  function notes(rows, done, o) {
+    const by = Object.fromEntries(rows.map((r) => [r.key, r]));
+    const out = [];
+    const lin = by.linear, def = by["default"], trust = by.trust, oracle = by.oracle;
+    if (lin.ok && def.ok) {
+      const ratio = lin.width / def.width;
+      const [tone] = reading(lin);
+      const but = tone === "good" ? (ratio < 0.8 ? "" : ", so the recorded value added little here") : ", but they were too narrow for its errors";
+      out.push([tone === "good" ? "" : tone, `Filling in from the recorded value gave intervals ${Math.round(100 * ratio)}% as wide as filling in without it${but}. Typical error ${fmt(lin.rmse)} against ${fmt(def.rmse)}.`]);
+    }
+    if (lin.ok) {
+      const [tone] = reading(lin);
+      out.push([tone === "good" ? "" : tone, `Filling in from the recorded value contained the true slope in ${lin.coverage.toFixed(0)}% of ${lin.ok} studies.`]);
+      if (lin.kept && o.error === "none") out.push(["", `In all ${lin.kept} studies every audited record agreed, so filling in kept the recorded values. Coverage held only because the records really were correct.`]);
+      else if (lin.kept) out.push([tone === "good" ? "warn" : tone, `In ${lin.kept} of ${lin.ok} studies the audit found no disagreement, so filling in kept the recorded values, including any errors the audit missed. The package warns when this happens.`]);
+    }
+    if (trust.ok && lin.ok && reading(trust)[0] === "good" && trust.rmse <= 1.05 * lin.rmse)
+      out.push(["", "Trusting the recorded value did as well here. An audit does not always improve the answer, and nothing tells you in advance when it will."]);
+    if (o.selection === "sites") out.push(["", "With whole sites audited, the package would pool with catmech_pool_lm(cluster = ). Here the outcome has no site effect, so plain intervals are enough."]);
+    if (trust.ok && trust.coverage < 85) out.push(["bad", `Trusting the recorded value contained the true slope in only ${trust.coverage.toFixed(0)}% of studies.`]);
+    if (oracle.ok) out.push(["", `Checking every record, which no real audit does, gave typical error ${fmt(oracle.rmse)}.`]);
+    const list = $("notes");
+    list.textContent = "";
+    out.forEach(([tone, text]) => { const li = document.createElement("li"); if (tone) li.className = tone; li.textContent = text; list.appendChild(li); });
+  }
+
+  function runMany() {
+    const token = ++runToken, o = opts(), total = Number($("reps").value);
+    const run = S.runner(o, 20, 4242 + total);
+    $("many-readout").textContent = `Running ${total} studies.`;
+    const tick = () => {
+      if (token !== runToken) return;
+      run.step(Math.min(6, total - run.done()));
+      const done = run.done(), rows = run.summary();
+      drawMany(rows, done, total);
+      if (done < total) { $("many-readout").textContent = `Running studies: ${done} of ${total}.`; setTimeout(tick, 0); }
+      else { $("many-readout").innerHTML = `<b>${total}</b> studies, each with a new population and a new audit.`; notes(rows, done, o); }
+    };
+    $("notes").textContent = "";
+    tick();
+  }
+
+  const PRESETS = {
+    keep: { error: "noise", size: 3, fraction: 25, who: "random" },
+    slips: { error: "slips", size: 2, fraction: 5, who: "random" },
+    clean: { error: "rare", size: 1, fraction: 5, who: "random" },
+    sites: { error: "site", size: 4, fraction: 25, who: "sites" }
+  };
+  function applyPreset(name) {
+    const p = PRESETS[name];
+    $("error-" + p.error).checked = true;
+    $("who-" + p.who).checked = true;
+    syncControls(true);
+    $("size").value = p.size;
+    $("fraction").value = p.fraction;
+    syncControls(false);
+    refresh();
+  }
+
+  let pending = null;
+  function refresh() {
+    newStudy();
+    clearTimeout(pending);
+    pending = setTimeout(runMany, 120);
+  }
+
+  document.querySelectorAll("input[name=error]").forEach((n) => n.addEventListener("change", () => { syncControls(true); refresh(); }));
+  document.querySelectorAll("input[name=who]").forEach((n) => n.addEventListener("change", () => { syncControls(false); refresh(); }));
+  ["size", "fraction"].forEach((id) => {
+    $(id).addEventListener("input", () => syncControls(false));
+    $(id).addEventListener("change", refresh);
+  });
+  $("reps").addEventListener("change", runMany);
+  $("new-study").addEventListener("click", newStudy);
+  $("presets").addEventListener("click", (e) => { const b = e.target.closest("button[data-preset]"); if (b) applyPreset(b.dataset.preset); });
+
+  let resizeTimer = null, lastWidth = window.innerWidth;
+  window.addEventListener("resize", () => {
+    if (Math.abs(window.innerWidth - lastWidth) < 40) return;
+    lastWidth = window.innerWidth;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => { if (last.one) drawOne(last.one); if (last.many) drawMany(...last.many); }, 200);
+  });
+
+  syncControls(false);
+  newStudy();
+  runMany();
+})();
+</script>
+</body>
+</html>

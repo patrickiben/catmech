@@ -1,0 +1,8 @@
+Evaluation pool: 3908 people, 3844 with a self-reported weight; audited: 977
+Audited people with both weights whose self-report differs from the measurement by more than 1 kg: 624 of 954 (65.4%)
+Median absolute difference on those rows: 1.7 kg
+Fill in from the recorded value (catmech_reference, use_recorded = TRUE): 0.126, 95% interval 0.097 to 0.155, width 0.058
+Fill in without the recorded value (catmech_reference default): 0.108, 95% interval 0.047 to 0.169, width 0.122
+Audited rows only: 0.141, 95% interval 0.082 to 0.199, width 0.117
+Trust the recorded value, rows that have one: 0.108, 95% interval 0.079 to 0.137, width 0.058
+Every measured weight: 0.127, 95% interval 0.100 to 0.154, width 0.054

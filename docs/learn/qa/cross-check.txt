@@ -1,0 +1,32 @@
+catmech audit simulator: browser engine against the R package
+Studies: 140, from docs/learn/qa/make-datasets.js; R results from tools/learn-simulator-check.R
+
+PASS  least squares on 140 studies, three methods: largest relative difference 1.31e-11
+PASS  the package's fit used no column pivoting, so coefficient order matches
+PASS  the fit on audited rows (coefficients, residual sum of squares, df): largest relative difference 9.86e-13
+PASS  one draw of 450 filled values with fixed deviates: largest relative difference 5.38e-15
+PASS  negative control: a mutated engine (sigma without the chi-square draw) fails the exact draw
+PASS  negative control: a mutated engine (chi-square on the wrong df) fails the exact draw
+PASS  negative control: a mutated engine (no coefficient draw) fails the exact draw
+PASS  negative control: a mutated engine (no noise on filled rows) fails the exact draw
+PASS  pooling the package's own completed copies, 4 cases: largest relative difference 4.28e-14
+PASS  negative control: a pooling rule without the (1 + 1/m) factor is detected
+PASS  studies where the audit found no disagreement: 18
+PASS  kept recorded values, against the package on those 18 studies: largest relative difference 7.67e-13
+PASS  negative control: the older pooling rule with a floor on lambda is detected on a kept study
+
+Imputation, browser against package, same studies, m = 20 each. Differences come from random draws, so these use z-tests (|z| < 3.5).
+  default, 140 studies with imputation: mean difference in estimate -2.45e-3 (z = -1.29); geometric mean SE ratio 1.0289 (z = 1.88); intervals covering the true slope 133 and 130 of 140
+PASS  default: no systematic difference in estimates
+PASS  default: no systematic difference in standard errors
+  linear, 122 studies with imputation: mean difference in estimate -8.46e-4 (z = -0.66); geometric mean SE ratio 1.0016 (z = 0.19); intervals covering the true slope 119 and 119 of 140
+PASS  linear: no systematic difference in estimates
+PASS  linear: no systematic difference in standard errors
+PASS  negative control: imputation without random draws is detected (z = -8.63)
+
+Notes: a first version required average standard errors within 3%. It flagged the default method at 1.0353,
+but two browser runs with different seeds differed by as much, so the standard-error check is a z-test, which
+misses smaller systematic differences; the exact draw above is what pins down the imputation step. The first
+version also floored lambda at 1e-4, as older mice did; mice 3.19.0, which the package ran with, does not.
+
+RESULT: PASS

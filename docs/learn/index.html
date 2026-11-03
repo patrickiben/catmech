@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>catmech Guide</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="data:,">
+<meta name="description" content="A plain-language guide to catmech: how it uses an audit to correct recorded values, which method to start with, where it fails, and what its tests found.">
+<style>
+/* Layout concept: a Mission Control field manual. A status strip and the five-step diagram up top,
+   then cards that each answer one question, with the evidence as verdict chips. Palette shared with
+   the Record Audit Planner and the audit simulator. */
+:root {
+  --bg: #f4f6f9; --surface: #ffffff; --surface-2: #eef2f6; --surface-3: #e4e9ef;
+  --line: #d7dee7; --line-2: #c3ccd8; --control: #7d8a9b;
+  --ink: #121a24; --text: #1f2a37; --muted: #4d5a69; --faint: #5b6878;
+  --accent: #0b7268; --accent-ink: #075b53; --accent-soft: rgba(11,114,104,.08); --accent-ring: rgba(11,114,104,.30); --on-accent: #ffffff;
+  --green: #1d6b3c; --amber: #8a5300; --red: #b42318;
+  --green-soft: rgba(29,107,60,.10); --amber-soft: rgba(138,83,0,.10); --red-soft: rgba(180,35,24,.10);
+  --fig-card: #f4f6f9; --fig-cell: #c3ccd8; --fig-empty: #9aa6b5; --fig-copy: #ffffff;
+  --glow: rgba(11,114,104,.06); --bar-bg: rgba(244,246,249,.88);
+  --shadow-1: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08);
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --wrap: 1120px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b0f15; --surface: #111721; --surface-2: #161e2a; --surface-3: #1c2533;
+  --line: #222c3b; --line-2: #2e3a4d; --control: #62718a;
+  --ink: #e8eef6; --text: #c9d3e1; --muted: #98a5b8; --faint: #8593a8;
+  --accent: #3ad7c8; --accent-ink: #8ff0e6; --accent-soft: rgba(58,215,200,.12); --accent-ring: rgba(58,215,200,.35); --on-accent: #06231f;
+  --green: #4fd394; --amber: #f0b450; --red: #ff7a7a;
+  --green-soft: rgba(79,211,148,.14); --amber-soft: rgba(240,180,80,.14); --red-soft: rgba(255,122,122,.14);
+  --fig-card: #161e2a; --fig-cell: #3a475b; --fig-empty: #62718a; --fig-copy: #111721;
+  --glow: rgba(122,164,255,.10); --bar-bg: rgba(11,15,21,.84);
+  --shadow-1: inset 0 1px 0 rgba(255,255,255,.035), 0 1px 2px rgba(0,0,0,.45);
+  color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+  --bg: #0b0f15; --surface: #111721; --surface-2: #161e2a; --surface-3: #1c2533;
+  --line: #222c3b; --line-2: #2e3a4d; --control: #62718a;
+  --ink: #e8eef6; --text: #c9d3e1; --muted: #98a5b8; --faint: #8593a8;
+  --accent: #3ad7c8; --accent-ink: #8ff0e6; --accent-soft: rgba(58,215,200,.12); --accent-ring: rgba(58,215,200,.35); --on-accent: #06231f;
+  --green: #4fd394; --amber: #f0b450; --red: #ff7a7a;
+  --green-soft: rgba(79,211,148,.14); --amber-soft: rgba(240,180,80,.14); --red-soft: rgba(255,122,122,.14);
+  --fig-card: #161e2a; --fig-cell: #3a475b; --fig-empty: #62718a; --fig-copy: #111721;
+  --glow: rgba(122,164,255,.10); --bar-bg: rgba(11,15,21,.84);
+  --shadow-1: inset 0 1px 0 rgba(255,255,255,.035), 0 1px 2px rgba(0,0,0,.45);
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-padding-top: 72px; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 400 16px/1.6 var(--sans);
+  background-image: radial-gradient(1100px 480px at 50% -10%, var(--glow), transparent 62%); background-repeat: no-repeat; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bar-bg); }
+a { color: var(--accent-ink); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code { font-family: var(--mono); font-size: .9em; background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
+.wrap { max-width: var(--wrap); margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+.topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bar-bg); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.topbar .wrap { display: flex; align-items: center; gap: 10px 14px; min-height: 52px; flex-wrap: wrap; padding-block: 6px; }
+.brand { font-weight: 700; color: var(--ink); }
+.brand span { color: var(--muted); font-weight: 500; }
+.topbar nav { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 14px; margin-left: auto; }
+.chip { display: inline-flex; align-items: center; font: 650 11px/1 var(--sans); text-transform: uppercase; letter-spacing: .08em;
+  padding: 6px 9px; border-radius: 999px; border: 1px solid var(--line-2); color: var(--muted); background: var(--surface); white-space: nowrap; }
+.chip.good { color: var(--green); border-color: transparent; background: var(--green-soft); }
+.chip.warn { color: var(--amber); border-color: transparent; background: var(--amber-soft); }
+.chip.bad { color: var(--red); border-color: transparent; background: var(--red-soft); }
+.chip.info { color: var(--accent-ink); border-color: var(--accent-ring); background: var(--accent-soft); }
+
+.strip { display: flex; flex-wrap: wrap; gap: 8px 22px; padding-block: 14px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.strip b { color: var(--ink); font-family: var(--mono); font-weight: 600; }
+
+.hero { padding-block: 26px 8px; display: grid; gap: 10px; }
+h1 { font-size: clamp(26px, 4vw, 38px); line-height: 1.12; margin: 0; color: var(--ink); text-wrap: balance; letter-spacing: -.015em; max-width: 22ch; }
+.lede { margin: 0; max-width: 64ch; font-size: 17px; color: var(--muted); }
+.cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+.btn { display: inline-block; text-decoration: none; border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent); padding: 9px 15px; border-radius: 8px; font-weight: 600; font-size: 15px; }
+.btn.ghost { background: transparent; color: var(--accent-ink); }
+
+section { padding-block: 26px 4px; }
+h2 { font-size: clamp(20px, 2.4vw, 26px); color: var(--ink); margin: 0 0 6px; letter-spacing: -.01em; text-wrap: balance; }
+.kicker { font: 650 12px/1 var(--sans); text-transform: uppercase; letter-spacing: .1em; color: var(--accent-ink); margin: 0 0 8px; }
+.sub { margin: 0 0 16px; color: var(--muted); max-width: 70ch; }
+.grid { display: grid; gap: 14px; }
+.g2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.g4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; box-shadow: var(--shadow-1); min-width: 0; }
+.card h3 { margin: 0 0 6px; font-size: 16px; color: var(--ink); }
+.card p { margin: 0; font-size: 15px; }
+.card p + p { margin-top: 8px; }
+.card .assume { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line-2); font-size: 13.5px; color: var(--muted); }
+.card .assume b { color: var(--text); }
+.card.flag { border-left: 3px solid var(--red); }
+.card.warnflag { border-left: 3px solid var(--amber); }
+.card.okflag { border-left: 3px solid var(--green); }
+.card .big { font: 650 28px/1.1 var(--mono); color: var(--ink); margin: 2px 0 6px; font-variant-numeric: tabular-nums; }
+.card .big small { font-size: 14px; color: var(--muted); font-weight: 500; }
+dl.terms { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px; margin: 0; }
+dl.terms div { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; min-width: 0; }
+dt { font-weight: 650; color: var(--ink); font-size: 15px; }
+dd { margin: 2px 0 0; font-size: 14.5px; color: var(--text); }
+.figure { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px; overflow-x: auto; box-shadow: var(--shadow-1); }
+.figure svg { display: block; width: 100%; min-width: 720px; height: auto; }
+.how-fig text { font: 13px var(--sans); } .how-fig .h { font-size: 14px; font-weight: 650; } .how-fig .s { font-size: 12px; }
+.how-fig .bg { fill: var(--surface); } .how-fig .card { fill: var(--fig-card); stroke: var(--line); }
+.how-fig .ink { fill: var(--ink); } .how-fig .muted { fill: var(--muted); } .how-fig .cell { fill: var(--fig-cell); }
+.how-fig .empty { fill: none; stroke: var(--fig-empty); stroke-dasharray: 3 2; }
+.how-fig .check { fill: var(--accent); } .how-fig .line { stroke: var(--accent); } .how-fig .axis { stroke: var(--fig-empty); }
+.how-fig .arrow { stroke: var(--control); fill: none; } .how-fig .head { fill: var(--control); }
+.how-fig .copy { fill: var(--fig-copy); stroke: var(--fig-cell); } .how-fig .bar { stroke: var(--muted); } .how-fig .dot { fill: var(--muted); }
+.how-fig .final { stroke: var(--accent); } .how-fig .finaldot { fill: var(--accent); }
+pre { margin: 0; background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font: 13px/1.55 var(--mono); color: var(--text); }
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow-1); }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+thead th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 650; background: var(--surface-2); }
+tbody th { color: var(--ink); font-weight: 650; }
+tr:last-child td, tr:last-child th { border-bottom: 0; }
+td.num { font-family: var(--mono); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.bars { display: grid; gap: 10px; }
+.bar-row { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) 150px; gap: 10px; align-items: center; font-size: 14px; }
+.bar-row .name { color: var(--ink); font-weight: 600; }
+.bar-row .track { position: relative; height: 18px; background: var(--surface-2); border-radius: 4px; }
+.bar-row .ci { position: absolute; top: 7px; height: 4px; border-radius: 2px; background: var(--accent); }
+.bar-row .pt { position: absolute; top: 3px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: var(--surface); border: 2.5px solid var(--accent); }
+.bar-row.off .ci { background: var(--amber); } .bar-row.off .pt { border-color: var(--amber); }
+.bar-row .ref { position: absolute; top: -3px; bottom: -3px; width: 0; border-left: 2px dashed var(--red); }
+.bar-row .val { font: 13px var(--mono); color: var(--text); text-align: right; white-space: nowrap; }
+.verdicts { display: grid; gap: 8px; }
+.verdict { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 12px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.verdict .chip { justify-self: start; margin-top: 2px; }
+.verdict p { margin: 0; font-size: 15px; }
+.verdict p b { color: var(--ink); }
+details { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+details + details { margin-top: 10px; }
+summary { cursor: pointer; padding: 12px 16px; font-weight: 650; color: var(--ink); }
+details > div { padding: 0 16px 14px; }
+details p { margin: 0 0 8px; max-width: 72ch; font-size: 15px; }
+footer { border-top: 1px solid var(--line); margin-top: 30px; padding-block: 18px 30px; font-size: 13.5px; color: var(--muted); }
+footer p { max-width: 80ch; margin: 0 0 8px; }
+@media (max-width: 900px) {
+  .g3, .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .bar-row { grid-template-columns: minmax(0, 1fr) 130px; }
+  .bar-row .track { grid-column: 1 / -1; grid-row: 2; }
+}
+@media (max-width: 620px) {
+  .g2, .g3, .g4, dl.terms { grid-template-columns: minmax(0, 1fr); }
+  .bar-row { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .bar-row .track { grid-row: auto; }
+  .bar-row .val { text-align: left; }
+  .verdict { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .topbar nav { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <div class="brand">catmech <span>Guide</span></div>
+    <nav aria-label="Sections">
+      <a href="#how">How it works</a><a href="#example">Example</a><a href="#which">Which method</a><a href="#fails">Where it fails</a><a href="#evidence">Evidence</a><a href="simulator.html">Simulator</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+  <div class="strip" aria-label="Package status">
+    <span>Version <b>0.7.1</b></span>
+    <span>Status <b>experimental</b></span>
+    <span>On CRAN <b>no</b></span>
+    <span>Independent human review <b>none</b></span>
+  </div>
+
+  <div class="hero">
+    <h1 id="title">Use recorded values without trusting them</h1>
+    <p class="lede">Records contain mistakes, and checking every one against its source is expensive. catmech, an R package, uses a checked sample of records to fill in plausible checked values for the rest, many times over, and carries that uncertainty into the answer.</p>
+    <div class="cta"><a class="btn" href="simulator.html">Open the audit simulator</a><a class="btn ghost" href="#how">See how it works</a></div>
+  </div>
+
+  <section aria-labelledby="problem-h">
+    <p class="kicker">The problem</p>
+    <h2 id="problem-h">Two poor options, and a third</h2>
+    <div class="grid g3">
+      <div class="card warnflag"><h3>Trust the recorded values</h3><p>Precise, and sometimes the best choice. But errors that grow with the value or differ between groups go straight into a slope, and the interval does not know it. A constant offset moves only the intercept.</p></div>
+      <div class="card warnflag"><h3>Use only the checked records</h3><p>Honest, but it throws away most of the data, so intervals get wide.</p></div>
+      <div class="card okflag"><h3>Learn from the checked records</h3><p>Use the audit to learn how recorded values relate to checked ones, then fill in the rest several plausible ways, carrying the uncertainty forward. This is what catmech does.</p><p>A small audit does not always beat trusting the records, and nothing tells you in advance when it will.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="words-h">
+    <p class="kicker">Words used here</p>
+    <h2 id="words-h">Eight terms</h2>
+    <dl class="terms">
+      <div><dt>Recorded value</dt><dd>What the record says, such as a self-reported weight. Most records have one, and some are wrong.</dd></div>
+      <div><dt>Checked value</dt><dd>The value confirmed against the source, such as a measured weight. The package calls it the reference.</dd></div>
+      <div><dt>Audit</dt><dd>Checking a subset of records. The checked records are the audited rows.</dd></div>
+      <div><dt>Multiple imputation</dt><dd>Filling in each missing checked value several plausible ways, analyzing each copy, then combining.</dd></div>
+      <div><dt>Interval</dt><dd>The 95% range around an estimate. It should contain the true value 95% of the time.</dd></div>
+      <div><dt>Coverage</dt><dd>How often, across repeated studies, the intervals actually contain the true value.</dd></div>
+      <div><dt>Typical error</dt><dd>Root mean squared error: how far estimates land from the truth, on average.</dd></div>
+      <div><dt>Oracle</dt><dd>A benchmark that uses every checked value. No real audit has it.</dd></div>
+    </dl>
+  </section>
+
+  <section id="how" aria-labelledby="how-h">
+    <p class="kicker">How it works</p>
+    <h2 id="how-h">Learn, fill in, analyze, combine</h2>
+    <p class="sub">The recommended start is linear imputation given the recorded value. <code>catmech_reference(..., use_recorded = TRUE)</code> learns and fills in; <code>catmech_pool_lm()</code> analyzes and combines. Without <code>use_recorded = TRUE</code>, <code>catmech_reference()</code> leaves the recorded value out: the method called "fill in without the recorded value" below.</p>
+    <div class="figure how-fig" tabindex="0" role="region" aria-label="How catmech works, scrollable diagram">
+<!--HOW-FIGURE start: generated from docs/figures/how-it-works.svg-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 300" role="img" aria-labelledby="how-t how-d">
+  <title id="how-t">How catmech works</title>
+  <desc id="how-d">Five panels from left to right. One: a table where every row has a recorded value and only audited rows have a checked value. Two: on audited rows, a regression of the checked value on the recorded value and the other variables. Three: each unaudited row's checked value is drawn 20 times from that model. Four: the analysis runs on each of the 20 completed copies. Five: Rubin's rules combine them into one estimate whose interval includes the spread between copies.</desc>
+  <rect class="bg" x="0" y="0" width="960" height="300"/>
+
+  <!-- 1. Records -->
+  <rect class="card" x="8" y="8" width="176" height="284" rx="8"/>
+  <text class="ink h" x="20" y="32">1. Your records</text>
+  <text class="muted s" x="34" y="56">recorded</text>
+  <text class="muted s" x="106" y="56">checked</text>
+  <g>
+    <rect class="cell" x="34" y="66" width="56" height="14" rx="2"/><rect class="empty" x="106" y="66" width="56" height="14" rx="2"/>
+    <rect class="cell" x="34" y="86" width="56" height="14" rx="2"/><rect class="check" x="106" y="86" width="56" height="14" rx="2"/>
+    <rect class="cell" x="34" y="106" width="56" height="14" rx="2"/><rect class="empty" x="106" y="106" width="56" height="14" rx="2"/>
+    <rect class="cell" x="34" y="126" width="56" height="14" rx="2"/><rect class="empty" x="106" y="126" width="56" height="14" rx="2"/>
+    <rect class="cell" x="34" y="146" width="56" height="14" rx="2"/><rect class="check" x="106" y="146" width="56" height="14" rx="2"/>
+    <rect class="cell" x="34" y="166" width="56" height="14" rx="2"/><rect class="empty" x="106" y="166" width="56" height="14" rx="2"/>
+    <rect class="cell" x="34" y="186" width="56" height="14" rx="2"/><rect class="empty" x="106" y="186" width="56" height="14" rx="2"/>
+    <rect class="cell" x="34" y="206" width="56" height="14" rx="2"/><rect class="check" x="106" y="206" width="56" height="14" rx="2"/>
+  </g>
+  <text class="muted s" x="20" y="246">Every row has a recorded</text>
+  <text class="muted s" x="20" y="262">value. Audited rows also</text>
+  <text class="muted s" x="20" y="278">have a checked one.</text>
+
+  <path class="arrow" d="M186 150 H 200" stroke-width="2"/><path class="head" d="M200 145 L208 150 L200 155 Z"/>
+
+  <!-- 2. Learn -->
+  <rect class="card" x="210" y="8" width="176" height="284" rx="8"/>
+  <text class="ink h" x="222" y="32">2. Learn</text>
+  <line class="axis" x1="236" y1="208" x2="366" y2="208"/><line class="axis" x1="236" y1="208" x2="236" y2="62"/>
+  <text class="muted s" x="270" y="226">recorded</text>
+  <text class="muted s" x="0" y="0" transform="translate(228 166) rotate(-90)">checked</text>
+  <line class="line" x1="244" y1="196" x2="358" y2="76" stroke-width="2"/>
+  <circle class="check" cx="252" cy="182" r="4"/><circle class="check" cx="266" cy="176" r="4"/><circle class="check" cx="280" cy="150" r="4"/>
+  <circle class="check" cx="296" cy="144" r="4"/><circle class="check" cx="312" cy="116" r="4"/><circle class="check" cx="326" cy="112" r="4"/>
+  <circle class="check" cx="342" cy="88" r="4"/><circle class="check" cx="304" cy="132" r="4"/>
+  <text class="muted s" x="222" y="246">On audited rows, regress</text>
+  <text class="muted s" x="222" y="262">checked on recorded and the</text>
+  <text class="muted s" x="222" y="278">other variables.</text>
+
+  <path class="arrow" d="M388 150 H 402" stroke-width="2"/><path class="head" d="M402 145 L410 150 L402 155 Z"/>
+
+  <!-- 3. Fill in -->
+  <rect class="card" x="412" y="8" width="176" height="284" rx="8"/>
+  <text class="ink h" x="424" y="32">3. Fill in 20 ways</text>
+  <rect class="copy" x="456" y="62" width="96" height="132" rx="4"/>
+  <rect class="copy" x="448" y="70" width="96" height="132" rx="4"/>
+  <rect class="copy" x="440" y="78" width="96" height="132" rx="4"/>
+  <g>
+    <rect class="cell" x="450" y="90" width="34" height="12" rx="2"/><rect class="check" x="492" y="90" width="34" height="12" rx="2" opacity=".45"/>
+    <rect class="cell" x="450" y="108" width="34" height="12" rx="2"/><rect class="check" x="492" y="108" width="34" height="12" rx="2"/>
+    <rect class="cell" x="450" y="126" width="34" height="12" rx="2"/><rect class="check" x="492" y="126" width="34" height="12" rx="2" opacity=".45"/>
+    <rect class="cell" x="450" y="144" width="34" height="12" rx="2"/><rect class="check" x="492" y="144" width="34" height="12" rx="2" opacity=".45"/>
+    <rect class="cell" x="450" y="162" width="34" height="12" rx="2"/><rect class="check" x="492" y="162" width="34" height="12" rx="2"/>
+    <rect class="cell" x="450" y="180" width="34" height="12" rx="2"/><rect class="check" x="492" y="180" width="34" height="12" rx="2" opacity=".45"/>
+  </g>
+  <text class="ink h" x="556" y="216">×20</text>
+  <text class="muted s" x="424" y="246">Draw each missing checked</text>
+  <text class="muted s" x="424" y="262">value from the model, with</text>
+  <text class="muted s" x="424" y="278">its uncertainty, 20 times.</text>
+
+  <path class="arrow" d="M590 150 H 604" stroke-width="2"/><path class="head" d="M604 145 L612 150 L604 155 Z"/>
+
+  <!-- 4. Analyze each -->
+  <rect class="card" x="614" y="8" width="160" height="284" rx="8"/>
+  <text class="ink h" x="626" y="32">4. Analyze each</text>
+  <g stroke-width="1.5">
+    <line class="bar" x1="662" y1="70" x2="712" y2="70"/><circle class="dot" cx="686" cy="70" r="3"/>
+    <line class="bar" x1="670" y1="88" x2="722" y2="88"/><circle class="dot" cx="696" cy="88" r="3"/>
+    <line class="bar" x1="654" y1="106" x2="706" y2="106"/><circle class="dot" cx="680" cy="106" r="3"/>
+    <line class="bar" x1="666" y1="124" x2="716" y2="124"/><circle class="dot" cx="691" cy="124" r="3"/>
+    <line class="bar" x1="660" y1="142" x2="710" y2="142"/><circle class="dot" cx="685" cy="142" r="3"/>
+    <line class="bar" x1="674" y1="160" x2="726" y2="160"/><circle class="dot" cx="700" cy="160" r="3"/>
+    <line class="bar" x1="658" y1="178" x2="708" y2="178"/><circle class="dot" cx="683" cy="178" r="3"/>
+    <line class="bar" x1="664" y1="196" x2="716" y2="196"/><circle class="dot" cx="690" cy="196" r="3"/>
+  </g>
+  <text class="muted s" x="626" y="246">Run your analysis on</text>
+  <text class="muted s" x="626" y="262">every completed copy.</text>
+
+  <path class="arrow" d="M776 150 H 790" stroke-width="2"/><path class="head" d="M790 145 L798 150 L790 155 Z"/>
+
+  <!-- 5. Combine -->
+  <rect class="card" x="800" y="8" width="152" height="284" rx="8"/>
+  <text class="ink h" x="812" y="32">5. Combine</text>
+  <line class="final" x1="836" y1="132" x2="920" y2="132" stroke-width="3"/>
+  <line class="final" x1="836" y1="124" x2="836" y2="140" stroke-width="2"/><line class="final" x1="920" y1="124" x2="920" y2="140" stroke-width="2"/>
+  <circle class="finaldot" cx="878" cy="132" r="6"/>
+  <text class="muted s" x="812" y="246">One estimate. Its interval</text>
+  <text class="muted s" x="812" y="262">adds how much the copies</text>
+  <text class="muted s" x="812" y="278">disagree (Rubin's rules).</text>
+</svg>
+<!--HOW-FIGURE end-->
+    </div>
+    <div class="grid g4" style="margin-top:14px">
+      <div class="card"><h3>Learn</h3><p>On the audited rows, fit a straight-line regression of the checked value on the recorded value and the variables you list in <code>predictors</code>, which should include your analysis outcome.</p><p class="assume"><b>Assumes</b> the audit picked rows at random, or by the recorded value or other variables in the model, and that checked values are exact.</p></div>
+      <div class="card"><h3>Fill in</h3><p>For each unaudited row, draw a checked value from that model, with its uncertainty. Repeat to make several completed copies, 20 in the examples.</p><p class="assume"><b>Assumes</b> a straight line in the recorded value, normal scatter of constant size, and independent rows. Gross errors break the line. Rows with no recorded value are filled in from the other variables alone.</p></div>
+      <div class="card"><h3>Analyze each</h3><p>Run your regression on every completed copy, exactly as you would on clean data.</p><p class="assume"><b>Clustered audits</b> need a cluster-robust variance here: <code>catmech_pool_lm(cluster = )</code>.</p></div>
+      <div class="card"><h3>Combine</h3><p>Pool the copies with Rubin's rules. The interval adds how much the copies disagree to the usual sampling error.</p><p class="assume"><b>Result</b>: one estimate and interval, plus a log of every value replaced and why.</p></div>
+    </div>
+  </section>
+
+  <section id="example" aria-labelledby="ex-h">
+    <p class="kicker">A worked example</p>
+    <h2 id="ex-h">Self-reported weight in NHANES</h2>
+    <p class="sub">Public survey data with both a self-reported and a measured weight. Keep the measured weight on a random 25% of people, as an audit would, and estimate how systolic blood pressure changes per kg of weight.</p>
+    <div class="grid g3">
+      <div class="card"><p class="big">3908 <small>people</small></p><p>in the evaluation pool; 977 audited.</p></div>
+      <div class="card"><p class="big">65.4% <small>off by over 1 kg</small></p><p>624 of the 954 audited people with both weights. The median absolute difference is 1.7 kg.</p></div>
+      <div class="card"><p class="big">0.126 <small>mmHg per kg</small></p><p>Filling in from the recorded value, against 0.127 with every measured weight.</p></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h3>Five ways to answer, on the same audit</h3>
+      <p class="sub" style="margin-bottom:12px">Estimate and 95% interval. The dashed line is the answer with every measured weight.</p>
+      <div class="bars" role="img" aria-label="Estimates and intervals for five methods on the NHANES example. Every measured weight 0.127, 0.100 to 0.154. Fill in from the recorded value 0.126, 0.097 to 0.155. Trust the recorded value, on the 3844 people with one, 0.108, 0.079 to 0.137. Fill in without the recorded value 0.108, 0.047 to 0.169. Audited rows only 0.141, 0.082 to 0.199.">
+        <div class="bar-row"><span class="name">Every measured weight</span><span class="track"><span class="ref" style="left:51.2%"></span><span class="ci" style="left:35.3%;width:31.8%"></span><span class="pt" style="left:51.2%"></span></span><span class="val">0.127 (0.100 to 0.154)</span></div>
+        <div class="bar-row"><span class="name">Fill in from the recorded value</span><span class="track"><span class="ref" style="left:51.2%"></span><span class="ci" style="left:33.5%;width:34.1%"></span><span class="pt" style="left:50.6%"></span></span><span class="val">0.126 (0.097 to 0.155)</span></div>
+        <div class="bar-row off"><span class="name">Trust the recorded value (3844 with one)</span><span class="track"><span class="ref" style="left:51.2%"></span><span class="ci" style="left:22.9%;width:34.1%"></span><span class="pt" style="left:40.0%"></span></span><span class="val">0.108 (0.079 to 0.137)</span></div>
+        <div class="bar-row"><span class="name">Fill in without the recorded value</span><span class="track"><span class="ref" style="left:51.2%"></span><span class="ci" style="left:4.1%;width:71.8%"></span><span class="pt" style="left:40.0%"></span></span><span class="val">0.108 (0.047 to 0.169)</span></div>
+        <div class="bar-row"><span class="name">Audited rows only</span><span class="track"><span class="ref" style="left:51.2%"></span><span class="ci" style="left:24.7%;width:68.8%"></span><span class="pt" style="left:59.4%"></span></span><span class="val">0.141 (0.082 to 0.199)</span></div>
+      </div>
+      <p style="margin-top:12px">Filling in from the recorded value landed next to the full answer with an interval about as narrow. Trusting the self-reports was just as narrow but low. The two methods that ignore recorded values were about twice as wide. This is one audit, an illustration, not a study.</p>
+    </div>
+    <details id="code-details" open style="margin-top:14px">
+      <summary>The code</summary>
+      <div>
+<pre tabindex="0" aria-label="Example code"><code>install.packages(c("digest", "jsonlite", "mice", "posterior", "truncnorm", "yaml"))
+install.packages(".", repos = NULL, type = "source")   # from the repository directory
+
+library(catmech)
+d &lt;- read.csv("validation/real-data/nhanes-pool.csv")
+d &lt;- d[d$split == "evaluation", ]
+set.seed(1)
+audited &lt;- sample(nrow(d), nrow(d) / 4)
+d$audit_kg &lt;- NA_real_
+d$audit_kg[audited] &lt;- d$reference_kg[audited]
+
+# 1. Read what the audit shows. This fits no model.
+catmech_recording_audit(d, "recorded_kg", "audit_kg", by = "sex", agreement_tol = 1)
+
+# 2. Fill in from the recorded value. In each completed copy, recorded_kg holds
+#    the measured weight where audited and a drawn value elsewhere.
+fit &lt;- catmech_reference(d, "recorded_kg", "audit_kg",
+  predictors = c("age", "sex", "race", "height", "sbp"),
+  use_recorded = TRUE, m = 20, seed = 123)
+catmech_pool_lm(fit, sbp ~ recorded_kg + age + sex + race + height)</code></pre>
+        <p style="margin-top:10px">From the README. Run it from a clone of the repository, since the data path is relative to it. <code>tools/learn-guide-example.R</code> reruns it with the other methods and writes the numbers above to <code>docs/learn/qa/guide-example.txt</code>.</p>
+      </div>
+    </details>
+  </section>
+
+  <section id="which" aria-labelledby="which-h">
+    <p class="kicker">Which method to start with</p>
+    <h2 id="which-h">Start simple, and know what changes the answer</h2>
+    <div class="table-wrap" tabindex="0" role="region" aria-label="Which method to start with">
+      <table>
+        <thead><tr><th scope="col">Your situation</th><th scope="col">Start with</th><th scope="col">Why</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Most cases</th><td><code>catmech_reference(..., use_recorded = TRUE)</code></td><td>Best or tied among methods that use the audit on two public datasets at 25% audits.</td></tr>
+          <tr><th scope="row">Gross errors that stand apart from correct values, or a checked value with known noise</th><td><code>catmech_contamination()</code>, the error model</td><td>Strongest in simulations with these errors, which remain untested on real data.</td></tr>
+          <tr><th scope="row">Doubtful residuals, precision not critical</th><td><code>catmech_reference()</code></td><td>Assumes least about recorded values, with intervals about twice as wide on the real data.</td></tr>
+          <tr><th scope="row">Audit of whole sites or facilities</th><td>Linear imputation with <code>catmech_pool_lm(cluster = )</code></td><td>Repairs the analysis step only. The clustered imputation option is experimental, and only for an audited outcome: as a predictor it biased the slope toward zero in simulation.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="fails" aria-labelledby="fails-h">
+    <p class="kicker">Where it fails</p>
+    <h2 id="fails-h">Coverage should be near 95%. These were not.</h2>
+    <p class="sub">Coverage of linear imputation in the package's own tests. Each card names what broke it.</p>
+    <div class="grid g3">
+      <div class="card flag"><p class="big">64.7%</p><h3>Gross errors</h3><p>Some values ten times too large, in simulation. The error model, <code>catmech_contamination()</code>, reached 94.0% there.</p></div>
+      <div class="card flag"><p class="big">38.0%</p><h3>Noisy checked values</h3><p>When the audit's own values carry noise, in simulation.</p></div>
+      <div class="card flag"><p class="big">74.0%</p><h3>Audit chosen by the truth</h3><p>Records picked because of their true value, with errors present, in simulation.</p></div>
+      <div class="card warnflag"><p class="big">81% to 86%</p><h3>Clustered errors</h3><p>On the worst items of a Rwanda health-facility recount at a 25% audit, even with a cluster-robust variance, against 94% to 97% for the recount. An item is one reported count, such as early antenatal visits.</p></div>
+      <div class="card warnflag"><h3>An audit that finds no errors</h3><p>If every audited record agrees, it keeps the recorded values with no added uncertainty and warns you. A small audit can simply miss rare errors.</p></div>
+      <div class="card"><h3>Try these in the simulator</h3><p>Decimal slips with a small audit, and an audit that finds nothing, are presets in the <a href="simulator.html">audit simulator</a>.</p></div>
+    </div>
+  </section>
+
+  <section id="evidence" aria-labelledby="ev-h">
+    <p class="kicker">What the tests found</p>
+    <h2 id="ev-h">Each test had a rule written before it ran</h2>
+    <p class="sub">Where a test's rule named a verdict, the chip shows it; the first two chips summarize findings. The validation folder in the repository holds each plan and write-up.</p>
+    <div class="verdicts">
+      <div class="verdict"><span class="chip good">Finding</span><p><b>Public data with real recording differences.</b> At a random 25% audit, over 1,000 cohorts of 600, linear imputation matched or beat the package's own error model: typical error 0.0286 against 0.0308 on ClinicalTrials.gov, and 0.0409 against 0.0408 on NHANES. The model could not tell which records were wrong.</p></div>
+      <div class="verdict"><span class="chip good">Finding</span><p><b>Keeping the recorded value pays, against discarding it.</b> Intervals about half as wide (0.102 against 0.205 on ClinicalTrials.gov, and 0.154 against 0.297 on NHANES), with coverage near the oracle's. Against simply trusting the recorded value, a small audit often did not reduce error: at a 25% audit of a real recount, the recorded value alone had lower error than every audit-based method on 6 of 11 items.</p></div>
+      <div class="verdict"><span class="chip warn">Inconclusive</span><p><b>A real audit</b>, a health-facility recount in Rwanda. At a 25% audit, where a reported slope differed from a recount of that one item, the error model's intervals covered 35% to 72%, against 90% to 97% for the recount. Only one reported slope, for antenatal 4th visits, clearly differed.</p></div>
+      <div class="verdict"><span class="chip warn">Partial</span><p><b>The clustered imputation option</b>, twice. Under the variance then in use, it raised coverage on common items (from 79.6% to 91.0% on early antenatal visits) and had 4% to 5% more error on rare ones. The verdict sits within simulation noise of NO-GO. Use it only when the audited value is the outcome.</p></div>
+      <div class="verdict"><span class="chip warn">Mixed</span><p><b>A second health system.</b> Errors barely clustered there, and the clustered option added little.</p></div>
+      <div class="verdict"><span class="chip info">Keep, narrowly</span><p><b>The clustered option against outside methods.</b> In a rerun after the planned comparison, <code>mice</code> with the same model matched its accuracy once a default that can drop the recorded value was off.</p></div>
+      <div class="verdict"><span class="chip info">Keep, narrowly</span><p><b>Against setups written by fresh AI agents that saw no results.</b> None met the rule, but the best looks better than the option on most measures, so the option is not the best available.</p></div>
+      <div class="verdict"><span class="chip bad">Not adopted</span><p><b>Separate within-site and between-site slopes.</b> They helped when the audited value was a predictor, and had 1.258 times the option's error on small real audits when it was the outcome.</p></div>
+      <div class="verdict"><span class="chip bad">No-go</span><p><b>The audit-size planner.</b> Its median error at the smallest audit was 11.3% to 16.8%, against a 10% limit. It is a documented calculation, not a validated tool.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="limits-h">
+    <p class="kicker">Limits</p>
+    <h2 id="limits-h">What this does not show</h2>
+    <details open>
+      <summary>Not clinical, and not reviewed</summary>
+      <div>
+        <p>No dataset here is a patient-level clinical source-data audit. The Rwanda audit holds facility counts, and on ClinicalTrials.gov both values are sponsor-entered. Simulation data are synthetic.</p>
+        <p>The methods are established, and no new statistical method is claimed. The package is not on CRAN, and it has had no outside peer review or clinical validation.</p>
+      </div>
+    </details>
+    <details id="ai-details" open>
+      <summary>AI use</summary>
+      <div>
+        <p>AI systems drafted the package code and tests and did literature search, review and simulation orchestration: OpenAI Codex before version 0.4, and Anthropic Claude Code from then on. Claude Code also wrote most later study plans, decision rules, scoring and write-ups, and drafted this guide and the simulator. No independent statistician has reviewed them. <code>CONTRIBUTING.md</code> in the repository has the full disclosure.</p><p>A script checks that every decimal number on this page appears in the README or in the output of <code>tools/learn-guide-example.R</code>.</p>
+      </div>
+    </details>
+  </section>
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>catmech is an experimental R package for regression when every record has a recorded value and only an audited subset has a checked one. Data named here: NHANES (National Center for Health Statistics), ClinicalTrials.gov (U.S. National Library of Medicine), and the Rwanda recount of Nshimyiryo et al. (2020), <i>PLOS ONE</i>, under CC BY.</p>
+    <p>No independent statistician has reviewed this guide, the simulator or the package.</p>
+    <p>"Contamination" in function names means recording error, not treatment spillover between trial arms.</p>
+  </div>
+</footer>
+</body>
+</html>

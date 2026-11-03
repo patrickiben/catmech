@@ -4,6 +4,23 @@
 
 **The question:** can you keep error-prone recorded values for precision without trusting them, and which method should you try first?
 
+## How it works
+
+![Panels from left to right. Your records: every row has a recorded value, and audited rows also have a checked value. Learn: on audited rows, regress the checked value on the recorded value and the other variables. Fill in: draw each missing checked value from that model, with its uncertainty, many times over. Analyze each: run the analysis on every completed copy. Combine: a single estimate whose interval adds how much the copies disagree.](docs/figures/how-it-works.svg)
+
+Most records have a **recorded value**, which may be wrong. An **audit** checks some records against the source, so those rows also have a **checked value**. With the recommended start, catmech then works in this order:
+
+- **Learn.** On the audited rows, fit how the checked value relates to the recorded value and the variables you list in `predictors`, which should include your analysis outcome.
+- **Fill in.** Draw each unaudited row's checked value from that model, with its uncertainty, once for each of `m` completed copies. Rows with no recorded value are filled in from the other variables alone.
+- **Analyze each.** Run your analysis on every completed copy.
+- **Combine.** Pool the results with Rubin's rules, so the interval includes how much the copies disagree.
+
+`catmech_reference(..., use_recorded = TRUE)` learns and fills in, and `catmech_pool_lm()` analyzes and combines. The other methods change how it learns: the default leaves the recorded value out of the model, `catmech_contamination()` models which records are wrong, and `cluster = ` adds a random intercept for each site. Linear imputation given the recorded value assumes the audit picked rows at random, or by the recorded value or other variables in the model; that checked values are exact; that rows are independent; and that the checked value follows a straight line in the recorded value, with normal scatter of constant size. The default also needs an audit that does not depend on the recorded value. Gross errors break the line ([where it fails](#which-method-to-start-with)).
+
+A plain-language [guide](docs/learn/index.html) and an [audit simulator](docs/learn/simulator.html) walk through the same steps. Download them and open them in a browser.
+
+## What the tests found
+
 **The finding:** on public data with real recording differences, simple linear multiple imputation (MI) given the recorded value matched or beat `catmech_contamination()`, the recording-error model this package added. On a real audit the model often had lower point error, but its intervals failed. Start with linear MI when you need an interval.
 
 - **Real data, 25% audits.** Linear MI had lower RMSE than the model on ClinicalTrials.gov (0.0286 against 0.0308) and less bias (+0.0001 against +0.0068). They tied on NHANES (0.0409 against 0.0408). The model's largest edge, at the 10% NHANES audit (0.0435 against 0.0490), was within Monte Carlo noise, and 14 of 200 requests returned no interval there. It could not tell which records were wrong (AUC 0.54 and 0.50).

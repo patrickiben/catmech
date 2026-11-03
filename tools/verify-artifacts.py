@@ -1206,6 +1206,45 @@ def verify_later_studies():
     print("Later studies: second health system, rare counts, independently written setups and separate slopes, all planned requests, sources hashed, scored files regenerated identically, numbers traced: PASS")
 
 
+def verify_learn_pages():
+    """The guide and simulator in docs/learn: every decimal in their visible text has a source, the guide's
+    diagram matches docs/figures/how-it-works.svg, and, where node is installed, the simulator's engine still
+    matches the R package's saved results."""
+    import html
+    import re
+    import shutil
+    import subprocess
+    learn = ROOT/"docs/learn"
+    def visible(path):
+        text = path.read_text(encoding="utf-8")
+        text = re.sub(r"<(script|style)\b.*?</\1>", " ", text, flags=re.S)
+        text = re.sub(r"<!--.*?-->", " ", text, flags=re.S)
+        return html.unescape(re.sub(r"<[^>]+>", " ", text))
+    decimals = lambda text: set(re.findall(r"(?<![\w.])\d+\.\d+(?![\d])", text))
+    read = lambda *paths: "".join((ROOT/p).read_text(encoding="utf-8") for p in paths)
+    # The guide claims its decimals come from the README or the example's output, so only those count for it.
+    for page, sources in (("index.html", read("README.md", "docs/learn/qa/guide-example.txt")),
+                          ("simulator.html", read("README.md", "docs/learn/qa/cross-check.txt", "docs/learn/audit-sim.js"))):
+        unsupported = sorted(decimals(visible(learn/page)) - decimals(sources))
+        assert not unsupported, (page, "Numbers with no source", unsupported)
+    assert decimals("a made-up 12.345")-decimals(read("README.md", "docs/learn/qa/guide-example.txt")), "Negative control: a made-up number went undetected"
+    guide = (learn/"index.html").read_text(encoding="utf-8")
+    inline = re.search(r"<!--HOW-FIGURE start[^>]*-->(.*?)<!--HOW-FIGURE end-->", guide, re.S).group(1)
+    figure = re.sub(r"\s*<style>.*?</style>", "", (ROOT/"docs/figures/how-it-works.svg").read_text(encoding="utf-8"), flags=re.S)
+    shapes = lambda svg: re.findall(r"<(?:rect|line|circle|path|text)\b[^>]*>(?:[^<]*)", re.sub(r'\s(?:id|aria-labelledby)="[^"]*"', "", svg))
+    assert shapes(inline) == shapes(figure) and shapes(figure), "The guide's diagram differs from docs/figures/how-it-works.svg"
+    example = (learn/"qa/guide-example.txt").read_text(encoding="utf-8")
+    assert "0.126, 95% interval 0.097 to 0.155" in example, "The guide's example no longer matches the README"
+    node = shutil.which("node")
+    if node:
+        result = subprocess.run([node, str(learn/"qa/compare.js")], capture_output=True, text=True)
+        assert result.returncode == 0 and result.stdout == (learn/"qa/cross-check.txt").read_text(encoding="utf-8"), "Simulator engine check changed or failed"
+        engine = "engine rechecked against the R package's saved results"
+    else:
+        engine = "engine check NOT RUN, node is not installed"
+    print(f"Learning pages: every decimal traced, diagram matches the figure, {engine}: PASS")
+
+
 def verify_contamination_supplement(folder):
     scores = rows(folder/"corruption-scores.csv")
     main = rows(ROOT/"validation/contamination-study/replicates.csv")
@@ -2116,6 +2155,7 @@ def main():
     verify_variance_mi_study(ROOT/"validation/variance-mi-study")
     verify_outside_methods(ROOT/"validation/outside-methods-study")
     verify_later_studies()
+    verify_learn_pages()
     print("This verifies correspondence and repeatability, not inferential validity.")
 
 
