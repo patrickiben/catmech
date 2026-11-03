@@ -1,4 +1,4 @@
-# catmech
+# catmech <img src="man/figures/logo.png" align="right" width="160" alt="catmech logo: a neon cat piloting a mech suit">
 
 **An experimental R package for regression when every record has a recorded value and only an audited subset has a checked reference value. Version 0.7.1.**
 

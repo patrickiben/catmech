@@ -264,6 +264,7 @@ not_findings = [
     ("R", "This one audit", "Describes the single illustrative run in the example"),
     ("R", "# 1.", "Step number in a code comment"), ("R", "# 2.", "Step number in a code comment"),
     ("C", "two poor options", "Framing of the problem, not a measurement"),
+    ("R", 'width="160"', "Display width of the logo in the README header"),
 ]
 
 
