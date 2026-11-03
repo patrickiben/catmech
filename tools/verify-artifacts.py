@@ -1217,7 +1217,9 @@ def verify_learn_pages():
     learn = ROOT/"docs/learn"
     def visible(path):
         text = path.read_text(encoding="utf-8")
-        text = re.sub(r"<(script|style)\b.*?</\1>", " ", text, flags=re.S)
+        # Text the page shows from a JSON data block, such as the guide's method picker, is traced too.
+        shown = " ".join(re.findall(r'<script type="application/json"[^>]*>(.*?)</script>', text, flags=re.S))
+        text = re.sub(r"<(script|style)\b.*?</\1>", " ", text, flags=re.S) + " " + shown
         text = re.sub(r"<!--.*?-->", " ", text, flags=re.S)
         return html.unescape(re.sub(r"<[^>]+>", " ", text))
     decimals = lambda text: set(re.findall(r"(?<![\w.])\d+\.\d+(?![\d])", text))
@@ -1228,6 +1230,7 @@ def verify_learn_pages():
         unsupported = sorted(decimals(visible(learn/page)) - decimals(sources))
         assert not unsupported, (page, "Numbers with no source", unsupported)
     assert decimals("a made-up 12.345")-decimals(read("README.md", "docs/learn/qa/guide-example.txt")), "Negative control: a made-up number went undetected"
+    assert "94.0%" in visible(learn/"index.html") and "79.3%" in visible(learn/"index.html"), "The picker's text was not traced"
     guide = (learn/"index.html").read_text(encoding="utf-8")
     inline = re.search(r"<!--HOW-FIGURE start[^>]*-->(.*?)<!--HOW-FIGURE end-->", guide, re.S).group(1)
     figure = re.sub(r"\s*<style>.*?</style>", "", (ROOT/"docs/figures/how-it-works.svg").read_text(encoding="utf-8"), flags=re.S)
@@ -1235,11 +1238,16 @@ def verify_learn_pages():
     assert shapes(inline) == shapes(figure) and shapes(figure), "The guide's diagram differs from docs/figures/how-it-works.svg"
     example = (learn/"qa/guide-example.txt").read_text(encoding="utf-8")
     assert "0.126, 95% interval 0.097 to 0.155" in example, "The guide's example no longer matches the README"
+    picker = (learn/"qa/picker-check.txt").read_text(encoding="utf-8")
+    ran = re.search(r"(\d+) of (\d+) snippets ran", picker)
+    assert ran and ran.group(1) == ran.group(2), "Not every picker snippet ran in R"
     node = shutil.which("node")
     if node:
+        current = subprocess.run([node, str(learn/"qa/picker-snippets.js"), str(learn/"index.html")], capture_output=True, text=True, check=True).stdout.strip()
+        assert current in picker, "The picker changed since its snippets were run in R; rerun tools/learn-picker-check.R"
         result = subprocess.run([node, str(learn/"qa/compare.js")], capture_output=True, text=True)
         assert result.returncode == 0 and result.stdout == (learn/"qa/cross-check.txt").read_text(encoding="utf-8"), "Simulator engine check changed or failed"
-        engine = "engine rechecked against the R package's saved results"
+        engine = f"engine rechecked against the R package's saved results, all {ran.group(1)} picker snippets ran in R for the current picker"
     else:
         engine = "engine check NOT RUN, node is not installed"
     print(f"Learning pages: every decimal traced, diagram matches the figure, {engine}: PASS")

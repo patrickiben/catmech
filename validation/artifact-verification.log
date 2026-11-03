@@ -32,5 +32,5 @@ variance-check: all 24500 planned requests, scored output regenerated identicall
 variance-mi-study: all 148500 planned requests, sources hashed, scored output and post-hoc table regenerated identically, the outcome re-derived as cv3, 148500 replayed through the package: PASS
 outside-methods-study: all 297000 planned requests and 58356 rerun, sources hashed, three scored files regenerated identically, accuracy failures re-derived, controls passed: PASS
 Later studies: second health system, rare counts, independently written setups and separate slopes, all planned requests, sources hashed, scored files regenerated identically, numbers traced: PASS
-Learning pages: every decimal traced, diagram matches the figure, engine rechecked against the R package's saved results: PASS
+Learning pages: every decimal traced, diagram matches the figure, engine rechecked against the R package's saved results, all 24 picker snippets ran in R for the current picker: PASS
 This verifies correspondence and repeatability, not inferential validity.

@@ -1,0 +1,26 @@
+Picker snippets: 24 distinct snippets, sha256 f410d9ea3da8b60c2cd43223f0c8609d6d738ef5bc0f60b54a0f78246a19bee7
+linear        predictor sites=no  OK
+noisy         predictor sites=no  OK
+unknownNoise  predictor sites=no  OK
+contamination predictor sites=no  OK
+default       predictor sites=no  OK
+linear        predictor sites=yes  OK
+noisy         predictor sites=yes  OK
+unknownNoise  predictor sites=yes  OK
+contamination predictor sites=yes  OK
+default       predictor sites=yes  OK
+truth         predictor sites=no  OK
+truth         predictor sites=yes  OK
+linear        outcome   sites=no  OK
+noisy         outcome   sites=no  OK
+unknownNoise  outcome   sites=no  OK
+contamination outcome   sites=no  OK
+default       outcome   sites=no  OK
+linear        outcome   sites=yes  OK
+noisy         outcome   sites=yes  OK
+unknownNoise  outcome   sites=yes  OK
+contamination outcome   sites=yes  OK
+default       outcome   sites=yes  OK
+truth         outcome   sites=no  OK
+truth         outcome   sites=yes  OK
+24 of 24 snippets ran

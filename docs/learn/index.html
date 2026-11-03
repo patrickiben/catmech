@@ -143,6 +143,26 @@ details + details { margin-top: 10px; }
 summary { cursor: pointer; padding: 12px 16px; font-weight: 650; color: var(--ink); }
 details > div { padding: 0 16px 14px; }
 details p { margin: 0 0 8px; max-width: 72ch; font-size: 15px; }
+.picker { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 14px; align-items: start; }
+.pick-questions fieldset { border: 0; margin: 0 0 14px; padding: 0; min-width: 0; }
+.pick-questions fieldset:last-child { margin-bottom: 0; }
+.pick-questions legend { font-weight: 650; color: var(--ink); font-size: 15px; margin-bottom: 6px; padding: 0; }
+.opts { display: grid; gap: 6px; }
+.opts label { position: relative; display: block; }
+.opts input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.opts span { display: block; padding: 8px 11px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--surface-2); font-size: 14.5px; line-height: 1.35; }
+.opts input:checked + span { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); box-shadow: inset 3px 0 0 var(--accent); font-weight: 600; }
+.opts input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pick-result { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 64px); }
+.pick-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-bottom: 10px; }
+.pick-head h3 { margin: 0; font-size: 18px; }
+.pick-result h4 { margin: 14px 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.pick-result ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14.5px; }
+.code-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; font-size: 12px; color: var(--muted); }
+.copy { font: 600 12px var(--sans); border: 1px solid var(--accent); background: var(--surface); color: var(--accent-ink); border-radius: 6px; padding: 5px 9px; cursor: pointer; }
+details.fold { margin-top: 12px; }
+.pick-echo { display: none; margin: 14px 0 0; padding-top: 12px; border-top: 1px dashed var(--line-2); font-size: 14.5px; }
+@media (max-width: 900px) { .picker { grid-template-columns: minmax(0, 1fr); } .pick-result { position: static; order: -1; } .pick-echo { display: block; } }
 footer { border-top: 1px solid var(--line); margin-top: 30px; padding-block: 18px 30px; font-size: 13.5px; color: var(--muted); }
 footer p { max-width: 80ch; margin: 0 0 8px; }
 @media (max-width: 900px) {
@@ -165,7 +185,7 @@ footer p { max-width: 80ch; margin: 0 0 8px; }
   <div class="wrap">
     <div class="brand">catmech <span>Guide</span></div>
     <nav aria-label="Sections">
-      <a href="#how">How it works</a><a href="#example">Example</a><a href="#which">Which method</a><a href="#fails">Where it fails</a><a href="#evidence">Evidence</a><a href="simulator.html">Simulator</a>
+      <a href="#picker">Which method</a><a href="#how">How it works</a><a href="#example">Example</a><a href="#fails">Where it fails</a><a href="#evidence">Evidence</a><a href="simulator.html">Simulator</a>
     </nav>
   </div>
 </header>
@@ -182,8 +202,82 @@ footer p { max-width: 80ch; margin: 0 0 8px; }
   <div class="hero">
     <h1 id="title">Use recorded values without trusting them</h1>
     <p class="lede">Records contain mistakes, and checking every one against its source is expensive. catmech, an R package, uses a checked sample of records to fill in plausible checked values for the rest, many times over, and carries that uncertainty into the answer.</p>
-    <div class="cta"><a class="btn" href="simulator.html">Open the audit simulator</a><a class="btn ghost" href="#how">See how it works</a></div>
+    <div class="cta"><a class="btn" href="#picker">Find your method</a><a class="btn ghost" href="simulator.html">Open the audit simulator</a><a class="btn ghost" href="#how">See how it works</a></div>
   </div>
+
+  <section id="picker" aria-labelledby="picker-h">
+    <p class="kicker">Which method</p>
+    <h2 id="picker-h">Answer five questions, get the call to start with</h2>
+    <p class="sub">The answers follow the README's recommendations and the evidence behind them. Example column names: <code>lab_value</code> is recorded, <code>reference_value</code> is checked.</p>
+    <div class="picker">
+      <form class="pick-questions card" id="pick-form" aria-label="Your audit">
+        <fieldset>
+          <legend>1. In your analysis, the audited value is</legend>
+          <div class="opts">
+            <label><input type="radio" name="role" value="predictor" id="role-predictor" checked><span>A predictor</span></label>
+            <label><input type="radio" name="role" value="outcome" id="role-outcome"><span>The outcome</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>2. Records were chosen for the audit</legend>
+          <div class="opts">
+            <label><input type="radio" name="chosen" value="random" id="chosen-random" checked><span>At random</span></label>
+            <label><input type="radio" name="chosen" value="targeted" id="chosen-targeted"><span>Using the recorded value or other variables I have</span></label>
+            <label><input type="radio" name="chosen" value="truth" id="chosen-truth"><span>Using the true value itself, beyond what the records show</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>3. The audit checked whole sites, clinics or facilities</legend>
+          <div class="opts">
+            <label><input type="radio" name="sites" value="no" id="sites-no" checked><span>No</span></label>
+            <label><input type="radio" name="sites" value="yes" id="sites-yes"><span>Yes</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>4. Recorded values are wrong mostly by</legend>
+          <div class="opts">
+            <label><input type="radio" name="errors" value="small" id="errors-small" checked><span>Small or moderate errors</span></label>
+            <label><input type="radio" name="errors" value="gross" id="errors-gross"><span>Some gross errors, such as decimal slips or unit mix-ups</span></label>
+            <label><input type="radio" name="errors" value="unsure" id="errors-unsure"><span>I doubt a straight line in the recorded value fits</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>5. The checked values are</legend>
+          <div class="opts">
+            <label><input type="radio" name="checked" value="exact" id="checked-exact" checked><span>Exact</span></label>
+            <label><input type="radio" name="checked" value="known" id="checked-known"><span>Noisy, with an SD I can state</span></label>
+            <label><input type="radio" name="checked" value="unknown" id="checked-unknown"><span>Noisy, and I can't say how much</span></label>
+          </div>
+        </fieldset>
+        <p class="pick-echo" id="pick-echo">Your call: <b id="pick-echo-title">Linear imputation given the recorded value</b>. <a href="#pick-result">See the code</a></p>
+      </form>
+      <div class="pick-result card" id="pick-result" aria-live="polite">
+        <div class="pick-head"><span class="chip" id="pick-chip">Start here</span><h3 id="pick-title">Linear imputation given the recorded value</h3></div>
+        <div class="code-bar"><span>R code to start from</span><button type="button" class="copy" id="pick-copy">Copy code</button></div>
+        <pre tabindex="0" aria-label="Recommended code" id="pick-code"></pre>
+        <h4>Why</h4>
+        <ul id="pick-why"></ul>
+        <h4>Watch for</h4>
+        <ul id="pick-watch"></ul>
+      </div>
+    </div>
+    <details id="which" class="fold">
+      <summary>The four situations at a glance</summary>
+      <div>
+        <div class="table-wrap" tabindex="0" role="region" aria-label="Which method to start with">
+          <table>
+            <thead><tr><th scope="col">Your situation</th><th scope="col">Start with</th><th scope="col">Why</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Most cases</th><td><code>catmech_reference(..., use_recorded = TRUE)</code></td><td>Best or tied among methods that use the audit on two public datasets at 25% audits.</td></tr>
+              <tr><th scope="row">Gross errors that stand apart from correct values, or a checked value with known noise</th><td><code>catmech_contamination()</code>, the error model</td><td>Strongest in simulations with these errors, which remain untested on real data.</td></tr>
+              <tr><th scope="row">Doubtful residuals, precision not critical</th><td><code>catmech_reference()</code></td><td>Assumes least about recorded values, with intervals about twice as wide on the real data.</td></tr>
+              <tr><th scope="row">Audit of whole sites or facilities</th><td>Linear imputation with <code>catmech_pool_lm(cluster = )</code></td><td>Repairs the analysis step only. The clustered imputation option is experimental, and only for an audited outcome: as a predictor it biased the slope toward zero in simulation.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+  </section>
 
   <section aria-labelledby="problem-h">
     <p class="kicker">The problem</p>
@@ -197,7 +291,9 @@ footer p { max-width: 80ch; margin: 0 0 8px; }
 
   <section aria-labelledby="words-h">
     <p class="kicker">Words used here</p>
-    <h2 id="words-h">Eight terms</h2>
+    <details class="fold" id="terms">
+    <summary id="words-h">Eight terms, from recorded value to oracle</summary>
+    <div>
     <dl class="terms">
       <div><dt>Recorded value</dt><dd>What the record says, such as a self-reported weight. Most records have one, and some are wrong.</dd></div>
       <div><dt>Checked value</dt><dd>The value confirmed against the source, such as a measured weight. The package calls it the reference.</dd></div>
@@ -208,6 +304,8 @@ footer p { max-width: 80ch; margin: 0 0 8px; }
       <div><dt>Typical error</dt><dd>Root mean squared error: how far estimates land from the truth, on average.</dd></div>
       <div><dt>Oracle</dt><dd>A benchmark that uses every checked value. No real audit has it.</dd></div>
     </dl>
+    </div>
+    </details>
   </section>
 
   <section id="how" aria-labelledby="how-h">
@@ -366,22 +464,6 @@ catmech_pool_lm(fit, sbp ~ recorded_kg + age + sex + race + height)</code></pre>
     </details>
   </section>
 
-  <section id="which" aria-labelledby="which-h">
-    <p class="kicker">Which method to start with</p>
-    <h2 id="which-h">Start simple, and know what changes the answer</h2>
-    <div class="table-wrap" tabindex="0" role="region" aria-label="Which method to start with">
-      <table>
-        <thead><tr><th scope="col">Your situation</th><th scope="col">Start with</th><th scope="col">Why</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">Most cases</th><td><code>catmech_reference(..., use_recorded = TRUE)</code></td><td>Best or tied among methods that use the audit on two public datasets at 25% audits.</td></tr>
-          <tr><th scope="row">Gross errors that stand apart from correct values, or a checked value with known noise</th><td><code>catmech_contamination()</code>, the error model</td><td>Strongest in simulations with these errors, which remain untested on real data.</td></tr>
-          <tr><th scope="row">Doubtful residuals, precision not critical</th><td><code>catmech_reference()</code></td><td>Assumes least about recorded values, with intervals about twice as wide on the real data.</td></tr>
-          <tr><th scope="row">Audit of whole sites or facilities</th><td>Linear imputation with <code>catmech_pool_lm(cluster = )</code></td><td>Repairs the analysis step only. The clustered imputation option is experimental, and only for an audited outcome: as a predictor it biased the slope toward zero in simulation.</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
   <section id="fails" aria-labelledby="fails-h">
     <p class="kicker">Where it fails</p>
     <h2 id="fails-h">Coverage should be near 95%. These were not.</h2>
@@ -440,5 +522,141 @@ catmech_pool_lm(fit, sbp ~ recorded_kg + age + sex + race + height)</code></pre>
     <p>"Contamination" in function names means recording error, not treatment spillover between trial arms.</p>
   </div>
 </footer>
+<!-- Every sentence the picker can show. tools/verify-artifacts.py traces the numbers in this block. -->
+<script type="application/json" id="picker-text">
+{
+  "linear": {
+    "title": "Linear imputation given the recorded value",
+    "chip": ["good", "Start here"],
+    "why": [
+      "Best or tied among methods that use the audit on two public datasets at 25% audits.",
+      "Keeping the recorded value pays against discarding it: on NHANES its intervals were about half as wide (0.154 against 0.297), with coverage near the oracle's."
+    ]
+  },
+  "default": {
+    "title": "Fill in without the recorded value",
+    "chip": ["warn", "Use with care"],
+    "why": [
+      "It does not use the recorded value, so it assumes least about it. Intervals were about twice as wide on the real data.",
+      "It still assumes a normal straight-line model in the other variables."
+    ]
+  },
+  "contamination": {
+    "title": "The error model, catmech_contamination()",
+    "chip": ["warn", "Use with care"],
+    "why": [
+      "Strongest in simulations with gross errors: coverage 94.0%, against 64.7% for linear imputation.",
+      "Untested on real data with gross errors, and on ClinicalTrials.gov it had higher error than linear imputation."
+    ]
+  },
+  "noisy": {
+    "title": "The error model with a declared reference SD",
+    "chip": ["warn", "Use with care"],
+    "why": [
+      "With a declared SD for the checked values, the error model covered 91.8% in simulation. Linear imputation fell to 38.0% with noisy checked values.",
+      "The SD is an assumption, not estimated. Compare several values with catmech_sensitivity()."
+    ]
+  },
+  "unknownNoise": {
+    "title": "No method here handles noise of unknown size",
+    "chip": ["bad", "Not repaired"],
+    "why": [
+      "Linear imputation fell to 38.0% with noisy checked values in simulation, and the error model needs the noise SD declared.",
+      "Vary a range of plausible SDs as a sensitivity analysis, and report the noise as a limitation."
+    ]
+  },
+  "truth": {
+    "title": "No method here repairs an audit chosen by the true value",
+    "chip": ["bad", "Not repaired"],
+    "why": [
+      "Selection on the true value beyond what the recorded value shows is not supported. In simulations with errors present, linear imputation covered 74.0% and the error model 79.3%.",
+      "selection_delta in catmech_contamination() is a declared shift to compare with catmech_sensitivity(). The data cannot identify it."
+    ]
+  },
+  "watch": {
+    "always": [
+      "Read what the audit shows first, with catmech_recording_audit(). It fits no model.",
+      "If every audited record agrees, the package keeps the recorded values with no added uncertainty and warns you. A small audit can miss rare errors.",
+      "Against simply trusting the recorded value, a small audit often did not reduce error, and nothing tells you in advance when it will."
+    ],
+    "sites": "Pool with cluster = \"site\": a delete-one-cluster jackknife, chosen narrowly in a planned test. It repairs the analysis step only. Linear imputation with it still covered 81% to 86% on the worst items of a real recount at a 25% audit.",
+    "sitesOtherMethod": "This method has not been tested with the cluster-robust variance.",
+    "sitesOutcome": "Optional check: catmech_reference(..., cluster = \"site\") adds a random intercept for each site. It came out PARTIAL in both planned tests, within simulation noise of NO-GO, and refuses fewer than five audited clusters. Treat it as a check, not a default.",
+    "sitesPredictor": "Do not pass cluster to catmech_reference(). With the audited value as a predictor it biased the slope toward zero in simulation, and catmech_pool_lm() warns.",
+    "targetedDefault": "Doubt about the straight line would point to filling in without the recorded value, but that needs an audit that does not depend on the recorded value. With a targeted audit, this page keeps linear imputation given the recorded value.",
+    "targetedOk": "A targeted audit is supported, because the recorded value is in the model.",
+    "gross": "Run catmech_holdout_check(fit). If it shows no skill against the recorded value or the stratum error rate, prefer linear imputation. Its per-record error probabilities could not tell which records were wrong on real data (AUC 0.54 and 0.50)."
+  }
+}
+</script>
+<script>
+(function () {
+  "use strict";
+  const T = JSON.parse(document.getElementById("picker-text").textContent);
+  const $ = (id) => document.getElementById(id);
+  const pick = (name) => document.querySelector(`input[name=${name}]:checked`).value;
+
+  function code(method, a) {
+    const outcome = a.role === "outcome";
+    const preds = outcome ? 'c("age", "sex")' : 'c("age", "sex", "outcome")';
+    const formula = outcome ? "lab_value ~ age + sex" : "outcome ~ lab_value + age + sex";
+    const pool = (fit) => `catmech_pool_lm(${fit}, ${formula}${a.sites === "yes" ? ', cluster = "site"' : ""})`;
+    const lines = [`catmech_recording_audit(dat, "lab_value", "reference_value", by = ${a.sites === "yes" ? '"site"' : '"sex"'})`, ""];
+    if (method === "linear" || method === "default") {
+      lines.push("fit <- catmech_reference(", '  dat, "lab_value", "reference_value",', `  predictors = ${preds},`,
+        `  ${method === "linear" ? "use_recorded = TRUE, " : ""}m = 20, seed = 1`, ")");
+      lines.push("# In each completed copy, lab_value holds the checked value or a draw.", pool("fit"));
+    } else if (method === "contamination") {
+      lines.push("fit <- catmech_contamination(", '  dat, "lab_value", "reference_value",', `  predictors = ${preds},`, "  m = 20, seed = 1", ")", pool("fit"), "catmech_holdout_check(fit)");
+    } else {
+      const sds = method === "noisy" ? "c(lower = sd_checked / 2, stated = sd_checked, upper = 2 * sd_checked)" : "c(small = sd_guess / 2, middle = sd_guess, large = 2 * sd_guess)";
+      const arg = method === "truth" ? "selection_delta" : "reference_sd";
+      const values = method === "truth" ? "c(none = 0, shift = delta_guess, larger = 2 * delta_guess)" : sds;
+      lines.push(`fits <- lapply(${values}, function(v) catmech_contamination(`, '  dat, "lab_value", "reference_value",', `  predictors = ${preds},`,
+        `  ${arg} = v, m = 20, seed = 1`, "))", `catmech_sensitivity(fits, ${formula}, term = "${outcome ? "age" : "lab_value"}"${a.sites === "yes" ? ', cluster = "site"' : ""})`);
+    }
+    return lines.join("\n");
+  }
+
+  function update() {
+    const a = { role: pick("role"), chosen: pick("chosen"), sites: pick("sites"), errors: pick("errors"), checked: pick("checked") };
+    let method = "linear";
+    if (a.chosen === "truth") method = "truth";
+    else if (a.checked === "unknown") method = "unknownNoise";
+    else if (a.checked === "known") method = "noisy";
+    else if (a.errors === "gross") method = "contamination";
+    else if (a.errors === "unsure" && a.chosen !== "targeted") method = "default";
+    const t = T[method], w = T.watch;
+    const watch = [];
+    if (a.errors === "unsure" && a.chosen === "targeted" && method === "linear") watch.push(w.targetedDefault);
+    if (a.chosen === "targeted" && method !== "default") watch.push(w.targetedOk);
+    if (method === "contamination") watch.push(w.gross);
+    if (a.sites === "yes") {
+      watch.push(w.sites);
+      if (method !== "linear") watch.push(w.sitesOtherMethod);
+      watch.push(a.role === "outcome" ? w.sitesOutcome : w.sitesPredictor);
+    }
+    w.always.forEach((s) => watch.push(s));
+    $("pick-title").textContent = t.title;
+    $("pick-echo-title").textContent = t.title;
+    $("pick-chip").className = "chip " + t.chip[0];
+    $("pick-chip").textContent = t.chip[1];
+    $("pick-code").textContent = code(method, a);
+    const fill = (id, items) => { const ul = $(id); ul.textContent = ""; items.forEach((s) => { const li = document.createElement("li"); li.textContent = s; ul.appendChild(li); }); };
+    fill("pick-why", t.why);
+    fill("pick-watch", watch);
+    $("pick-result").dataset.method = method;
+  }
+
+  $("pick-form").addEventListener("change", update);
+  $("pick-copy").addEventListener("click", () => {
+    const text = $("pick-code").textContent;
+    const done = () => { $("pick-copy").textContent = "Copied"; setTimeout(() => { $("pick-copy").textContent = "Copy code"; }, 1500); };
+    const fallback = () => { const r = document.createRange(); r.selectNodeContents($("pick-code")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); $("pick-copy").textContent = "Selected, press Copy"; };
+    try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+  });
+  update();
+})();
+</script>
 </body>
 </html>
