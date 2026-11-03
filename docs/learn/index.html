@@ -125,7 +125,7 @@ tbody th { color: var(--ink); font-weight: 650; }
 tr:last-child td, tr:last-child th { border-bottom: 0; }
 td.num { font-family: var(--mono); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .bars { display: grid; gap: 10px; }
-.bar-row { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) 150px; gap: 10px; align-items: center; font-size: 14px; }
+.bar-row { display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) max-content; gap: 10px; align-items: center; font-size: 14px; }
 .bar-row .name { color: var(--ink); font-weight: 600; }
 .bar-row .track { position: relative; height: 18px; background: var(--surface-2); border-radius: 4px; }
 .bar-row .ci { position: absolute; top: 7px; height: 4px; border-radius: 2px; background: var(--accent); }
@@ -167,11 +167,14 @@ footer { border-top: 1px solid var(--line); margin-top: 30px; padding-block: 18p
 footer p { max-width: 80ch; margin: 0 0 8px; }
 @media (max-width: 900px) {
   .g3, .g4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .bar-row { grid-template-columns: minmax(0, 1fr) 130px; }
+  .bar-row { grid-template-columns: minmax(0, 1fr) max-content; }
   .bar-row .track { grid-column: 1 / -1; grid-row: 2; }
 }
 @media (max-width: 620px) {
   .g2, .g3, .g4, dl.terms { grid-template-columns: minmax(0, 1fr); }
+  pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+  #which td code { overflow-wrap: anywhere; }
+  #which th, #which td { padding: 8px 7px; }
   .bar-row { grid-template-columns: minmax(0, 1fr); gap: 4px; }
   .bar-row .track { grid-row: auto; }
   .bar-row .val { text-align: left; }

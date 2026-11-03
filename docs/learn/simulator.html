@@ -144,7 +144,7 @@ th:first-child, td:first-child { text-align: left; white-space: normal; }
 th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 650; }
 td { font-family: var(--mono); color: var(--text); }
 td:first-child { font-family: var(--sans); color: var(--ink); font-weight: 600; }
-.fn { font: 500 11.5px var(--mono); color: var(--muted); margin-top: 2px; white-space: normal; }
+.fn { font: 500 11.5px var(--mono); color: var(--muted); margin-top: 2px; white-space: normal; overflow-wrap: break-word; }
 tbody th { text-transform: none; letter-spacing: 0; font-size: 13.5px; color: var(--ink); font-weight: 600; }
 .pill { display: inline-block; font: 650 11px/1 var(--sans); letter-spacing: .05em; text-transform: uppercase; padding: 4px 7px; border-radius: 999px; }
 .pill.good { color: var(--green); background: var(--green-soft); }
@@ -167,6 +167,11 @@ footer { border-top: 1px solid var(--line); padding-block: 18px 28px; font-size:
 footer p { max-width: 80ch; margin: 0 0 8px; }
 @media (max-width: 980px) {
   .bench { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  #many-table th:nth-child(4), #many-table td:nth-child(4) { display: none; }
+  #many-table th, #many-table td { padding: 7px 5px; white-space: normal; }
+  #many-table thead th { font-size: 10.5px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
@@ -405,7 +410,7 @@ footer p { max-width: 80ch; margin: 0 0 8px; }
   function drawScatter(study, audited) {
     const svg = $("scatter");
     svg.textContent = "";
-    const left = 40, right = 350, top = 10, bottom = 210;
+    const left = 56, right = 350, top = 10, bottom = 210;
     const cap = 160;
     const t = study.truth, r = study.recorded;
     const lo = Math.floor(Math.min(...t, ...r.filter((v) => v <= cap)) / 10) * 10, hi = cap;
@@ -494,7 +499,7 @@ footer p { max-width: 80ch; margin: 0 0 8px; }
       const cells = [row.label, row.ok ? row.coverage.toFixed(1) + "%" : "none", fmt(row.rmse), fmt(row.width)];
       cells.forEach((c, i) => { const td = document.createElement(i ? "td" : "th"); if (!i) td.scope = "row"; td.textContent = c; tr.appendChild(td); });
       const fn = { default: "catmech_reference()", linear: "catmech_reference(use_recorded = TRUE), the recommended start" }[row.key];
-      if (fn) { const small = document.createElement("div"); small.className = "fn"; small.textContent = fn; tr.firstChild.appendChild(small); }
+      if (fn) { const small = document.createElement("div"); small.className = "fn"; small.textContent = fn.replace(/([_(])/g, "$1\u200b"); tr.firstChild.appendChild(small); }
       const td = document.createElement("td");
       const pill = document.createElement("span");
       pill.className = "pill " + tone; pill.textContent = word;
