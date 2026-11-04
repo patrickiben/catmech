@@ -79,3 +79,5 @@ These checks complement the coverage study and do not select the estimator:
 ## Amendments before held-out scoring
 
 Before any pilot or held-out run, review clarified that the baseline is an existing supported comparator, without a claim that it is the strongest possible method. The fixed automatic extension schedule above is part of the tested package procedure; manual retries remain prohibited. Any later engineering changes will be recorded here before the held-out run.
+
+An engineering reproducibility check before the planned pilot found that `pan` retains a hidden random-number cache across calls: an unrelated prior `pan` call could change a nominally same-seed package result, despite restoration of R's RNG state. The adapter will isolate each chain in a fresh R worker process so the recorded chain seed determines its run independently of caller history. This changes execution isolation, not the statistical model, priors, masks, seeds or scored design. The pilot will assess the process-startup cost. No planned-simulation accuracy had been inspected when this amendment was written.
