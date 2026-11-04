@@ -208,7 +208,7 @@ catmech_marginal_cluster_prepare <- function(data, value, gold, predictors, clus
   if (length(predictors)) {
     centered_x <- x
     for (j in seq_len(ncol(x)))
-      centered_x[, j] <- x[, j] - ave(x[, j], ids, FUN = mean)
+      centered_x[, j] <- x[, j] - stats::ave(x[, j], ids, FUN = mean)
     if (qr(centered_x, tol = 1e-7)$rank < ncol(x))
       stop("joint_marginal requires independent within-site predictor variation; site-constant or within-site aliased predictors are unsupported.", call. = FALSE)
   }
