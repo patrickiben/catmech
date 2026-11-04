@@ -1,0 +1,45 @@
+{
+  "mode": "pilot",
+  "workers": 8,
+  "m": 40,
+  "cells": ["gaussian_balanced", "gaussian_unbalanced", "near_zero_icc", "observed_mar", "null_slope", "student_t5", "contextual_x", "contextual_unbalanced", "contextual_null"],
+  "primary_cells": ["gaussian_balanced", "gaussian_unbalanced", "observed_mar", "null_slope"],
+  "contextual_cells": ["contextual_x", "contextual_unbalanced", "contextual_null"],
+  "prior_cells": ["gaussian_balanced", "near_zero_icc", "observed_mar", "contextual_x"],
+  "primary_reps": 1,
+  "prior_reps": 1,
+  "data_seed_base": 1670000000,
+  "imputation_seed_base": 1680000000,
+  "bootstrap_seed": null,
+  "bootstrap_reps": 2000,
+  "new_control": {
+    "chains": 4,
+    "burnin": 1000,
+    "iterations": 4000,
+    "max_iterations": 32000,
+    "prior_scale": 1
+  },
+  "old_control": {
+    "chains": 4,
+    "burnin": 1000,
+    "iterations": 4000,
+    "max_iterations": 32000,
+    "prior_scale": 1
+  },
+  "baseline_source_commit": "ae8f94086710ea1acc0df937f45ee847b6a0976b",
+  "pan_version": "2.0",
+  "source_fingerprint": "1cc4a0b86ee69ee660e598c9e78ce721e46326911caa990871dd7da2244b5c43",
+  "compiler": {
+    "CC": "clang -arch arm64",
+    "CFLAGS": "-falign-functions=64 -Wall -g -O2",
+    "CXX17": "clang++ -arch arm64",
+    "CXX17STD": "-std=gnu++17",
+    "CXX17FLAGS": "-falign-functions=64 -Wall -g -O2",
+    "CPPFLAGS": "-I/opt/R/arm64/include",
+    "LDFLAGS": "-L/opt/R/arm64/lib",
+    "FLIBS": "/Library/Frameworks/R.framework/Resources/lib/libgfortran.5.dylib /Library/Frameworks/R.framework/Resources/lib/libquadmath.0.dylib",
+    "R_MAKEVARS_USER": "/tmp/catmech-native-Makevars",
+    "makevars_user_sha256": "038390bba6e2ce66c46d0412a7e3d78eb143006043919fee3a18586287852141"
+  },
+  "accuracy_exported": false
+}

@@ -1,0 +1,8 @@
+2026-11-04: independent reporting controls, fabricated records only.
+No catmech fit or actual study accuracy was inspected.
+R reporting functions versus independent Python verifier arithmetic: PASS.
+2310 synthetic records; 2926 summary scalars; 408 paired contrasts.
+All 2000 paired bootstrap resamples reproduced.
+All four gate calculations, including partial and all-refusal groups, agreed.
+Generator: tools/check-joint-marginal-reporting.R
+Verifier: tools/verify-joint-marginal.py

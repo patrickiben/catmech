@@ -1,0 +1,1 @@
+Frozen source files for the first masked v0.10.0 pilot, candidate commit `8e65e4b`. Exact bytes verified against the pilot source manifest. The pilot inspected numerical diagnostics only; no estimates, intervals, coverage or bias were exported. Four sampler refusals motivated a posterior-preserving numerical amendment.
