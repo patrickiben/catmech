@@ -1,0 +1,15 @@
+{
+  "status": "complete",
+  "mode": "confirmation",
+  "cohorts": 2600,
+  "analysis_requests": 12800,
+  "fitted_workflow_requests": 9000,
+  "mcmc_fit_requests": 6400,
+  "returned_intervals": 12755,
+  "analysis_failures": 45,
+  "fit_failures": 45,
+  "source_fingerprint": "a260c005f1ddda9fb27f63225d7c312bd9e98a384a30383f75e089922b372b6a",
+  "started_utc": "2026-11-04 04:54:10 UTC",
+  "finished_utc": "2026-11-04 05:22:51 UTC",
+  "elapsed_seconds": 1721.4125
+}

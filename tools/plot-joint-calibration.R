@@ -32,8 +32,14 @@ methods <- c("old_cv3", "new_cv3", "direct")
 stopifnot(identical(config$cells, c(cells, "contextual_x")),
   identical(config$prior_cells, prior_cells))
 check <- function(actual, expected, label) {
-  if (!isTRUE(all.equal(as.numeric(actual), as.numeric(expected), tolerance = 1e-11,
-                       check.attributes = FALSE))) stop("Plotted-data self-check failed: ", label)
+  actual <- as.numeric(actual); expected <- as.numeric(expected)
+  good <- length(actual) == length(expected) && identical(is.na(actual), is.na(expected))
+  if (good) {
+    observed <- !is.na(expected)
+    good <- all(is.finite(actual[observed]) & is.finite(expected[observed]) &
+      abs(actual[observed] - expected[observed]) <= 1e-12 + 1e-11 * abs(expected[observed]))
+  }
+  if (!good) stop("Plotted-data self-check failed: ", label)
 }
 wilson <- function(k, n) {
   if (!n) return(c(NA_real_, NA_real_))
@@ -130,10 +136,11 @@ draw_points <- function(rows, y, multiplier = 1) {
   graphics::segments(multiplier * rows$upper[ci], y[ci] - .045, multiplier * rows$upper[ci], y[ci] + .045, col = color[ci])
   graphics::points(multiplier * rows$estimate[good], y[good], pch = 16, cex = 1.0, col = color[good])
 }
-panel_axes <- function(xlim, ylim, yticks, ylabels, title, subtitle, xlab, reference = NULL) {
+panel_axes <- function(xlim, ylim, yticks, ylabels, title, subtitle, xlab, reference = NULL, xticks = NULL) {
   graphics::plot(NA_real_, NA_real_, type = "n", xlim = xlim, ylim = ylim,
     xlab = xlab, ylab = "", axes = FALSE, xaxs = "i", yaxs = "i")
-  ticks <- pretty(xlim); ticks <- ticks[ticks >= xlim[1L] & ticks <= xlim[2L]]
+  ticks <- if (is.null(xticks)) pretty(xlim) else xticks
+  ticks <- ticks[ticks >= xlim[1L] & ticks <= xlim[2L]]
   graphics::abline(v = ticks, col = "#E8EBEF", lwd = .8)
   if (!is.null(reference)) graphics::abline(v = reference, col = "#59616E", lty = 2L, lwd = 1.2)
   graphics::axis(1L, at = ticks, col = "#9BA4B0", col.axis = "#273142", cex.axis = .85)
@@ -159,18 +166,17 @@ render <- function() {
     "Coverage among returned intervals (%)", 95)
   draw_points(z, 4 - match(z$method, methods), 100)
   z <- plot_data[plot_data$panel == "C", ]
-  upper <- max(c(.05, z$upper[is.finite(z$upper)])) * 1.07
-  low <- min(c(0, z$lower[is.finite(z$lower)]))
+  stopifnot(all(z$lower[is.finite(z$lower)] >= 0), all(z$upper[is.finite(z$upper)] <= .15))
   counts <- z$n[match(prior_cells, z$cell)]
-  panel_axes(c(low, upper), c(.5, 3.5), 3:1,
+  panel_axes(c(0, .15), c(.5, 3.5), 3:1,
     paste0(c("Balanced", "Near-zero ICC", "Observed MAR"), " (n=", counts, ")"),
     "C  Relative sensitivity of interval width",
     "Common complete triples; covariance-prior scales 0.25, 1 and 4",
-    "S = mean absolute log width ratio (smaller = less change)")
+    "S = mean absolute log width ratio (smaller = less change)", xticks = c(0, .05, .10, .15))
   draw_points(z, 4 - match(z$cell, prior_cells) + c(new_cv3 = .1, direct = -.1)[z$method])
   z <- plot_data[plot_data$panel == "D", ]
   upper <- max(c(2, z$upper[is.finite(z$upper)] * 100)) * 1.06
-  panel_axes(c(0, upper), c(.45, 6.55), 6:1, labels[cells],
+  panel_axes(c(-.025 * upper, upper), c(.45, 6.55), 6:1, labels[cells],
     "D  Numerical fit refusals",
     sprintf("Old / longer-run sampler; all %d fit requests per scenario", config$primary_reps),
     "Fit refusals (%)")
@@ -185,7 +191,7 @@ render <- function() {
     side = 1L, outer = TRUE, line = 2.5, cex = .8, col = "#526073")
   graphics::par(fig = c(0, 1, .904, .941), mar = rep(0, 4), oma = rep(0, 4), new = TRUE)
   graphics::plot.new()
-  graphics::legend("center", legend = c("Old model + CV3 CI", "Longer-run model + CV3 CI", "Direct posterior credible interval"),
+  graphics::legend("center", legend = c("Old sampler + CV3 CI", "Longer-run sampler + CV3 CI", "Direct posterior credible interval"),
     col = colors, pch = 16, horiz = TRUE, bty = "n", cex = .9, x.intersp = .7)
 }
 dir.create(output, recursive = TRUE, showWarnings = FALSE)

@@ -1,0 +1,20 @@
+{
+  "stage": "confirmation",
+  "source_fingerprint": "a260c005f1ddda9fb27f63225d7c312bd9e98a384a30383f75e089922b372b6a",
+  "script_sha256": "2c6d73421a2dea1661065dd278ac7d9c64fabfe0f4dbbce9243ac74b0d4d30e2",
+  "input_files": {
+    "COMPLETE.json": "ac1c10e2b3cad893cdfb4c6918122724b6393afb9dace70a1fa8642944f20ec0",
+    "settings.json": "743b500e84db2623644002224a99ccbfbeb839e71e994ccc3f07337efdc57b0b",
+    "records.csv": "8fc5f2f39910e03832dc6242085a389fd115f713c4f3c5f388260a250dcd25e8",
+    "fit-records.csv": "edef720790e9db7338d68862e74224699c64530876be85f885c817ccf9e07408",
+    "summary.csv": "3cf1ac097529375de5a60d03ec7255de17c7b71e7fbebb39a7cee538c6495c40",
+    "prior-triples.csv": "ef0985ba92a07f8fbb15a616ee50a2e7aa75491d5d03d37fcad66cbb29045d7d",
+    "prior-summary.csv": "d4e05e04e18290524bc08ec81997fc8d074d75f06eb1ab0a20abce1c0c597a6b",
+    "availability.csv": "230895e44fd81793bffc3601ad2c3628e95c5d333b8f8ccd1ada2a975d00de53",
+    "source-hashes-before.csv": "bb8415132db6e1fd36bec708c61b3d11e450be420a4e4e89b7b57305ffe4f096",
+    "source-hashes-after.csv": "bb8415132db6e1fd36bec708c61b3d11e450be420a4e4e89b7b57305ffe4f096"
+  },
+  "points": 39,
+  "self_checks": "Every plotted value recomputed from raw records and checked against saved summaries; prior triples share a common denominator.",
+  "uncertainty": "95% Monte Carlo intervals, not uncertainty intervals for an individual fitted coefficient."
+}

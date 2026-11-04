@@ -1,0 +1,7 @@
+"cell","requests","old_failures","new_failures","old_failure_rate","new_failure_rate","difference","mcse"
+"gaussian_balanced",400,4,0,0.01,0,-0.00999999999999999,0.00498116754136902
+"gaussian_unbalanced",400,8,0,0.02,0,-0.02,0.00700876644050462
+"near_zero_icc",400,0,0,0,0,0,0
+"observed_mar",400,8,0,0.02,0,-0.02,0.00700876644050462
+"null_slope",400,1,0,0.0025,0,-0.0025,0.0025
+"student_t5",400,12,0,0.03,0,-0.03,0.00854004278836279

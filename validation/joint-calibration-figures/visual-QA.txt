@@ -1,0 +1,11 @@
+PASS: final PNG visually inspected at 2800 x 2000 pixels; all labels, legends and Monte Carlo bars visible, no text clipping or overlapping labels.
+PASS: panel D includes padding so zero-refusal points remain fully visible; their Wilson upper bounds remain above zero.
+PASS: all 39 estimates, 39 denominators and 78 Monte Carlo bounds independently recomputed in Python from individual saved request records.
+PASS: R script independently reconstructs coverage, common prior triples and fit-refusal counts and compares saved summaries before writing figures.
+PASS: incomplete-stage guard refuses before reading result CSVs or writing figures.
+PASS: temporary-copy mutation adding 0.01 to saved balanced/direct coverage was rejected before output; original study artifacts were unchanged.
+PASS: final script and completed input SHA256 hashes match figure-provenance.json.
+Numerical comparisons use absolute tolerance 1e-12 plus relative tolerance 1e-11; this accommodates CSV rounding in near-zero paired sensitivity differences.
+Scope: coverage is conditional on returned intervals; contextual-X misspecification is separate; priors share common successful triples; fit refusals use all requests. Error bars describe Monte Carlo uncertainty, not per-fit coefficient uncertainty.
+Presentation refinement: panel C explicitly spans 0.00 to 0.15 with ticks at 0.00, 0.05, 0.10 and 0.15; every confidence bar lies within that range.
+Legend now says Old sampler / Longer-run sampler, preserving the shared-likelihood interpretation. Final PNG re-inspected without clipping; PDF/PNG and provenance regenerated and hashes rechecked.
