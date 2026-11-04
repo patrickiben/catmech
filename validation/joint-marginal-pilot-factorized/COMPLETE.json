@@ -1,0 +1,15 @@
+{
+  "status": "complete",
+  "mode": "pilot",
+  "cohorts": 9,
+  "analysis_requests": 93,
+  "fitted_workflow_requests": 51,
+  "mcmc_fit_requests": 42,
+  "returned_intervals": 93,
+  "analysis_failures": 0,
+  "fit_failures": 0,
+  "source_fingerprint": "3a6c65470a6198dfd9c85f99c71217446b6f17206113322d0a1c351746009c5c",
+  "started_utc": "2026-11-04 14:09:19 UTC",
+  "finished_utc": "2026-11-04 14:11:23 UTC",
+  "elapsed_seconds": 124.5416
+}
