@@ -1,7 +1,7 @@
 # Explicit bivariate Gaussian random-intercept model, fitted by pan.
 catmech_joint_cluster_control <- function(control = list()) {
-  defaults <- list(chains = 4L, burnin = 1000L, iterations = 2000L,
-                   max_iterations = 8000L, prior_scale = 1)
+  defaults <- list(chains = 4L, burnin = 1000L, iterations = 4000L,
+                   max_iterations = 32000L, prior_scale = 1)
   if (!is.list(control) || (length(control) && (is.null(names(control)) ||
       anyNA(names(control)) || any(!nzchar(names(control))) || anyDuplicated(names(control)))))
     stop("joint_control must be a uniquely named list.", call. = FALSE)
@@ -155,21 +155,72 @@ catmech_joint_cluster_trace <- function(problem, fit, keep) {
   patterns <- list(recorded = problem$prediction$missing & problem$prediction$recorded,
                    absent = problem$prediction$missing & !problem$prediction$recorded)
   patterns <- patterns[vapply(patterns, any, logical(1))]
-  names <- c(names, paste0("conditional_target_mean_", names(patterns)))
+  names <- c(names, paste0("conditional_target_mean_", names(patterns)),
+             "beta_T_original:(Intercept)")
   out <- matrix(NA_real_, length(keep), length(names), dimnames = list(NULL, names))
-  for (i in seq_along(keep)) {
-    k <- keep[i]
-    beta <- matrix(fit$beta[, , k], p, 2L)
-    sigma <- fit$sigma[, , k]; psi <- fit$psi[, , k]
-    conditional <- catmech_joint_cluster_condition(problem$prediction, beta, sigma, psi)
-    mu <- problem$x %*% beta + conditional$mean[problem$prediction$group, , drop = FALSE]
-    means <- vapply(names(patterns), function(pattern) {
-      rows <- patterns[[pattern]]
-      if (pattern == "recorded") mean(mu[rows, 1L] + conditional$lambda * (problem$y[rows, 2L] - mu[rows, 2L])) else mean(mu[rows, 1L])
-    }, numeric(1))
-    out[i, ] <- c(as.vector(beta), sigma[1L, 1L], sigma[1L, 2L], sigma[2L, 2L],
-                  psi[1L, 1L], psi[1L, 2L], psi[2L, 2L], means)
+  out[, seq_len(2L * p)] <- matrix(aperm(fit$beta[, , keep, drop = FALSE], c(3L, 1L, 2L)),
+                                  nrow = length(keep))
+  out[, 2L * p + seq_len(6L)] <- cbind(fit$sigma[1L, 1L, keep], fit$sigma[1L, 2L, keep],
+    fit$sigma[2L, 2L, keep], fit$psi[1L, 1L, keep], fit$psi[1L, 2L, keep], fit$psi[2L, 2L, keep])
+
+  # A pattern mean depends on recipient design means and site counts, so it
+  # does not require constructing a prediction for every row at every draw.
+  g <- length(problem$prediction$ids)
+  recipients <- lapply(patterns, function(rows) list(
+    x = colMeans(problem$x[rows, , drop = FALSE]),
+    weight = tabulate(problem$prediction$group[rows], nbins = g) / sum(rows),
+    w = if (all(problem$prediction$recorded[rows])) mean(problem$y[rows, 2L]) else NA_real_))
+  a <- problem$prediction$patterns[[1L]]
+  t <- problem$prediction$patterns[[2L]]
+  w <- problem$prediction$patterns[[3L]]
+  # Bound temporary site-by-draw matrices even for many sites or long chains.
+  batch_size <- max(1L, min(1024L, as.integer(floor(1e6 / max(g, 1L)))))
+  for (first in seq.int(1L, length(keep), by = batch_size)) {
+    rows <- seq.int(first, min(first + batch_size - 1L, length(keep)))
+    beta_t <- t(out[rows, seq_len(p), drop = FALSE])
+    beta_w <- t(out[rows, p + seq_len(p), drop = FALSE])
+    sigma11 <- out[rows, 2L * p + 1L]; sigma12 <- out[rows, 2L * p + 2L]
+    sigma22 <- out[rows, 2L * p + 3L]
+    psi11 <- out[rows, 2L * p + 4L]; psi12 <- out[rows, 2L * p + 5L]
+    psi22 <- out[rows, 2L * p + 6L]
+    # The same two-dimensional precision algebra as the predictive helper,
+    # evaluated across draws; Schur complements avoid determinant subtraction.
+    ri11 <- 1 / (sigma11 - sigma12 * (sigma12 / sigma22))
+    ri12 <- -(sigma12 / sigma22) * ri11
+    ri22 <- 1 / sigma22 + (sigma12 / sigma22)^2 * ri11
+    ui11 <- 1 / (psi11 - psi12 * (psi12 / psi22))
+    ui12 <- -(psi12 / psi22) * ui11
+    ui22 <- 1 / psi22 + (psi12 / psi22)^2 * ui11
+    if (any(!is.finite(c(ri11, ri12, ri22, ui11, ui12, ui22))) ||
+        any(c(sigma22, psi22, ri11, ui11) <= 0))
+      stop("Joint cluster trace covariance is not numerically positive definite.", call. = FALSE)
+    da_t <- a$y[, 1L] - a$x %*% beta_t
+    da_w <- a$y[, 2L] - a$x %*% beta_w
+    h_t <- sweep(da_t, 2L, ri11, "*") + sweep(da_w, 2L, ri12, "*") +
+      sweep(t$y[, 1L] - t$x %*% beta_t, 2L, sigma11, "/")
+    h_w <- sweep(da_t, 2L, ri12, "*") + sweep(da_w, 2L, ri22, "*") +
+      sweep(w$y[, 2L] - w$x %*% beta_w, 2L, sigma22, "/")
+    p11 <- matrix(ui11, g, length(rows), byrow = TRUE) + outer(a$n, ri11) + outer(t$n, 1 / sigma11)
+    p12 <- matrix(ui12, g, length(rows), byrow = TRUE) + outer(a$n, ri12)
+    p22 <- matrix(ui22, g, length(rows), byrow = TRUE) + outer(a$n, ri22) + outer(w$n, 1 / sigma22)
+    schur <- p22 - p12 * (p12 / p11)
+    if (any(!is.finite(schur)) || any(schur <= 0))
+      stop("Joint cluster trace conditional covariance is not numerically positive definite.", call. = FALSE)
+    u_w <- (h_w - p12 * (h_t / p11)) / schur
+    u_t <- (h_t - p12 * u_w) / p11
+    for (pattern in names(recipients)) {
+      r <- recipients[[pattern]]
+      means <- as.vector(crossprod(r$x, beta_t) + crossprod(r$weight, u_t))
+      if (pattern == "recorded") means <- means + (sigma12 / sigma22) *
+        as.vector(r$w - crossprod(r$x, beta_w) - crossprod(r$weight, u_w))
+      out[rows, paste0("conditional_target_mean_", pattern)] <- means
+    }
   }
+  center <- unlist(problem$transform$predictor_center, use.names = FALSE)
+  scale <- unlist(problem$transform$predictor_scale, use.names = FALSE)
+  intercept <- out[, 1L]
+  if (p > 1L) intercept <- intercept - as.vector(out[, 2L:p, drop = FALSE] %*% (center[-1L] / scale[-1L]))
+  out[, "beta_T_original:(Intercept)"] <- problem$center[1L] + problem$scale[1L] * intercept
   if (any(!is.finite(out))) stop("Nonfinite joint cluster parameter trace.", call. = FALSE)
   out
 }

@@ -246,6 +246,9 @@ stopifnot(identical(joint$manifest$engine, "reference_joint_cluster"),
           joint$model_diagnostics$convergence_pass,
           identical(joint$original, joint_example$joint_data),
           all(is.finite(joint_example$joint_analysis$std.error)),
+          all(is.finite(joint_example$joint_posterior$posterior_sd)),
+          all(joint_example$joint_posterior$interpretation ==
+              "conditional_joint_model_credible_interval"),
           identical(mice::complete(joint$mids, 1)$recorded, joint$completed[[1]]$recorded))
 check_export(joint, "joint-cluster")
 cat("Joint mixed-pattern clustered example, adapter and export: PASS\n")

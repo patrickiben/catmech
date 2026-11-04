@@ -1,0 +1,8 @@
+PASS: exact 22 previously failed request keys, data/imputation seeds, input hashes and prior scales.
+PASS: all 22 return at 16,000 retained draws under 4,000/8,000/16,000 attempts; every earlier attempt fails and final attempt passes.
+PASS: all 286 parameter diagnostics finite and pass unchanged Rhat <= 1.05, bulk/tail ESS >= 400.
+PASS: before/after/current numerical source and challenge-input SHA256 hashes agree.
+PASS: no point-estimate, interval or accuracy fields exported; zero omitted errors.
+Elapsed 57.540s; per-request median 2.571s; max 2.804s.
+Across final checks: max Rhat 1.013467; min bulk ESS 515.5760; min tail ESS 932.8605.
+LIMIT: selected numerical stress check, not an estimate of population failure rate or interval calibration.

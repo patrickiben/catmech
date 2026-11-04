@@ -1,0 +1,17 @@
+{
+  "kind": "selected_previous_convergence_failures",
+  "requests": 22,
+  "controls": {
+    "chains": 4,
+    "burnin": 1000,
+    "iterations": 4000,
+    "max_iterations": 32000,
+    "prior_scale": 1
+  },
+  "m": 40,
+  "pan_version": "2.0",
+  "catmech_version": "0.9.0",
+  "source_fingerprint": "f9bf05555bdb27033f85f4d8d567c74d45b8c6e8128b73ac7409dda67a46018d",
+  "accuracy_computed": false,
+  "limitation": "Selected numerical challenge; it cannot estimate a population refusal rate or interval calibration."
+}

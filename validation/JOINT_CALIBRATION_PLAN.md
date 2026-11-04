@@ -65,7 +65,7 @@ S = ( abs(log(width_0.25 / width_1))
     + abs(log(width_4 / width_1)) ) / 2.
 ```
 
-Compare `S_direct - S_new_cv3` on the same complete triples, reporting denominators and a paired MCSE in each of the three fixed cells. The overall contrast is the equal-weight mean over those cells; its MCSE is the square root of the sum of the three cell-mean variances divided by three. This compares **relative** sensitivity and cannot be satisfied merely by making every interval narrower. Also report paired estimate shifts and failures by scale; width is not the whole prior-sensitivity story.
+Compare `S_direct - S_new_cv3` on the same complete triples, reporting denominators and a paired MCSE in each of the three fixed cells. The overall contrast is the equal-weight mean over those cells; its MCSE is `sqrt(sum(cell_MCSE^2)) / 3`, with the division outside the square root. This compares **relative** sensitivity and cannot be satisfied merely by making every interval narrower. Also report paired estimate shifts and failures by scale; width is not the whole prior-sensitivity story.
 
 The direct-only candidate supports a claim of reduced relative width sensitivity only when the upper two-sided 95% Monte Carlo confidence bound for that overall contrast is below zero and no cell has a positive point contrast. In development, failure of this screen activates a **separate prospective covariance-prior development amendment before confirmation**. The next principled candidate to consider is a hierarchical inverse-Wishart/half-t construction such as Huang and Wand, with its actual joint prior, scale choice, sampler and validation specified in that amendment. It is not silently substituted here, and half-t marginal scales do not imply independent scales and correlations.
 
@@ -109,4 +109,6 @@ Hash the candidate R sources, `DESCRIPTION`, `NAMESPACE`, this plan and runner, 
 
 ## Amendments
 
-None yet. No candidate accuracy runs preceded this plan.
+None yet. No candidate accuracy runs preceded this plan. Before accuracy runs, the cohort-bootstrap seeds were fixed at `1650000000` for development and `1660000000` for confirmation. The engineering pilot produces no accuracy bootstrap.
+
+Before accuracy runs, bootstrap ordering was fixed explicitly: use R `RNGkind("Mersenne-Twister", "Inversion", "Rejection")`, the stage-specific seed above, then loop over bootstrap replicates first and `primary_cells` in the listed order second. Draw `sample.int(n, n, replace = TRUE)` for each cell and reuse those cohort indices across methods. An independent Python verifier may use base R solely to reproduce these indices, then recompute all statistics itself; it does not call the runner's scoring functions.

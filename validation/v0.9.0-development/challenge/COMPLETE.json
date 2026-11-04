@@ -1,0 +1,10 @@
+{
+  "status": "complete",
+  "requests": 22,
+  "returned": 22,
+  "errors": 0,
+  "accuracy_computed": false,
+  "source_fingerprint": "f9bf05555bdb27033f85f4d8d567c74d45b8c6e8128b73ac7409dda67a46018d",
+  "elapsed_seconds": 57.5397,
+  "limitation": "These previously failed cases were selected. This is not an estimate of a population failure rate or interval accuracy."
+}

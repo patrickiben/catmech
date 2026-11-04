@@ -1,0 +1,93 @@
+Joint trace engineering check (no interval accuracy or coverage evaluation)
+=======================================================================
+
+Baseline: v0.8.0 source from git b2362935d17ee7a2bfdac5ceee732d7232a15a15.
+The isolated baseline R/joint-cluster.R exactly matches the frozen copy at
+validation/v0.8.0-source/R/joint-cluster.R. Neither frozen source was changed.
+Baseline sampler-file SHA256:
+424abc0a94f44a4ff3fc0a344ff54411ccc260c5118f9bf58ba09a4fcbbbbb07
+Candidate R/joint-cluster.R SHA256 at this check:
+713fd03adacdb8917d079e86f7368459d2ac36c7bd85799b14fa5051f1216914
+
+Candidate changes
+-----------------
+* Default retained iterations 2,000 -> 4,000; maximum 8,000 -> 32,000.
+* Four chains, 1,000 burn-in iterations, covariance priors, thresholds, the
+  fresh-process pan restart backend and predictive draw helper are unchanged.
+* Conditional target means are computed from recipient design means and site
+  weights in batches, with at most 1,024 draws / 1,000,000 site-draw cells.
+* The original-scale target intercept is appended as a convergence monitor.
+  This added monitor can require an extension even when older monitors pass.
+
+Explicit historical controls: stream / prediction equivalence
+------------------------------------------------------------
+Fixture: joint_cluster_api_fixture() in tests/testthat/test-joint-cluster.R;
+its generation seed is 30911. Sampler seed 24, m=8, chains=4, burnin=1000,
+iterations=2000, max_iterations=8000, prior_scale=1. Both runs stopped at 2000.
+Baseline functions were loaded into an isolated environment whose parent was
+the package namespace; set.seed(24) preceded each draw-function call.
+
+Completed target draws: bit-identical.
+Raw pan parameter traces: bit-identical.
+Chain seeds and selected imputation iterations: bit-identical.
+Maximum absolute difference in previously existing trace columns: 3.712308e-16.
+Elapsed time, baseline / candidate: 0.628 / 0.400 seconds.
+
+Reusing the same 17,000-iteration pan array and retaining iterations 1001:17000
+isolates trace processing from fitting and worker startup:
+  Baseline trace elapsed: 0.452 seconds.
+  Candidate trace elapsed: 0.025 seconds.
+  Maximum absolute difference in previously existing columns: 3.712308e-16.
+This is approximately an 18-fold speedup for trace construction on this fixture.
+
+Diagnostic-only replay of an earlier refusal
+------------------------------------------
+Input: frozen v0.8 study Gaussian-balanced replicate 66, data seed 1530100066,
+imputation seed 1540100066. No coefficient coverage or interval accuracy was
+computed. Both comparisons used fixed chains=4, burnin=1000, iterations=16000,
+max_iterations=16000, prior_scale=1 and m=2.
+
+Baseline elapsed: 3.628 seconds; candidate elapsed: 1.445 seconds.
+Both passed the unchanged thresholds, with the same reported original monitor
+extrema: maximum Rhat 1.006232, minimum bulk ESS 599.3498, minimum tail ESS 1427.600.
+The candidate's extra original-scale intercept monitor also passed:
+Rhat 1.004640, bulk ESS 747.7787, tail ESS 1899.005.
+
+Rprof sampling interval 0.005 seconds (parent process only): trace construction
+was 70.26% of sampled baseline parent CPU and 25.68% of candidate parent CPU.
+Posterior diagnostic calculations were 25.06% and 62.16%, respectively. These
+fractions exclude child-process sampling CPU and are not whole-system profiles.
+
+Tests
+-----
+New tests/testthat/test-joint-trace.R: 17 assertions passed. It compares batch
+means to per-row calculations using the unchanged scalar conditioning helper;
+covers reversed/repeated retained indices, batch boundaries, both missingness
+patterns, one-pattern endpoints, intercept-only and singleton-draw shapes,
+original-scale intercept transformation, covariance refusal and RNG neutrality.
+The tests do not read frozen v0.8 source files or require git.
+
+Existing joint test file: 139 assertions passed at this checkpoint. Its single
+remaining failure was an obsolete expectation that m=10000 exceeds the initial
+draw budget; 4,000 initial iterations times 4 chains now permit 16,000. Root was
+notified to update that assertion to 17,000. No numerical or preservation test
+failed. Final whole-package checks are recorded separately by the release task.
+
+Limits and reproduction notes
+-----------------------------
+Timings are illustrative single-run engineering measurements on this machine,
+not a controlled performance study; concurrent machine activity can affect them.
+This check establishes implementation equivalence at explicit historical
+controls on the stated fixture, not unchanged stopping decisions for every
+possible input. The extra intercept monitor and longer defaults intentionally
+change the supported stopping procedure. No calibration conclusion follows.
+
+Temporary detailed scripts/logs during development:
+/tmp/catmech-next-trace-equivalence.R
+/tmp/catmech-next-trace-equivalence.log
+/tmp/catmech-next-design-profile.R
+/tmp/catmech-next-design-profile.log
+/tmp/catmech-next-design-profile-vectorized.R
+/tmp/catmech-next-design-profile-vectorized.log
+The baseline source can be reconstructed from the frozen source path above;
+the temporary paths are optional detailed records, not package dependencies.

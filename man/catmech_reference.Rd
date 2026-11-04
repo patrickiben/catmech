@@ -66,7 +66,7 @@ recorded value with one shared two-dimensional site effect. It requires
 `method = "normal"`, `use_recorded = TRUE` and `cluster`.}
 
 \item{joint_control}{Named list for the joint sampler: `chains = 4`,
-`burnin = 1000`, `iterations = 2000`, `max_iterations = 8000`, and
+`burnin = 1000`, `iterations = 4000`, `max_iterations = 32000`, and
 `prior_scale = 1`. Chains must be at least four. Failed diagnostic screens
 restart the same seeded chains with doubled retained iterations up to the
 declared maximum, then fail with traces in a `catmech_convergence_error`.

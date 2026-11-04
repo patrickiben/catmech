@@ -21,3 +21,8 @@ joint_fit <- catmech::catmech_reference(
 print(joint_fit$model_diagnostics$summary)
 joint_analysis <- catmech::catmech_pool_lm(joint_fit, recorded ~ x)
 print(joint_analysis)
+
+# Population coefficients of the fitted joint model, with model-based credible
+# intervals. This uses all posterior draws and the original imputation design.
+joint_posterior <- catmech::catmech_joint_summary(joint_fit)
+print(joint_posterior)

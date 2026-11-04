@@ -254,7 +254,7 @@ test_that("joint controls and observed-data support are checked before sampling"
     expect_error(run(joint_control = control), "joint_control")
   expect_error(catmech_reference(d, "raw", "gold", "x", cluster_model = "joint"),
     "cluster|use_recorded")
-  expect_error(run(m = 10000L), "m cannot exceed")
+  expect_error(run(m = 17000L), "m cannot exceed")
   e <- d
   e$raw[!is.na(e$gold)] <- NA_real_
   expect_error(run(e), "paired calibration")
