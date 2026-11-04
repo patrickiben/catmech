@@ -1,0 +1,14 @@
+{
+  "status": "pass",
+  "evidence": "isolated function environments and synthetic 72-row fixture",
+  "frozen_sampler_sha256": "ac870aa08e4c9fd7d80e09bbfa72a0f83432527838dc4fc40c2d48a60e3be35c",
+  "patched_temporary_sampler_sha256": "44d8e7856ae543982531cec69540fd9f689c826269add0eff46eb4311c1b8e36",
+  "pkgload_imports_ave": false,
+  "old_function_resolved_stats_ave_before_detach": true,
+  "stats_detached_old_failure": "could not find function \"ave\"",
+  "stats_detached_patched_function_passed": true,
+  "preparation_byte_identical": true,
+  "study_inputs_used": false,
+  "fits_run": false,
+  "root_sources_modified": false
+}

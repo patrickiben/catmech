@@ -1,0 +1,84 @@
+{
+  "status": "PASS",
+  "evidence": "synthetic verifier-policy fixtures; no real study evaluated",
+  "positive_controls": 2,
+  "rejected_controls": 17,
+  "checks": [
+    {
+      "case": "unchanged source passes strict default",
+      "result": "pass"
+    },
+    {
+      "case": "exact named correction passes with explicit receipt",
+      "result": "pass"
+    },
+    {
+      "case": "changed source rejected without waiver",
+      "result": "rejected"
+    },
+    {
+      "case": "receipt without frozen directory rejected",
+      "result": "rejected"
+    },
+    {
+      "case": "unrelated R change",
+      "result": "rejected"
+    },
+    {
+      "case": "native source change",
+      "result": "rejected"
+    },
+    {
+      "case": "extra sampler change",
+      "result": "rejected"
+    },
+    {
+      "case": "archived source alteration",
+      "result": "rejected"
+    },
+    {
+      "case": "study source manifest change",
+      "result": "rejected"
+    },
+    {
+      "case": "study input records change",
+      "result": "rejected"
+    },
+    {
+      "case": "equivalence checker change",
+      "result": "rejected"
+    },
+    {
+      "case": "cohort input hash change",
+      "result": "rejected"
+    },
+    {
+      "case": "preparation hash mismatch",
+      "result": "rejected"
+    },
+    {
+      "case": "missing cohort",
+      "result": "rejected"
+    },
+    {
+      "case": "duplicate cohort",
+      "result": "rejected"
+    },
+    {
+      "case": "new source hash change",
+      "result": "rejected"
+    },
+    {
+      "case": "namespace test failure",
+      "result": "rejected"
+    },
+    {
+      "case": "incorrect cohort seed",
+      "result": "rejected"
+    },
+    {
+      "case": "unapproved correction name",
+      "result": "rejected"
+    }
+  ]
+}
