@@ -1,0 +1,10 @@
+gaussian_balanced: 1/1 cohorts; 13 analysis requests, 7 fitted-workflow requests; 6.6s elapsed
+gaussian_unbalanced: 1/1 cohorts; 18 analysis requests, 10 fitted-workflow requests; 12.1s elapsed
+near_zero_icc: 1/1 cohorts; 31 analysis requests, 17 fitted-workflow requests; 25.4s elapsed
+observed_mar: 1/1 cohorts; 44 analysis requests, 24 fitted-workflow requests; 51.5s elapsed
+null_slope: 1/1 cohorts; 49 analysis requests, 27 fitted-workflow requests; 53.4s elapsed
+student_t5: 1/1 cohorts; 54 analysis requests, 30 fitted-workflow requests; 56.1s elapsed
+contextual_x: 1/1 cohorts; 67 analysis requests, 37 fitted-workflow requests; 62.5s elapsed
+contextual_unbalanced: 1/1 cohorts; 72 analysis requests, 40 fitted-workflow requests; 64.5s elapsed
+contextual_null: 1/1 cohorts; 77 analysis requests, 43 fitted-workflow requests; 66.4s elapsed
+Complete: 77 analysis requests, 77 intervals, 0 analysis refusals; 0 fit refusals.
