@@ -1,0 +1,9 @@
+{
+  "status": "incomplete",
+  "reason": "Forked outer worker segfault during observed_mar cohort34; no completed-study claim. Stopped remaining work.",
+  "missing_cohort": {
+    "cell": "observed_mar",
+    "replicate": 34
+  },
+  "source_unchanged": true
+}
