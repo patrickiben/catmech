@@ -1,0 +1,515 @@
+{
+  "scope": "selected numerical challenge; no accuracy evaluated",
+  "cases": [
+    {
+      "cell": "gaussian_unbalanced",
+      "replicate": 12,
+      "input_sha256": "26c2b30d164f82208c6da5e2771078758dee27cf86fa42e1a8d50fc66142a208",
+      "iterations": 64000,
+      "attempts": [
+        {
+          "iterations": 4000,
+          "convergence_pass": false,
+          "max_rhat": 1.08822337421864,
+          "min_bulk_ess": 36.0679680728351,
+          "min_tail_ess": 51.9965590227403
+        },
+        {
+          "iterations": 8000,
+          "convergence_pass": false,
+          "max_rhat": 1.05731054284108,
+          "min_bulk_ess": 68.1683491286064,
+          "min_tail_ess": 155.277191397205
+        },
+        {
+          "iterations": 16000,
+          "convergence_pass": false,
+          "max_rhat": 1.02319078245316,
+          "min_bulk_ess": 207.261908910762,
+          "min_tail_ess": 408.576036000481
+        },
+        {
+          "iterations": 32000,
+          "convergence_pass": false,
+          "max_rhat": 1.01328235649619,
+          "min_bulk_ess": 396.730546541788,
+          "min_tail_ess": 747.335610750249
+        },
+        {
+          "iterations": 64000,
+          "convergence_pass": true,
+          "max_rhat": 1.00647931858774,
+          "min_bulk_ess": 835.623299570687,
+          "min_tail_ess": 1768.01856223023
+        }
+      ],
+      "diagnostics": [
+        {
+          "parameter": "mu:T",
+          "rhat": 1.00190053879023,
+          "ess_bulk": 2462.81779224627,
+          "ess_tail": 8105.01394762013
+        },
+        {
+          "parameter": "mu:W",
+          "rhat": 1.00000890366191,
+          "ess_bulk": 208764.411307485,
+          "ess_tail": 221268.689458992
+        },
+        {
+          "parameter": "mu:X1",
+          "rhat": 1.00004142786892,
+          "ess_bulk": 250808.783263702,
+          "ess_tail": 239090.273256302
+        },
+        {
+          "parameter": "sigma:T:T",
+          "rhat": 1.00014250518939,
+          "ess_bulk": 30725.3404110336,
+          "ess_tail": 82485.2185724547
+        },
+        {
+          "parameter": "sigma:W:T",
+          "rhat": 1.00005199469582,
+          "ess_bulk": 65041.5915489349,
+          "ess_tail": 148549.900660833
+        },
+        {
+          "parameter": "sigma:X1:T",
+          "rhat": 1.00004684544355,
+          "ess_bulk": 71685.7169683503,
+          "ess_tail": 150041.935973506
+        },
+        {
+          "parameter": "sigma:W:W",
+          "rhat": 1.0000053694829,
+          "ess_bulk": 139580.831617801,
+          "ess_tail": 203476.642803849
+        },
+        {
+          "parameter": "sigma:X1:W",
+          "rhat": 1.00000083962019,
+          "ess_bulk": 188543.124945967,
+          "ess_tail": 234695.844170099
+        },
+        {
+          "parameter": "sigma:X1:X1",
+          "rhat": 0.999997170246959,
+          "ess_bulk": 242034.15470464,
+          "ess_tail": 251718.060917452
+        },
+        {
+          "parameter": "psi:T:T",
+          "rhat": 1.00319293217085,
+          "ess_bulk": 1851.75123430672,
+          "ess_tail": 5535.82612303437
+        },
+        {
+          "parameter": "psi:W:T",
+          "rhat": 1.0033135714067,
+          "ess_bulk": 2022.30547955801,
+          "ess_tail": 3103.23903073898
+        },
+        {
+          "parameter": "psi:X1:T",
+          "rhat": 1.00134225743824,
+          "ess_bulk": 4031.50352732408,
+          "ess_tail": 10838.3015470499
+        },
+        {
+          "parameter": "psi:W:W",
+          "rhat": 1.00055568817771,
+          "ess_bulk": 10132.1239701214,
+          "ess_tail": 22120.2990653365
+        },
+        {
+          "parameter": "psi:X1:W",
+          "rhat": 1.00084879303577,
+          "ess_bulk": 5888.47197838066,
+          "ess_tail": 24028.7826072663
+        },
+        {
+          "parameter": "psi:X1:X1",
+          "rhat": 1.00101157774844,
+          "ess_bulk": 6019.44558621897,
+          "ess_tail": 15553.3278505809
+        },
+        {
+          "parameter": "aux_sigma:T",
+          "rhat": 1.00001482287989,
+          "ess_bulk": 65977.7096485462,
+          "ess_tail": 97621.4299933353
+        },
+        {
+          "parameter": "aux_sigma:W",
+          "rhat": 1.00002910752082,
+          "ess_bulk": 65044.5848159137,
+          "ess_tail": 102850.310773533
+        },
+        {
+          "parameter": "aux_sigma:X1",
+          "rhat": 1.00001578319609,
+          "ess_bulk": 252910.423838865,
+          "ess_tail": 252258.863808189
+        },
+        {
+          "parameter": "aux_psi:T",
+          "rhat": 1.0002865464909,
+          "ess_bulk": 11110.5220597582,
+          "ess_tail": 27873.854351833
+        },
+        {
+          "parameter": "aux_psi:W",
+          "rhat": 1.00166618395396,
+          "ess_bulk": 3619.81864092455,
+          "ess_tail": 10736.852687181
+        },
+        {
+          "parameter": "aux_psi:X1",
+          "rhat": 1.00079920932518,
+          "ess_bulk": 7902.77647356299,
+          "ess_tail": 17238.9535897196
+        },
+        {
+          "parameter": "marginal:(Intercept)",
+          "rhat": 1.00190259139603,
+          "ess_bulk": 2440.84574188719,
+          "ess_tail": 7945.05510240423
+        },
+        {
+          "parameter": "marginal:x",
+          "rhat": 1.00068551074624,
+          "ess_bulk": 7862.84123000991,
+          "ess_tail": 17106.0708193142
+        },
+        {
+          "parameter": "conditional_target_mean_recorded",
+          "rhat": 1.00647931858774,
+          "ess_bulk": 835.623299570687,
+          "ess_tail": 1768.01856223023
+        },
+        {
+          "parameter": "conditional_target_mean_absent",
+          "rhat": 1.00612265174605,
+          "ess_bulk": 872.366447227757,
+          "ess_tail": 1877.38952630813
+        },
+        {
+          "parameter": "conditional_sigma:T:T",
+          "rhat": 1.00006492618066,
+          "ess_bulk": 24224.4761386666,
+          "ess_tail": 60760.3326960905
+        },
+        {
+          "parameter": "conditional_sigma:W:T",
+          "rhat": 1.00005204210589,
+          "ess_bulk": 41930.999250168,
+          "ess_tail": 92343.4939878131
+        },
+        {
+          "parameter": "conditional_sigma:W:W",
+          "rhat": 1.00005441575674,
+          "ess_bulk": 88021.1597405365,
+          "ess_tail": 155338.872838136
+        },
+        {
+          "parameter": "regression_sigma:T:X1",
+          "rhat": 1.0001538634357,
+          "ess_bulk": 35467.6097482836,
+          "ess_tail": 87748.1178526187
+        },
+        {
+          "parameter": "regression_sigma:W:X1",
+          "rhat": 1.00003877779568,
+          "ess_bulk": 109910.547314456,
+          "ess_tail": 189148.758785625
+        },
+        {
+          "parameter": "conditional_psi:T:T",
+          "rhat": 1.00140899971849,
+          "ess_bulk": 4786.60314414112,
+          "ess_tail": 8256.10746818046
+        },
+        {
+          "parameter": "conditional_psi:W:T",
+          "rhat": 1.00195793264776,
+          "ess_bulk": 4488.04717026196,
+          "ess_tail": 9606.68510937589
+        },
+        {
+          "parameter": "conditional_psi:W:W",
+          "rhat": 1.00161934837143,
+          "ess_bulk": 4369.892768185,
+          "ess_tail": 10305.0463025944
+        },
+        {
+          "parameter": "regression_psi:T:X1",
+          "rhat": 1.00050498499471,
+          "ess_bulk": 10648.0853961787,
+          "ess_tail": 35302.323856839
+        },
+        {
+          "parameter": "regression_psi:W:X1",
+          "rhat": 1.00036886976403,
+          "ess_bulk": 23048.5348710844,
+          "ess_tail": 39935.8035302015
+        }
+      ]
+    },
+    {
+      "cell": "contextual_null",
+      "replicate": 143,
+      "input_sha256": "3a6261bb3cfcb1591b4b8f614d41541ad426e971e3e505e4885d7d79404aead5",
+      "iterations": 64000,
+      "attempts": [
+        {
+          "iterations": 4000,
+          "convergence_pass": false,
+          "max_rhat": 1.11970109344547,
+          "min_bulk_ess": 27.9296138357148,
+          "min_tail_ess": 143.364335328028
+        },
+        {
+          "iterations": 8000,
+          "convergence_pass": false,
+          "max_rhat": 1.04845867690822,
+          "min_bulk_ess": 77.0418880045927,
+          "min_tail_ess": 147.886817180508
+        },
+        {
+          "iterations": 16000,
+          "convergence_pass": false,
+          "max_rhat": 1.01946203636563,
+          "min_bulk_ess": 172.438297027405,
+          "min_tail_ess": 338.561425384921
+        },
+        {
+          "iterations": 32000,
+          "convergence_pass": false,
+          "max_rhat": 1.00758922986341,
+          "min_bulk_ess": 386.996941177949,
+          "min_tail_ess": 777.394181782384
+        },
+        {
+          "iterations": 64000,
+          "convergence_pass": true,
+          "max_rhat": 1.00773914752065,
+          "min_bulk_ess": 805.472680871134,
+          "min_tail_ess": 1697.83092067965
+        }
+      ],
+      "diagnostics": [
+        {
+          "parameter": "mu:T",
+          "rhat": 1.00138493175312,
+          "ess_bulk": 3782.56638323072,
+          "ess_tail": 7117.95942623105
+        },
+        {
+          "parameter": "mu:W",
+          "rhat": 1.00000778847174,
+          "ess_bulk": 248191.998965011,
+          "ess_tail": 243330.010222435
+        },
+        {
+          "parameter": "mu:X1",
+          "rhat": 1.00000035921673,
+          "ess_bulk": 256490.001471315,
+          "ess_tail": 244232.83784009
+        },
+        {
+          "parameter": "sigma:T:T",
+          "rhat": 1.00025901999806,
+          "ess_bulk": 12816.6007164629,
+          "ess_tail": 29162.1008075359
+        },
+        {
+          "parameter": "sigma:W:T",
+          "rhat": 1.00044671577765,
+          "ess_bulk": 12726.9502810897,
+          "ess_tail": 33250.7065579394
+        },
+        {
+          "parameter": "sigma:X1:T",
+          "rhat": 1.00038838058896,
+          "ess_bulk": 8375.67466134321,
+          "ess_tail": 20991.7793572911
+        },
+        {
+          "parameter": "sigma:W:W",
+          "rhat": 1.00003212141393,
+          "ess_bulk": 121060.912592787,
+          "ess_tail": 188019.742407903
+        },
+        {
+          "parameter": "sigma:X1:W",
+          "rhat": 1.00001034449385,
+          "ess_bulk": 164140.04240427,
+          "ess_tail": 213408.971031722
+        },
+        {
+          "parameter": "sigma:X1:X1",
+          "rhat": 1.00000347829712,
+          "ess_bulk": 181614.308008166,
+          "ess_tail": 218903.596908752
+        },
+        {
+          "parameter": "psi:T:T",
+          "rhat": 1.00213805407834,
+          "ess_bulk": 1962.02006459278,
+          "ess_tail": 2604.57473437059
+        },
+        {
+          "parameter": "psi:W:T",
+          "rhat": 1.00541585419699,
+          "ess_bulk": 1127.1959473909,
+          "ess_tail": 2969.08035482086
+        },
+        {
+          "parameter": "psi:X1:T",
+          "rhat": 1.00665687651647,
+          "ess_bulk": 928.707771165846,
+          "ess_tail": 2757.70203422276
+        },
+        {
+          "parameter": "psi:W:W",
+          "rhat": 1.00002179913436,
+          "ess_bulk": 121754.673947184,
+          "ess_tail": 170088.82980169
+        },
+        {
+          "parameter": "psi:X1:W",
+          "rhat": 1.00001475940457,
+          "ess_bulk": 135559.340406399,
+          "ess_tail": 191099.522713924
+        },
+        {
+          "parameter": "psi:X1:X1",
+          "rhat": 1.00004161398153,
+          "ess_bulk": 132505.10078845,
+          "ess_tail": 189046.99117493
+        },
+        {
+          "parameter": "aux_sigma:T",
+          "rhat": 1.00005681252799,
+          "ess_bulk": 59257.5099966383,
+          "ess_tail": 94429.1328693282
+        },
+        {
+          "parameter": "aux_sigma:W",
+          "rhat": 1.00006030060309,
+          "ess_bulk": 54204.5032408577,
+          "ess_tail": 93234.1641963183
+        },
+        {
+          "parameter": "aux_sigma:X1",
+          "rhat": 1.00002140670014,
+          "ess_bulk": 251781.191197228,
+          "ess_tail": 254672.305056833
+        },
+        {
+          "parameter": "aux_psi:T",
+          "rhat": 1.00033712419926,
+          "ess_bulk": 10528.7318425513,
+          "ess_tail": 17150.5214878431
+        },
+        {
+          "parameter": "aux_psi:W",
+          "rhat": 1.00004826281435,
+          "ess_bulk": 65089.0438062306,
+          "ess_tail": 144315.938045623
+        },
+        {
+          "parameter": "aux_psi:X1",
+          "rhat": 1.00001616848492,
+          "ess_bulk": 206958.682161461,
+          "ess_tail": 224914.431884702
+        },
+        {
+          "parameter": "marginal:(Intercept)",
+          "rhat": 1.00063744777621,
+          "ess_bulk": 6074.75041442033,
+          "ess_tail": 13696.6143570448
+        },
+        {
+          "parameter": "marginal:x",
+          "rhat": 1.00628297714968,
+          "ess_bulk": 970.96400464523,
+          "ess_tail": 2577.31920626401
+        },
+        {
+          "parameter": "conditional_target_mean_recorded",
+          "rhat": 1.00502192444708,
+          "ess_bulk": 1137.95674875734,
+          "ess_tail": 2182.05430230988
+        },
+        {
+          "parameter": "conditional_target_mean_absent",
+          "rhat": 1.00431878242758,
+          "ess_bulk": 1326.62331867847,
+          "ess_tail": 2726.33873938645
+        },
+        {
+          "parameter": "conditional_sigma:T:T",
+          "rhat": 1.0003061844646,
+          "ess_bulk": 18867.6894950201,
+          "ess_tail": 41141.1837129703
+        },
+        {
+          "parameter": "conditional_sigma:W:T",
+          "rhat": 1.00022749172042,
+          "ess_bulk": 29572.2003005405,
+          "ess_tail": 60116.016958427
+        },
+        {
+          "parameter": "conditional_sigma:W:W",
+          "rhat": 1.00002235261018,
+          "ess_bulk": 97255.144587276,
+          "ess_tail": 161954.987536389
+        },
+        {
+          "parameter": "regression_sigma:T:X1",
+          "rhat": 1.00038515903728,
+          "ess_bulk": 7951.406200285,
+          "ess_tail": 20792.096127678
+        },
+        {
+          "parameter": "regression_sigma:W:X1",
+          "rhat": 1.00003311509234,
+          "ess_bulk": 98072.2666284958,
+          "ess_tail": 176029.409909916
+        },
+        {
+          "parameter": "conditional_psi:T:T",
+          "rhat": 1.0009610381527,
+          "ess_bulk": 3651.34532751687,
+          "ess_tail": 6780.27176522367
+        },
+        {
+          "parameter": "conditional_psi:W:T",
+          "rhat": 1.00042216984931,
+          "ess_bulk": 7060.56021208121,
+          "ess_tail": 15912.4604837273
+        },
+        {
+          "parameter": "conditional_psi:W:W",
+          "rhat": 1.00006190980497,
+          "ess_bulk": 59953.8279461831,
+          "ess_tail": 90886.3074539334
+        },
+        {
+          "parameter": "regression_psi:T:X1",
+          "rhat": 1.00773914752065,
+          "ess_bulk": 805.472680871134,
+          "ess_tail": 1697.83092067965
+        },
+        {
+          "parameter": "regression_psi:W:X1",
+          "rhat": 1.00004821849342,
+          "ess_bulk": 99894.7751171431,
+          "ess_tail": 172040.095827247
+        }
+      ]
+    }
+  ]
+}

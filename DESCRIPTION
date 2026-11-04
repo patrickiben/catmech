@@ -1,6 +1,6 @@
 Package: catmech
 Title: Auditable Model-Based Imputation and Category Sensitivity
-Version: 0.10.0
+Version: 0.10.1
 Authors@R: person("Patrick", "Iben", role = c("aut", "cre"),
     email = "295464172+patrickiben@users.noreply.github.com")
 Description: Auditable completion of a continuous measurement using Gaussian

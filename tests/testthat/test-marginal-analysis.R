@@ -289,3 +289,10 @@ test_that("paired calibration at one site retains sufficient residual support", 
     prepared$paired_support$minimum_singular_value))
   expect_identical(prepared$rows, seq_len(nrow(d)))
 })
+
+
+test_that("marginal numerical budget extends without changing conditional defaults", {
+  expect_identical(catmech:::catmech_marginal_cluster_control()$max_iterations, 64000L)
+  expect_identical(catmech:::catmech_joint_cluster_control()$max_iterations, 32000L)
+  expect_identical(catmech:::catmech_marginal_cluster_control(list(max_iterations=32000L))$max_iterations, 32000L)
+})

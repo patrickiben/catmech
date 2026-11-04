@@ -133,7 +133,8 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #'   declared maximum, then fail with traces in a `catmech_convergence_error`.
 #'   For `"joint"`, each chain uses a fresh R worker to isolate the backend RNG.
 #'   For `"joint_marginal"`, a compiled blocked Gibbs sampler uses independent
-#'   R RNG streams. It also accepts `regression_scale = 10`, the conditional
+#'   R RNG streams. Its default maximum is 64000 retained iterations per chain.
+#'   It also accepts `regression_scale = 10`, the conditional
 #'   matrix-normal prior scale for within- and between-site measurement
 #'   regressions on the predictors. Its predictor and conditional-measurement
 #'   covariance blocks have Huang--Wand priors with half-t(2) marginal standard

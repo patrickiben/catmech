@@ -8,6 +8,7 @@ catmech_marginal_cluster_control <- function(control = list()) {
     stop("joint_control must be a uniquely named list.", call. = FALSE)
   regression_scale <- if ("regression_scale" %in% names(control)) control$regression_scale else 10
   remaining <- control[setdiff(names(control), "regression_scale")]
+  if (!"max_iterations" %in% names(remaining)) remaining$max_iterations <- 64000L
   out <- catmech_joint_cluster_control(remaining)
   if (!is.numeric(regression_scale) || is.complex(regression_scale) ||
       length(regression_scale) != 1L || !is.finite(regression_scale) || regression_scale <= 0 ||
