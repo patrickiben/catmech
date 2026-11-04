@@ -1,0 +1,15 @@
+gaussian_balanced: 16/30 cohorts; 128 analysis requests, 80 fitted-workflow requests; 16.6s elapsed
+gaussian_balanced: 30/30 cohorts; 240 analysis requests, 150 fitted-workflow requests; 28.9s elapsed
+gaussian_unbalanced: 16/30 cohorts; 304 analysis requests, 198 fitted-workflow requests; 40.1s elapsed
+gaussian_unbalanced: 30/30 cohorts; 360 analysis requests, 240 fitted-workflow requests; 52.0s elapsed
+near_zero_icc: 16/30 cohorts; 488 analysis requests, 320 fitted-workflow requests; 62.6s elapsed
+near_zero_icc: 30/30 cohorts; 600 analysis requests, 390 fitted-workflow requests; 70.7s elapsed
+observed_mar: 16/30 cohorts; 728 analysis requests, 470 fitted-workflow requests; 90.2s elapsed
+observed_mar: 30/30 cohorts; 840 analysis requests, 540 fitted-workflow requests; 107.2s elapsed
+null_slope: 16/30 cohorts; 904 analysis requests, 588 fitted-workflow requests; 115.5s elapsed
+null_slope: 30/30 cohorts; 960 analysis requests, 630 fitted-workflow requests; 126.2s elapsed
+student_t5: 16/30 cohorts; 1024 analysis requests, 678 fitted-workflow requests; 137.2s elapsed
+student_t5: 30/30 cohorts; 1080 analysis requests, 720 fitted-workflow requests; 148.3s elapsed
+contextual_x: 16/30 cohorts; 1144 analysis requests, 768 fitted-workflow requests; 159.2s elapsed
+contextual_x: 30/30 cohorts; 1200 analysis requests, 810 fitted-workflow requests; 170.1s elapsed
+Complete: 1200 analysis requests, 1198 intervals, 2 analysis refusals; 2 fit refusals.

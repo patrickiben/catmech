@@ -1,0 +1,33 @@
+{
+  "mode": "pilot",
+  "workers": 8,
+  "m": 40,
+  "cells": ["gaussian_balanced", "gaussian_unbalanced", "near_zero_icc", "observed_mar", "null_slope", "student_t5", "contextual_x"],
+  "primary_cells": ["gaussian_balanced", "gaussian_unbalanced", "observed_mar", "null_slope"],
+  "prior_cells": ["gaussian_balanced", "near_zero_icc", "observed_mar"],
+  "primary_reps": 1,
+  "contextual_reps": 1,
+  "prior_reps": 1,
+  "data_seed_base": 1590000000,
+  "imputation_seed_base": 1600000000,
+  "bootstrap_seed": null,
+  "bootstrap_reps": 2000,
+  "new_control": {
+    "chains": 4,
+    "burnin": 1000,
+    "iterations": 4000,
+    "max_iterations": 32000,
+    "prior_scale": 1
+  },
+  "old_control": {
+    "chains": 4,
+    "burnin": 1000,
+    "iterations": 2000,
+    "max_iterations": 8000,
+    "prior_scale": 1
+  },
+  "baseline_source_commit": "b236293",
+  "pan_version": "2.0",
+  "source_fingerprint": "a260c005f1ddda9fb27f63225d7c312bd9e98a384a30383f75e089922b372b6a",
+  "accuracy_exported": false
+}

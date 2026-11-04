@@ -1,0 +1,21 @@
+gaussian_balanced 1 input + private truth byte-identical; seeds/hash/target identical
+gaussian_balanced 2 input + private truth byte-identical; seeds/hash/target identical
+gaussian_balanced 30 input + private truth byte-identical; seeds/hash/target identical
+gaussian_unbalanced 1 input + private truth byte-identical; seeds/hash/target identical
+gaussian_unbalanced 2 input + private truth byte-identical; seeds/hash/target identical
+gaussian_unbalanced 30 input + private truth byte-identical; seeds/hash/target identical
+near_zero_icc 1 input + private truth byte-identical; seeds/hash/target identical
+near_zero_icc 2 input + private truth byte-identical; seeds/hash/target identical
+near_zero_icc 30 input + private truth byte-identical; seeds/hash/target identical
+observed_mar 1 input + private truth byte-identical; seeds/hash/target identical
+observed_mar 2 input + private truth byte-identical; seeds/hash/target identical
+observed_mar 30 input + private truth byte-identical; seeds/hash/target identical
+null_slope 1 input + private truth byte-identical; seeds/hash/target identical
+null_slope 2 input + private truth byte-identical; seeds/hash/target identical
+null_slope 30 input + private truth byte-identical; seeds/hash/target identical
+student_t5 1 input + private truth byte-identical; seeds/hash/target identical
+student_t5 2 input + private truth byte-identical; seeds/hash/target identical
+student_t5 30 input + private truth byte-identical; seeds/hash/target identical
+contextual_x analytic Var(x)=2 Cov(x,T)=1.8 marginal slope=0.9
+Within-site structural coefficient .7; missingness uses ordinary random masks.
+No fitting, coefficient accuracy, or coverage evaluation was performed.

@@ -1,0 +1,69 @@
+{
+  "stage": "development",
+  "calibration": {
+    "conditional_coverage": {
+      "old_cv3": {
+        "gaussian_balanced": 1,
+        "gaussian_unbalanced": 1,
+        "observed_mar": 1,
+        "null_slope": 0.90000000000000002
+      },
+      "new_cv3": {
+        "gaussian_balanced": 1,
+        "gaussian_unbalanced": 1,
+        "observed_mar": 1,
+        "null_slope": 0.90000000000000002
+      },
+      "direct": {
+        "gaussian_balanced": 1,
+        "gaussian_unbalanced": 0.96666666666666667,
+        "observed_mar": 0.96666666666666667,
+        "null_slope": 0.83333333333333337
+      }
+    },
+    "methods": ["old_cv3", "new_cv3", "direct"],
+    "mean_absolute_distance": {
+      "old_cv3": 0.050000000000000017,
+      "new_cv3": 0.050000000000000017,
+      "direct": 0.050000000000000017
+    },
+    "direct_bias": {
+      "gaussian_balanced": -0.00019981446049194274,
+      "gaussian_unbalanced": 0.013433004097519336,
+      "observed_mar": -0.019149071416856109,
+      "null_slope": 0.0043529010430696192
+    },
+    "coverage_band_pass": false,
+    "bias_bound_pass": true,
+    "direct_minus_old": {
+      "difference": 0,
+      "lower": -0.025000000000000022,
+      "upper": 0.041666666666666685
+    },
+    "direct_minus_new_cv3": {
+      "difference": 0,
+      "lower": -0.025000000000000022,
+      "upper": 0.041666666666666685
+    },
+    "pass": false
+  },
+  "prior_sensitivity": {
+    "difference": -0.024481046518998201,
+    "mcse": 0.0033762786372831606,
+    "lower": -0.031098431049845165,
+    "upper": -0.017863661988151237,
+    "no_positive_cell": true,
+    "pass": true
+  },
+  "availability": {
+    "difference": -0.011111111111111112,
+    "mcse": 0.0078567420131838584,
+    "lower": -0.026510042492774187,
+    "upper": 0.004287820270551964,
+    "every_return_rate_at_least_99": true,
+    "no_observed_failure_increase": true,
+    "pass": false
+  },
+  "activate_prior_development_branch": false,
+  "interpretation": "development_only_no_confirmation_claim"
+}

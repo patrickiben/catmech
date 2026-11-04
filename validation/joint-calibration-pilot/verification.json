@@ -1,0 +1,40 @@
+{
+  "status": "PASS",
+  "output": "/Users/patrickiben/Documents/catmech/validation/joint-calibration-pilot",
+  "source_root": "/Users/patrickiben/Documents/catmech",
+  "checks": {
+    "stage": "pilot",
+    "cohorts": 7,
+    "analysis_requests": 40,
+    "fitted_workflow_requests": 27,
+    "mcmc_fit_requests": 20,
+    "returned_intervals": 40,
+    "analysis_failures": 0,
+    "fit_failures": 0,
+    "diagnostic_rows": 253,
+    "source_files": 27
+  },
+  "scope": "Independent reporting/grid/arithmetic audit; not proof of model validity or sampler correctness.",
+  "tamper_tests": [
+    {
+      "test": "missing_entire_cell",
+      "rejected": true,
+      "reason": "Analysis request grid mismatch"
+    },
+    {
+      "test": "missing_fit",
+      "rejected": true,
+      "reason": "MCMC/oracle fit grid mismatch"
+    },
+    {
+      "test": "changed_seed",
+      "rejected": true,
+      "reason": "Data seed mismatch"
+    },
+    {
+      "test": "changed_source_hash",
+      "rejected": true,
+      "reason": "Sources changed during the stage"
+    }
+  ]
+}

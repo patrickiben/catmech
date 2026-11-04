@@ -1,0 +1,69 @@
+{
+  "status": "PASS",
+  "output": "/Users/patrickiben/Documents/catmech/validation/joint-calibration-development",
+  "source_root": "/Users/patrickiben/Documents/catmech",
+  "checks": {
+    "stage": "development",
+    "cohorts": 210,
+    "analysis_requests": 1200,
+    "fitted_workflow_requests": 810,
+    "mcmc_fit_requests": 600,
+    "returned_intervals": 1198,
+    "analysis_failures": 2,
+    "fit_failures": 2,
+    "diagnostic_rows": 7590,
+    "source_files": 27,
+    "summary_values_checked": 1520,
+    "paired_contrasts_checked": 198,
+    "bootstrap_replicates_recomputed": 2000,
+    "adoption_screens_recomputed": 3
+  },
+  "scope": "Independent reporting/grid/arithmetic audit; not proof of model validity or sampler correctness.",
+  "tamper_tests": [
+    {
+      "test": "missing_entire_cell",
+      "rejected": true,
+      "reason": "Analysis request grid mismatch"
+    },
+    {
+      "test": "missing_fit",
+      "rejected": true,
+      "reason": "MCMC/oracle fit grid mismatch"
+    },
+    {
+      "test": "changed_seed",
+      "rejected": true,
+      "reason": "Data seed mismatch"
+    },
+    {
+      "test": "changed_source_hash",
+      "rejected": true,
+      "reason": "Sources changed during the stage"
+    },
+    {
+      "test": "missing_summary",
+      "rejected": true,
+      "reason": "Summary grid mismatch"
+    },
+    {
+      "test": "changed_summary",
+      "rejected": true,
+      "reason": "Summary ('contextual_x', 'direct')/coverage_conditional: 0.1234567 != 0.6"
+    },
+    {
+      "test": "flipped_raw_covered",
+      "rejected": true,
+      "reason": "Raw coverage: ('gaussian_balanced', 1, 'direct'): 0.0 != 1.0"
+    },
+    {
+      "test": "changed_prior",
+      "rejected": true,
+      "reason": "Prior sensitivity gaussian_balanced/1/direct: 0.22389299811316699 != 0.10043629811316705"
+    },
+    {
+      "test": "changed_adoption",
+      "rejected": true,
+      "reason": "JSON value changed: adoption/calibration/pass"
+    }
+  ]
+}
