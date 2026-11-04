@@ -676,7 +676,7 @@ catmech_contamination_exact_test <- function(counts) {
 catmech_holdout_check <- function(fit, folds = 5L, m = 40L, level = 0.9, seed = 1L) {
   if (!inherits(fit, "catmech_result")) stop("Expected a catmech_result.", call. = FALSE)
   engine <- fit$manifest$engine
-  if (!isTRUE(engine %in% c("reference_contamination", "reference_normal", "reference_normal_recorded")))
+  if (!isTRUE(engine %in% c("reference_contamination", "reference_normal", "reference_normal_recorded", "reference_joint_cluster")))
     stop("Hold-out checks support the contamination and normal reference workflows.", call. = FALSE)
   check_count(folds, "folds", 2L)
   check_count(m, "m", 20L)
@@ -714,8 +714,10 @@ catmech_holdout_check <- function(fit, folds = 5L, m = 40L, level = 0.9, seed = 
         chains = spec$chains)
     } else {
       suppressWarnings(catmech_reference(train, spec$value, spec$reference, spec$predictors, method = "normal",
-                        m = m, seed = fold_seed, use_recorded = identical(engine, "reference_normal_recorded"),
-                        cluster = spec[["cluster"]]))
+                        m = m, seed = fold_seed, use_recorded = engine %in% c("reference_normal_recorded", "reference_joint_cluster"),
+                        cluster = spec[["cluster"]],
+                        cluster_model = if (is.null(spec[["cluster_model"]])) "moment" else spec[["cluster_model"]],
+                        joint_control = if (is.null(spec[["joint_control"]])) list() else spec[["joint_control"]]))
     }
   }
   results <- list()

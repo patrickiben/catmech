@@ -14,7 +14,9 @@ catmech_reference(
   m = 20L,
   seed = 1L,
   use_recorded = FALSE,
-  cluster = NULL
+  cluster = NULL,
+  cluster_model = c("moment", "joint"),
+  joint_control = list()
 )
 }
 \arguments{
@@ -57,6 +59,17 @@ intercept for the cluster, instead of treating rows as independent. If the audit
 stratified, put the strata in `predictors`, which needs some stratum with at least two
 audited clusters. Do not use it when the audited value will be a predictor in the
 analysis. See details.}
+
+\item{cluster_model}{`"moment"` preserves the existing recorded-value regression.
+`"joint"` explicitly selects a bivariate Gaussian model of the true target and
+recorded value with one shared two-dimensional site effect. It requires
+`method = "normal"`, `use_recorded = TRUE` and `cluster`.}
+
+\item{joint_control}{Named list for the joint sampler: `chains = 4`,
+`burnin = 1000`, `iterations = 2000`, `max_iterations = 8000`, and
+`prior_scale = 1`. Chains must be at least four. Failed diagnostic screens
+restart the same seeded chains with doubled retained iterations up to the
+declared maximum, then fail with traces in a `catmech_convergence_error`.}
 }
 \value{
 A `catmech_result`. Its completed target contains exact gold references
@@ -108,7 +121,7 @@ reference-using methods at 25% audits on two real datasets, and failed under syn
 gross errors, which distort a linear fit;
 [catmech_contamination()] is the alternative there.
 
-With `cluster`, the imputation model is the recorded-value regression plus a random
+With the default `cluster_model = "moment"`, the imputation model is the recorded-value regression plus a random
 intercept for the cluster. Its variance components come from moments (Henderson, 1953,
 method 3) on the audited rows and are drawn in each imputation, and coefficients are
 drawn from the generalized least squares fit given them. An unaudited cluster gets a new
@@ -126,14 +139,36 @@ Its justification is weaker with one or two large sites. It is not a new method.
 assumes one normal intercept per cluster, so cluster-specific slopes and non-constant
 variance are not modeled. The same model is available in other software, including `mice`.
 
-Within a cluster, unaudited rows cannot require stochastic imputation through both
+With `cluster_model = "moment"`, unaudited rows within a cluster cannot require stochastic imputation through both
 the recorded-present and recorded-missing paths: the current separate fits do not
 provide a shared cluster draw across those paths, so that request is refused.
 Different clusters may use different paths. Audited rows and recorded values kept
 deterministically after complete calibration agreement do not trigger this refusal.
-Resolve one pattern with reference measurements or use a joint model supporting both.
+Resolve one pattern with reference measurements or explicitly select `cluster_model = "joint"`.
 
-`cluster` is experimental. Version 0.6.0 replaced an earlier version that resampled audited
+The explicit joint option uses `pan::pan` to fit `(T, W) = X B + u_site + e`,
+with unrestricted bivariate normal site and row covariance matrices. Observed
+gold values and recorded values enter as fixed observed components; unobserved
+components are missing data. Both responses are centered and scaled using their
+observed means and standard deviations, and non-intercept design columns are
+centered and scaled. The resolved transforms are recorded. The coefficient prior
+is flat. Each covariance prior is inverse Wishart with four degrees of freedom
+and scale `0.5 * prior_scale * I`, whose mean is `0.5 * prior_scale * I` in
+standardized units. These empirically scaled covariance priors are proper and
+substantive; they are not noninformative. Vary the declared prior scale.
+
+Joint completions draw a single site vector conditional on the original observed
+components at each selected parameter draw, then draw missing targets conditional
+on the recorded value where available. This supports mixed recording patterns
+within a site and sites with no observations. Fully missing rows do not enter the
+fitting likelihood. The joint model has no deterministic agreement shortcut.
+Full-rank designs separately on gold, recorded and paired rows, two paired residual
+degrees of freedom, five observed sites per response, and within- and between-site
+residual information are supported-data requirements. They do not establish model
+adequacy. Joint parameter and conditional-mean traces use the existing R-hat and
+bulk/tail ESS screen. See `docs/JOINT_CLUSTER_METHOD.md` for assumptions and limits.
+
+The moment-based `cluster` option is experimental. Version 0.6.0 replaced an earlier version that resampled audited
 clusters, in which resampling within strata understated variance. The replacement's planned
 test came out PARTIAL under a rule fixed in advance: on a real facility recount at a 25%
 audit, coverage was within its limits on eight of nine items, with 89.0% on the ninth, but
@@ -143,7 +178,7 @@ since very wide intervals remain possible with few audited clusters. See
 `validation/CLUSTERED_FIX_SYNTHESIS.md`.
 
 In later simulations where the audited value was a predictor in the analysis and errors
-shifted whole clusters, `cluster` biased that slope toward zero and covered far less than
+shifted whole clusters, the moment-based `cluster` option biased that slope toward zero and covered far less than
 a fit without it. The cause has not been established. [catmech_pool_lm()] warns about
 this use. See `validation/VARIANCE_MI_SYNTHESIS.md`.
 }

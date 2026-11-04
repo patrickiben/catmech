@@ -1,6 +1,6 @@
 Package: catmech
 Title: Auditable Model-Based Imputation and Category Sensitivity
-Version: 0.7.2
+Version: 0.8.0
 Authors@R: person("Patrick", "Iben", role = c("aut", "cre"),
     email = "295464172+patrickiben@users.noreply.github.com")
 Description: Auditable completion of a continuous measurement using Gaussian
@@ -16,7 +16,7 @@ Description: Auditable completion of a continuous measurement using Gaussian
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends: R (>= 4.1.0)
-Imports: digest, jsonlite, mice (>= 3.16.0), posterior, stats, truncnorm, utils, yaml
+Imports: digest, jsonlite, mice (>= 3.16.0), pan (>= 2.0), parallel, posterior, stats, truncnorm, utils, yaml
 Suggests: testthat (>= 3.0.0), roxygen2, pkgload
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.1.1

@@ -118,6 +118,16 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #'   stratified, put the strata in `predictors`, which needs some stratum with at least two
 #'   audited clusters. Do not use it when the audited value will be a predictor in the
 #'   analysis. See details.
+#' @param cluster_model `"moment"` preserves the existing recorded-value regression.
+#'   `"joint"` explicitly selects a bivariate Gaussian model of the true target and
+#'   recorded value with one shared two-dimensional site effect. It requires
+#'   `method = "normal"`, `use_recorded = TRUE` and `cluster`.
+#' @param joint_control Named list for the joint sampler: `chains = 4`,
+#'   `burnin = 1000`, `iterations = 2000`, `max_iterations = 8000`, and
+#'   `prior_scale = 1`. Chains must be at least four. Failed diagnostic screens
+#'   restart the same seeded chains with doubled retained iterations up to the
+#'   declared maximum, then fail with traces in a `catmech_convergence_error`.
+#'   Each chain uses a fresh R worker to isolate the backend's internal RNG state.
 #' @return A `catmech_result`. Its completed target contains exact gold references
 #'   or imputations; the original reference column is unchanged. The `mids`
 #'   observed target is the reference values with other rows missing. The manifest
@@ -160,7 +170,7 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #' gross errors, which distort a linear fit;
 #' [catmech_contamination()] is the alternative there.
 #'
-#' With `cluster`, the imputation model is the recorded-value regression plus a random
+#' With the default `cluster_model = "moment"`, the imputation model is the recorded-value regression plus a random
 #' intercept for the cluster. Its variance components come from moments (Henderson, 1953,
 #' method 3) on the audited rows and are drawn in each imputation, and coefficients are
 #' drawn from the generalized least squares fit given them. An unaudited cluster gets a new
@@ -178,14 +188,36 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #' assumes one normal intercept per cluster, so cluster-specific slopes and non-constant
 #' variance are not modeled. The same model is available in other software, including `mice`.
 #'
-#' Within a cluster, unaudited rows cannot require stochastic imputation through both
+#' With `cluster_model = "moment"`, unaudited rows within a cluster cannot require stochastic imputation through both
 #' the recorded-present and recorded-missing paths: the current separate fits do not
 #' provide a shared cluster draw across those paths, so that request is refused.
 #' Different clusters may use different paths. Audited rows and recorded values kept
 #' deterministically after complete calibration agreement do not trigger this refusal.
-#' Resolve one pattern with reference measurements or use a joint model supporting both.
+#' Resolve one pattern with reference measurements or explicitly select `cluster_model = "joint"`.
 #'
-#' `cluster` is experimental. Version 0.6.0 replaced an earlier version that resampled audited
+#' The explicit joint option uses `pan::pan` to fit `(T, W) = X B + u_site + e`,
+#' with unrestricted bivariate normal site and row covariance matrices. Observed
+#' gold values and recorded values enter as fixed observed components; unobserved
+#' components are missing data. Both responses are centered and scaled using their
+#' observed means and standard deviations, and non-intercept design columns are
+#' centered and scaled. The resolved transforms are recorded. The coefficient prior
+#' is flat. Each covariance prior is inverse Wishart with four degrees of freedom
+#' and scale `0.5 * prior_scale * I`, whose mean is `0.5 * prior_scale * I` in
+#' standardized units. These empirically scaled covariance priors are proper and
+#' substantive; they are not noninformative. Vary the declared prior scale.
+#'
+#' Joint completions draw a single site vector conditional on the original observed
+#' components at each selected parameter draw, then draw missing targets conditional
+#' on the recorded value where available. This supports mixed recording patterns
+#' within a site and sites with no observations. Fully missing rows do not enter the
+#' fitting likelihood. The joint model has no deterministic agreement shortcut.
+#' Full-rank designs separately on gold, recorded and paired rows, two paired residual
+#' degrees of freedom, five observed sites per response, and within- and between-site
+#' residual information are supported-data requirements. They do not establish model
+#' adequacy. Joint parameter and conditional-mean traces use the existing R-hat and
+#' bulk/tail ESS screen. See `docs/JOINT_CLUSTER_METHOD.md` for assumptions and limits.
+#'
+#' The moment-based `cluster` option is experimental. Version 0.6.0 replaced an earlier version that resampled audited
 #' clusters, in which resampling within strata understated variance. The replacement's planned
 #' test came out PARTIAL under a rule fixed in advance: on a real facility recount at a 25%
 #' audit, coverage was within its limits on eight of nine items, with 89.0% on the ninth, but
@@ -195,19 +227,27 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #' `validation/CLUSTERED_FIX_SYNTHESIS.md`.
 #'
 #' In later simulations where the audited value was a predictor in the analysis and errors
-#' shifted whole clusters, `cluster` biased that slope toward zero and covered far less than
+#' shifted whole clusters, the moment-based `cluster` option biased that slope toward zero and covered far less than
 #' a fit without it. The cause has not been established. [catmech_pool_lm()] warns about
 #' this use. See `validation/VARIANCE_MI_SYNTHESIS.md`.
 #' @export
 catmech_reference <- function(data, value, reference, predictors,
                               method = c("normal", "pmm", "pmm_abb"), donors = 5L,
                               m = 20L, seed = 1L, use_recorded = FALSE,
-                              cluster = NULL) {
+                              cluster = NULL, cluster_model = c("moment", "joint"),
+                              joint_control = list()) {
   method <- match.arg(method)
+  cluster_model <- match.arg(cluster_model)
   if (!is.logical(use_recorded) || length(use_recorded) != 1L || is.na(use_recorded))
     stop("use_recorded must be TRUE or FALSE.", call. = FALSE)
   if (use_recorded && method != "normal")
     stop("use_recorded applies only to method = 'normal'.", call. = FALSE)
+  joint <- cluster_model == "joint"
+  if (joint && (method != "normal" || !use_recorded || is.null(cluster)))
+    stop("cluster_model='joint' requires method='normal', use_recorded=TRUE and cluster.", call. = FALSE)
+  if (!joint && length(joint_control))
+    stop("joint_control applies only to cluster_model='joint'.", call. = FALSE)
+  if (joint) joint_control <- catmech_joint_cluster_control(joint_control)
   catmech_reference_inputs(data, value, predictors, m, seed, donors,
                            excluded = c(value, reference))
   if (!is.null(cluster)) {
@@ -224,6 +264,7 @@ catmech_reference <- function(data, value, reference, predictors,
   if (!any(known)) stop("At least one independently observed reference value is required.", call. = FALSE)
   X <- if (all(known) || use_recorded) NULL else catmech_model_matrix(data, predictors)
   recorded_fit <- NULL
+  joint_transform <- NULL
   cluster_uncertainty <- "random_intercept_drawn_each_imputation"
   restore <- preserve_rng()
   on.exit(restore(), add = TRUE)
@@ -231,6 +272,17 @@ catmech_reference <- function(data, value, reference, predictors,
   if (all(known)) {
     draws <- matrix(rep(gold, m), nrow = nrow(data), ncol = m)
     model_diagnostics <- catmech_reference_independent_diagnostics("reference_complete")
+    if (joint) {
+      recorded_fit <- "not_fitted_all_reference_observed"
+      cluster_uncertainty <- "none_all_reference_observed"
+    }
+  } else if (joint) {
+    sampled <- catmech_joint_cluster_draws(data, value, gold, predictors, m, cluster, joint_control)
+    draws <- sampled$draws
+    model_diagnostics <- sampled$model_diagnostics
+    joint_transform <- sampled$transform
+    recorded_fit <- "joint_bivariate_gaussian"
+    cluster_uncertainty <- "shared_bivariate_site_effect_conditional_on_original_observations"
   } else if (use_recorded) {
     sampled <- if (is.null(cluster)) catmech_reference_recorded_draws(data, value, gold, predictors, m, seed) else
       catmech_reference_clustered_draws(data, value, gold, predictors, m, cluster)
@@ -256,7 +308,7 @@ catmech_reference <- function(data, value, reference, predictors,
     draws <- catmech_reference_pmm_draws(gold, X, donors, m, bootstrap = method == "pmm_abb")
     model_diagnostics <- catmech_reference_independent_diagnostics(paste0("reference_mice_", method))
   }
-  engine <- if (use_recorded) "reference_normal_recorded" else paste0("reference_", method)
+  engine <- if (joint) "reference_joint_cluster" else if (use_recorded) "reference_normal_recorded" else paste0("reference_", method)
   spec <- structure(list(version = "reference1", engine = engine, value = value,
     predictors = predictors,
     reference = reference, reference_policy = "observed_gold_only_all_others_unavailable",
@@ -279,6 +331,16 @@ catmech_reference <- function(data, value, reference, predictors,
     spec$cluster <- cluster
     spec$cluster_uncertainty <- cluster_uncertainty
     spec$audited_clusters <- length(unique(data[[cluster]][known]))
+  }
+  if (joint) {
+    spec$cluster_model <- "joint"
+    spec$joint_control <- joint_control
+    spec$joint_transform <- joint_transform
+    spec$prior <- catmech_joint_cluster_prior(joint_control)
+    spec$raw_target_policy <- "observed_component_of_joint_bivariate_gaussian_model"
+    spec$reference_selection_assumption <- "ignorable_given_observed_components_predictors_and_site"
+    spec$joint_model <- "(T,W) = X B + b_site + e; independent Gaussian site and row vectors"
+    spec$joint_backend <- "pan"
   }
   audits <- lapply(seq_len(m), function(j) {
     row <- catmech_reference_audit(data[[value]], draws[, j], seq_len(nrow(data)), j,
@@ -306,11 +368,12 @@ catmech_reference <- function(data, value, reference, predictors,
     reference_fills = sum(known & is.na(data[[value]])), fallback_draws = 0L)))
   result <- catmech_reference_assemble(data, value, predictors, gold, draws, audits,
     diagnostics, spec, m, seed,
-    if (method == "normal") "conditional_reference_model" else if (method == "pmm" && any(!known))
+    if (joint) "conditional_joint_cluster_model" else if (method == "normal") "conditional_reference_model" else if (method == "pmm" && any(!known))
       "sensitivity_only" else "conditional_reference_matching",
     model_diagnostics)
   result$manifest$reference_rows <- which(known)
   result$manifest$reference_column <- reference
+  if (joint) result$manifest$pan_version <- as.character(utils::packageVersion("pan"))
   result$mids$call <- match.call()
   result
 }

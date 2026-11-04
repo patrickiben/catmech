@@ -57,6 +57,7 @@ catmech_pool_lm <- function(result, formula, conf_level = 0.95,
     reference_pmm = "conditional_reference_matching",
     reference_pmm_abb = "conditional_reference_matching",
     reference_normal_recorded = "conditional_reference_model",
+    reference_joint_cluster = "conditional_joint_cluster_model",
     reference_contamination = "conditional_contamination_model")
   recognized <- is.character(engine) && length(engine) == 1L && !is.na(engine) && engine %in% names(labels)
   if (!is.null(engine) && !recognized)
@@ -104,8 +105,12 @@ catmech_pool_lm <- function(result, formula, conf_level = 0.95,
   if (reference_pmm_sensitivity && !allow_sensitivity)
     stop("Partial-reference PMM is experimental and showed undercoverage in validation. Set allow_sensitivity=TRUE only for sensitivity calculations.", call. = FALSE)
   if (!is.null(result[["spec"]][["cluster"]]) && !is.null(result[["spec"]][["value"]]) &&
-      result[["spec"]][["value"]] %in% all.vars(stats::delete.response(stats::terms(formula))))
-    warning("catmech_reference(cluster = ) gives an unaudited cluster a new intercept, which biased slopes toward zero in simulations when the audited value was a predictor. Prefer a fit without cluster, pooled with catmech_pool_lm(cluster = ). See validation/VARIANCE_MI_SYNTHESIS.md.", call. = FALSE)
+      result[["spec"]][["value"]] %in% all.vars(stats::delete.response(stats::terms(formula)))) {
+    if (identical(engine, "reference_joint_cluster"))
+      warning("Joint clustered imputation has not been validated here with the audited value as an analysis predictor. The earlier moment model showed slope attenuation in that role; joint sampling alone does not establish compatible inference. See docs/JOINT_CLUSTER_METHOD.md.", call. = FALSE)
+    else
+      warning("catmech_reference(cluster = ) gives an unaudited cluster a new intercept, which biased slopes toward zero in simulations when the audited value was a predictor. Prefer a fit without cluster, pooled with catmech_pool_lm(cluster = ). See validation/VARIANCE_MI_SYNTHESIS.md.", call. = FALSE)
+  }
   cluster_name <- if (is.null(cluster)) result[["spec"]][["cluster"]] else cluster
   robust <- NULL
   if (!is.null(cluster_name)) {
