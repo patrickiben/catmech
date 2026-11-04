@@ -1,0 +1,4 @@
+Synthetic verifier fixtures only; original pilot evidence unchanged.
+NA_pass_rejected: PASS (Diagnostic screen disagrees: ('gaussian_balanced', 1, 'joint'))
+Inf_pass_rejected: PASS (Diagnostic screen disagrees: ('gaussian_balanced', 1, 'joint'))
+NA_failed_record_accepted: PASS (valid failed screen retained)

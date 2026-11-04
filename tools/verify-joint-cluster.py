@@ -183,7 +183,9 @@ def verify(out, source_root):
         require(int(r["iterations_used"]) == schedule[-1], f"Last iteration metadata: {key}")
         require(all(not a["convergence_pass"] for a in attempts[:-1]), f"Extended after passing screen: {key}")
         last = attempts[-1]
-        screen = (number(r, "max_rhat") <= 1.05 and number(r, "min_ess_bulk") >= 400 and
+        all_finite = all(math.isfinite(number(row, field)) for row in d
+                         for field in ("rhat", "ess_bulk", "ess_tail"))
+        screen = (all_finite and number(r, "max_rhat") <= 1.05 and number(r, "min_ess_bulk") >= 400 and
                   number(r, "min_ess_tail") >= 400)
         require(last["convergence_pass"] == screen, f"Diagnostic screen disagrees: {key}")
         if r["status"] == "ok":

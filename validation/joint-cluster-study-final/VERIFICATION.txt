@@ -1,0 +1,7 @@
+PASS: 4200 planned requests; 22 recorded failures; 966 independently recomputed scalar summaries; source hashes match.
+PASS: all 350 aborted requests exactly match final scientific/status/diagnostic fields; only runtime/source fingerprint excluded.
+
+Synthetic negative controls in temporary copies only:
+drop_entire_cell: rejected (Request grid mismatch; missing 600, extra 0)
+alter_summary_bias: rejected (Summary ('gaussian_balanced', 'joint')/bias: 0.000707066502294847 != -0.00029293349770515985)
+flip_raw_coverage: rejected (Coverage: ('gaussian_balanced', 1, 'joint'): 0.0 != 1.0)

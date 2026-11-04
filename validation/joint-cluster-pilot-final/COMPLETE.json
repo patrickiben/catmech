@@ -1,0 +1,11 @@
+{
+  "status": "complete",
+  "mode": "pilot",
+  "requests": 72,
+  "intervals": 71,
+  "errors": 1,
+  "started_utc": "2026-11-04 03:28:30 UTC",
+  "finished_utc": "2026-11-04 03:30:38 UTC",
+  "elapsed_seconds": 127.8555,
+  "source_fingerprint": "a1e91441183669e1a800d7737fc30ef800b73f22d4c0029b9711408e6b97a717"
+}

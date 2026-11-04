@@ -1,0 +1,19 @@
+Frozen v0.7.2 versus current: 18 of 18 supported workflow runs identical.
+plain 881 identical
+complete_W 881 identical
+separate_sites 881 identical
+no_recipient_W 881 identical
+agreement 881 identical
+full_gold 881 identical
+plain 882 identical
+complete_W 882 identical
+separate_sites 882 identical
+no_recipient_W 882 identical
+agreement 882 identical
+full_gold 882 identical
+plain 883 identical
+complete_W 883 identical
+separate_sites 883 identical
+no_recipient_W 883 identical
+agreement 883 identical
+full_gold 883 identical

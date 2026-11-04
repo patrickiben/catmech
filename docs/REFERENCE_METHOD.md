@@ -148,7 +148,9 @@ regression: `target = x'beta + c_i + e_ij`. If the audit is stratified, put the 
 
 Records with no recorded value use the same steps without that predictor. A cluster that needs stochastic imputations
 for both recorded-present and recorded-missing rows is refused: the two separate fits do not define a shared cluster
-effect. Supply reference values that resolve one of those groups, or use a joint model that supports both patterns.
+effect. Use `cluster_model = "joint"` for the bivariate model described in
+[Joint clustered imputation](JOINT_CLUSTER_METHOD.md), or supply references that resolve one group.
+The default `cluster_model = "moment"` retains these separate fits for reproducibility.
 Different clusters may use different patterns. Audited rows and recorded values retained deterministically do not trigger
 this refusal. If the audited rows cannot separate the two
 variances, as with one row per cluster, the intercept variance is zero, with a warning. If the predictors absorb every

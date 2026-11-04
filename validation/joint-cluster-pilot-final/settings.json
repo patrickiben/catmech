@@ -1,0 +1,21 @@
+{
+  "mode": "pilot",
+  "m": 40,
+  "cells": ["gaussian_balanced", "gaussian_unbalanced", "near_zero_icc", "observed_mar", "null_slope", "student_t5"],
+  "reps": 3,
+  "sensitivity_cells": ["gaussian_balanced", "near_zero_icc", "observed_mar"],
+  "sensitivity_reps": 3,
+  "control": {
+    "chains": 4,
+    "burnin": 1000,
+    "iterations": 2000,
+    "max_iterations": 8000,
+    "prior_scale": 1
+  },
+  "workers": 4,
+  "pan_version": "2.0",
+  "data_seed_base": 1510000000,
+  "imputation_seed_base": 1520000000,
+  "source_fingerprint": "a1e91441183669e1a800d7737fc30ef800b73f22d4c0029b9711408e6b97a717",
+  "accuracy_exported": false
+}

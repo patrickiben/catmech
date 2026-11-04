@@ -1,6 +1,6 @@
 # Assessment and release decision
 
-Assessed 2026-11-03. Version 0.7.2 is worth releasing as an **experimental, auditable toolkit for data with recorded values and a
+Assessed 2026-11-03. Version 0.8.0 is worth releasing as an **experimental, auditable toolkit for data with recorded values and a
 reference subset**, built from established methods. Real-data testing narrowed its recommended use. It does not support a novel-method
 or clinical-validity claim. Earlier assessments are preserved for [v0.1](ASSESSMENT_V0.1.md), [v0.2](ASSESSMENT_V0.2.md) and [v0.3](ASSESSMENT_V0.3.md).
 
@@ -38,6 +38,8 @@ A [later test of separate within-cluster and between-cluster slopes](../validati
 
 Version 0.7.2 fixes the audit planner's formula offsets and compound-stratum identification, and refuses mixed stochastic recorded-value patterns within a cluster until a shared draw is supported. The variance-component draws are explicitly approximate. The rare-count interpretation above was narrowed after review; its original protocol, decision label and numerical results remain unchanged. These corrections do not establish general coverage.
 
+Version 0.8.0 adds an explicit joint model through `pan` for sites containing both recorded-present and recorded-missing unaudited rows. It shares the site draw coherently and adds multiple-chain diagnostics, declared covariance priors and a separate [validation study](../validation/JOINT_CLUSTER_SYNTHESIS.md). It is an established bivariate Gaussian mixed model, not a novel estimator. Historical moment-model studies do not establish the new option's calibration, and this repair is not evidence that rare-count undercoverage or predictor attenuation has been cured. The default moment model remains unchanged for supported inputs.
+
 ## Current judgment
 
 | Question | Judgment |
@@ -49,7 +51,7 @@ Version 0.7.2 fixes the audit planner's formula offsets and compound-stratum ide
 | Can it say how many records to audit? | Not validated. The planner gave a NO-GO, failing only at the 5% target. It is a documented calculation, built on classical theory. |
 | Does it repair missed errors with no new information? | No. It requires genuine reference measurements. |
 | Generally valid confidence intervals? | No. Failures are recorded for each workflow. With default intervals the oracle itself undercovered on ClinicalTrials.gov and on the Rwanda audit, and no method in the real-audit test held the oracle's clustered coverage at a 25% facility audit. The experimental clustered option came closer, and under the variance then in use still reached only 89.0% on one of nine items, against 93.2% for a recount. |
-| Does it handle clustered audits? | Partly. `catmech_pool_lm(cluster = )` is a standard cluster-robust variance. `catmech_reference(cluster = )` is experimental: better worst-case coverage when the audited value is the outcome, some added error on rare items, two planned tests that came out PARTIAL, and bias when the audited value is a predictor. Planned comparisons kept it under their rule, narrowly, and an independently written setup looks better on most measures. |
+| Does it handle clustered audits? | The opt-in `cluster_model = "joint"` now handles mixed recording patterns through a shared bivariate site model; its validation and assumptions are separate. For the historical default, partly. `catmech_pool_lm(cluster = )` is a standard cluster-robust variance. `catmech_reference(cluster = )` is experimental: better worst-case coverage when the audited value is the outcome, some added error on rare items, two planned tests that came out PARTIAL, and bias when the audited value is a predictor. Planned comparisons kept it under their rule, narrowly, and an independently written setup looks better on most measures. |
 | Real-data evidence? | Two public datasets with real recording differences, and two public audits: Rwanda facility counts and psychology effect sizes. None is a patient-level clinical source-data audit, and the ClinicalTrials.gov reference is not independent truth. |
 | Ready for a GitHub research release? | Yes, with the recorded limitations. |
 | Ready for a methods paper or clinical use? | No. A short software paper may be realistic after review. A methods claim is not supported. |

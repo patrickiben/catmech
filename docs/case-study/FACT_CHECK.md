@@ -2,7 +2,7 @@
 
 Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-03. Each row recomputes the number from its source, and most sources are frozen results tables that the script only reads. A document fails if it contains a digit or number word that no row covers, or if a row's text no longer appears in it. Rerun with `python3 docs/case-study/fact_check.py`.
 
-**Result: all 108 claims match their sources.** PDF: 1 page, generated from the current `CASE_STUDY.md`. Relative links and README tool paths checked: 154, 0 broken. External DOI links were not checked, because this check stays offline. Negative controls: a changed number, an added number, an added number word, a wrong claim value, an unnegated publication claim, a listed term and broken links were all caught.
+**Result: all 108 claims match their sources.** PDF: 1 page, generated from the current `CASE_STUDY.md`. Relative links and README tool paths checked: 158, 0 broken. External DOI links were not checked, because this check stays offline. Negative controls: a changed number, an added number, an added number word, a wrong claim value, an unnegated publication claim, a listed term and broken links were all caught.
 
 ## README.md front page
 
@@ -28,7 +28,7 @@ Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-03. Each row reco
 | `three rare` | Second clustered-audit test, 25%: items where its recovery RMSE was above linear MI's | `validation/clustered-fix-study/ratios.csv` | Match |
 | `4%` | Second clustered-audit test, 25%: smallest rise in recovery RMSE on a rare item | `validation/clustered-fix-study/ratios.csv` | Match |
 | `5%` | Second clustered-audit test, 25%: largest rise in recovery RMSE on a rare item | `validation/clustered-fix-study/ratios.csv` | Match |
-| `0.7.2` | Current package version | `DESCRIPTION` | Match |
+| `0.8.0` | Current package version | `DESCRIPTION` | Match |
 | `25%` | Audit fraction: mean referenced rows over cohort size, ClinicalTrials.gov cell | `validation/real-data-study/summary.csv` | Match |
 | `25%` | Audit fraction: mean referenced rows over cohort size, NHANES cell | `validation/real-data-study/summary.csv` | Match |
 | `0.0286` | RMSE, linear MI, ClinicalTrials.gov, 25% | `validation/real-data-study/summary.csv` | Match |
@@ -177,14 +177,14 @@ Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-03. Each row reco
 | Not on CRAN, with no outside peer review or clinical validation | `docs/GITHUB.md` | Supported |
 | Linear MI is the recommended start and a supported option | `docs/ASSESSMENT.md` | Supported |
 | The model could not tell which records were wrong | `validation/REAL_DATA_SYNTHESIS.md` | Supported |
-| Every study had a written plan first, with earlier looks disclosed | `validation/VALIDATION.md` | Supported |
+| Every study had a written plan first, with earlier looks disclosed | `validation/v0.7.1-VALIDATION.md` | Supported |
 | Results were not retuned after viewing | `validation/AUDIT_PLAN_SYNTHESIS.md` | Supported |
 | Coverage was judged against the oracle | `validation/REAL_DATA_SYNTHESIS.md` | Supported |
 | Do not write the merged paper on that thesis | `docs/ASSESSMENT.md` | Supported |
 | Merged idea: audits helped, targeting did not beat the most suspicious records, direction added nothing | `docs/ASSESSMENT.md` | Supported |
 | The planner is not validated | `validation/AUDIT_PLAN_SYNTHESIS.md` | Supported |
 | The planner test was not fully blind | `validation/AUDIT_PLAN_SYNTHESIS.md` | Supported |
-| Plain Python recomputes the reported summaries | `validation/VALIDATION.md` | Supported |
+| Plain Python recomputes the reported summaries | `validation/v0.7.1-VALIDATION.md` | Supported |
 | AI use and its limits | `CONTRIBUTING.md` | Supported |
 
 ## Excluded as not findings

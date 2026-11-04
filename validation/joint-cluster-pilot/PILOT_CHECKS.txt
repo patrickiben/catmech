@@ -1,0 +1,6 @@
+Pilot verified: 72 planned requests; 71 intervals; 1 convergence refusal.
+Source hashes before/after/current match. No coefficient, interval or coverage accuracy exported.
+Wall time: 43.7848 seconds. Default joint passed 18/18: 12 at 4000 and 6 at 8000 retained iterations per chain.
+Prior-four passed 9/9; prior-quarter passed 8/9, with one bulk ESS 397.297 below the fixed 400 threshold at 8000 iterations.
+drop_entire_cell: rejected (Request grid mismatch; missing 9, extra 0)
+export_pilot_accuracy: rejected (Pilot accuracy exported: ('gaussian_balanced', 1, 'joint')/estimate)

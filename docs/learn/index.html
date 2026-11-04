@@ -196,7 +196,7 @@ footer p { max-width: 80ch; margin: 0 0 8px; }
 <main>
 <div class="wrap">
   <div class="strip" aria-label="Package status">
-    <span>Version <b>0.7.2</b></span>
+    <span>Version <b>0.8.0</b></span>
     <span>Status <b>experimental</b></span>
     <span>On CRAN <b>no</b></span>
     <span>Independent human review <b>none</b></span>
@@ -579,7 +579,7 @@ catmech_pool_lm(fit, sbp ~ recorded_kg + age + sex + race + height)</code></pre>
     ],
     "sites": "Pool with cluster = \"site\": a delete-one-cluster jackknife, chosen narrowly in a planned test. It repairs the analysis step only. Linear imputation with it still covered 81% to 86% on the worst items of a real recount at a 25% audit.",
     "sitesOtherMethod": "This method has not been tested with the cluster-robust variance.",
-    "sitesOutcome": "Optional check: catmech_reference(..., cluster = \"site\") adds a random intercept for each site, with approximate variance draws. It came out PARTIAL in both planned tests, within simulation noise of NO-GO, and refuses fewer than five audited clusters. It also refuses a site needing stochastic draws for both recorded-present and recorded-missing rows; audited rows and deterministically retained recorded values do not trigger that refusal. Treat it as a check, not a default.",
+    "sitesOutcome": "Optional check: catmech_reference(..., cluster = \"site\") adds a random intercept for each site, with approximate variance draws. It came out PARTIAL in both planned tests, within simulation noise of NO-GO, and refuses fewer than five audited clusters. Its default moment model refuses a site needing stochastic draws for both recorded-present and recorded-missing rows. Version 0.8.0 adds explicit cluster_model = \"joint\" for this case: a bivariate Gaussian model through pan with covariance priors and convergence checks. See the README for its separate assumptions and validation. Treat it as a check, not a default.",
     "sitesPredictor": "Do not pass cluster to catmech_reference(). With the audited value as a predictor it biased the slope toward zero in simulation, and catmech_pool_lm() warns.",
     "targetedDefault": "Doubt about the straight line would point to filling in without the recorded value, but that needs an audit that does not depend on the recorded value. With a targeted audit, this page keeps linear imputation given the recorded value.",
     "targetedOk": "A targeted audit is supported, because the recorded value is in the model.",

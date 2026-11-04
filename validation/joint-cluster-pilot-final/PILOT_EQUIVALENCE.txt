@@ -1,0 +1,2 @@
+PASS: all 72 pilot rows identical to historical pilot except elapsed_seconds/source_fingerprint; entire diagnostics.csv byte-identical.
+72 requests, 71 intervals, one identical convergence refusal; no accuracy fields exported.

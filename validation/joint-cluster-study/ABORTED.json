@@ -1,0 +1,11 @@
+{
+  "status": "aborted-worker-limit",
+  "reason": "Independent R CMD check --as-cran rejected four simultaneous child workers; execution-only worker batching fix required. No held-out accuracy inspected or used.",
+  "saved_requests": 350,
+  "last_cell": "gaussian_balanced",
+  "last_replicate": 70,
+  "source_hashes_unchanged": true,
+  "aborted_utc": "2026-11-04T03:26:02.827216+00:00",
+  "accuracy_inspected": false,
+  "rerun_policy": "Repeat the same prespecified seeds in a new output directory after fresh-source engineering pilot; retain all incomplete artifacts."
+}

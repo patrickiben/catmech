@@ -1,0 +1,2 @@
+"cell","replicate","method","error_class","message","warnings"
+"gaussian_balanced",2,"joint_prior_quarter","catmech_convergence_error","Joint cluster model failed convergence checks (R-hat <= 1.05 and bulk/tail ESS >= 400 required). Inspect the condition's model_diagnostics.",""

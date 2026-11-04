@@ -1,3 +1,23 @@
+# catmech 0.8.0
+
+- Add explicit `cluster_model = "joint"` to normal reference imputation with
+  recorded values and clusters. A bivariate Gaussian random-intercept model
+  fitted by `pan` shares site uncertainty across recorded-present and
+  recorded-missing rows. It also predicts entirely unobserved sites, while
+  preserving observed gold references and raw input exactly.
+- Expose and record covariance prior scales and multiple-chain controls;
+  reject unsupported designs and failed convergence. Joint fitting does not
+  use the moment model's deterministic all-agree shortcut.
+- Run each `pan` chain in a fresh local R process to avoid hidden cached RNG
+  state making same-seed fits depend on earlier unrelated `pan` calls.
+- Add independent conditional-normal oracle tests, mixed-pattern integration
+  tests, a runnable installed example and a separately planned simulation with
+  prior sensitivity and misspecification stress. Historical real-audit results
+  remain evidence for earlier models, not validation of this option.
+- Preserve `cluster_model = "moment"` as the default. The joint model is an
+  explicit change of likelihood and priors, not a general correction for
+  rare-count undercoverage or predictor-slope attenuation.
+
 # catmech 0.7.2
 
 - Refuse clustered reference imputation when one site needs stochastic fills both

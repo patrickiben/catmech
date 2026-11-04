@@ -238,3 +238,14 @@ clustered_pool <- catmech::catmech_pool_lm(clustered, recorded ~ x)
 stopifnot(identical(clustered$spec$audited_clusters, 15L), all(clustered_pool$clusters == 40L),
           all(endsWith(clustered_pool$interpretation, "_cluster_robust")))
 cat("Clustered option: PASS\n")
+
+joint_example <- new.env(parent = baseenv())
+source(system.file("examples", "joint-cluster.R", package = "catmech"), local = joint_example)
+joint <- joint_example$joint_fit
+stopifnot(identical(joint$manifest$engine, "reference_joint_cluster"),
+          joint$model_diagnostics$convergence_pass,
+          identical(joint$original, joint_example$joint_data),
+          all(is.finite(joint_example$joint_analysis$std.error)),
+          identical(mice::complete(joint$mids, 1)$recorded, joint$completed[[1]]$recorded))
+check_export(joint, "joint-cluster")
+cat("Joint mixed-pattern clustered example, adapter and export: PASS\n")

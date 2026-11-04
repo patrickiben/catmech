@@ -1,6 +1,6 @@
 # catmech <img src="man/figures/logo.png" align="right" width="160" alt="catmech logo: a neon cat piloting a mech suit">
 
-**An experimental R package for regression when every record has a recorded value and only an audited subset has a checked reference value. Version 0.7.2.**
+**An experimental R package for regression using error-prone recorded measurements and an independently checked reference subset. Version 0.8.0.**
 
 **The question:** can you keep error-prone recorded values for precision without trusting them, and which method should you try first?
 
@@ -125,7 +125,7 @@ and [validation record](validation/VALIDATION.md).
 
 The [commands above](#try-it) install the dependencies and then the package. Run the second
 command from the repository directory, or build the source archive with `R CMD build .` and
-install it with `R CMD INSTALL catmech_0.7.2.tar.gz`. R 4.1 or later is required, although only R 4.6
+install it with `R CMD INSTALL catmech_0.8.0.tar.gz`. R 4.1 or later is required, although only R 4.6
 has been tested. GitHub Actions checks Linux, macOS and Windows, and all three passed. See the
 [validation record](validation/VALIDATION.md).
 
@@ -276,20 +276,52 @@ fit_clustered <- catmech_reference(
 catmech_pool_lm(fit_clustered, lab_value ~ age + sex + inflammation)
 ```
 
-**Do not use `cluster` in the fit when the audited value is a predictor.** In simulations, it biased that slope toward
-zero, and `catmech_pool_lm()` warns about this use. The option's [planned test](validation/CLUSTERED_FIX_SYNTHESIS.md),
+**Do not use the default moment model when the audited value is an analysis predictor.** In simulations, it biased that slope toward
+zero, and `catmech_pool_lm()` warns about this use. The joint option has not been validated for that role and also warns.
+The moment option's [planned test](validation/CLUSTERED_FIX_SYNTHESIS.md),
 with the audited value as the outcome, came out PARTIAL: it helped where the first example's imputation fell short of a
 recount and cost some accuracy on rare items. It replaced an [earlier version](validation/CLUSTERED_SYNTHESIS.md) that
 resampled audited clusters. If the audit is stratified, put the strata in `predictors`; `cluster_strata` no longer exists. With one audited cluster per stratum, nothing can estimate between-cluster variance, so the fit is refused.
 It assumes one normal intercept per cluster and uses approximate moment-based variance draws. Equal site sizes do not
-make those draws exact posterior samples. A site requiring stochastic imputation for both recorded-present and
-recorded-missing rows is refused, because the separate fits do not share a site effect. Supply references that resolve
-one of those groups, or use a joint model that supports both patterns. Audited rows and deterministically retained recorded
-values do not trigger that refusal. Treat the option as a check, not a default. Fewer than five audited clusters
+make those draws exact posterior samples. The default `cluster_model = "moment"` still refuses a site requiring stochastic imputation for both recorded-present
+and recorded-missing rows, because its separate fits do not share a site effect. Use the explicit joint option below for
+that case. Audited rows and deterministically retained recorded values do not trigger the default refusal. Treat the option as a check, not a default. Fewer than five audited clusters
 are refused. Very wide intervals remain possible with few audited clusters, so read the `df` column. See the
 [method](docs/REFERENCE_METHOD.md#clustered-audits-experimental).
 
-The same model is available elsewhere. In a [planned comparison](validation/OUTSIDE_METHODS_SYNTHESIS.md), `mice` with `2l.lmer` under
+### Mixed recording patterns within sites
+
+Version 0.8.0 adds `cluster_model = "joint"`. It models the checked and recorded measurements together, using one
+shared pair of site effects. A site can contain rows with recorded values, rows without them, and audited rows in either
+pattern. A site with neither measurement observed is predicted from the population model. Checked values stay exact,
+and the raw input remains in `original`.
+
+```r
+fit_joint <- catmech_reference(
+  dat_with_reference, "lab_value", "reference_value",
+  predictors = c("age", "sex", "inflammation"),
+  use_recorded = TRUE, cluster = "site", cluster_model = "joint",
+  m = 40, seed = 127
+)
+fit_joint$model_diagnostics$summary
+catmech_pool_lm(fit_joint, lab_value ~ age + sex + inflammation)
+```
+
+This is an established bivariate Gaussian mixed model fitted through `pan`, with explicit covariance priors and
+multiple-chain convergence checks. It adds assumptions about the recorded measurement distribution and missingness;
+it is an opt-in model change. It does not silently retain recorded values when a small audit happens to agree.
+See the [model, priors and support requirements](docs/JOINT_CLUSTER_METHOD.md) and the
+[new validation](validation/JOINT_CLUSTER_SYNTHESIS.md). The historical results below concern the earlier moment model.
+Neither model is a demonstrated solution to rare-count undercoverage or use of the audited value as an analysis predictor.
+
+The new study used 200 cohorts per scenario and 40 completions. The joint option had small slope bias, but its
+intervals were often conservative and changed materially with the covariance prior. Some fits refused to complete
+after reaching the convergence limit, especially in the heavy-tailed stress case. These results support a working,
+auditable model option; they do not establish nominal interval calibration or superiority across settings.
+
+### Earlier moment-model evidence
+
+The earlier moment model's random-intercept regression is available elsewhere. In a [planned comparison](validation/OUTSIDE_METHODS_SYNTHESIS.md), `mice` with `2l.lmer` under
 its defaults did much worse, because by default it drops a predictor correlated at 0.99 or more with the imputed variable,
 which can remove the recorded value when records are good. Check `loggedEvents` if you use `mice` for audited values. With
 that check off, in a rerun made after seeing the results, it matched the option's accuracy on the same cohorts, with slightly
@@ -423,7 +455,10 @@ are not silently converted to the new model.
 Rscript -e 'install.packages(c("testthat", "pkgload", "roxygen2"))'
 Rscript -e 'testthat::test_local()'
 R CMD build .
-R CMD check --no-manual catmech_0.7.2.tar.gz
+R CMD check --no-manual catmech_0.8.0.tar.gz
+Rscript tools/check-v072-unchanged.R validation/my-v072-comparison.txt
+Rscript validation/run-joint-cluster.R heldout validation/my-joint-cluster
+python3 -I tools/verify-joint-cluster.py validation/my-joint-cluster
 Rscript tools/check-model-oracle.R validation/my-model-oracle
 Rscript tools/coverage-benchmark.R confirmatory validation/my-heldout
 Rscript tools/coverage-benchmark.R clinical validation/my-clinical
@@ -487,7 +522,8 @@ pooling; successful scalar estimates and intervals are unchanged. See
 
 ## License, credits and AI use
 
-MIT license for code and documents. Data files keep their own terms, described below. Built on [mice](https://doi.org/10.18637/jss.v045.i03),
+MIT license for this repository's code and documents. Dependencies and data retain their own licenses. Built on [mice](https://doi.org/10.18637/jss.v045.i03),
+[pan](https://cran.r-project.org/package=pan) for the joint clustered model,
 [data augmentation](https://doi.org/10.1080/01621459.1987.10478458), interval imputation
 such as [hmi](https://doi.org/10.18637/jss.v095.i09), and
 [multiple overimputation](https://doi.org/10.1177/0049124115585360).

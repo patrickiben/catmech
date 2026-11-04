@@ -1,0 +1,24 @@
+                          parameter      rhat  ess_bulk  ess_tail
+1                beta_T:(Intercept) 1.0033375  841.4042  1123.533
+2                          beta_T:x 1.0019958 1422.0737  3151.303
+3                beta_W:(Intercept) 1.0028049 1397.5580  3085.569
+4                          beta_W:x 0.9999510 7609.7995 11703.683
+5                          sigma_TT 1.0016457 1819.7549  3124.206
+6                          sigma_TW 1.0021500 1579.8991  3673.587
+7                          sigma_WW 0.9999843 8553.1296 11907.699
+8                            psi_TT 1.0096731  411.8500  1159.951
+9                            psi_TW 1.0056139  695.0856  1913.509
+10                           psi_WW 1.0005323 5589.5835  8798.516
+11 conditional_target_mean_recorded 1.0028296 1025.6098  1833.506
+12   conditional_target_mean_absent 1.0030610  932.8087  1867.130
+         term   estimate std.error       df      lower     upper
+1 (Intercept) 0.67553807 0.2144693 20.31301  0.2286045 1.1224716
+2           x 0.06035253 0.1414838 11.93815 -0.2480913 0.3687964
+  within_variance between_variance  m   n
+1     0.027475592       0.01806973 40 240
+2     0.007335202       0.01237312 40 240
+                                  interpretation clusters cluster_variance
+1 conditional_joint_cluster_model_cluster_robust       40              cv3
+2 conditional_joint_cluster_model_cluster_robust       40              cv3
+   user  system elapsed 
+  1.322   0.021   1.345 

@@ -1,0 +1,105 @@
+
+R version 4.6.0 (2026-04-24) -- "Because it was There"
+Copyright (C) 2026 The R Foundation for Statistical Computing
+Platform: aarch64-apple-darwin23
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> library(testthat)
+> library(catmech)
+> test_check("catmech")
+Saving _problems/test-joint-cluster-117.R
+Saving _problems/test-joint-cluster-195.R
+Saving _problems/test-joint-cluster-211.R
+Saving _problems/test-joint-cluster-281.R
+Saving _problems/test-joint-cluster-284.R
+Saving _problems/test-joint-cluster-285.R
+Saving _problems/test-joint-cluster-286.R
+Saving _problems/test-joint-cluster-287.R
+Saving _problems/test-joint-cluster-288.R
+Saving _problems/test-joint-cluster-289.R
+Saving _problems/test-joint-cluster-291.R
+[ FAIL 11 | WARN 0 | SKIP 0 | PASS 781 ]
+
+══ Failed tests ════════════════════════════════════════════════════════════════
+── Error ('test-joint-cluster.R:116:3'): joint mode preserves anchors, original data, mids and caller RNG ──
+Error in `.check_ncores(length(names))`: 4 simultaneous processes spawned
+Backtrace:
+    ▆
+ 1. └─catmech::catmech_reference(...) at test-joint-cluster.R:116:3
+ 2.   └─catmech:::catmech_joint_cluster_draws(...)
+ 3.     └─catmech:::catmech_joint_cluster_pan(...)
+── Error ('test-joint-cluster.R:194:3'): joint mode keeps caller row order with interleaved site labels ──
+Error in `.check_ncores(length(names))`: 4 simultaneous processes spawned
+Backtrace:
+    ▆
+ 1. └─catmech::catmech_reference(...) at test-joint-cluster.R:194:3
+ 2.   └─catmech:::catmech_joint_cluster_draws(...)
+ 3.     └─catmech:::catmech_joint_cluster_pan(...)
+── Error ('test-joint-cluster.R:210:3'): joint mode never treats calibration agreement as exact unaudited truth ──
+Error in `.check_ncores(length(names))`: 4 simultaneous processes spawned
+Backtrace:
+    ▆
+ 1. └─catmech::catmech_reference(...) at test-joint-cluster.R:210:3
+ 2.   └─catmech:::catmech_joint_cluster_draws(...)
+ 3.     └─catmech:::catmech_joint_cluster_pan(...)
+── Failure ('test-joint-cluster.R:281:3'): joint convergence refusal retains evidence and restores caller RNG ──
+Expected `error` to inherit from "catmech_convergence_error".
+Actual class: "simpleError"/"error"/"condition".
+── Failure ('test-joint-cluster.R:284:3'): joint convergence refusal retains evidence and restores caller RNG ──
+Expected `diagnostic$convergence_pass` to be FALSE.
+Differences:
+`actual` is NULL
+`expected` is a logical vector (FALSE)
+
+── Failure ('test-joint-cluster.R:285:3'): joint convergence refusal retains evidence and restores caller RNG ──
+Expected `diagnostic$iterations_used` to be identical to 100L.
+Differences:
+`actual` is NULL
+`expected` is an integer vector (100)
+
+── Failure ('test-joint-cluster.R:286:3'): joint convergence refusal retains evidence and restores caller RNG ──
+Expected `dim(diagnostic$traces)[1:2]` to equal `c(100L, 4L)`.
+Differences:
+`actual` is NULL
+`expected` is an integer vector (100, 4)
+
+── Failure ('test-joint-cluster.R:287:3'): joint convergence refusal retains evidence and restores caller RNG ──
+Expected `nrow(diagnostic$attempts)` to equal 1L.
+Differences:
+`actual` is NULL
+`expected` is an integer vector (1)
+
+── Failure ('test-joint-cluster.R:288:3'): joint convergence refusal retains evidence and restores caller RNG ──
+Expected `diagnostic$pan_prior$Binv` to equal `diag(1, 2L)`.
+Differences:
+`actual` is NULL
+`expected` is a double vector (1, 0, 0, 1)
+
+── Failure ('test-joint-cluster.R:289:3'): joint convergence refusal retains evidence and restores caller RNG ──
+Expected `diagnostic$pan_prior$Dinv` to equal `diag(1, 2L)`.
+Differences:
+`actual` is NULL
+`expected` is a double vector (1, 0, 0, 1)
+
+── Failure ('test-joint-cluster.R:290:3'): joint convergence refusal retains evidence and restores caller RNG ──
+Expected `diagnostic$backend_isolation` to be identical to "fresh_R_worker_per_chain_and_attempt".
+Differences:
+`actual` is NULL
+`expected` is a character vector ('fresh_R_worker_per_chain_and_attempt')
+
+
+[ FAIL 11 | WARN 0 | SKIP 0 | PASS 781 ]
+Error:
+! Test failures.
+Execution halted

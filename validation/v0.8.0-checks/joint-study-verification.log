@@ -1,0 +1,2 @@
+PASS: 4200 planned requests; 22 recorded failures; 966 independently recomputed scalar summaries; source hashes match.
+PASS: all 350 aborted requests exactly match final scientific/status/diagnostic fields; only runtime/source fingerprint excluded.
