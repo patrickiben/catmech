@@ -1,0 +1,296 @@
+{
+  "status": "PASS",
+  "scope": "Read-only byte comparison against committed Git objects; no fits or accuracy calculations",
+  "baseline_files": 13,
+  "first_pilot_files": 35,
+  "checks": [
+    {
+      "source": "v0.9.0",
+      "file": "DESCRIPTION",
+      "sha256": "f0e5ff374634d0adc312592c92dd7eb76b8dccb4e947919881ff11c7829fd089",
+      "git_commit": "ae8f94086710ea1acc0df937f45ee847b6a0976b"
+    },
+    {
+      "source": "v0.9.0",
+      "file": "NAMESPACE",
+      "sha256": "0bf55965de1f0c98b6450553b2eea3048c46cbdb067b791aa38f0b119894884a",
+      "git_commit": "ae8f94086710ea1acc0df937f45ee847b6a0976b"
+    },
+    {
+      "source": "v0.9.0",
+      "file": "R/analysis.R",
+      "sha256": "4cbe8d966b27f22ef13eb69e7c49b9e8d42aabdc6b20c82542c7630cb4392322",
+      "git_commit": "ae8f94086710ea1acc0df937f45ee847b6a0976b"
+    },
+    {
+      "source": "v0.9.0",
+      "file": "R/audit-plan.R",
+      "sha256": "319a9400d98c3abc74e5cdb07875f7f87d4e1a1d1a4f5ba2fc2e5b251d04e764",
+      "git_commit": "ae8f94086710ea1acc0df937f45ee847b6a0976b"
+    },
+    {
+      "source": "v0.9.0",
+      "file": "R/contamination.R",
+      "sha256": "3da564c4bac0fec7cf5e0c151a531e7bd598dbd03c5f0b51293389437597115d",
+      "git_commit": "ae8f94086710ea1acc0df937f45ee847b6a0976b"
+    },
+    {
+      "source": "v0.9.0",
+      "file": "R/impute.R",
+      "sha256": "39837090144d9e9244a32daebb2df28f5731b25ac89a15c47a2a3fbfee0f9b3b",
+      "git_commit": "ae8f94086710ea1acc0df937f45ee847b6a0976b"
+    },
+    {
+      "source": "v0.9.0",
+      "file": "R/imputer.R",
+      "sha256": "c4fd038872513e6012f2e156ae4b444d91748067b2461d94888ee2f585f97e8c",
+      "git_commit": "ae8f94086710ea1acc0df937f45ee847b6a0976b"
+    },
+    {
+      "source": "v0.9.0",
+      "file": "R/joint-analysis.R",
+      "sha256": "af830e8f7c23a94b5b613747314d09bb77d1caf3fe0a8073b77face5d56f4b35",
+      "git_commit": "ae8f94086710ea1acc0df937f45ee847b6a0976b"
+    },
+    {
+      "source": "v0.9.0",
+      "file": "R/joint-cluster.R",
+      "sha256": "713fd03adacdb8917d079e86f7368459d2ac36c7bd85799b14fa5051f1216914",
+      "git_commit": "ae8f94086710ea1acc0df937f45ee847b6a0976b"
+    },
+    {
+      "source": "v0.9.0",
+      "file": "R/model.R",
+      "sha256": "701295a32332a46870f89abbe20aa5bc0e768bb7816414c1a2e0cd5cabc72222",
+      "git_commit": "ae8f94086710ea1acc0df937f45ee847b6a0976b"
+    },
+    {
+      "source": "v0.9.0",
+      "file": "R/reference.R",
+      "sha256": "093e1d9dcd67000e5ea9a376053300f1b6b2eb09f761026f15496cec422cca49",
+      "git_commit": "ae8f94086710ea1acc0df937f45ee847b6a0976b"
+    },
+    {
+      "source": "v0.9.0",
+      "file": "R/simulate.R",
+      "sha256": "bdc24dbd40c6547b1f6fe12be96c340ccafe995f0504f24db17946e65a079b7d",
+      "git_commit": "ae8f94086710ea1acc0df937f45ee847b6a0976b"
+    },
+    {
+      "source": "v0.9.0",
+      "file": "R/spec.R",
+      "sha256": "ed6f3b74e9a1d0751c33bfa72b63da6e90b95dd75ffa0f142ef3810241ef7e15",
+      "git_commit": "ae8f94086710ea1acc0df937f45ee847b6a0976b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "DESCRIPTION",
+      "sha256": "07bf8ba459066fccfe24064fc23bac6eb99f5349fa2a2582c6f81c62301e9333",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "NAMESPACE",
+      "sha256": "fd427ea1d038f561b2d35a3436bf264d6353aed4e704c47e16a23ed73e88a508",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "validation/JOINT_MARGINAL_PLAN.md",
+      "sha256": "d3eb67dcf008b0a5cf8a21773704907471eeb9eb674cf95314fb9c2e920a2656",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "validation/run-joint-marginal.R",
+      "sha256": "961d5c336d452f50019c7858994b78efa642fe475d7c280d1b9945355c155186",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "src/init.cpp",
+      "sha256": "a2372b944766d4534923b01fa5e48eaf1a560ce1174c6bad1931957e655a4a1d",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "src/Makevars",
+      "sha256": "f1e594e2101c3ec3edff3905c535eee0a892b69e955baba42f6f7d30be26375f",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "src/Makevars.win",
+      "sha256": "f1e594e2101c3ec3edff3905c535eee0a892b69e955baba42f6f7d30be26375f",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "src/marginal.cpp",
+      "sha256": "7e64ee057a4073c1d056d2159c98aeba88403a1c08fc5b074233501a3a357343",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "R/analysis.R",
+      "sha256": "90bb93efccd5e6985727758f49b4b81a734e550fdc8ac7a818a63a848392c0f2",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "R/audit-plan.R",
+      "sha256": "319a9400d98c3abc74e5cdb07875f7f87d4e1a1d1a4f5ba2fc2e5b251d04e764",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "R/catmech-package.R",
+      "sha256": "ed2bf174b149ab29e59b887b0e6ddea420573719491dfa70ccf3dd5443d8edcf",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "R/contamination.R",
+      "sha256": "fa9a6929dc0fe392e2e3a3014a5a54ba5308fb0033e8a2434e435a15909e8544",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "R/impute.R",
+      "sha256": "39837090144d9e9244a32daebb2df28f5731b25ac89a15c47a2a3fbfee0f9b3b",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "R/imputer.R",
+      "sha256": "c4fd038872513e6012f2e156ae4b444d91748067b2461d94888ee2f585f97e8c",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "R/joint-analysis.R",
+      "sha256": "af830e8f7c23a94b5b613747314d09bb77d1caf3fe0a8073b77face5d56f4b35",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "R/joint-cluster.R",
+      "sha256": "713fd03adacdb8917d079e86f7368459d2ac36c7bd85799b14fa5051f1216914",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "R/marginal-analysis.R",
+      "sha256": "530b1985233bea40daa13394fb1539d7474471bb4550bcca94f4b48b7bb5a043",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "R/marginal-sampler.R",
+      "sha256": "7d0a7d67a3d8e1ba91d2a282d172dc77bfa5ff4f87e8124060e6948e8722117f",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "R/model.R",
+      "sha256": "701295a32332a46870f89abbe20aa5bc0e768bb7816414c1a2e0cd5cabc72222",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "R/reference.R",
+      "sha256": "bf7c9fd35387ae383ff400ab277301883b8f20ade1c4179da683f80dcbac6135",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "R/simulate.R",
+      "sha256": "bdc24dbd40c6547b1f6fe12be96c340ccafe995f0504f24db17946e65a079b7d",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "R/spec.R",
+      "sha256": "ed6f3b74e9a1d0751c33bfa72b63da6e90b95dd75ffa0f142ef3810241ef7e15",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "validation/v0.9.0-source/DESCRIPTION",
+      "sha256": "f0e5ff374634d0adc312592c92dd7eb76b8dccb4e947919881ff11c7829fd089",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "validation/v0.9.0-source/NAMESPACE",
+      "sha256": "0bf55965de1f0c98b6450553b2eea3048c46cbdb067b791aa38f0b119894884a",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "validation/v0.9.0-source/R/analysis.R",
+      "sha256": "4cbe8d966b27f22ef13eb69e7c49b9e8d42aabdc6b20c82542c7630cb4392322",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "validation/v0.9.0-source/R/audit-plan.R",
+      "sha256": "319a9400d98c3abc74e5cdb07875f7f87d4e1a1d1a4f5ba2fc2e5b251d04e764",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "validation/v0.9.0-source/R/contamination.R",
+      "sha256": "3da564c4bac0fec7cf5e0c151a531e7bd598dbd03c5f0b51293389437597115d",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "validation/v0.9.0-source/R/impute.R",
+      "sha256": "39837090144d9e9244a32daebb2df28f5731b25ac89a15c47a2a3fbfee0f9b3b",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "validation/v0.9.0-source/R/imputer.R",
+      "sha256": "c4fd038872513e6012f2e156ae4b444d91748067b2461d94888ee2f585f97e8c",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "validation/v0.9.0-source/R/joint-analysis.R",
+      "sha256": "af830e8f7c23a94b5b613747314d09bb77d1caf3fe0a8073b77face5d56f4b35",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "validation/v0.9.0-source/R/joint-cluster.R",
+      "sha256": "713fd03adacdb8917d079e86f7368459d2ac36c7bd85799b14fa5051f1216914",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "validation/v0.9.0-source/R/model.R",
+      "sha256": "701295a32332a46870f89abbe20aa5bc0e768bb7816414c1a2e0cd5cabc72222",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "validation/v0.9.0-source/R/reference.R",
+      "sha256": "093e1d9dcd67000e5ea9a376053300f1b6b2eb09f761026f15496cec422cca49",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "validation/v0.9.0-source/R/simulate.R",
+      "sha256": "bdc24dbd40c6547b1f6fe12be96c340ccafe995f0504f24db17946e65a079b7d",
+      "git_commit": "8e65e4b"
+    },
+    {
+      "source": "first-masked-pilot",
+      "file": "validation/v0.9.0-source/R/spec.R",
+      "sha256": "ed6f3b74e9a1d0751c33bfa72b63da6e90b95dd75ffa0f142ef3810241ef7e15",
+      "git_commit": "8e65e4b"
+    }
+  ]
+}

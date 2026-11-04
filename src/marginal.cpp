@@ -56,6 +56,74 @@ arma::vec auxiliary_draw(const arma::mat& covariance, double scale) {
   return out;
 }
 
+struct ConditionalCovariance {
+  arma::mat predictor;
+  arma::mat regression;  // k predictors by two measurement responses
+  arma::mat residual;
+};
+
+ConditionalCovariance conditional_covariance(const arma::mat& covariance) {
+  const unsigned int d = covariance.n_rows, k = d - 2;
+  ConditionalCovariance out;
+  out.residual = covariance.submat(0, 0, 1, 1);
+  if (k) {
+    out.predictor = covariance.submat(2, 2, d - 1, d - 1);
+    out.regression = inverse_spd(out.predictor) * covariance.submat(2, 0, d - 1, 1);
+    out.residual -= covariance.submat(0, 2, 1, d - 1) * out.regression;
+    out.residual = symmetric(out.residual);
+  } else {
+    out.predictor.set_size(0, 0);
+    out.regression.set_size(0, 2);
+  }
+  return out;
+}
+
+// Exact conjugate block conditional for the proper prior:
+// S=Q_XX and Omega=Q_RR-Q_RX S^-1 Q_XR have independent HW priors;
+// B|Omega ~ MN(0, regression_scale^2 I_k, Omega). R=(T,W).
+arma::mat factorized_covariance_draw(const arma::mat& values, const arma::vec& auxiliary,
+                                     double regression_scale) {
+  const unsigned int n = values.n_rows, d = values.n_cols, k = d - 2;
+  arma::mat response = values.cols(0, 1);
+  if (!k) {
+    arma::mat scale = response.t() * response;
+    scale.diag() += 4 / auxiliary;
+    return inverse_wishart(3.0 + n, scale);
+  }
+  const double precision = 1 / (regression_scale * regression_scale);
+  arma::mat x = values.cols(2, d - 1), cross = x.t() * x;
+  arma::mat predictor_scale = cross;
+  predictor_scale.diag() += 4 / auxiliary.tail(k);
+  arma::mat s = inverse_wishart(k + 1.0 + n, predictor_scale);
+  arma::mat coefficient_precision = cross;
+  coefficient_precision.diag() += precision;
+  arma::mat upper = chol_lower(coefficient_precision).t();
+  arma::mat mean = arma::solve(arma::trimatu(upper),
+    arma::solve(arma::trimatl(upper.t()), x.t() * response));
+  arma::mat residual = response - x * mean;
+  // Stable form of R'R - M'(X'X + precision I)M.
+  arma::mat conditional_scale = residual.t() * residual + precision * mean.t() * mean;
+  conditional_scale.diag() += 4 / auxiliary.head(2);
+  arma::mat omega = inverse_wishart(3.0 + n, conditional_scale);
+  arma::mat z(k, 2);
+  for (unsigned int j = 0; j < 2; ++j) z.col(j) = normals(k);
+  arma::mat b = mean + arma::solve(arma::trimatu(upper), z) * chol_lower(omega).t();
+  arma::mat out(d, d);
+  out.submat(2, 2, d - 1, d - 1) = s;
+  out.submat(2, 0, d - 1, 1) = s * b;
+  out.submat(0, 2, 1, d - 1) = b.t() * s;
+  out.submat(0, 0, 1, 1) = omega + b.t() * s * b;
+  return symmetric(out);
+}
+
+arma::vec factorized_auxiliary_draw(const arma::mat& covariance, double scale) {
+  ConditionalCovariance block = conditional_covariance(covariance);
+  arma::vec out(covariance.n_rows);
+  out.head(2) = auxiliary_draw(block.residual, scale);
+  if (covariance.n_rows > 2) out.tail(covariance.n_rows - 2) = auxiliary_draw(block.predictor, scale);
+  return out;
+}
+
 double log_sum_exp(double a, double b) {
   double larger = std::max(a, b);
   return larger + std::log1p(std::exp(std::min(a, b) - larger));
@@ -68,8 +136,9 @@ double log_sum_exp(double a, double b) {
 double scale_log_ratio(const arma::mat& ybar, const arma::vec& sizes,
                        const arma::vec& mu, const arma::mat& u,
                        const arma::mat& si, const arma::mat& pi,
+                       const arma::mat& psi,
                        unsigned int j, double eta, double scale,
-                       const std::string& family) {
+                       const std::string& family, double regression_scale) {
   const double d = u.n_cols;
   arma::mat residual = ybar - u;
   residual.each_row() -= mu.t();
@@ -77,7 +146,30 @@ double scale_log_ratio(const arma::mat& ybar, const arma::vec& sizes,
   double likelihood = arma::dot(sizes, delta % (residual * si.col(j)) -
     0.5 * arma::square(delta) * si(j, j));
   double prior_and_jacobian;
-  if (family == "huang_wand") {
+  if (family == "conditional_regression") {
+    const double k = d - 2;
+    if (j < 2) {
+      // Omega transforms with the measurement coordinate; B's matching
+      // column transforms too. Its normal density cancels that B Jacobian.
+      double log_precision = std::log(2 * pi(j, j));
+      double log_rate = -std::log(scale);
+      double change = log_sum_exp(log_precision - 2 * eta, log_rate) -
+        log_sum_exp(log_precision, log_rate);
+      prior_and_jacobian = -3 * eta - 2 * change;
+    } else {
+      ConditionalCovariance block = conditional_covariance(psi);
+      arma::mat sinv = inverse_spd(block.predictor);
+      arma::rowvec coefficient = block.regression.row(j - 2);
+      double quadratic = arma::as_scalar(coefficient * pi.submat(0, 0, 1, 1) * coefficient.t());
+      double log_precision = std::log(2 * sinv(j - 2, j - 2));
+      double log_rate = -std::log(scale);
+      double change = log_sum_exp(log_precision - 2 * eta, log_rate) -
+        log_sum_exp(log_precision, log_rate);
+      // The Q->(S,B,Omega) prior density contributes -2 log|S|.
+      prior_and_jacobian = -(2 + 2 * k) * eta - (2 + k) / 2 * change +
+        (k - 1) * eta - 0.5 * quadratic / (regression_scale * regression_scale) * std::expm1(-2 * eta);
+    }
+  } else if (family == "huang_wand") {
     double log_precision = std::log(2 * pi(j, j));
     double log_rate = -std::log(scale);
     double log_change = log_sum_exp(log_precision - 2 * eta, log_rate) -
@@ -94,13 +186,15 @@ double scale_log_ratio(const arma::mat& ybar, const arma::vec& sizes,
 void scale_interweave(arma::mat& u, arma::mat& psi, const arma::mat& ybar,
                       const arma::vec& sizes, const arma::vec& mu,
                       const arma::mat& sigma, double scale, const std::string& family,
+                      double regression_scale,
                       arma::vec& proposed, arma::vec& accepted) {
   arma::mat si = inverse_spd(sigma), pi = inverse_spd(psi);
   for (unsigned int j = 0; j < u.n_cols; ++j) {
     // Fixed engineering settings, never adapted to interval performance.
     for (unsigned int step = 0; step < 2; ++step) {
       const double eta = R::rnorm(0, 1), c = std::exp(eta);
-      const double ratio = scale_log_ratio(ybar, sizes, mu, u, si, pi, j, eta, scale, family);
+      const double ratio = scale_log_ratio(ybar, sizes, mu, u, si, pi, psi,
+        j, eta, scale, family, regression_scale);
       proposed[j] += 1;
       if (std::log(R::runif(0, 1)) < ratio) {
         u.col(j) *= c;
@@ -212,11 +306,15 @@ RcppExport SEXP catmech_marginal_gibbs_cpp(SEXP input_sexp, SEXP iterations_sexp
   const unsigned int iterations = Rcpp::as<unsigned int>(iterations_sexp);
   const double scale = Rcpp::as<double>(prior["scale"]);
   const std::string family = Rcpp::as<std::string>(prior["family"]);
+  const double regression_scale = prior.containsElementNamed("regression_scale") ?
+    Rcpp::as<double>(prior["regression_scale"]) : 10;
   const bool interweave = prior.containsElementNamed("interweave") ?
     Rcpp::as<bool>(prior["interweave"]) : true;
   if (n < 1 || d < 1 || iterations < 1 || subject.size() != n ||
       !R_finite(scale) || scale <= 0 ||
-      (family != "huang_wand" && family != "inverse_wishart"))
+      !R_finite(regression_scale) || regression_scale <= 0 ||
+      (family != "huang_wand" && family != "inverse_wishart" && family != "conditional_regression") ||
+      (family == "conditional_regression" && d < 2))
     Rcpp::stop("Malformed marginal sampler input.");
   int largest = 0;
   for (unsigned int i = 0; i < n; ++i) {
@@ -350,24 +448,30 @@ RcppExport SEXP catmech_marginal_gibbs_cpp(SEXP input_sexp, SEXP iterations_sexp
     if (!fixed) {
       arma::mat residual = y;
       for (unsigned int i = 0; i < n; ++i) residual.row(i) -= mu.t() + u.row(group[i]);
-      arma::mat sigma_scale = residual.t() * residual;
-      arma::mat psi_scale = u.t() * u;
-      if (family == "huang_wand") {
-        sigma_scale.diag() += 4 / a_sigma;
-        psi_scale.diag() += 4 / a_psi;
+      if (family == "conditional_regression") {
+        sigma = factorized_covariance_draw(residual, a_sigma, regression_scale);
+        psi = factorized_covariance_draw(u, a_psi, regression_scale);
       } else {
-        sigma_scale.diag() += 0.5 * scale;
-        psi_scale.diag() += 0.5 * scale;
+        arma::mat sigma_scale = residual.t() * residual;
+        arma::mat psi_scale = u.t() * u;
+        if (family == "huang_wand") {
+          sigma_scale.diag() += 4 / a_sigma;
+          psi_scale.diag() += 4 / a_psi;
+        } else {
+          sigma_scale.diag() += 0.5 * scale;
+          psi_scale.diag() += 0.5 * scale;
+        }
+        sigma = inverse_wishart(covariance_df + n, sigma_scale);
+        psi = inverse_wishart(covariance_df + g, psi_scale);
       }
-      sigma = inverse_wishart(covariance_df + n, sigma_scale);
-      psi = inverse_wishart(covariance_df + g, psi_scale);
-      if (family == "huang_wand") {
-        a_sigma = auxiliary_draw(sigma, scale);
-      }
+      if (family == "huang_wand") a_sigma = auxiliary_draw(sigma, scale);
+      if (family == "conditional_regression") a_sigma = factorized_auxiliary_draw(sigma, scale);
       if (interweave)
-        scale_interweave(u, psi, ybar, sizes, mu, sigma, scale, family, scale_proposed, scale_accepted);
+        scale_interweave(u, psi, ybar, sizes, mu, sigma, scale, family, regression_scale,
+          scale_proposed, scale_accepted);
       // Mandatory after the collapsed-auxiliary scale move, including rejection.
       if (family == "huang_wand") a_psi = auxiliary_draw(psi, scale);
+      if (family == "conditional_regression") a_psi = factorized_auxiliary_draw(psi, scale);
     }
     if (!mu.is_finite() || !y.is_finite()) Rcpp::stop("Nonfinite marginal Gibbs state.");
     for (unsigned int j = 0; j < d; ++j) {
@@ -405,10 +509,31 @@ RcppExport SEXP catmech_marginal_ratio_cpp(SEXP y_sexp, SEXP subject_sexp,
     ybar.row(group[i]) += y.row(i);
   }
   ybar.each_col() /= sizes;
+  arma::mat psi = Rcpp::as<arma::mat>(psi_sexp);
+  double regression_scale = prior.containsElementNamed("regression_scale") ?
+    Rcpp::as<double>(prior["regression_scale"]) : 10;
   return Rcpp::wrap(scale_log_ratio(ybar, sizes, Rcpp::as<arma::vec>(mu_sexp), u,
-    inverse_spd(Rcpp::as<arma::mat>(sigma_sexp)), inverse_spd(Rcpp::as<arma::mat>(psi_sexp)),
+    inverse_spd(Rcpp::as<arma::mat>(sigma_sexp)), inverse_spd(psi), psi,
     Rcpp::as<unsigned int>(j_sexp) - 1, Rcpp::as<double>(eta_sexp),
-    Rcpp::as<double>(prior["scale"]), Rcpp::as<std::string>(prior["family"])));
+    Rcpp::as<double>(prior["scale"]), Rcpp::as<std::string>(prior["family"]), regression_scale));
+  END_RCPP
+}
+
+RcppExport SEXP catmech_marginal_factor_cpp(SEXP values_sexp, SEXP auxiliary_sexp,
+                                          SEXP regression_scale_sexp, SEXP n_sexp) {
+  BEGIN_RCPP
+  Rcpp::RNGScope scope;
+  arma::mat values = Rcpp::as<arma::mat>(values_sexp);
+  arma::vec auxiliary = Rcpp::as<arma::vec>(auxiliary_sexp);
+  const unsigned int n = Rcpp::as<unsigned int>(n_sexp), d = values.n_cols;
+  const double regression_scale = Rcpp::as<double>(regression_scale_sexp);
+  Rcpp::NumericVector covariance(static_cast<R_xlen_t>(d) * d * n);
+  covariance.attr("dim") = Rcpp::IntegerVector::create(d, d, n);
+  for (unsigned int i = 0; i < n; ++i) {
+    if (i % 128 == 0) Rcpp::checkUserInterrupt();
+    save_matrix(covariance, factorized_covariance_draw(values, auxiliary, regression_scale), i);
+  }
+  return Rcpp::List::create(Rcpp::Named("covariance") = covariance);
   END_RCPP
 }
 
@@ -464,7 +589,8 @@ RcppExport SEXP catmech_marginal_derived_cpp(SEXP input_sexp, SEXP fit_sexp,
   for (unsigned int i = 0; i < y.n_rows; ++i) if (!R_finite(y(i, 0))) {
     if (R_finite(y(i, 1))) recorded.push_back(i); else absent.push_back(i);
   }
-  const unsigned int count = k + 1 + !recorded.empty() + !absent.empty();
+  const unsigned int base_count = k + 1 + !recorded.empty() + !absent.empty();
+  const unsigned int count = base_count + 2 * (3 + 2 * k);
   Rcpp::NumericMatrix out(keep.size(), count);
   for (int row = 0; row < keep.size(); ++row) {
     if (row % 256 == 0) Rcpp::checkUserInterrupt();
@@ -494,6 +620,17 @@ RcppExport SEXP catmech_marginal_derived_cpp(SEXP input_sexp, SEXP fit_sexp,
         double sum = 0;
         for (unsigned int index : absent) sum += predicted[index];
         out(row, column++) = center[0] + scale[0] * sum / absent.size();
+      }
+    }
+    unsigned int column = base_count;
+    for (unsigned int component = 0; component < 2; ++component) {
+      ConditionalCovariance block = conditional_covariance(component ? psi.slice(it) : sigma.slice(it));
+      out(row, column++) = block.residual(0, 0);
+      out(row, column++) = block.residual(1, 0);
+      out(row, column++) = block.residual(1, 1);
+      for (unsigned int predictor = 0; predictor < k; ++predictor) {
+        out(row, column++) = block.regression(predictor, 0);
+        out(row, column++) = block.regression(predictor, 1);
       }
     }
   }

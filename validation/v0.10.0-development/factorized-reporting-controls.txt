@@ -1,0 +1,11 @@
+2026-11-04: independent reporting controls for Amendment 2, fabricated records only.
+No catmech fit or new study accuracy inspected.
+R reporting functions versus independent Python arithmetic: PASS.
+2790 synthetic records; 3534 summary scalars; 504 paired contrasts.
+All 2000 paired bootstrap resamples and strengthened maximum-axis gate reproduced.
+Includes dominant regression-prior sensitivity, regression-only refusal, partial and all-refusal groups.
+Pilot grid: 42 MCMC + 9 oracle workflows = 51 workflows / 93 analyses.
+D2 grid: 1260 MCMC + 270 oracle workflows = 1530 workflows / 2790 analyses.
+Confirmation grid: 12000 MCMC + 3600 oracle workflows = 15600 workflows / 27600 analyses.
+Generator: tools/check-joint-marginal-reporting.R
+Verifier: tools/verify-joint-marginal.py

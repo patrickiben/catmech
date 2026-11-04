@@ -134,9 +134,10 @@ test_that("fixed-covariance Gibbs mean draws agree with the observed likelihood"
 # Huang and Wand (2013), doi:10.1214/13-BA815, equation (2):
 # Q|a ~ IW(nu+d-1, 2*nu*diag(1/a)); a_k ~ IG(1/2, 1/A^2).
 # At nu=2 each SD/A is half-t2 and each pairwise correlation is Uniform(-1,1).
-# These independent CDF checks are preferable to variance moments, which do not
-# exist for the half-t2 prior, or comparing one implementation with itself.
-test_that("hierarchical covariance prior has its declared marginal distributions", {
+# In the conditional-regression prior these properties apply to the S and
+# Omega blocks, not to the assembled full covariance. These independent CDF
+# checks avoid variance moments, which do not exist for the half-t2 prior.
+test_that("Huang-Wand helper has its declared block marginal distributions", {
   n <- 12000L; d <- 3L; scale <- 4
   samples <- catmech_marginal_hw_draw(n, d, scale = scale, seed = 170830L)
   covariance <- samples$covariance
@@ -378,14 +379,22 @@ test_that("interweaving ratios match full densities and the complete Jacobian", 
   u <- matrix(c(.2, -.3, .5, -.1, .4, .2), 3L, 2L)
   sigma <- matrix(c(.8, -.25, -.25, .6), 2L)
   psi <- matrix(c(.6, .2, .2, .9), 2L)
+  extend <- function(v) {
+    loading <- c(.2, -.3)
+    rbind(cbind(v, v %*% loading),
+      c(as.vector(crossprod(loading, v)), as.numeric(crossprod(loading, v %*% loading)) + .7))
+  }
+  sigma <- extend(sigma); psi <- extend(psi)
+  y <- cbind(y, c(.3, -.5, .1, .7, .2, -.8, .6, -.2, .4))
+  u <- cbind(u, c(.1, -.2, .4)); mu <- c(mu, .1)
   density <- function(u, psi, family, scale) {
     residual <- sweep(y - u[group, ], 2L, mu, "-")
     marginal_oracle_log_normal(residual, sigma) +
       marginal_oracle_log_normal(u, psi) +
       marginal_oracle_log_covariance_prior(psi, family, scale)
   }
-  for (j in 1:2) for (eta in c(-.8, .55)) {
-    transform <- diag(2L); transform[j, j] <- exp(eta)
+  for (j in seq_along(mu)) for (eta in c(-.8, .55)) {
+    transform <- diag(length(mu)); transform[j, j] <- exp(eta)
     proposed_u <- u %*% transform
     proposed_psi <- transform %*% psi %*% transform
     jacobian <- (nrow(u) + ncol(u) + 1) * eta
@@ -402,7 +411,7 @@ test_that("interweaving ratios match full densities and the complete Jacobian", 
     state <- c(u, psi[indices])
     move <- function(state) {
       uu <- matrix(state[seq_along(u)], nrow(u), ncol(u))
-      pp <- matrix(0, 2L, 2L)
+      pp <- matrix(0, length(mu), length(mu))
       pp[indices] <- state[length(u) + seq_len(nrow(indices))]
       pp <- pp + t(pp) - diag(diag(pp))
       pp <- transform %*% pp %*% transform
@@ -418,7 +427,7 @@ test_that("interweaving ratios match full densities and the complete Jacobian", 
   }
 })
 
-test_that("hierarchical-prior posterior is unchanged by scale interweaving", {
+test_that("unfactorized Huang-Wand posterior is unchanged by scale interweaving", {
   set.seed(170940L)
   group <- rep(seq_len(24L), each = 10L)
   sigma <- matrix(c(.6, .15, .15, .5), 2L)

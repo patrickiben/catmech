@@ -27,9 +27,10 @@ PRIOR_CELLS = ["gaussian_balanced", "near_zero_icc", "observed_mar", "contextual
 CONTEXT = ["contextual_x", "contextual_unbalanced", "contextual_null"]
 MAIN = ["baseline_direct", "baseline_cv3", "marginal_direct", "marginal_cv3", "oracle_cv3"]
 PRIOR_METHODS = [f"{family}_{analysis}_prior_{scale}" for family in ("baseline", "marginal")
-                 for analysis in ("direct", "cv3") for scale in ("quarter", "four")]
+                 for analysis in ("direct", "cv3") for scale in ("quarter", "four")] + [
+    f"marginal_{analysis}_regression_{scale}" for analysis in ("direct", "cv3") for scale in ("half", "double")]
 OLD_CONTROL = dict(chains=4, burnin=1000, iterations=4000, max_iterations=32000, prior_scale=1)
-NEW_CONTROL = dict(OLD_CONTROL)
+NEW_CONTROL = dict(OLD_CONTROL, regression_scale=10)
 MISSING = {"", "NA", "NaN", "null"}
 Z975 = statistics.NormalDist().inv_cdf(.975)
 
@@ -158,7 +159,7 @@ def stage_settings(mode):
     require(mode in ("pilot", "development", "confirmation"), "Unknown stage")
     return {
         "pilot": (1, 1, 1670000000, 1680000000, None),
-        "development": (30, 30, 1690000000, 1700000000, 1730000000),
+        "development": (30, 30, 1750000000, 1760000000, 1770000000),
         "confirmation": (400, 200, 1710000000, 1720000000, 1740000000),
     }[mode]
 
@@ -172,7 +173,7 @@ def expected_grid(mode):
             methods = MAIN + (PRIOR_METHODS if extra else [])
             analyses.update((cell, rep, method) for method in methods)
             ids = ["baseline", "marginal", "oracle"] + ([f"{f}_prior_{s}" for f in ("baseline", "marginal")
-                   for s in ("quarter", "four")] if extra else [])
+                   for s in ("quarter", "four")]+["marginal_regression_half", "marginal_regression_double"] if extra else [])
             fits.update((cell, rep, name) for name in ids)
     return analyses, fits
 
@@ -211,13 +212,8 @@ def verify_records(out, root):
         baseline_source_commit="ae8f94086710ea1acc0df937f45ee847b6a0976b", pan_version="2.0", accuracy_exported=mode != "pilot").items():
         require(settings[field] == expected, f"Protocol setting changed: {field}")
     require(1 <= settings["workers"] <= 16, "Unsupported worker count")
-    sampler = "hw_gibbs_interwoven_logscale_mh_2_per_component_sd1"
-    runner_text = (root/"validation/run-joint-marginal.R").read_text()
-    if "candidate_sampler =" in runner_text:
-        require(settings.get("candidate_sampler") == sampler, "Candidate sampler schedule changed")
-    else:
-        require(mode == "pilot" and "candidate_sampler" not in settings,
-                "Unamended sampler is restricted to the frozen first masked pilot")
+    require(settings.get("candidate_sampler") == "factorized_hw_matrixnormal_gibbs_logscale_mh_2_per_component_sd1",
+            "Candidate sampler/prior schedule changed")
     require(set(settings["compiler"]) == {"CC", "CFLAGS", "CXX17", "CXX17STD", "CXX17FLAGS", "CPPFLAGS", "LDFLAGS", "FLIBS", "R_MAKEVARS_USER", "makevars_user_sha256"}, "Compiler provenance missing")
     require(settings["compiler"]["CXX17"] and settings["compiler"]["CXX17STD"], "C++17 compiler record missing")
     require(completed["status"] == "complete" and completed["mode"] == mode, "Stage is not completed")
@@ -262,6 +258,8 @@ def verify_records(out, root):
         require(row["spread_type"] == ("posterior_sd" if direct else "pooled_se"), f"Mislabeled uncertainty: {k}")
         scale = .25 if method.endswith("quarter") else 4 if method.endswith("four") else 1
         close(number(row, "prior_scale"), scale, f"Prior scale: {k}")
+        regression = (5 if method.endswith("_half") else 20 if method.endswith("_double") else 10) if method.startswith("marginal") else math.nan
+        close(number(row, "regression_scale"), regression, f"Regression-prior scale: {k}")
         require(row["status"] in ("ok", "error"), f"Unknown analysis status: {k}")
         if parent["fit_status"] == "error":
             require(row["status"] == "error" and row["failure_stage"] == "fit", f"Failed fit reused: {k}")
@@ -375,11 +373,15 @@ def verify_diagnostics(out, settings, fits, fit_map):
     marginal_parameters = ({f"mu:{x}" for x in labels}
         | {f"{c}:{x}" for c in ("sigma", "psi") for x in suffixes}
         | {f"aux_{c}:{x}" for c in ("sigma", "psi") for x in labels}
-        | {"marginal:(Intercept)", "marginal:x", "conditional_target_mean_recorded", "conditional_target_mean_absent"})
+        | {"marginal:(Intercept)", "marginal:x", "conditional_target_mean_recorded", "conditional_target_mean_absent"}
+        | {f"conditional_{c}:{x}" for c in ("sigma", "psi") for x in ("T:T", "W:T", "W:W")}
+        | {f"regression_{c}:{y}:X1" for c in ("sigma", "psi") for y in ("T", "W")})
     for k, fit in fit_map.items():
         require(fit["fit_status"] in ("ok", "error"), f"Unknown fit status: {k}")
         scale = .25 if k[2].endswith("quarter") else 4 if k[2].endswith("four") else 1
         close(number(fit, "prior_scale"), scale, f"Fit prior: {k}")
+        regression = (5 if k[2].endswith("_half") else 20 if k[2].endswith("_double") else 10) if k[2].startswith("marginal") else math.nan
+        close(number(fit, "regression_scale"), regression, f"Fit regression prior: {k}")
         require(math.isfinite(number(fit, "elapsed_seconds")) and number(fit, "elapsed_seconds") >= 0,
                 f"Invalid fit timing: {k}")
         if fit["fit_status"] == "error":
@@ -457,6 +459,8 @@ def verify_paired(out, records, record_map):
                        ("marginal_direct", "marginal_cv3"), ("baseline_direct", "baseline_cv3")]
         if cell in PRIOR_CELLS:
             comparisons += [(a+s, a) for a in ("baseline_direct", "baseline_cv3", "marginal_direct", "marginal_cv3") for s in ("_prior_quarter", "_prior_four")]
+        if cell in PRIOR_CELLS:
+            comparisons += [(a+s, a) for a in ("marginal_direct", "marginal_cv3") for s in ("_regression_half", "_regression_double")]
         for method, baseline in comparisons:
             reps = sorted(k[1] for k in record_map if k[0] == cell and k[2] == method)
             pairs = [(record_map[cell, r, method], record_map[cell, r, baseline]) for r in reps]
@@ -475,7 +479,7 @@ def verify_paired(out, records, record_map):
 
 
 def verify_prior(out, settings, record_map):
-    actual = index_rows(read_csv(out/"prior-triples.csv"), ("cell", "replicate", "analysis"), "prior triple")
+    actual = index_rows(read_csv(out/"prior-triples.csv"), ("cell", "replicate", "analysis"), "prior set")
     expected = {}
     for cell in PRIOR_CELLS:
         for rep in range(1, settings["prior_reps"]+1):
@@ -484,22 +488,29 @@ def verify_prior(out, settings, record_map):
                 for family in ("baseline", "marginal"):
                     records = [record_map[cell, rep, f"{family}_{analysis}{s}"] for s in ("", "_prior_quarter", "_prior_four")]
                     complete = all(r["status"] == "ok" for r in records)
-                    row[f"{family}_complete"] = complete
+                    prefix = family if family == "baseline" else "marginal_hw"
+                    row[f"{prefix}_complete"] = complete
                     shifts = [number(r, "estimate")-number(records[0], "estimate") for r in records[1:]] if complete else [math.nan]*2
-                    row[f"{family}_coefficient_sensitivity"] = mean([abs(x) for x in shifts])
-                    row[f"{family}_width_sensitivity"] = mean([abs(math.log(number(r, "width")/number(records[0], "width"))) for r in records[1:]]) if complete else math.nan
+                    row[f"{prefix}_coefficient_sensitivity"] = mean([abs(x) for x in shifts])
+                    row[f"{prefix}_width_sensitivity"] = mean([abs(math.log(number(r, "width")/number(records[0], "width"))) for r in records[1:]]) if complete else math.nan
                     row[f"{family}_quarter_shift"], row[f"{family}_four_shift"] = shifts
-                common = row["baseline_complete"] and row["marginal_complete"]
+                records = [record_map[cell, rep, f"marginal_{analysis}{s}"] for s in ("", "_regression_half", "_regression_double")]
+                complete = all(r["status"] == "ok" for r in records)
+                row["marginal_regression_complete"] = complete
+                shifts = [number(r, "estimate")-number(records[0], "estimate") for r in records[1:]] if complete else [math.nan]*2
+                row["marginal_regression_coefficient_sensitivity"] = mean([abs(x) for x in shifts])
+                row["marginal_regression_width_sensitivity"] = mean([abs(math.log(number(r, "width")/number(records[0], "width"))) for r in records[1:]]) if complete else math.nan
+                row["marginal_regression_half_shift"], row["marginal_regression_double_shift"] = shifts
+                row["marginal_complete"] = row["marginal_hw_complete"] and row["marginal_regression_complete"]
                 for metric in ("coefficient", "width"):
-                    row[f"{metric}_difference"] = row[f"marginal_{metric}_sensitivity"]-row[f"baseline_{metric}_sensitivity"] if common else math.nan
+                    row[f"marginal_{metric}_sensitivity"] = max(row[f"marginal_hw_{metric}_sensitivity"],row[f"marginal_regression_{metric}_sensitivity"]) if row["marginal_complete"] else math.nan
+                    row[f"{metric}_difference"] = row[f"marginal_{metric}_sensitivity"]-row[f"baseline_{metric}_sensitivity"] if row["baseline_complete"] and row["marginal_complete"] else math.nan
                 expected[cell, str(rep), analysis] = row
-    require(set(actual) == set(expected), "Prior triple grid mismatch")
+    require(set(actual) == set(expected), "Prior three-plus-five fit grid mismatch")
     for k, row in expected.items():
         for field, value in row.items():
-            if isinstance(value, bool):
-                require(boolean(actual[k][field], field) == value, f"Prior completion changed: {k}/{field}")
-            else:
-                close(number(actual[k], field), value, f"Prior triple {k}/{field}")
+            if isinstance(value, bool): require(boolean(actual[k][field], field) == value, f"Prior completion changed: {k}/{field}")
+            else: close(number(actual[k], field), value, f"Prior set {k}/{field}")
     summaries = index_rows(read_csv(out/"prior-summary.csv"), ("cell", "analysis"), "prior summary")
     require(set(summaries) == {(c, a) for c in PRIOR_CELLS for a in ("direct", "cv3")}, "Prior summary grid mismatch")
     results = {}
@@ -508,26 +519,26 @@ def verify_prior(out, settings, record_map):
             rows = [v for k, v in expected.items() if k[0] == cell and k[2] == analysis]
             good = [r for r in rows if r["baseline_complete"] and r["marginal_complete"]]
             row = dict(requested_triples=len(rows), baseline_triples=sum(r["baseline_complete"] for r in rows),
-                       marginal_triples=sum(r["marginal_complete"] for r in rows), complete_pairs=len(good))
+                marginal_triples=sum(r["marginal_complete"] for r in rows),
+                marginal_hw_triples=sum(r["marginal_hw_complete"] for r in rows),
+                marginal_regression_triples=sum(r["marginal_regression_complete"] for r in rows), complete_pairs=len(good))
             for metric in ("coefficient", "width"):
-                for family in ("baseline", "marginal"):
+                for family in ("baseline", "marginal", "marginal_hw", "marginal_regression"):
                     field = f"{family}_{metric}_sensitivity"
                     row[f"mean_{field}"] = mean([r[field] for r in good])
                 row[f"{metric}_difference"] = mean([r[f"{metric}_difference"] for r in good])
                 row[f"{metric}_mcse"] = mcse([r[f"{metric}_difference"] for r in good])
-            for field, value in row.items():
-                close(number(summaries[cell, analysis], field), value, f"Prior summary {cell}/{analysis}/{field}")
+            for field,value in row.items(): close(number(summaries[cell, analysis],field),value,f"Prior summary {cell}/{analysis}/{field}")
             results[cell, analysis] = row
     direct = [results[c, "direct"] for c in PRIOR_CELLS]
-    delta = mean([r["coefficient_difference"] for r in direct])
-    se = math.sqrt(sum(r["coefficient_mcse"]**2 for r in direct))/len(PRIOR_CELLS)
-    width = mean([r["width_difference"] for r in direct])
-    width_se = math.sqrt(sum(r["width_mcse"]**2 for r in direct))/len(PRIOR_CELLS)
+    delta = mean([r["coefficient_difference"] for r in direct]); se = math.sqrt(sum(r["coefficient_mcse"]**2 for r in direct))/len(PRIOR_CELLS)
+    width = mean([r["width_difference"] for r in direct]); width_se = math.sqrt(sum(r["width_mcse"]**2 for r in direct))/len(PRIOR_CELLS)
     no_positive = all(math.isfinite(r["coefficient_difference"]) and r["coefficient_difference"] <= 0 for r in direct)
-    return dict(difference=delta, mcse=se, lower=delta-Z975*se, upper=delta+Z975*se,
-        no_positive_cell=no_positive, pass_=math.isfinite(delta) and math.isfinite(se) and delta+Z975*se < 0 and no_positive,
-        secondary_width_difference=width, secondary_width_mcse=width_se,
-        secondary_width_lower=width-Z975*width_se, secondary_width_upper=width+Z975*width_se)
+    return dict(difference=delta,mcse=se,lower=delta-Z975*se,upper=delta+Z975*se,no_positive_cell=no_positive,
+        pass_=math.isfinite(delta) and math.isfinite(se) and delta+Z975*se<0 and no_positive,
+        sensitivity_definition="candidate_max_HW_and_regression_axes_vs_baseline_IW_on_common_3_plus_5_fits",
+        secondary_width_difference=width,secondary_width_mcse=width_se,
+        secondary_width_lower=width-Z975*width_se,secondary_width_upper=width+Z975*width_se)
 
 
 def bootstrap_indices(seed, sizes, replicates):

@@ -1,8 +1,8 @@
 # catmech <img src="man/figures/logo.png" align="right" width="160" alt="catmech logo: a neon cat piloting a mech suit">
 
-**An experimental R package for regression using error-prone recorded measurements and an independently checked reference subset. Version 0.9.0.**
+**An experimental R package for regression using error-prone recorded measurements and an independently checked reference subset. Version 0.10.0.**
 
-**Joint-model analysis:** `catmech_joint_summary()` now provides explicit posterior coefficient intervals; see the [comparison and limits](validation/JOINT_CALIBRATION_SYNTHESIS.md).
+**Contextual site effects:** the explicit `joint_marginal` model estimates measurement and predictor variation together. Use `catmech_marginal_summary()` for population marginal coefficients; see the [model and assumptions](docs/JOINT_MARGINAL_METHOD.md).
 
 **The question:** can you keep error-prone recorded values for precision without trusting them, and which method should you try first?
 
@@ -46,7 +46,7 @@ A plain-language [guide](docs/learn/index.html) and an [audit simulator](docs/le
 ## Try it
 
 ```r
-install.packages(c("digest", "jsonlite", "mice", "posterior", "truncnorm", "yaml"))
+install.packages(c("Rcpp", "RcppArmadillo", "digest", "jsonlite", "mice", "pan", "posterior", "truncnorm", "yaml"))
 install.packages(".", repos = NULL, type = "source")   # from the repository directory
 ```
 
@@ -127,9 +127,10 @@ and [validation record](validation/VALIDATION.md).
 
 The [commands above](#try-it) install the dependencies and then the package. Run the second
 command from the repository directory, or build the source archive with `R CMD build .` and
-install it with `R CMD INSTALL catmech_0.9.0.tar.gz`. R 4.1 or later is required, although only R 4.6
-has been tested locally. GitHub Actions checks Linux, macOS and Windows. See the
-[validation record](validation/VALIDATION.md).
+install it with `R CMD INSTALL catmech_0.10.0.tar.gz`. R 4.1 or later is required, although only R 4.6
+has been tested locally. Building from source also requires a C++17 compiler and the
+platform toolchain for R packages. GitHub Actions checks Linux, macOS and Windows. See the
+[validation record](validation/VALIDATION.md) and [source-build guide](docs/BUILDING.md).
 
 ## Flags with no references: declare a trust policy
 
@@ -349,6 +350,36 @@ See the [full results and Monte Carlo uncertainty](validation/JOINT_CALIBRATION_
 
 [![Calibration, prior-width sensitivity, convergence refusals and contextual stress](validation/joint-calibration-figures/joint-calibration-evidence.png)](validation/joint-calibration-figures/joint-calibration-evidence.pdf)
 
+### Marginal coefficients with contextual site effects
+
+The explicit `cluster_model = "joint_marginal"` models the checked value, recorded
+value and complete continuous predictors as a joint Gaussian vector with correlated
+site effects. It estimates the population regression of the checked value on the
+predictors from the total site-plus-row covariance. This includes uncertainty in
+the predictor distribution and preserves the distinction between a marginal slope
+and a within-site slope.
+
+```r
+fit_marginal <- catmech_reference(
+  dat_with_reference, "lab_value", "reference_value",
+  predictors = c("age", "inflammation"),
+  use_recorded = TRUE, cluster = "site", cluster_model = "joint_marginal",
+  m = 40, seed = 127
+)
+catmech_marginal_summary(fit_marginal)
+```
+
+Predictor and conditional-measurement covariance blocks use hierarchical half-t
+priors, with a separate proper prior for the regression matrices. The sampler includes
+an exact scale move to improve mixing near zero site variance while preserving the
+posterior. The existing conditional `joint` engine and its summary retain their
+interpretations. The new engine requires continuous Gaussian predictor associations,
+noninformative site sizes, exact references and ignorable observation patterns.
+Categorical, incomplete, site-constant or aliased predictors are unsupported.
+See the [method](docs/JOINT_MARGINAL_METHOD.md),
+[runnable example](inst/examples/joint-marginal.R) and
+[prospective validation plan](validation/JOINT_MARGINAL_PLAN.md).
+
 ### Earlier moment-model evidence
 
 The earlier moment model's random-intercept regression is available elsewhere. In a [planned comparison](validation/OUTSIDE_METHODS_SYNTHESIS.md), `mice` with `2l.lmer` under
@@ -485,9 +516,12 @@ are not silently converted to the new model.
 Rscript -e 'install.packages(c("testthat", "pkgload", "roxygen2"))'
 Rscript -e 'testthat::test_local()'
 R CMD build .
-R CMD check --no-manual catmech_0.9.0.tar.gz
+R CMD check --no-manual catmech_0.10.0.tar.gz
 Rscript tools/check-v072-unchanged.R validation/my-v072-comparison.txt
-Rscript validation/run-joint-calibration.R confirmation validation/my-joint-calibration
+Rscript validation/run-joint-marginal.R confirmation validation/my-joint-marginal
+python3 -I tools/verify-joint-marginal.py validation/my-joint-marginal --tamper-tests
+# Reproduce the previous direct-interval comparison from its frozen sources:
+Rscript validation/v0.9.0-source/validation/run-joint-calibration.R confirmation validation/my-joint-calibration
 python3 -I tools/verify-joint-calibration.py validation/my-joint-calibration --tamper-tests
 # Reproduce the historical joint-model study from its frozen sources:
 Rscript validation/v0.8.0-source/validation/run-joint-cluster.R heldout validation/my-joint-cluster

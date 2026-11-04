@@ -8,19 +8,19 @@ dir.create(out, showWarnings=FALSE)
 e <- new.env(parent=globalenv())
 wanted <- c('cells','prior_cells','contextual_cells','primary_cells','se_mean','wilson','summary_rows','paired_rows','prior_rows','calibration_screen','availability_screen')
 for(z in parse(file.path(root,'validation/run-joint-marginal.R'))) if(is.call(z) && identical(z[[1]],as.name('<-')) && is.symbol(z[[2]]) && as.character(z[[2]]) %in% wanted) eval(z,e)
-e$config <- list(prior_reps=30L,primary_reps=30L,bootstrap_seed=1730000000L,bootstrap_reps=2000L)
+e$config <- list(prior_reps=30L,primary_reps=30L,bootstrap_seed=1770000000L,bootstrap_reps=2000L)
 records <- fits <- list()
 for(ci in seq_along(e$cells)) for(rep in 1:30) {
   cell <- e$cells[ci]
-  ids <- c('baseline','marginal','oracle',if(cell %in% e$prior_cells)c('baseline_prior_quarter','baseline_prior_four','marginal_prior_quarter','marginal_prior_four'))
+  ids <- c('baseline','marginal','oracle',if(cell %in% e$prior_cells)c('baseline_prior_quarter','baseline_prior_four','marginal_prior_quarter','marginal_prior_four','marginal_regression_half','marginal_regression_double'))
   for(id in ids) {
-    status <- if((rep==1 && cell=='gaussian_balanced' && startsWith(id,'marginal')) || (cell=='student_t5' && id=='marginal')) 'error' else 'ok'
+    status <- if((rep==1 && cell=='gaussian_balanced' && startsWith(id,'marginal')) || (cell=='student_t5' && id=='marginal') || (rep==2 && cell=='near_zero_icc' && id=='marginal_regression_half')) 'error' else 'ok'
     fits[[length(fits)+1]] <- data.frame(cell=cell,replicate=rep,fit_id=id,fit_status=status)
     for(analysis in if(id=='oracle')'cv3' else c('direct','cv3')) {
-      family <- sub('_prior.*','',id)
+      family <- sub('_(prior|regression).*','',id)
       method <- sub(family,paste0(family,'_',analysis),id,fixed=TRUE)
       base <- if(family=='baseline')-.1 else .005
-      shift <- if(endsWith(id,'quarter'))-.03 else if(endsWith(id,'four')).04 else 0
+      shift <- if(endsWith(id,'quarter'))-.03 else if(endsWith(id,'four')).04 else if(endsWith(id,'half'))-.06 else if(endsWith(id,'double')).08 else 0
       if(family=='marginal')shift <- shift/3
       target <- if(cell %in% c('null_slope','contextual_null'))0 else if(cell %in%e$contextual_cells).9 else .7
       estimate <- target + base + shift + .12*sin(rep+ci)

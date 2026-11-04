@@ -33,7 +33,7 @@ cells <- c("gaussian_balanced", "gaussian_unbalanced", "near_zero_icc", "observe
 prior_cells <- c("gaussian_balanced", "near_zero_icc", "observed_mar", "contextual_x")
 contextual_cells <- c("contextual_x", "contextual_unbalanced", "contextual_null")
 primary_cells <- c("gaussian_balanced", "gaussian_unbalanced", "observed_mar", "null_slope")
-new_control <- list(chains = 4L, burnin = 1000L, iterations = 4000L, max_iterations = 32000L, prior_scale = 1)
+new_control <- list(chains = 4L, burnin = 1000L, iterations = 4000L, max_iterations = 32000L, prior_scale = 1, regression_scale = 10)
 old_control <- list(chains = 4L, burnin = 1000L, iterations = 4000L, max_iterations = 32000L, prior_scale = 1)
 compiler_fields <- c("CC", "CFLAGS", "CXX17", "CXX17STD", "CXX17FLAGS", "CPPFLAGS", "LDFLAGS", "FLIBS")
 compiler <- setNames(lapply(compiler_fields, function(field)
@@ -47,12 +47,12 @@ config <- list(mode = mode, workers = workers, m = 40L, cells = cells,
   primary_cells = primary_cells, contextual_cells = contextual_cells, prior_cells = prior_cells,
   primary_reps = switch(mode, pilot = 1L, development = 30L, confirmation = 400L),
   prior_reps = switch(mode, pilot = 1L, development = 30L, confirmation = 200L),
-  data_seed_base = switch(mode, pilot = 1670000000L, development = 1690000000L, confirmation = 1710000000L),
-  imputation_seed_base = switch(mode, pilot = 1680000000L, development = 1700000000L, confirmation = 1720000000L),
-  bootstrap_seed = switch(mode, pilot = NA_integer_, development = 1730000000L, confirmation = 1740000000L),
+  data_seed_base = switch(mode, pilot = 1670000000L, development = 1750000000L, confirmation = 1710000000L),
+  imputation_seed_base = switch(mode, pilot = 1680000000L, development = 1760000000L, confirmation = 1720000000L),
+  bootstrap_seed = switch(mode, pilot = NA_integer_, development = 1770000000L, confirmation = 1740000000L),
   bootstrap_reps = 2000L, new_control = new_control, old_control = old_control,
   baseline_source_commit = "ae8f94086710ea1acc0df937f45ee847b6a0976b", pan_version = as.character(utils::packageVersion("pan")),
-  candidate_sampler = "hw_gibbs_interwoven_logscale_mh_2_per_component_sd1",
+  candidate_sampler = "factorized_hw_matrixnormal_gibbs_logscale_mh_2_per_component_sd1",
   source_fingerprint = source_fingerprint, compiler = compiler, accuracy_exported = mode != "pilot")
 utils::write.csv(before, file.path(out, "source-hashes-before.csv"), row.names = FALSE)
 jsonlite::write_json(config, file.path(out, "settings.json"), auto_unbox = TRUE, pretty = TRUE, na = "null")
@@ -116,9 +116,12 @@ make_cohort <- function(cell, index, replicate) {
 }
 fit_specs <- function(cell, replicate) {
   c("baseline", "marginal", "oracle", if (cell %in% prior_cells && replicate <= config$prior_reps)
-    c("baseline_prior_quarter", "baseline_prior_four", "marginal_prior_quarter", "marginal_prior_four"))
+    c("baseline_prior_quarter", "baseline_prior_four", "marginal_prior_quarter", "marginal_prior_four",
+      "marginal_regression_half", "marginal_regression_double"))
 }
 prior_scale <- function(id) if (endsWith(id, "_quarter")) .25 else if (endsWith(id, "_four")) 4 else 1
+regression_scale <- function(id) if (!startsWith(id, "marginal")) NA_real_ else
+  if (endsWith(id, "_half")) 5 else if (endsWith(id, "_double")) 20 else 10
 diag_info <- function(result) {
   d <- result$model_diagnostics
   summary <- d$summary
@@ -148,6 +151,7 @@ fit_one <- function(id, p) {
     call$cluster_model <- if (startsWith(id, "baseline")) "joint" else "joint_marginal"
     call$joint_control <- if (startsWith(id, "baseline")) old_control else new_control
     call$joint_control$prior_scale <- prior_scale(id)
+    if (startsWith(id, "marginal")) call$joint_control$regression_scale <- regression_scale(id)
   }
   fit <- do.call(fun, call)
   known <- !is.na(call$data$gold)
@@ -191,7 +195,7 @@ run_replicate <- function(cell, index, replicate) {
     fit_failed <- inherits(fit$value, "error")
     d <- diag_info(fit$value)
     fit_row <- cbind(p$meta, data.frame(fit_id = id,
-      prior_scale = prior_scale(id),
+      prior_scale = prior_scale(id), regression_scale = regression_scale(id),
       fit_status = if (fit_failed) "error" else "ok", error_class = if (fit_failed) class(fit$value)[1L] else "",
       message = if (fit_failed) conditionMessage(fit$value) else "", warnings = fit$warnings,
       elapsed_seconds = fit$elapsed, max_rhat = d$max_rhat, min_ess_bulk = d$min_bulk,
@@ -208,7 +212,7 @@ run_replicate <- function(cell, index, replicate) {
         capture(function() analyze_one(fit$value, id, analysis))
       failed <- inherits(analyzed$value, "error")
       row <- cbind(p$meta, data.frame(method = method, fit_id = id, analysis = analysis,
-        prior_scale = fit_row$prior_scale, status = if (failed) "error" else "ok",
+        prior_scale = fit_row$prior_scale, regression_scale = fit_row$regression_scale, status = if (failed) "error" else "ok",
         failure_stage = if (!failed) "" else if (fit_failed) "fit" else "analysis",
         error_class = if (failed) class(analyzed$value)[1L] else "",
         message = if (failed) conditionMessage(analyzed$value) else "",
@@ -278,6 +282,9 @@ paired_rows <- function(records) {
     if (cell %in% prior_cells) for (analysis in c("baseline_direct", "baseline_cv3", "marginal_direct", "marginal_cv3"))
       for (suffix in c("_prior_quarter", "_prior_four"))
         comparisons[[length(comparisons) + 1L]] <- c(paste0(analysis, suffix), analysis)
+    if (cell %in% prior_cells) for (analysis in c("marginal_direct", "marginal_cv3"))
+      for (suffix in c("_regression_half", "_regression_double"))
+        comparisons[[length(comparisons) + 1L]] <- c(paste0(analysis, suffix), analysis)
     for (comparison in comparisons) {
       a <- z[z$method == comparison[1L], ]; b <- z[z$method == comparison[2L], ]
       pair <- merge(a, b, by = "replicate", suffixes = c("_method", "_baseline"))
@@ -306,23 +313,43 @@ prior_rows <- function(records) {
       r <- z[z$replicate == replicate, , drop = FALSE]
       row <- data.frame(cell = cell, replicate = replicate, analysis = analysis,
         baseline_complete = FALSE, marginal_complete = FALSE,
+        marginal_hw_complete = FALSE, marginal_regression_complete = FALSE,
         baseline_coefficient_sensitivity = NA_real_, marginal_coefficient_sensitivity = NA_real_,
         baseline_width_sensitivity = NA_real_, marginal_width_sensitivity = NA_real_,
+        marginal_hw_coefficient_sensitivity = NA_real_, marginal_regression_coefficient_sensitivity = NA_real_,
+        marginal_hw_width_sensitivity = NA_real_, marginal_regression_width_sensitivity = NA_real_,
         baseline_quarter_shift = NA_real_, baseline_four_shift = NA_real_,
         marginal_quarter_shift = NA_real_, marginal_four_shift = NA_real_,
+        marginal_regression_half_shift = NA_real_, marginal_regression_double_shift = NA_real_,
         coefficient_difference = NA_real_, width_difference = NA_real_)
       for (family in c("baseline", "marginal")) {
         methods <- paste0(family, "_", analysis, c("", "_prior_quarter", "_prior_four"))
         selected <- r[match(methods, r$method), ]
         ok <- nrow(selected) == 3L && all(!is.na(selected$status) & selected$status == "ok")
-        row[[paste0(family, "_complete")]] <- ok
+        row[[if (family == "baseline") "baseline_complete" else "marginal_hw_complete"]] <- ok
         if (ok) {
           shifts <- selected$estimate[-1L] - selected$estimate[1L]
-          row[[paste0(family, "_coefficient_sensitivity")]] <- mean(abs(shifts))
-          row[[paste0(family, "_width_sensitivity")]] <- mean(abs(log(selected$width[-1L] / selected$width[1L])))
+          prefix <- if (family == "baseline") "baseline" else "marginal_hw"
+          row[[paste0(prefix, "_coefficient_sensitivity")]] <- mean(abs(shifts))
+          row[[paste0(prefix, "_width_sensitivity")]] <- mean(abs(log(selected$width[-1L] / selected$width[1L])))
           row[[paste0(family, "_quarter_shift")]] <- shifts[1L]
           row[[paste0(family, "_four_shift")]] <- shifts[2L]
         }
+      }
+      methods <- paste0("marginal_", analysis, c("", "_regression_half", "_regression_double"))
+      selected <- r[match(methods, r$method), ]
+      row$marginal_regression_complete <- nrow(selected) == 3L && all(!is.na(selected$status) & selected$status == "ok")
+      if (row$marginal_regression_complete) {
+        shifts <- selected$estimate[-1L] - selected$estimate[1L]
+        row$marginal_regression_coefficient_sensitivity <- mean(abs(shifts))
+        row$marginal_regression_width_sensitivity <- mean(abs(log(selected$width[-1L] / selected$width[1L])))
+        row$marginal_regression_half_shift <- shifts[1L]
+        row$marginal_regression_double_shift <- shifts[2L]
+      }
+      row$marginal_complete <- row$marginal_hw_complete && row$marginal_regression_complete
+      if (row$marginal_complete) {
+        row$marginal_coefficient_sensitivity <- max(row$marginal_hw_coefficient_sensitivity, row$marginal_regression_coefficient_sensitivity)
+        row$marginal_width_sensitivity <- max(row$marginal_hw_width_sensitivity, row$marginal_regression_width_sensitivity)
       }
       if (row$baseline_complete && row$marginal_complete) {
         row$coefficient_difference <- row$marginal_coefficient_sensitivity - row$baseline_coefficient_sensitivity
@@ -337,10 +364,11 @@ prior_rows <- function(records) {
     good <- z[z$baseline_complete & z$marginal_complete, ]
     row <- data.frame(cell = cell, analysis = analysis, requested_triples = nrow(z),
       baseline_triples = sum(z$baseline_complete), marginal_triples = sum(z$marginal_complete),
+      marginal_hw_triples = sum(z$marginal_hw_complete), marginal_regression_triples = sum(z$marginal_regression_complete),
       complete_pairs = nrow(good))
     for (metric in c("coefficient", "width")) {
-      for (family in c("baseline", "marginal")) {
-        field <- paste0(family, "_", metric, "_sensitivity")
+      for (prefix in c("baseline", "marginal", "marginal_hw", "marginal_regression")) {
+        field <- paste0(prefix, "_", metric, "_sensitivity")
         row[[paste0("mean_", field)]] <- if (nrow(good)) mean(good[[field]]) else NA_real_
       }
       field <- paste0(metric, "_difference")
@@ -360,6 +388,7 @@ prior_rows <- function(records) {
     no_positive_cell = all(is.finite(direct$coefficient_difference) & direct$coefficient_difference <= 0),
     pass = is.finite(overall) && is.finite(mcse) && overall + stats::qnorm(.975) * mcse < 0 &&
       all(is.finite(direct$coefficient_difference) & direct$coefficient_difference <= 0),
+    sensitivity_definition = "candidate_max_HW_and_regression_axes_vs_baseline_IW_on_common_3_plus_5_fits",
     secondary_width_difference = width, secondary_width_mcse = width_mcse,
     secondary_width_lower = width - stats::qnorm(.975) * width_mcse,
     secondary_width_upper = width + stats::qnorm(.975) * width_mcse)
@@ -484,8 +513,8 @@ for (index in seq_along(cells)) {
   }
 }
 cohorts <- length(cells) * config$primary_reps
-expected_analyses <- 5L * cohorts + 8L * length(prior_cells) * config$prior_reps
-expected_fits <- 3L * cohorts + 4L * length(prior_cells) * config$prior_reps
+expected_analyses <- 5L * cohorts + 12L * length(prior_cells) * config$prior_reps
+expected_fits <- 3L * cohorts + 6L * length(prior_cells) * config$prior_reps
 stopifnot(nrow(records) == expected_analyses, nrow(fits) == expected_fits,
   !anyDuplicated(records[c("cell", "replicate", "method")]), !anyDuplicated(fits[c("cell", "replicate", "fit_id")]))
 if (mode != "pilot") {

@@ -76,9 +76,13 @@ restart the same seeded chains with doubled retained iterations up to the
 declared maximum, then fail with traces in a `catmech_convergence_error`.
 For `"joint"`, each chain uses a fresh R worker to isolate the backend RNG.
 For `"joint_marginal"`, a compiled blocked Gibbs sampler uses independent
-R RNG streams. Its hierarchical Huang--Wand covariance prior has marginal
-half-t(2) standard deviations with scale `sqrt(prior_scale)` in standardized
-units. This differs from the fixed inverse-Wishart prior in `"joint"`.}
+R RNG streams. It also accepts `regression_scale = 10`, the conditional
+matrix-normal prior scale for within- and between-site measurement
+regressions on the predictors. Its predictor and conditional-measurement
+covariance blocks have Huang--Wand priors with half-t(2) marginal standard
+deviations of scale `sqrt(prior_scale)` in standardized units. These are
+distinct from the reconstructed full covariance matrices and from the fixed
+inverse-Wishart prior in `"joint"`.}
 }
 \value{
 A `catmech_result`. Its completed target contains exact gold references
@@ -196,7 +200,12 @@ measurements. This allows their site effects to be correlated and distinguishes
 marginal from within-site coefficients. Independent sites, noninformative site
 sizes, Gaussian joint associations, exact references and ignorable observation
 patterns remain assumptions. Missing, categorical, constant or aliased predictors
-are refused. Population coefficient summaries include uncertainty in predictor
+are refused. The marginal model additionally requires at least two residual
+degrees of freedom and two numerically independent paired-measurement residual
+directions after adjusting for predictors and site indicators. This conservative
+support restriction protects the weak covariance prior near singular residual
+directions; it can exclude otherwise identifiable sparse paired designs.
+Population coefficient summaries include uncertainty in predictor
 means and covariances. An all-reference input still takes the exact-copy shortcut
 and does not fit a posterior for either joint summary function.
 }

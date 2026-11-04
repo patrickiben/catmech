@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "output": "/Users/patrickiben/Documents/catmech/validation/joint-calibration-confirmation",
+  "source_root": "/Users/patrickiben/Documents/catmech/validation/v0.9.0-source",
+  "checks": {
+    "stage": "confirmation",
+    "cohorts": 2600,
+    "analysis_requests": 12800,
+    "fitted_workflow_requests": 9000,
+    "mcmc_fit_requests": 6400,
+    "returned_intervals": 12755,
+    "analysis_failures": 45,
+    "fit_failures": 45,
+    "diagnostic_rows": 80600,
+    "source_files": 27,
+    "summary_values_checked": 1520,
+    "paired_contrasts_checked": 198,
+    "bootstrap_replicates_recomputed": 2000,
+    "adoption_screens_recomputed": 3
+  },
+  "scope": "Independent reporting/grid/arithmetic audit; not proof of model validity or sampler correctness."
+}

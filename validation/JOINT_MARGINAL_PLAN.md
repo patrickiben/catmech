@@ -4,6 +4,8 @@ Written 2026-11-04 before candidate accuracy runs. The completed v0.9.0
 study is exposed development evidence, including its contextual failure. This
 protocol uses new cohorts for development and fresh cohorts for confirmation.
 The candidate, controls and any amendments must be committed before scoring.
+Amendment 2 specifies the current candidate; earlier sections preserve the
+prospective design and history of the first scientific candidate.
 
 ## Scientific question and fixed target
 
@@ -298,3 +300,126 @@ engineering rerun is permitted because no pilot accuracy was exported or used.
 Review mixing, refusals and timing, and repeat independent sampler/conditional
 oracles. Development and confirmation still use their original untouched seeds
 and counts. No scored accuracy preceded this amendment.
+
+### Amendment 2: conditional-regression covariance priors and fresh development
+
+The completed first development stage is preserved under
+`joint-marginal-development`, with its exact 35 source files under
+`joint-marginal-stage1-source`. Its [development review](JOINT_MARGINAL_DEVELOPMENT_REVIEW.md)
+records both failed calibration screens, improved contextual coverage and
+remaining positive-context bias. The old direct model had contextual coverage
+63.3%, 56.7% and 63.3%; the first candidate had 96.7%, 93.3% and 100%, but its
+positive-context biases were -0.0491 (MCSE 0.0180) and -0.0593 (0.0203).
+The finite-chain coefficient scale-sensitivity screen passed and all 1,020
+MCMC requests returned. These results are development evidence, not confirmation.
+
+The new scientific candidate changes the covariance prior factorization,
+keeping the full joint Gaussian likelihood, marginal target and imputation law.
+For each row/site covariance `Q`, partition predictors X from measurements
+`Y = (T,W)` and use
+
+```
+S = Q_XX
+B = solve(S, Q_XY)
+Omega = Q_YY - transpose(B) %*% S %*% B
+Q = [[Omega + B' S B, B' S], [S B, S]].
+```
+
+Independently for row and site components, put Huang--Wand nu=2 priors on `S`
+and `Omega`, with half-t scales `sqrt(prior_scale)` on their own standard
+deviations after the same empirical standardization. Given `Omega`, put a
+proper matrix-normal prior on the predictor-by-two coefficient matrix:
+`B | Omega ~ MN(0, row_covariance = regression_scale^2 * I,
+column_covariance = Omega)`. The mean-vector prior remains
+flat. The full covariance's marginal standard deviations are no longer claimed
+to have the original full-matrix half-t marginals.
+
+The default `regression_scale = 10` is a broad, proper conditional-regression
+scale fixed before the next accuracy run, with separate sensitivity values five
+and 20. This parameterization directly states beliefs about measurement-on-X
+regressions, rather than using a full-covariance correlation prior as an implicit
+regression prior. A flat prior for the site regression is deliberately avoided:
+when predictor site variance approaches zero, the regression is weakly
+identified and an improper prior need not produce a proper posterior. The new
+prior remains an assumption; it is not selected by a grid search for 95%
+coverage. Correlation shrinkage was a scientific diagnosis to investigate, not
+an independently established causal explanation for all first-stage bias.
+
+The exact Gibbs/full-conditional and Metropolis--Hastings updates must be checked
+against independent conditional matrix-normal/inverse-Wishart calculations,
+prior simulations and fixed-covariance conditioning oracles. The scale
+interweaving moves retain two proposals per component per sweep with normal
+log-scale standard deviation one, using the new prior density and its correct
+Jacobian; redraw both conditional-block auxiliary sets after those moves.
+Monitor the original full covariances and all previous parameters, plus both
+conditional measurement covariances and both regression matrices. For one X
+and both missing-W patterns this is 35 monitors. R-hat/ESS thresholds and the
+4k/8k/16k/32k schedule are unchanged. Record the factorized sampler identifier
+and public `regression_scale` in settings; the frozen v0.9.0 model does not
+receive or acquire this new control.
+
+Before the factorized-source freeze, add a conservative paired-residual support
+screen. Among rows with both exact T and recorded W, residualize both
+standardized measurements against X and paired-row site indicators. Require
+at least two residual degrees of freedom and rank two for the resulting
+two-column residual matrix. Its smaller singular value must exceed
+`sqrt(number_of_paired_rows) * 1e-8` on the standardized scale. This restriction
+protects the weak covariance-scale prior from an exactly singular measurement
+residual likelihood. It is a conservative sufficient support restriction, not
+a necessary identification condition or a general proof of posterior propriety;
+it can refuse very sparse paired patterns that other information might identify.
+Keep all such refusals in the planned fit and analysis denominators, without
+resampling or replacing cohorts. The existing `joint` engine is unchanged.
+
+Run a masked engineering pilot on the original nine pilot cohorts/seeds in a
+new `joint-marginal-pilot-factorized` directory after freezing this source.
+Then run **fresh development D2**, 30 cohorts in every cell, using data base
+**1750000000**, imputation base **1760000000** and bootstrap seed
+**1770000000**. Cell-index/replicate offsets remain unchanged. No D2 accuracy
+precedes this amendment. The original unused confirmation seed bases
+1710000000/1720000000 and bootstrap seed 1740000000 remain reserved; no
+confirmation begins until the D2 decision and selected source are committed.
+
+On every prespecified sensitivity cohort, run the same three old-model fits
+at inverse-Wishart covariance variance-scale settings 0.25, one and four.
+Run **five** candidate fits:
+HW settings 0.25, one and four with regression scale ten, plus regression scales
+five and 20 with HW setting one. Keep both direct and CV3 summaries for all fits.
+The candidate's prior-scale setting affects its HW blocks; the regression-scale
+setting affects its conditional matrix-normal prior. No averaging of extra
+axes is permitted to dilute a larger sensitivity.
+
+The strengthened primary coefficient metric is
+
+```
+S_HW = mean(abs(beta_HW=.25 - beta_default), abs(beta_HW=4 - beta_default))
+S_B  = mean(abs(beta_B=5 - beta_default), abs(beta_B=20 - beta_default))
+S_candidate = max(S_HW, S_B)
+S_baseline = baseline S_IW (the same mean absolute shift for its inverse-Wishart scale).
+```
+
+Use only cohorts where the old three and candidate five direct analyses all
+return. Compute the paired candidate-minus-baseline contrast on these common
+sets. Keep the original equal-cell weighting, upper 95% Monte Carlo bound
+below zero and no-positive-cell requirements. Report each axis separately,
+all signed shifts and every failure. The secondary width statistic uses the
+same maximum across the two candidate mean absolute log-width ratios; label it
+explicitly as the maximum-axis statistic and also report both component axes.
+The comparison spans declared ranges for different prior families, not
+identical priors or unrestricted prior robustness. Keep finite-chain mean-MCSE
+cautions and do not subtract simulation error from absolute shifts.
+
+The extra two candidate fits and four analyses per sensitivity cohort produce:
+
+- Factorized pilot: 42 MCMC fits plus nine oracle workflows, 93 analyses.
+- D2: 1,260 MCMC fits plus 270 oracle workflows, **1,530 workflows and 2,790 analyses**.
+- Confirmation: 12,000 MCMC fits plus 3,600 oracle workflows,
+  **15,600 workflows and 27,600 analyses** from the same 3,600 fresh cohorts.
+
+All other data-generating cells, targets, calibration/bias screens,
+availability screen, diagnostic thresholds and reporting rules remain fixed.
+Preserve the earlier failed scientific candidate and its reporting verifier as
+`tools/verify-joint-marginal-stage1.py`; the new main verifier checks the amended
+grid, both sensitivity axes, stronger gate and new diagnostic monitor set.
+This amendment supersedes the initial candidate's covariance-prior description,
+D seeds, sensitivity grid/metric and request counts for all future runs.

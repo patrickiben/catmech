@@ -4,7 +4,7 @@ args <- commandArgs(trailingOnly = TRUE)
 if (length(args)) .libPaths(c(args[1], .libPaths()))
 stopifnot(!"package:catmech" %in% search())
 stopifnot(utils::packageVersion("catmech") >= "0.3.1")
-stopifnot(all(c("catmech_pmm", "catmech_reference") %in%
+stopifnot(all(c("catmech_pmm", "catmech_reference", "catmech_marginal_summary") %in%
                 getNamespaceExports("catmech")))
 
 d <- catmech::simulate_catmech_lab(200, seed = 7, corruption_probability = 0.5)
@@ -216,6 +216,44 @@ stopifnot(!"package:catmech" %in% search(), reference_example$reference_comparis
           identical(names(reference_example$reference_scenarios), reference_example$reference_expected))
 stopifnot(identical(reference_example$reference_comparison$table$interpretation[
   reference_example$reference_comparison$table$scenario == "reference_pmm"], "sensitivity_only"))
+
+# The native marginal engine must also work through namespace calls before any
+# example attaches catmech. Exercise installed registration, posterior summaries,
+# exact-reference preservation, the mice adapter, and exported assumptions.
+marginal_example <- new.env(parent = baseenv())
+source(system.file("examples", "joint-marginal.R", package = "catmech"), local = marginal_example)
+marginal <- marginal_example$marginal_fit
+marginal_posterior <- marginal_example$marginal_posterior
+stopifnot(!"package:catmech" %in% search(),
+          identical(marginal$manifest$engine, "reference_marginal_cluster"),
+          identical(marginal$spec$cluster_model, "joint_marginal"),
+          identical(marginal$model_diagnostics$engine, "hw_marginal_cluster"),
+          marginal$model_diagnostics$convergence_pass,
+          identical(marginal$original, marginal_example$marginal_data),
+          identical(marginal_posterior$term, c("(Intercept)", "x")),
+          all(is.finite(marginal_posterior$posterior_sd)),
+          all(marginal_posterior$interpretation == "conditional_joint_marginal_credible_interval"),
+          identical(marginal_example$marginal_completed$recorded,
+                    marginal$completed[[1]]$recorded))
+marginal_known <- !is.na(marginal$original$reference)
+for (j in seq_along(marginal$completed)) {
+  completed <- marginal$completed[[j]]
+  stopifnot(identical(completed$recorded[marginal_known],
+                      marginal$original$reference[marginal_known]),
+            identical(completed[-1L], marginal$original[-1L]),
+            identical(mice::complete(marginal$mids, j)$recorded, completed$recorded))
+}
+marginal_manifest <- check_export(marginal, "joint-marginal")
+stopifnot(identical(marginal_manifest$engine, "reference_marginal_cluster"),
+          identical(marginal_manifest$claim_level, "conditional_marginal_cluster_model"),
+          identical(marginal_manifest$assumptions$joint_backend, "catmech_blocked_gibbs_conditional_regression"),
+          identical(marginal_manifest$assumptions$prior$covariance_family, "conditional_regression"),
+          marginal_manifest$assumptions$prior$block_marginal_sd_df == 2,
+          marginal_manifest$assumptions$prior$block_marginal_sd_scale == 1,
+          marginal_manifest$assumptions$prior$conditional_regression$regression_scale == 10,
+          identical(marginal_manifest$assumptions$joint_transform$predictor_names, list("x")))
+cat("Installed namespace-only marginal model, native sampler, posterior, adapter and export: PASS\n")
+
 source(system.file("examples", "lab.R", package = "catmech"), local = new.env(parent = globalenv()))
 contamination_example <- new.env(parent = baseenv())
 source(system.file("examples", "contamination.R", package = "catmech"), local = contamination_example)

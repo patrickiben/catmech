@@ -133,9 +133,13 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #'   declared maximum, then fail with traces in a `catmech_convergence_error`.
 #'   For `"joint"`, each chain uses a fresh R worker to isolate the backend RNG.
 #'   For `"joint_marginal"`, a compiled blocked Gibbs sampler uses independent
-#'   R RNG streams. Its hierarchical Huang--Wand covariance prior has marginal
-#'   half-t(2) standard deviations with scale `sqrt(prior_scale)` in standardized
-#'   units. This differs from the fixed inverse-Wishart prior in `"joint"`.
+#'   R RNG streams. It also accepts `regression_scale = 10`, the conditional
+#'   matrix-normal prior scale for within- and between-site measurement
+#'   regressions on the predictors. Its predictor and conditional-measurement
+#'   covariance blocks have Huang--Wand priors with half-t(2) marginal standard
+#'   deviations of scale `sqrt(prior_scale)` in standardized units. These are
+#'   distinct from the reconstructed full covariance matrices and from the fixed
+#'   inverse-Wishart prior in `"joint"`.
 #' @return A `catmech_result`. Its completed target contains exact gold references
 #'   or imputations; the original reference column is unchanged. The `mids`
 #'   observed target is the reference values with other rows missing. The manifest
@@ -244,7 +248,12 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #' marginal from within-site coefficients. Independent sites, noninformative site
 #' sizes, Gaussian joint associations, exact references and ignorable observation
 #' patterns remain assumptions. Missing, categorical, constant or aliased predictors
-#' are refused. Population coefficient summaries include uncertainty in predictor
+#' are refused. The marginal model additionally requires at least two residual
+#' degrees of freedom and two numerically independent paired-measurement residual
+#' directions after adjusting for predictors and site indicators. This conservative
+#' support restriction protects the weak covariance prior near singular residual
+#' directions; it can exclude otherwise identifiable sparse paired designs.
+#' Population coefficient summaries include uncertainty in predictor
 #' means and covariances. An all-reference input still takes the exact-copy shortcut
 #' and does not fit a posterior for either joint summary function.
 #' @export
@@ -265,7 +274,8 @@ catmech_reference <- function(data, value, reference, predictors,
     stop("Joint cluster models require method='normal', use_recorded=TRUE and cluster.", call. = FALSE)
   if (!joint && length(joint_control))
     stop("joint_control applies only to joint cluster models.", call. = FALSE)
-  if (joint) joint_control <- catmech_joint_cluster_control(joint_control)
+  if (joint) joint_control <- if (marginal) catmech_marginal_cluster_control(joint_control) else
+    catmech_joint_cluster_control(joint_control)
   catmech_reference_inputs(data, value, predictors, m, seed, donors,
                            excluded = c(value, reference))
   if (!is.null(cluster)) {
@@ -363,7 +373,7 @@ catmech_reference <- function(data, value, reference, predictors,
     spec$reference_selection_assumption <- "ignorable_given_observed_components_predictors_and_site"
     spec$joint_model <- if (marginal) "(T,W,X) = mu + b_site + e; independent Gaussian site and row vectors" else
       "(T,W) = X B + b_site + e; independent Gaussian site and row vectors"
-    spec$joint_backend <- if (marginal) "catmech_blocked_gibbs_huang_wand" else "pan"
+    spec$joint_backend <- if (marginal) "catmech_blocked_gibbs_conditional_regression" else "pan"
   }
   audits <- lapply(seq_len(m), function(j) {
     row <- catmech_reference_audit(data[[value]], draws[, j], seq_len(nrow(data)), j,

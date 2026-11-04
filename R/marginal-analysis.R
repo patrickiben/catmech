@@ -21,10 +21,15 @@
 #' covariate model is an additional assumption; categorical, incomplete and
 #' deterministically related predictors are not supported by this engine.
 #'
-#' The covariance priors are hierarchical Huang--Wand priors with degrees of
-#' freedom parameter two and marginal half-t(2) standard deviations. The scale
-#' is the square root of `joint_control$prior_scale` in empirically standardized
-#' units. The mean prior is flat. Credible intervals remain conditional on these
+#' Each site/row covariance is factored into predictor covariance, regression
+#' of the two measurements on predictors, and conditional measurement covariance.
+#' The two covariance blocks have Huang--Wand priors with half-t(2) marginal
+#' standard deviations and scale `sqrt(joint_control$prior_scale)` in empirically
+#' standardized units. Those properties do not apply to the reconstructed full
+#' covariance. Regression matrices have proper zero-mean matrix-normal priors,
+#' with row covariance `regression_scale^2 * I` (default scale ten) and column
+#' covariance equal to the conditional measurement covariance. The population
+#' mean prior is flat. Credible intervals remain conditional on these
 #' distributional and reference-selection assumptions. They are not
 #' cluster-robust intervals and do not establish robustness to arbitrary
 #' contextual effects, nonlinear associations or informative cluster sizes.
@@ -59,7 +64,7 @@ catmech_marginal_summary <- function(result, level = .95) {
     catmech_joint_summary_failure("Marginal model convergence checks did not pass.", d)
   if (!identical(d$engine, "hw_marginal_cluster"))
     stop("The result does not contain marginal sampler diagnostics.", call. = FALSE)
-  control <- catmech_joint_cluster_control(spec$joint_control)
+  control <- catmech_marginal_cluster_control(spec$joint_control)
   tr <- d$traces
   dims <- dim(tr)
   if (!is.numeric(tr) || is.complex(tr) || length(dims) != 3L ||

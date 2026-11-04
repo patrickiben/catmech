@@ -162,7 +162,7 @@ claims = [
     ("three rare", "RC", "Second clustered-audit test, 25%: items where its recovery RMSE was above linear MI's", FXR, lambda: worded(all(fx_ratio(a) > 1 for a in RARE) and not any(fx_ratio(a) > 1 for a in COMMON), "three rare", "count")),
     ("4%", "RC", "Second clustered-audit test, 25%: smallest rise in recovery RMSE on a rare item", FXR, lambda: pct0(min(fx_ratio(a) for a in RARE) - 1)),
     ("5%", "RC", "Second clustered-audit test, 25%: largest rise in recovery RMSE on a rare item", FXR, lambda: pct0(max(fx_ratio(a) for a in RARE) - 1)),
-    ("0.9.0", "R", "Current package version", "DESCRIPTION", lambda: re.search(r"^Version: (.+)$", (ROOT / "DESCRIPTION").read_text(), re.M).group(1)),
+    ("0.10.0", "R", "Current package version", "DESCRIPTION", lambda: re.search(r"^Version: (.+)$", (ROOT / "DESCRIPTION").read_text(), re.M).group(1)),
     ("0.7.1", "C", "Historical case study version (status on November 2)", "validation/v0.7.1-VALIDATION.md", lambda: re.search(r"^# Validation record: catmech (.+)$", (ROOT / "validation/v0.7.1-VALIDATION.md").read_text(), re.M).group(1)),
     ("November 2, 2026", "C", "Historical case study status date", "validation/v0.7.1-VALIDATION.md", lambda: has("validation/v0.7.1-VALIDATION.md", r"Date: 2026-11-02", "November 2, 2026")),
     ("Version 0.4", "C", "Release that added the recording-error model", "NEWS.md", lambda: has("NEWS.md", r"# catmech 0\.4\.0\n\n- Add `catmech_contamination\(\)`", "Version 0.4")),

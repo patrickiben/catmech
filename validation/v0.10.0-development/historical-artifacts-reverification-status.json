@@ -1,0 +1,9 @@
+{
+  "status": "PARTIAL",
+  "all_historical_study_checks": "PASS",
+  "remaining_failure": "Learning-page fact check: index.html contains numeric 0.9 not yet in current-page source allowance after version bump to 0.10.0",
+  "command": "python3 tools/verify-artifacts.py",
+  "exit_code": 1,
+  "log": "historical-artifacts-reverified.txt",
+  "note": "Retain this pre-release documentation result; rerun after release documentation is finalized."
+}

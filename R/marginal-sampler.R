@@ -1,18 +1,42 @@
 # Multivariate Gaussian random-intercept model for (T,W,X), including the
 # complete numeric predictors as responses. Unlike conditional regression,
 # the marginal coefficient uses both between-site and within-site covariance.
+catmech_marginal_cluster_control <- function(control = list()) {
+  # Let the shared validator check list shape and the unchanged numerical knobs.
+  if (!is.list(control) || (length(control) && (is.null(names(control)) ||
+      anyNA(names(control)) || any(!nzchar(names(control))) || anyDuplicated(names(control)))))
+    stop("joint_control must be a uniquely named list.", call. = FALSE)
+  regression_scale <- if ("regression_scale" %in% names(control)) control$regression_scale else 10
+  remaining <- control[setdiff(names(control), "regression_scale")]
+  out <- catmech_joint_cluster_control(remaining)
+  if (!is.numeric(regression_scale) || is.complex(regression_scale) ||
+      length(regression_scale) != 1L || !is.finite(regression_scale) || regression_scale <= 0 ||
+      !is.finite(regression_scale^2) || regression_scale^2 == 0 || !is.finite(1 / regression_scale^2))
+    stop("joint_control$regression_scale must be positive and finite with a supported squared scale.", call. = FALSE)
+  out$regression_scale <- regression_scale
+  out
+}
+
 catmech_marginal_cluster_prior <- function(control) {
-  list(mean = "flat", covariance_family = "Huang_Wand",
-    covariance_df = "dimension + 1", auxiliary_shape = .5,
+  list(mean = "flat", covariance_family = "conditional_regression",
+    factorization = "S = Q_XX; B = solve(S, Q_XR); Omega = Q_RR - transpose(B) S B; R=(T,W)",
+    predictor_covariance = "Huang_Wand; dimension equals the predictor count",
+    conditional_measurement_covariance = "Huang_Wand; dimension two",
+    block_covariance_df = "block dimension + 1", auxiliary_shape = .5,
     auxiliary_inverse_gamma_rate = 1 / control$prior_scale,
-    covariance_conditional_scale = "4 * diag(1 / auxiliary)",
-    marginal_sd_family = "half_t", marginal_sd_df = 2,
-    marginal_sd_scale = sqrt(control$prior_scale),
-    marginal_correlation = "uniform(-1,1)",
+    block_covariance_conditional_scale = "4 * diag(1 / auxiliary)",
+    block_marginal_sd_family = "half_t", block_marginal_sd_df = 2,
+    block_marginal_sd_scale = sqrt(control$prior_scale),
+    block_marginal_correlation = "uniform(-1,1)",
+    conditional_regression = list(family = "matrix_normal", mean = 0,
+      row_covariance = "regression_scale^2 times predictor-dimensional identity",
+      regression_scale = control$regression_scale,
+      column_covariance = "Omega", proper = TRUE),
     covariance_components = "independent priors for residual and site covariance",
-    scale_convention = "standardized response units; prior_scale multiplies squared half-t scale",
+    scale_convention = "standardized response units; prior_scale multiplies squared half-t block scale; regression_scale is separate",
     scaling = "empirical observed-response means and standard deviations",
-    dependence = "standard deviations and correlations are not jointly independent")
+    auxiliary_order = "conditional measurement covariance T,W, then predictor covariance X1,...",
+    dependence = "half-t and uniform-correlation properties apply to S and Omega blocks, not the full covariance Q")
 }
 
 # Internal reproducible kernels; fixed covariance and inverse-Wishart options
@@ -29,13 +53,20 @@ catmech_marginal_gibbs <- function(input, seed, iterations, start = NULL,
       !setequal(input$subj, seq_len(max(input$subj))))
     stop("Malformed marginal sampler input.", call. = FALSE)
   if (!is.list(prior) || !is.character(prior$family) || length(prior$family) != 1L ||
-      !prior$family %in% c("huang_wand", "inverse_wishart") ||
+      !prior$family %in% c("huang_wand", "inverse_wishart", "conditional_regression") ||
       !is.numeric(prior$scale) || is.complex(prior$scale) || length(prior$scale) != 1L ||
       !is.finite(prior$scale) || prior$scale <= 0)
     stop("Malformed marginal covariance prior.", call. = FALSE)
   if (is.null(prior$interweave)) prior$interweave <- TRUE
   if (!is.logical(prior$interweave) || length(prior$interweave) != 1L || is.na(prior$interweave))
     stop("The internal interweave flag must be TRUE or FALSE.", call. = FALSE)
+  if (is.null(prior$regression_scale)) prior$regression_scale <- 10
+  if (!is.numeric(prior$regression_scale) || is.complex(prior$regression_scale) ||
+      length(prior$regression_scale) != 1L || !is.finite(prior$regression_scale) ||
+      prior$regression_scale <= 0 || !is.finite(prior$regression_scale^2) || prior$regression_scale^2 == 0 ||
+      !is.finite(1 / prior$regression_scale^2) ||
+      (prior$family == "conditional_regression" && ncol(input$y) < 2L))
+    stop("Malformed conditional regression prior.", call. = FALSE)
   if (!is.null(fixed)) {
     if (!is.list(fixed) || !all(c("sigma", "psi") %in% names(fixed)))
       stop("Both fixed covariance matrices are required.", call. = FALSE)
@@ -63,14 +94,43 @@ catmech_marginal_interweave_ratio <- function(y, subj, mu, u, sigma, psi, j, eta
       j < 1L || j > ncol(y) || !is.numeric(eta) || is.complex(eta) ||
       length(eta) != 1L || !is.finite(eta) || !is.list(prior) ||
       !is.character(prior$family) || length(prior$family) != 1L ||
-      !prior$family %in% c("huang_wand", "inverse_wishart") ||
+      !prior$family %in% c("huang_wand", "inverse_wishart", "conditional_regression") ||
       !is.numeric(prior$scale) || length(prior$scale) != 1L ||
       !is.finite(prior$scale) || prior$scale <= 0)
     stop("Malformed marginal scale-move oracle input.", call. = FALSE)
+  if (is.null(prior$regression_scale)) prior$regression_scale <- 10
+  if (!is.numeric(prior$regression_scale) || is.complex(prior$regression_scale) ||
+      length(prior$regression_scale) != 1L || !is.finite(prior$regression_scale) ||
+      prior$regression_scale <= 0 || !is.finite(prior$regression_scale^2) || prior$regression_scale^2 == 0 ||
+      !is.finite(1 / prior$regression_scale^2) ||
+      (prior$family == "conditional_regression" && ncol(y) < 2L))
+    stop("Malformed conditional regression prior.", call. = FALSE)
   catmech_marginal_covariance(sigma, ncol(y))
   catmech_marginal_covariance(psi, ncol(y))
   .Call("catmech_marginal_ratio_cpp", y, as.integer(subj), mu, u, sigma, psi,
     as.integer(j), eta, prior, PACKAGE = "catmech")
+}
+
+# Independent draws from the production covariance full conditional with fixed
+# HW auxiliaries. This internal hook lets tests use inverse-Wishart/matrix-normal
+# reference calculations without reproducing the implementation's Gibbs chain.
+catmech_marginal_factorized_draw <- function(values, auxiliary, regression_scale = 10,
+                                            n = 10000L, seed = 1L) {
+  check_count(n, "n", 1L)
+  check_count(seed, "seed", 1L)
+  if (!is.matrix(values) || !is.numeric(values) || is.complex(values) ||
+      ncol(values) < 2L || nrow(values) < 1L || any(!is.finite(values)) ||
+      !is.numeric(auxiliary) || is.complex(auxiliary) || length(auxiliary) != ncol(values) ||
+      any(!is.finite(auxiliary) | auxiliary <= 0) || !is.numeric(regression_scale) ||
+      is.complex(regression_scale) || length(regression_scale) != 1L ||
+      !is.finite(regression_scale) || regression_scale <= 0 ||
+      !is.finite(regression_scale^2) || regression_scale^2 == 0 || !is.finite(1 / regression_scale^2))
+    stop("Malformed conditional covariance oracle input.", call. = FALSE)
+  restore <- preserve_rng()
+  on.exit(restore(), add = TRUE)
+  set.seed(seed)
+  .Call("catmech_marginal_factor_cpp", values, auxiliary, regression_scale,
+    as.integer(n), PACKAGE = "catmech")
 }
 
 catmech_marginal_hw_draw <- function(n, dimension, scale = 1, seed = 1L) {
@@ -172,10 +232,30 @@ catmech_marginal_cluster_prepare <- function(data, value, gold, predictors, clus
   if (any(!is.finite(scale)) || any(scale <= 0))
     stop("All marginal-model responses and predictors must have positive finite variation.", call. = FALSE)
   y <- sweep(sweep(y, 2L, center, "-"), 2L, scale, "/")
+  # A sufficient, deliberately conservative support condition for a half-t
+  # residual covariance prior. Exact deterministic residual directions can
+  # otherwise drive the likelihood to a singular covariance boundary.
+  paired_design <- stats::model.matrix(~ factor(ids[paired]) - 1)
+  if (length(predictors))
+    paired_design <- cbind(paired_design, y[paired, seq.int(3L, ncol(y)), drop = FALSE])
+  paired_qr <- qr(paired_design, tol = 1e-7)
+  paired_df <- sum(paired) - paired_qr$rank
+  if (paired_df < 2L)
+    stop("Marginal cluster fitting needs at least two paired within-site residual degrees of freedom after predictors and site indicators.", call. = FALSE)
+  paired_residual <- qr.resid(paired_qr, y[paired, 1:2, drop = FALSE])
+  paired_singular <- svd(paired_residual, nu = 0L, nv = 0L)$d
+  paired_threshold <- 1e-8 * sqrt(sum(paired))
+  if (length(paired_singular) != 2L || any(!is.finite(paired_singular)) ||
+      any(paired_singular <= paired_threshold))
+    stop("Marginal cluster fitting needs two independent paired within-site measurement residual directions; exact or numerically degenerate measurement relations are unsupported.", call. = FALSE)
+  paired_support <- list(paired_rows = sum(paired), paired_sites = length(unique(ids[paired])),
+    residual_df = paired_df, standardized_residual_singular_values = paired_singular,
+    minimum_singular_value = paired_threshold,
+    policy = "conservative_sufficient_paired_within_site_support")
   rows <- which(rowSums(observed) > 0L)
   group <- match(ids[rows], unique(ids[rows]))
   list(y = y, cluster = ids, rows = rows, predictors = predictors, labels = labels,
-    center = center, scale = scale,
+    center = center, scale = scale, paired_support = paired_support,
     input = list(y = y[rows, , drop = FALSE], subj = as.integer(group)),
     prediction_input = list(y = y, subj = match(ids, unique(ids))),
     transform = list(response_center = as.list(center), response_scale = as.list(scale),
@@ -206,6 +286,11 @@ catmech_marginal_cluster_trace <- function(problem, fit, keep) {
     derived_names <- c(derived_names, "conditional_target_mean_recorded")
   if (any(missing & is.na(problem$y[, 2L])))
     derived_names <- c(derived_names, "conditional_target_mean_absent")
+  for (component in c("sigma", "psi")) {
+    derived_names <- c(derived_names, paste0("conditional_", component, ":", c("T:T", "W:T", "W:W")))
+    for (j in seq_along(problem$predictors))
+      derived_names <- c(derived_names, paste0("regression_", component, ":", c("T", "W"), ":X", j))
+  }
   parts[[length(parts) + 1L]] <- derived
   out <- do.call(cbind, parts)
   colnames(out) <- c(names, derived_names)
@@ -227,7 +312,8 @@ catmech_marginal_cluster_draws <- function(data, value, gold, predictors, m, clu
       psi = diag(1 / factor, d), aux_sigma = rep(factor, d),
       aux_psi = rep(1 / factor, d), y = y)
   })
-  prior <- list(family = "huang_wand", scale = control$prior_scale, interweave = TRUE)
+  prior <- list(family = "conditional_regression", scale = control$prior_scale,
+    regression_scale = control$regression_scale, interweave = TRUE)
   iterations <- control$iterations
   attempts <- list()
   repeat {
@@ -256,6 +342,7 @@ catmech_marginal_cluster_draws <- function(data, value, gold, predictors, m, clu
   diagnostics$sampler_input <- problem$input
   diagnostics$sampler_prior <- prior
   diagnostics$input_rows <- problem$rows
+  diagnostics$paired_support <- problem$paired_support
   diagnostics$transform <- problem$transform
   diagnostics$backend <- "native_blocked_Gibbs"
   diagnostics$backend_isolation <- "R_seed_restored_per_chain_and_exact_restart"

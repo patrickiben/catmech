@@ -1,3 +1,24 @@
+# catmech 0.10.0
+
+- Add the explicit `cluster_model = "joint_marginal"` for a joint Gaussian model
+  of the true measurement, recorded value and complete continuous predictors.
+  Correlated site effects permit contextual associations. The new
+  `catmech_marginal_summary()` reports population marginal coefficients from all
+  parameter draws, including uncertainty in the predictor distribution.
+- Factor covariance priors into predictor and conditional-measurement
+  Huang--Wand blocks with an explicit proper matrix-normal regression prior.
+  Add an original compiled blocked Gibbs sampler. An exact scale-interweaving move addresses slow mixing
+  near zero site variance without changing the posterior or diagnostic screens.
+- Preserve the existing conditional joint model and its priors. New marginal
+  inference requires Gaussian continuous predictor associations, noninformative
+  site size, exact references and ignorable selection; categorical, incomplete,
+  site-constant or aliased predictors are unsupported.
+- Add independent Gaussian conditioning and parameter-posterior oracles, prior
+  distribution checks, matched-posterior comparison with `pan`, exact MH density
+  and Jacobian checks, and tests of transformed marginal coefficients.
+- Building from source now requires a C++17 toolchain, Rcpp and RcppArmadillo.
+  Frozen v0.9.0 sources and the first numerical pilot remain reproducible.
+
 # catmech 0.9.0
 
 - Add `catmech_joint_summary()` for population target coefficients in the exact

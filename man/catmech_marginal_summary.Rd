@@ -36,10 +36,15 @@ slope of the completed cohort. Site size must be noninformative. The Gaussian
 covariate model is an additional assumption; categorical, incomplete and
 deterministically related predictors are not supported by this engine.
 
-The covariance priors are hierarchical Huang--Wand priors with degrees of
-freedom parameter two and marginal half-t(2) standard deviations. The scale
-is the square root of `joint_control$prior_scale` in empirically standardized
-units. The mean prior is flat. Credible intervals remain conditional on these
+Each site/row covariance is factored into predictor covariance, regression
+of the two measurements on predictors, and conditional measurement covariance.
+The two covariance blocks have Huang--Wand priors with half-t(2) marginal
+standard deviations and scale `sqrt(joint_control$prior_scale)` in empirically
+standardized units. Those properties do not apply to the reconstructed full
+covariance. Regression matrices have proper zero-mean matrix-normal priors,
+with row covariance `regression_scale^2 * I` (default scale ten) and column
+covariance equal to the conditional measurement covariance. The population
+mean prior is flat. Credible intervals remain conditional on these
 distributional and reference-selection assumptions. They are not
 cluster-robust intervals and do not establish robustness to arbitrary
 contextual effects, nonlinear associations or informative cluster sizes.

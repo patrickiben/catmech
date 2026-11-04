@@ -46,7 +46,7 @@ all chains, independently of the number of completed datasets.
 
 The contextual validation example has `x = a_site + z`,
 `T = 0.5 + 0.7*x + 0.4*a_site + v_T + e_T`, with independent unit-variance
-`a_site` and `z`. Its within-site slope is 0.7, its between-site slope is 1.1,
+`a_site` and `z`. Its within-site slope is 0.7, its latent between-site component slope is 1.1,
 and its marginal slope is 0.9. Adding site means to a regression and reporting
 the remaining x coefficient would answer the within-site question. The new
 summary explicitly answers the marginal question. See
@@ -56,35 +56,66 @@ claimed as a new statistical method.
 
 ## Prior and coefficient sensitivity
 
-Means have a flat prior. Residual and site covariance matrices have independent
-[Huang--Wand hierarchical priors](https://www.matt-p-wand.net/publicns/Huang13.pdf).
-For a covariance matrix C of dimension d, use
+The population mean has a flat prior. Each row/site covariance Q is expressed
+through a predictor covariance S, measurement regression B, and conditional
+measurement covariance Omega. For measurements R = (T,W), use
 
 ```
-C | a ~ inverse-Wishart(d + 1, 4 * diag(1 / a))
+S = Q_XX
+B = solve(S, Q_XR)
+Omega = Q_RR - transpose(B) %*% S %*% B
+Q_RR = Omega + transpose(B) %*% S %*% B
+Q_XR = S %*% B.
+```
+
+S and Omega have independent
+[Huang--Wand hierarchical priors](https://www.matt-p-wand.net/publicns/Huang13.pdf).
+For either covariance block C of dimension q,
+
+```
+C | a ~ inverse-Wishart(q + 1, 4 * diag(1 / a))
 a_k ~ inverse-gamma(1/2, 1 / A_k^2)
 A_k = sqrt(joint_control$prior_scale).
+B | Omega ~ matrix-normal(0, regression_scale^2 * I, Omega)
+regression_scale = 10 by default.
 ```
 
 The inverse-gamma density is proportional to
-`a^(-shape-1) * exp(-rate/a)`. This gives marginal half-t standard deviations
-with two degrees of freedom and scale A, and marginal uniform pairwise
-correlations. These parameters are not jointly independent. The default A is
-one in empirically standardized response units; the prior is not noninformative
-in every respect. Observed means and standard deviations used for scaling are
-retained in the result metadata.
+`a^(-shape-1) * exp(-rate/a)`. **Within S and Omega**, marginal standard deviations
+have half-t distributions with two degrees of freedom and scale A, and pairwise
+correlations are marginally uniform. Those properties do not apply to the
+reconstructed full Q. Standard deviations and correlations are not jointly
+independent. The matrix-normal regression prior is proper and broad in the
+empirically standardized units; its coefficient covariance is Omega times the
+squared regression scale. Observed means and standard deviations used for
+scaling are retained in the result metadata.
 
-The scale sensitivity comparison multiplies squared half-t scale by 0.25 or
-four, thereby halving or doubling A. The released conditional joint model uses
-a fixed inverse-Wishart prior with different shape and moments. Equal named
-multipliers across these families do not make the priors equivalent. The new
-model and prior change together, so a comparison with the old procedure does
-not attribute improvements separately to either component.
+This factorization makes the regression prior explicit. The first development
+candidate instead put a single Huang--Wand prior on each full covariance.
+It improved contextual coverage but retained material downward coefficient bias.
+That result, its failed calibration screens and its exact sources remain in the
+[first development review](../validation/JOINT_MARGINAL_DEVELOPMENT_REVIEW.md).
+The replacement prior was specified before new development cohorts were drawn;
+no interval multiplier or nominal-level adjustment was selected.
 
-The coefficient sensitivity statistic is the average absolute change in the
-posterior mean under the two alternative scales, in original units. Interval
-width sensitivity is reported separately. Finite-chain error can contribute to
-small measured differences; posterior mean Monte Carlo errors are retained.
+A flat prior for B would be unsafe at a zero predictor site variance. In the
+single-predictor case, write its site standard deviation as t and C = t B.
+As t approaches zero, the observed-data likelihood can stay positive for bounded
+C while the flat-B integration volume grows like `t^(-2)`. A proper finite-scale
+regression prior avoids that divergent boundary. The default scale ten remains
+an assumption that must be checked, not a claim of prior-free inference.
+
+Sensitivity is assessed along two separate axes: covariance `prior_scale` at
+0.25, one and four; regression scale at five, ten and twenty with covariance
+scale held at one. For each axis, measure the average absolute change in the
+posterior coefficient mean under its two alternatives. The candidate's primary
+sensitivity statistic is the **larger** of these two values. Compare it with
+the old conditional model's covariance-scale statistic on the same cohorts,
+requiring all fits to return. Width sensitivity is separate. This comparison
+covers the declared perturbations; it does not establish insensitivity to every
+prior family or combination of hyperparameters. Finite-chain error can
+contribute to small measured changes, so posterior mean Monte Carlo errors
+are also retained.
 
 ## Sampler and missing patterns
 
@@ -94,10 +125,11 @@ An original compiled Gibbs sampler performs these updates:
    the current shared site effect. Observed components stay fixed.
 2. Draw the population mean after integrating site effects, then draw each site
    effect conditional on that mean. This is a joint mean/site-effect block.
-3. Draw each covariance from its inverse-Wishart full conditional and update
-   the residual-covariance inverse-gamma auxiliaries.
-4. Interweave site-scale moves described below, marginalizing the site-covariance
-   auxiliaries and then redrawing them from their full conditional.
+3. Update S from predictor sums of squares. Update Omega after integrating B,
+   then B from its matrix-normal conditional. This is a joint regression and
+   conditional-covariance block. Reconstruct the full row and site covariances.
+4. Interweave site-scale moves described below, integrating both sets of site
+   covariance auxiliaries and then redrawing them from their full conditionals.
 
 Final completed T values are drawn afresh from the parameter draws conditional
 on the original observations. Each site gets one shared multivariate site draw
@@ -113,14 +145,18 @@ The site-effect quadratic form is unchanged. The full transformation Jacobian
 is `c^(G+d+1)`; its `c^G` factor cancels the normal site-density determinant
 change. The remaining log acceptance ratio is the completed-data log-likelihood
 difference plus the marginal covariance log-prior difference plus
-`(d+1)*eta`. The hierarchical auxiliaries are redrawn conditional on the resulting
+`(d+1)*eta`. The full-covariance prior density includes the factorization
+Jacobian: `p(Q) = p(S) p(Omega) p(B | Omega) / |S|^2`. The hierarchical
+auxiliaries for both covariance blocks are redrawn conditional on the resulting
 covariance before any update uses them. This is a posterior-preserving
 Metropolis move, not a modification of the prior or interval widths.
 
 The first masked pilot and its source snapshot are preserved. Its four
 convergence refusals prompted this numerical change before any candidate
-coverage was examined. The same pilot cohorts are replayed for a paired
-engineering check; the development and confirmation seeds remain fresh.
+coverage was examined. The same pilot cohorts were replayed for a paired
+engineering check. After the subsequent prior revision, a further masked pilot
+checks the revised procedure; its new development seeds and the unused
+confirmation seeds are declared in the protocol.
 
 ## Diagnostics, scope and evidence
 
@@ -128,14 +164,23 @@ The default four chains start with 1,000 burn-in and 4,000 retained iterations,
 extending the same seeded chains to 8,000, 16,000 and at most 32,000 retained
 iterations. Rank-normalized R-hat must be at most 1.05 and bulk and tail ESS at
 least 100 times the number of chains. Monitors include means, covariance entries,
-hierarchical auxiliaries, original-unit marginal coefficients and conditional
+hierarchical auxiliaries, conditional covariance blocks, within/between
+regression matrices, original-unit marginal coefficients and conditional
 means for both missing-target recording patterns. Passing the diagnostic screen
 does not prove convergence or coverage.
 
 The public engine requires complete continuous numeric predictors, sufficient
 paired measurement support, at least five observed sites for each measurement,
-and within-site replication. Constant, globally aliased, site-constant or
-within-site aliased predictors are refused. The all-reference shortcut still
+and within-site replication. After adjustment for predictors and paired-site
+indicators, the paired measurements must retain at least two residual degrees
+of freedom and two numerically independent residual directions. The smallest
+singular value of the standardized residual matrix must exceed
+`sqrt(number_of_pairs) * 1e-8`. This conservative support rule excludes exact
+measurement agreement and singular residual relationships under the weak
+covariance prior. It can also exclude otherwise identifiable sparse paired
+designs; it is a supported-data restriction, not a necessary identifiability
+criterion. Constant, globally aliased, site-constant or within-site aliased
+predictors are refused. The all-reference shortcut still
 copies exact observations without fitting a posterior, so the marginal summary
 refuses that shortcut explicitly.
 
@@ -147,7 +192,9 @@ The prospective repeated-sampling study is specified in the
 Monte Carlo uncertainty determine the empirical claims; these mathematical
 checks alone establish no coverage guarantee.
 
-This model adds a Gaussian predictor-distribution assumption. Its validation
+The repeated-sampling study has one continuous predictor. Multiple-predictor
+support has algebraic and numerical checks, rather than a separate coverage
+study. This model adds a Gaussian predictor-distribution assumption. Its validation
 scope does not include categorical or missing predictors, informative site size,
 nonlinear associations, imperfect reference measurements, MNAR, rare counts or
 the repaired measurement used as an analysis predictor. The existing

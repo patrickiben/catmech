@@ -1,0 +1,13 @@
+  iterations convergence_pass max_rhat min_bulk_ess min_tail_ess
+1       4000            FALSE 1.008937     327.1873     951.6203
+2       8000             TRUE 1.006899     626.9226    1667.9577
+         term  estimate posterior_sd     lower     upper level     rhat
+1 (Intercept) 0.5682638    0.2099602 0.1591031 0.9859029  0.95 1.002195
+2           x 0.7766252    0.1235467 0.5392816 1.0250499  0.95 1.006899
+  ess_bulk ess_tail   mcse_mean  mcse_lower  mcse_upper draws iterations chains
+1 1829.564 5512.621 0.004914118 0.004740704 0.007873843 32000       8000      4
+2 1241.699 3901.124 0.003505643 0.004156155 0.005121201 32000       8000      4
+                                interpretation
+1 conditional_joint_marginal_credible_interval
+2 conditional_joint_marginal_credible_interval
+EXAMPLE_NATIVE_NAMESPACE_EXPORT_PASS
