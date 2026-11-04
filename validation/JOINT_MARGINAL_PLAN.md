@@ -174,7 +174,7 @@ per cell use paired uncertainty, not an assumption of independent fitted models.
 Worker count is an execution choice (at most 16); seed mapping is invariant.
 Record session/package/compiler information and every diagnostic extension.
 
-Hash every current R source, `src/*.cpp`, `src/*.h`, `src/Makevars*`, DESCRIPTION,
+Hash every current R source, `src/*.c`, `src/*.cpp`, `src/*.h`, `src/Makevars*`, DESCRIPTION,
 NAMESPACE, this plan and runner, and frozen baseline sources before and after
 each stage. Workers verify those hashes before and after their assigned cohort.
 No scored stage completes if source hashes differ or the full planned grid is
@@ -218,7 +218,10 @@ statistical laws. Every failed component remains visible.
    shifts, per-scale bias/coverage and failures. Relative width sensitivity
    `mean(abs(log(width_alt/width_1)))` is separate and cannot substitute for
    the coefficient gate. Changes in prior-dependent posterior SD are not used
-   as denominators to manufacture reduced sensitivity.
+   as denominators to manufacture reduced sensitivity. Finite-chain posterior
+   means contribute Monte Carlo noise to absolute shifts; compare reported
+   mean MCSEs with their magnitudes and do not interpret small shifts as exact
+   prior independence.
 5. **Availability:** each cell must return at least 99% of candidate fits and
    at least 99% of direct intervals, without weaker diagnostics. The candidate
    must have no more observed default-fit refusals than the frozen v0.9.0

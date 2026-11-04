@@ -122,12 +122,20 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #'   `"joint"` explicitly selects a bivariate Gaussian model of the true target and
 #'   recorded value with one shared two-dimensional site effect. It requires
 #'   `method = "normal"`, `use_recorded = TRUE` and `cluster`.
+#'   `"joint_marginal"` jointly models the true measurement, recorded value and
+#'   complete continuous numeric predictors, allowing correlated site effects
+#'   across all of them. Use [catmech_marginal_summary()] for population marginal
+#'   coefficients from this model; [catmech_joint_summary()] applies to `"joint"`.
 #' @param joint_control Named list for the joint sampler: `chains = 4`,
 #'   `burnin = 1000`, `iterations = 4000`, `max_iterations = 32000`, and
 #'   `prior_scale = 1`. Chains must be at least four. Failed diagnostic screens
 #'   restart the same seeded chains with doubled retained iterations up to the
 #'   declared maximum, then fail with traces in a `catmech_convergence_error`.
-#'   Each chain uses a fresh R worker to isolate the backend's internal RNG state.
+#'   For `"joint"`, each chain uses a fresh R worker to isolate the backend RNG.
+#'   For `"joint_marginal"`, a compiled blocked Gibbs sampler uses independent
+#'   R RNG streams. Its hierarchical Huang--Wand covariance prior has marginal
+#'   half-t(2) standard deviations with scale `sqrt(prior_scale)` in standardized
+#'   units. This differs from the fixed inverse-Wishart prior in `"joint"`.
 #' @return A `catmech_result`. Its completed target contains exact gold references
 #'   or imputations; the original reference column is unchanged. The `mids`
 #'   observed target is the reference values with other rows missing. The manifest
@@ -230,11 +238,20 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #' shifted whole clusters, the moment-based `cluster` option biased that slope toward zero and covered far less than
 #' a fit without it. The cause has not been established. [catmech_pool_lm()] warns about
 #' this use. See `validation/VARIANCE_MI_SYNTHESIS.md`.
+#' With `cluster_model = "joint_marginal"`, the continuous predictors are observed
+#' components of the same multivariate Gaussian model as the true and recorded
+#' measurements. This allows their site effects to be correlated and distinguishes
+#' marginal from within-site coefficients. Independent sites, noninformative site
+#' sizes, Gaussian joint associations, exact references and ignorable observation
+#' patterns remain assumptions. Missing, categorical, constant or aliased predictors
+#' are refused. Population coefficient summaries include uncertainty in predictor
+#' means and covariances. An all-reference input still takes the exact-copy shortcut
+#' and does not fit a posterior for either joint summary function.
 #' @export
 catmech_reference <- function(data, value, reference, predictors,
                               method = c("normal", "pmm", "pmm_abb"), donors = 5L,
                               m = 20L, seed = 1L, use_recorded = FALSE,
-                              cluster = NULL, cluster_model = c("moment", "joint"),
+                              cluster = NULL, cluster_model = c("moment", "joint", "joint_marginal"),
                               joint_control = list()) {
   method <- match.arg(method)
   cluster_model <- match.arg(cluster_model)
@@ -242,11 +259,12 @@ catmech_reference <- function(data, value, reference, predictors,
     stop("use_recorded must be TRUE or FALSE.", call. = FALSE)
   if (use_recorded && method != "normal")
     stop("use_recorded applies only to method = 'normal'.", call. = FALSE)
-  joint <- cluster_model == "joint"
+  marginal <- cluster_model == "joint_marginal"
+  joint <- cluster_model %in% c("joint", "joint_marginal")
   if (joint && (method != "normal" || !use_recorded || is.null(cluster)))
-    stop("cluster_model='joint' requires method='normal', use_recorded=TRUE and cluster.", call. = FALSE)
+    stop("Joint cluster models require method='normal', use_recorded=TRUE and cluster.", call. = FALSE)
   if (!joint && length(joint_control))
-    stop("joint_control applies only to cluster_model='joint'.", call. = FALSE)
+    stop("joint_control applies only to joint cluster models.", call. = FALSE)
   if (joint) joint_control <- catmech_joint_cluster_control(joint_control)
   catmech_reference_inputs(data, value, predictors, m, seed, donors,
                            excluded = c(value, reference))
@@ -277,12 +295,15 @@ catmech_reference <- function(data, value, reference, predictors,
       cluster_uncertainty <- "none_all_reference_observed"
     }
   } else if (joint) {
-    sampled <- catmech_joint_cluster_draws(data, value, gold, predictors, m, cluster, joint_control)
+    sampled <- if (marginal)
+      catmech_marginal_cluster_draws(data, value, gold, predictors, m, cluster, joint_control) else
+      catmech_joint_cluster_draws(data, value, gold, predictors, m, cluster, joint_control)
     draws <- sampled$draws
     model_diagnostics <- sampled$model_diagnostics
     joint_transform <- sampled$transform
-    recorded_fit <- "joint_bivariate_gaussian"
-    cluster_uncertainty <- "shared_bivariate_site_effect_conditional_on_original_observations"
+    recorded_fit <- if (marginal) "joint_marginal_gaussian" else "joint_bivariate_gaussian"
+    cluster_uncertainty <- if (marginal) "shared_multivariate_site_effect_conditional_on_original_observations" else
+      "shared_bivariate_site_effect_conditional_on_original_observations"
   } else if (use_recorded) {
     sampled <- if (is.null(cluster)) catmech_reference_recorded_draws(data, value, gold, predictors, m, seed) else
       catmech_reference_clustered_draws(data, value, gold, predictors, m, cluster)
@@ -308,7 +329,7 @@ catmech_reference <- function(data, value, reference, predictors,
     draws <- catmech_reference_pmm_draws(gold, X, donors, m, bootstrap = method == "pmm_abb")
     model_diagnostics <- catmech_reference_independent_diagnostics(paste0("reference_mice_", method))
   }
-  engine <- if (joint) "reference_joint_cluster" else if (use_recorded) "reference_normal_recorded" else paste0("reference_", method)
+  engine <- if (marginal) "reference_marginal_cluster" else if (joint) "reference_joint_cluster" else if (use_recorded) "reference_normal_recorded" else paste0("reference_", method)
   spec <- structure(list(version = "reference1", engine = engine, value = value,
     predictors = predictors,
     reference = reference, reference_policy = "observed_gold_only_all_others_unavailable",
@@ -333,14 +354,16 @@ catmech_reference <- function(data, value, reference, predictors,
     spec$audited_clusters <- length(unique(data[[cluster]][known]))
   }
   if (joint) {
-    spec$cluster_model <- "joint"
+    spec$cluster_model <- cluster_model
     spec$joint_control <- joint_control
     spec$joint_transform <- joint_transform
-    spec$prior <- catmech_joint_cluster_prior(joint_control)
-    spec$raw_target_policy <- "observed_component_of_joint_bivariate_gaussian_model"
+    spec$prior <- if (marginal) catmech_marginal_cluster_prior(joint_control) else catmech_joint_cluster_prior(joint_control)
+    spec$raw_target_policy <- if (marginal) "observed_component_of_joint_multivariate_gaussian_model" else
+      "observed_component_of_joint_bivariate_gaussian_model"
     spec$reference_selection_assumption <- "ignorable_given_observed_components_predictors_and_site"
-    spec$joint_model <- "(T,W) = X B + b_site + e; independent Gaussian site and row vectors"
-    spec$joint_backend <- "pan"
+    spec$joint_model <- if (marginal) "(T,W,X) = mu + b_site + e; independent Gaussian site and row vectors" else
+      "(T,W) = X B + b_site + e; independent Gaussian site and row vectors"
+    spec$joint_backend <- if (marginal) "catmech_blocked_gibbs_huang_wand" else "pan"
   }
   audits <- lapply(seq_len(m), function(j) {
     row <- catmech_reference_audit(data[[value]], draws[, j], seq_len(nrow(data)), j,
@@ -368,12 +391,12 @@ catmech_reference <- function(data, value, reference, predictors,
     reference_fills = sum(known & is.na(data[[value]])), fallback_draws = 0L)))
   result <- catmech_reference_assemble(data, value, predictors, gold, draws, audits,
     diagnostics, spec, m, seed,
-    if (joint) "conditional_joint_cluster_model" else if (method == "normal") "conditional_reference_model" else if (method == "pmm" && any(!known))
+    if (marginal) "conditional_marginal_cluster_model" else if (joint) "conditional_joint_cluster_model" else if (method == "normal") "conditional_reference_model" else if (method == "pmm" && any(!known))
       "sensitivity_only" else "conditional_reference_matching",
     model_diagnostics)
   result$manifest$reference_rows <- which(known)
   result$manifest$reference_column <- reference
-  if (joint) result$manifest$pan_version <- as.character(utils::packageVersion("pan"))
+  if (joint && !marginal) result$manifest$pan_version <- as.character(utils::packageVersion("pan"))
   result$mids$call <- match.call()
   result
 }

@@ -15,7 +15,7 @@ catmech_reference(
   seed = 1L,
   use_recorded = FALSE,
   cluster = NULL,
-  cluster_model = c("moment", "joint"),
+  cluster_model = c("moment", "joint", "joint_marginal"),
   joint_control = list()
 )
 }
@@ -63,14 +63,22 @@ analysis. See details.}
 \item{cluster_model}{`"moment"` preserves the existing recorded-value regression.
 `"joint"` explicitly selects a bivariate Gaussian model of the true target and
 recorded value with one shared two-dimensional site effect. It requires
-`method = "normal"`, `use_recorded = TRUE` and `cluster`.}
+`method = "normal"`, `use_recorded = TRUE` and `cluster`.
+`"joint_marginal"` jointly models the true measurement, recorded value and
+complete continuous numeric predictors, allowing correlated site effects
+across all of them. Use [catmech_marginal_summary()] for population marginal
+coefficients from this model; [catmech_joint_summary()] applies to `"joint"`.}
 
 \item{joint_control}{Named list for the joint sampler: `chains = 4`,
 `burnin = 1000`, `iterations = 4000`, `max_iterations = 32000`, and
 `prior_scale = 1`. Chains must be at least four. Failed diagnostic screens
 restart the same seeded chains with doubled retained iterations up to the
 declared maximum, then fail with traces in a `catmech_convergence_error`.
-Each chain uses a fresh R worker to isolate the backend's internal RNG state.}
+For `"joint"`, each chain uses a fresh R worker to isolate the backend RNG.
+For `"joint_marginal"`, a compiled blocked Gibbs sampler uses independent
+R RNG streams. Its hierarchical Huang--Wand covariance prior has marginal
+half-t(2) standard deviations with scale `sqrt(prior_scale)` in standardized
+units. This differs from the fixed inverse-Wishart prior in `"joint"`.}
 }
 \value{
 A `catmech_result`. Its completed target contains exact gold references
@@ -182,4 +190,13 @@ In later simulations where the audited value was a predictor in the analysis and
 shifted whole clusters, the moment-based `cluster` option biased that slope toward zero and covered far less than
 a fit without it. The cause has not been established. [catmech_pool_lm()] warns about
 this use. See `validation/VARIANCE_MI_SYNTHESIS.md`.
+With `cluster_model = "joint_marginal"`, the continuous predictors are observed
+components of the same multivariate Gaussian model as the true and recorded
+measurements. This allows their site effects to be correlated and distinguishes
+marginal from within-site coefficients. Independent sites, noninformative site
+sizes, Gaussian joint associations, exact references and ignorable observation
+patterns remain assumptions. Missing, categorical, constant or aliased predictors
+are refused. Population coefficient summaries include uncertainty in predictor
+means and covariances. An all-reference input still takes the exact-copy shortcut
+and does not fit a posterior for either joint summary function.
 }

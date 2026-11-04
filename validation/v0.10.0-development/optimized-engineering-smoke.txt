@@ -1,0 +1,9 @@
+   user  system elapsed 
+  4.403   0.057   4.465 
+  iterations convergence_pass max_rhat min_bulk_ess min_tail_ess
+1       4000            FALSE 1.009672     266.1498     254.4880
+2       8000             TRUE 1.008967     466.1923     591.6607
+[1] 8000    4   25
+[1] 0.9999617 1.0089667
+[1] 466.1923
+[1] 591.6607

@@ -1,0 +1,26 @@
+gaussian_balanced 1 public inputs, hidden truth, metadata, seeds and target byte-identical
+gaussian_balanced 2 public inputs, hidden truth, metadata, seeds and target byte-identical
+gaussian_balanced 30 public inputs, hidden truth, metadata, seeds and target byte-identical
+gaussian_unbalanced 1 public inputs, hidden truth, metadata, seeds and target byte-identical
+gaussian_unbalanced 2 public inputs, hidden truth, metadata, seeds and target byte-identical
+gaussian_unbalanced 30 public inputs, hidden truth, metadata, seeds and target byte-identical
+near_zero_icc 1 public inputs, hidden truth, metadata, seeds and target byte-identical
+near_zero_icc 2 public inputs, hidden truth, metadata, seeds and target byte-identical
+near_zero_icc 30 public inputs, hidden truth, metadata, seeds and target byte-identical
+observed_mar 1 public inputs, hidden truth, metadata, seeds and target byte-identical
+observed_mar 2 public inputs, hidden truth, metadata, seeds and target byte-identical
+observed_mar 30 public inputs, hidden truth, metadata, seeds and target byte-identical
+null_slope 1 public inputs, hidden truth, metadata, seeds and target byte-identical
+null_slope 2 public inputs, hidden truth, metadata, seeds and target byte-identical
+null_slope 30 public inputs, hidden truth, metadata, seeds and target byte-identical
+student_t5 1 public inputs, hidden truth, metadata, seeds and target byte-identical
+student_t5 2 public inputs, hidden truth, metadata, seeds and target byte-identical
+student_t5 30 public inputs, hidden truth, metadata, seeds and target byte-identical
+contextual_x 1 public inputs, hidden truth, metadata, seeds and target byte-identical
+contextual_x 2 public inputs, hidden truth, metadata, seeds and target byte-identical
+contextual_x 30 public inputs, hidden truth, metadata, seeds and target byte-identical
+contextual_x: independent Var(X)=2 Cov(X,T)=1.8 marginal slope=0.9 structural slope=0.7
+contextual_unbalanced: independent Var(X)=2 Cov(X,T)=1.8 marginal slope=0.9 structural slope=0.7
+contextual_null: independent Var(X)=2 Cov(X,T)=0 marginal slope=0 structural slope=-0.2
+21 same-seed v0.9 cohort objects agree byte-for-byte; 3 contextual targets agree with independent covariance algebra.
+No fitted coefficient estimates or coverage were inspected.

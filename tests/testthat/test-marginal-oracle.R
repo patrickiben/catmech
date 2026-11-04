@@ -1,0 +1,231 @@
+# Independent dense observed-data Gaussian calculations. These deliberately do
+# not use the implementation's site-precision or missing-pattern calculations.
+marginal_oracle_fixture <- function() {
+  list(y = cbind(T = c(.8, NA, NA, 1.2, NA, NA, .7, NA, NA, NA, -.4),
+                 W = c(1.1, 2.1, NA, NA, -1, NA, .2, 1.2, NA, NA, NA),
+                 x = c(-.7, .2, .9, -.3, .5, -.8, .3, .6, -.1, .4, -.6)),
+    cluster = c(rep("A", 4), rep("B", 2), rep("C", 2), rep("new", 2), "E"),
+    mu = c(.3, -.2, .1),
+    sigma = matrix(c(.99, 1.285, .7, 1.285, 1.9025, 1.05, .7, 1.05, 1), 3L),
+    psi = matrix(c(1.71, 1.605, 1.1, 1.605, 1.7025, 1.05, 1.1, 1.05, 1), 3L))
+}
+
+marginal_dense_oracle <- function(y, cluster, mu, sigma, psi) {
+  n <- nrow(y); d <- ncol(y)
+  covariance <- kronecker(diag(n), sigma) +
+    kronecker(outer(cluster, cluster, `==`) * 1, psi)
+  design <- kronecker(matrix(1, n, 1L), diag(d))
+  mean <- as.vector(design %*% mu)
+  values <- as.vector(t(y))
+  observed <- which(!is.na(values))
+  target <- d * (which(is.na(y[, 1L])) - 1L) + 1L
+  observed_covariance <- covariance[observed, observed, drop = FALSE]
+  gain <- covariance[target, observed, drop = FALSE] %*% solve(observed_covariance)
+  a <- design[observed, , drop = FALSE]
+  mu_covariance <- solve(crossprod(a, solve(observed_covariance, a)))
+  list(rows = which(is.na(y[, 1L])),
+    mean = as.vector(mean[target] + gain %*% (values[observed] - mean[observed])),
+    covariance = covariance[target, target, drop = FALSE] -
+      gain %*% covariance[observed, target, drop = FALSE],
+    mu_mean = as.vector(mu_covariance %*%
+      crossprod(a, solve(observed_covariance, values[observed]))),
+    mu_covariance = mu_covariance)
+}
+
+test_that("marginal predictions agree with independent dense Gaussian conditioning", {
+  f <- marginal_oracle_fixture()
+  oracle <- do.call(marginal_dense_oracle, f)
+  set.seed(170801L)
+  repetitions <- 10000L
+  samples <- replicate(repetitions, do.call(catmech_marginal_cluster_predict, f))
+  known <- !is.na(f$y[, 1L])
+  expect_true(all(is.finite(samples)))
+  expect_equal(unname(samples[known, , drop = FALSE]),
+    matrix(rep(f$y[known, 1L], repetitions), nrow = sum(known)), tolerance = 0)
+  missing_samples <- t(samples[oracle$rows, , drop = FALSE])
+  mean_mcse <- sqrt(diag(oracle$covariance) / repetitions)
+  covariance_mcse <- sqrt((outer(diag(oracle$covariance),
+    diag(oracle$covariance)) + oracle$covariance^2) / (repetitions - 1L))
+  expect_lt(max(abs(colMeans(missing_samples) - oracle$mean) / mean_mcse), 6)
+  expect_lt(max(abs(stats::cov(missing_samples) - oracle$covariance) / covariance_mcse), 6)
+
+  # Mixed recording patterns must share the same site draw. A site with no T
+  # or W still has observed X: treating it as wholly unobserved is incorrect.
+  mixed <- match(c(2L, 3L), oracle$rows)
+  expect_gt(abs(oracle$covariance[mixed[1L], mixed[2L]]) /
+    covariance_mcse[mixed[1L], mixed[2L]], 8)
+  unaudited <- match(c(9L, 10L), oracle$rows)
+  expect_lt(oracle$covariance[unaudited[1L], unaudited[2L]], f$psi[1L, 1L])
+  expect_lt(max(diag(oracle$covariance)[unaudited]), f$sigma[1L, 1L] + f$psi[1L, 1L])
+  expect_gt(max(abs(oracle$mean[unaudited] - f$mu[1L]) / mean_mcse[unaudited]), 8)
+})
+
+test_that("marginal prediction handles row order and several continuous predictors", {
+  f <- marginal_oracle_fixture()
+  # Independent linear construction gives a valid four-response covariance;
+  # the fourth variable contributes information beyond the first predictor.
+  add <- c(.2, -.3, .4)
+  extend <- function(v) rbind(cbind(v, v %*% add),
+    c(as.vector(crossprod(add, v)), as.numeric(crossprod(add, v %*% add)) + .7))
+  f$sigma <- extend(f$sigma)
+  f$psi <- extend(f$psi)
+  f$mu <- c(f$mu, .4)
+  f$y <- cbind(f$y, x2 = seq(-.9, .9, length.out = nrow(f$y)))
+  permutation <- c(11L, 3L, 9L, 1L, 6L, 4L, 8L, 2L, 10L, 5L, 7L)
+  original <- do.call(marginal_dense_oracle, f)
+  f$y <- f$y[permutation, , drop = FALSE]
+  f$cluster <- f$cluster[permutation]
+  oracle <- do.call(marginal_dense_oracle, f)
+  locations <- match(permutation[oracle$rows], original$rows)
+  expect_equal(oracle$mean, original$mean[locations], tolerance = 1e-12)
+  expect_equal(oracle$covariance, original$covariance[locations, locations], tolerance = 1e-12)
+  set.seed(170802L)
+  repetitions <- 4000L
+  samples <- replicate(repetitions, do.call(catmech_marginal_cluster_predict, f))
+  mean_mcse <- sqrt(diag(oracle$covariance) / repetitions)
+  expect_lt(max(abs(rowMeans(samples[oracle$rows, , drop = FALSE]) -
+    oracle$mean) / mean_mcse), 6)
+})
+
+test_that("fixed-covariance Gibbs mean draws agree with the observed likelihood", {
+  f <- marginal_oracle_fixture()
+  oracle <- do.call(marginal_dense_oracle, f)
+  input <- list(y = f$y, subj = match(f$cluster, unique(f$cluster)))
+  retained <- 6000L; burnin <- 1000L; chains <- 4L; d <- ncol(f$y)
+  samples <- array(NA_real_, c(retained, chains, d))
+  for (chain in seq_len(chains)) {
+    fit <- catmech_marginal_gibbs(input, seed = 170810L + chain,
+      iterations = retained + burnin, fixed = list(sigma = f$sigma, psi = f$psi))
+    samples[, chain, ] <- t(fit$mu[, burnin + seq_len(retained), drop = FALSE])
+    expect_equal(fit$sigma[, , c(1L, burnin + retained)],
+      array(rep(f$sigma, 2L), c(d, d, 2L)), tolerance = 0)
+    expect_equal(fit$psi[, , c(1L, burnin + retained)],
+      array(rep(f$psi, 2L), c(d, d, 2L)), tolerance = 0)
+  }
+  centered <- samples
+  for (j in seq_len(d)) {
+    centered[, , j] <- samples[, , j] - oracle$mu_mean[j]
+    expect_lt(abs(mean(centered[, , j])) / posterior::mcse_mean(samples[, , j]), 6)
+    expect_lt(posterior::rhat(samples[, , j]), 1.02)
+    expect_gt(posterior::ess_bulk(samples[, , j]), 1000)
+    for (k in seq_len(j)) {
+      product <- centered[, , j] * (samples[, , k] - oracle$mu_mean[k])
+      expect_lt(abs(mean(product) - oracle$mu_covariance[j, k]) /
+        posterior::mcse_mean(product), 6)
+    }
+  }
+  # A fixed-covariance marginal intercept is a known linear contrast of mu.
+  covariance <- f$sigma + f$psi
+  slopes <- solve(covariance[-c(1L, 2L), -c(1L, 2L), drop = FALSE],
+    covariance[-c(1L, 2L), 1L])
+  contrast <- c(1, 0, -slopes)
+  intercept <- samples[, , 1L] - slopes * samples[, , 3L]
+  location <- sum(contrast * oracle$mu_mean)
+  variance <- as.numeric(crossprod(contrast, oracle$mu_covariance %*% contrast))
+  expect_lt(abs(mean(intercept) - location) / posterior::mcse_mean(intercept), 6)
+  square <- (intercept - location)^2
+  expect_lt(abs(mean(square) - variance) / posterior::mcse_mean(square), 6)
+  expect_equal(unname(slopes), .9, tolerance = 1e-12)
+  expect_equal(f$sigma[3L, 1L] / f$sigma[3L, 3L], .7, tolerance = 1e-12)
+  expect_equal(f$psi[3L, 1L] / f$psi[3L, 3L], 1.1, tolerance = 1e-12)
+})
+
+# Huang and Wand (2013), doi:10.1214/13-BA815, equation (2):
+# Q|a ~ IW(nu+d-1, 2*nu*diag(1/a)); a_k ~ IG(1/2, 1/A^2).
+# At nu=2 each SD/A is half-t2 and each pairwise correlation is Uniform(-1,1).
+# These independent CDF checks are preferable to variance moments, which do not
+# exist for the half-t2 prior, or comparing one implementation with itself.
+test_that("hierarchical covariance prior has its declared marginal distributions", {
+  n <- 12000L; d <- 3L; scale <- 4
+  samples <- catmech_marginal_hw_draw(n, d, scale = scale, seed = 170830L)
+  covariance <- samples$covariance
+  expect_equal(dim(covariance), c(d, d, n))
+  expect_true(all(is.finite(covariance)))
+  expect_equal(covariance, aperm(covariance, c(2L, 1L, 3L)), tolerance = 1e-10)
+  # Distributional rather than moment checks also remain stable in this prior's
+  # heavy tails. All bounds are six exact binomial Monte Carlo standard errors.
+  probabilities <- c(.25, .5, .75, .9)
+  thresholds <- stats::qt((probabilities + 1) / 2, df = 2)
+  for (j in seq_len(d)) {
+    standard_deviations <- sqrt(covariance[j, j, ]) / sqrt(scale)
+    expect_true(all(standard_deviations > 0))
+    for (k in seq_along(probabilities)) {
+      actual <- mean(standard_deviations <= thresholds[k])
+      mcse <- sqrt(probabilities[k] * (1 - probabilities[k]) / n)
+      expect_lt(abs(actual - probabilities[k]) / mcse, 6)
+    }
+    if (j > 1L) for (k in seq_len(j - 1L)) {
+      rho <- covariance[j, k, ] / sqrt(covariance[j, j, ]) / sqrt(covariance[k, k, ])
+      expect_true(all(abs(rho) < 1))
+      for (probability in c(.25, .5, .75)) {
+        actual <- mean(rho <= 2 * probability - 1)
+        expect_lt(abs(actual - probability) /
+          sqrt(probability * (1 - probability) / n), 6)
+      }
+    }
+  }
+})
+
+# Independent implementation comparison for the unknown-covariance posterior.
+# At dimension two, IW(d+2, .5 I) matches pan's documented IW(4, .5 I)
+# priors. The mean is intercept-only and flat in both implementations. This
+# does not claim that pan implements the hierarchical prior; it tests the
+# common missing-data Gaussian likelihood and all covariance Gibbs updates.
+test_that("unknown-covariance Gibbs posterior agrees with independent pan sampling", {
+  set.seed(170850L)
+  group <- rep(seq_len(24L), each = 6L)
+  within <- rep(seq_len(6L), 24L)
+  sigma <- matrix(c(1.1, .4, .4, .8), 2L)
+  psi <- matrix(c(.6, .25, .25, .5), 2L)
+  site <- matrix(stats::rnorm(48L), 24L, 2L) %*% chol(psi)
+  y <- matrix(stats::rnorm(288L), 144L, 2L) %*% chol(sigma) + site[group, ]
+  y <- sweep(y, 2L, c(.4, -.3), "+")
+  y[within > 2L | group > 18L, 1L] <- NA_real_
+  y[within %in% c(2L, 5L), 2L] <- NA_real_
+  active <- rowSums(!is.na(y)) > 0
+  y <- y[active, , drop = FALSE]; group <- group[active]
+  retained <- 10000L; burnin <- 2000L; chains <- 4L
+  keep <- burnin + seq_len(retained)
+  prior <- list(a = 4, Binv = diag(.5, 2L), c = 4, Dinv = diag(.5, 2L))
+  starts <- lapply(seq_len(chains), function(chain) {
+    initial <- y; initial[is.na(initial)] <- 0
+    list(beta = matrix(c(-.2, .2) * chain, 1L),
+      sigma = diag(.5 + .3 * chain, 2L), psi = diag(1.8 - .3 * chain, 2L), y = initial)
+  })
+  reference <- catmech_joint_cluster_pan(
+    list(y = y, subj = group, pred = matrix(1, nrow(y), 1L)),
+    prior, seeds = 170860L + seq_len(chains), starts = starts,
+    iter = burnin + retained)
+  candidate <- lapply(seq_len(chains), function(chain) catmech_marginal_gibbs(
+    list(y = y, subj = group), seed = 170880L + chain, iterations = burnin + retained,
+    prior = list(family = "inverse_wishart", scale = 1)))
+  traces <- function(fits, reference = FALSE) {
+    output <- array(NA_real_, c(retained, chains, 8L))
+    for (chain in seq_len(chains)) {
+      fit <- fits[[chain]]
+      means <- if (reference) fit$beta[1L, , keep] else fit$mu[, keep]
+      output[, chain, ] <- cbind(t(means), fit$sigma[1L, 1L, keep],
+        fit$sigma[1L, 2L, keep], fit$sigma[2L, 2L, keep],
+        fit$psi[1L, 1L, keep], fit$psi[1L, 2L, keep], fit$psi[2L, 2L, keep])
+    }
+    output
+  }
+  a <- traces(candidate); b <- traces(reference, reference = TRUE)
+  for (j in seq_len(dim(a)[3L])) {
+    expect_lt(posterior::rhat(a[, , j]), 1.05)
+    expect_lt(posterior::rhat(b[, , j]), 1.05)
+    mcse <- sqrt(posterior::mcse_mean(a[, , j])^2 + posterior::mcse_mean(b[, , j])^2)
+    expect_lt(abs(mean(a[, , j]) - mean(b[, , j])) / mcse, 6)
+    # Center both second moments at one fixed constant. The difference retains
+    # the same zero expectation without separately estimated centering terms.
+    aa <- a[, , j]^2; bb <- b[, , j]^2
+    mcse <- sqrt(posterior::mcse_mean(aa)^2 + posterior::mcse_mean(bb)^2)
+    expect_lt(abs(mean(aa) - mean(bb)) / mcse, 6)
+    probabilities <- c(.025, .975)
+    qa <- stats::quantile(a[, , j], probabilities, names = FALSE)
+    qb <- stats::quantile(b[, , j], probabilities, names = FALSE)
+    mcse <- sqrt(posterior::mcse_quantile(a[, , j], probabilities, names = FALSE)^2 +
+      posterior::mcse_quantile(b[, , j], probabilities, names = FALSE)^2)
+    expect_lt(max(abs(qa - qb) / mcse), 6)
+  }
+})

@@ -11,3 +11,9 @@ __pycache__/
 
 # Optional local word list for docs/case-study/fact_check.py
 docs/case-study/.local-terms
+
+# Local compiled package products
+src/*.o
+src/*.so
+src/*.dll
+src/*.dylib
