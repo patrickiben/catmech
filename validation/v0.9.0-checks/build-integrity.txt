@@ -1,0 +1,5 @@
+PASS: 63 archive entries. No validation, tools, docs, git, local assistant files or nested source archives.
+All 18 tested namespace/R/example files match the archive and current tree by SHA256.
+DESCRIPTION preserves every original field after standard R-build line folding; only NeedsCompilation, Packaged, Author and Maintainer were added by R.
+New tests, README, NEWS and new help file match current tree byte-for-byte.
+R CMD check used this exact final archive. Installed smoke used the same R/namespace/example sources; package check installed and tested the archive.

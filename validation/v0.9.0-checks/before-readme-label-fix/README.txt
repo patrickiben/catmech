@@ -1,0 +1,1 @@
+Preserved preflight outputs before changing the README label from "Joint-model users" to "Joint-model analysis". The fact-check wording heuristic treated the address as an unsupported user-adoption claim. No R code, namespace, examples, tests or scientific results changed. A rebuilt archive and final package check follow in the parent directory.

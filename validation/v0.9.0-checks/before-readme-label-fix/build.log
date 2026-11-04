@@ -1,0 +1,8 @@
+* checking for file ‘./DESCRIPTION’ ... OK
+* preparing ‘catmech’:
+* checking DESCRIPTION meta-information ... OK
+* checking for LF line-endings in source and make files and shell scripts
+* checking for empty or unneeded directories
+Removed empty directory ‘catmech/tests/testthat/_snaps’
+* building ‘catmech_0.9.0.tar.gz’
+

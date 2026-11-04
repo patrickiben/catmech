@@ -1,6 +1,8 @@
 # catmech <img src="man/figures/logo.png" align="right" width="160" alt="catmech logo: a neon cat piloting a mech suit">
 
-**An experimental R package for regression using error-prone recorded measurements and an independently checked reference subset. Version 0.8.0.**
+**An experimental R package for regression using error-prone recorded measurements and an independently checked reference subset. Version 0.9.0.**
+
+**Joint-model analysis:** `catmech_joint_summary()` now provides explicit posterior coefficient intervals; see the [comparison and limits](validation/JOINT_CALIBRATION_SYNTHESIS.md).
 
 **The question:** can you keep error-prone recorded values for precision without trusting them, and which method should you try first?
 
@@ -125,8 +127,8 @@ and [validation record](validation/VALIDATION.md).
 
 The [commands above](#try-it) install the dependencies and then the package. Run the second
 command from the repository directory, or build the source archive with `R CMD build .` and
-install it with `R CMD INSTALL catmech_0.8.0.tar.gz`. R 4.1 or later is required, although only R 4.6
-has been tested. GitHub Actions checks Linux, macOS and Windows, and all three passed. See the
+install it with `R CMD INSTALL catmech_0.9.0.tar.gz`. R 4.1 or later is required, although only R 4.6
+has been tested locally. GitHub Actions checks Linux, macOS and Windows. See the
 [validation record](validation/VALIDATION.md).
 
 ## Flags with no references: declare a trust policy
@@ -304,6 +306,9 @@ fit_joint <- catmech_reference(
   m = 40, seed = 127
 )
 fit_joint$model_diagnostics$summary
+# Model-based population coefficients for the original joint-model design:
+catmech_joint_summary(fit_joint)
+# A separately specified completed-data regression with CV3/Rubin pooling:
 catmech_pool_lm(fit_joint, lab_value ~ age + sex + inflammation)
 ```
 
@@ -311,13 +316,38 @@ This is an established bivariate Gaussian mixed model fitted through `pan`, with
 multiple-chain convergence checks. It adds assumptions about the recorded measurement distribution and missingness;
 it is an opt-in model change. It does not silently retain recorded values when a small audit happens to agree.
 See the [model, priors and support requirements](docs/JOINT_CLUSTER_METHOD.md) and the
-[new validation](validation/JOINT_CLUSTER_SYNTHESIS.md). The historical results below concern the earlier moment model.
+[initial v0.8.0 validation](validation/JOINT_CLUSTER_SYNTHESIS.md). The historical results below concern the earlier moment model.
 Neither model is a demonstrated solution to rare-count undercoverage or use of the audited value as an analysis predictor.
 
-The new study used 200 cohorts per scenario and 40 completions. The joint option had small slope bias, but its
-intervals were often conservative and changed materially with the covariance prior. Some fits refused to complete
-after reaching the convergence limit, especially in the heavy-tailed stress case. These results support a working,
-auditable model option; they do not establish nominal interval calibration or superiority across settings.
+`catmech_joint_summary()` uses all retained posterior draws and reports equal-tailed credible intervals,
+original-unit coefficients and Monte Carlo errors. Its target is the population mean under the fitted joint model,
+including independence of site effects from the selected covariates. It has no formula argument and cannot
+replace an arbitrary downstream analysis. The Gaussian model and covariance priors still matter.
+
+The joint sampler now starts with 4,000 retained iterations per chain and extends to 32,000 if needed,
+with unchanged R-hat and ESS thresholds. Faster trace calculations make the longer runs practical.
+
+The initial **v0.8.0** study used 200 cohorts per scenario and 40 completions, analyzed with CV3/Rubin pooling.
+It found small slope bias, often conservative intervals, material covariance-prior sensitivity and some convergence
+refusals at the earlier 8,000-iteration limit. Those results describe the earlier sampler profile and pooled analysis.
+The fresh [v0.9.0 comparison](validation/JOINT_CALIBRATION_SYNTHESIS.md), under a
+[plan fixed before execution](validation/JOINT_CALIBRATION_PLAN.md), used 2,600 cohorts and passed its three separate
+screens. In the four primary Gaussian scenarios, direct-interval coverage was 93.0%–96.75%; average absolute
+distance from 95% fell from 3.17 percentage points with the old CV3 analysis to 1.63 points. Across the six original
+scenarios, the new sampler returned all 2,400 fits, versus 33 refusals in 2,400 under the old profile, without weaker
+diagnostic thresholds. The contextual and alternative-prior fits also returned: 3,800 candidate fits in total.
+
+Across 600 matched prior triples, relative interval-width sensitivity was 18.9% lower than CV3 on the same posterior
+fits, using the prespecified absolute log-width statistic. The covariance priors are unchanged, and coefficient
+estimates were not uniformly less sensitive. This is an improvement in the reported interval summaries, not evidence
+that the fitted posterior is prior-insensitive.
+
+The null-slope coverage of 93.0% remains a caution. When a covariate shared an unmodeled site cause with the target,
+direct coverage fell to 63.5%, with substantial bias; candidate CV3 covered 96.5% in that particular stress case.
+Use the direct summary for its declared model-based target, not as a general robust marginal-effect analysis.
+See the [full results and Monte Carlo uncertainty](validation/JOINT_CALIBRATION_SYNTHESIS.md).
+
+[![Calibration, prior-width sensitivity, convergence refusals and contextual stress](validation/joint-calibration-figures/joint-calibration-evidence.png)](validation/joint-calibration-figures/joint-calibration-evidence.pdf)
 
 ### Earlier moment-model evidence
 
@@ -455,9 +485,12 @@ are not silently converted to the new model.
 Rscript -e 'install.packages(c("testthat", "pkgload", "roxygen2"))'
 Rscript -e 'testthat::test_local()'
 R CMD build .
-R CMD check --no-manual catmech_0.8.0.tar.gz
+R CMD check --no-manual catmech_0.9.0.tar.gz
 Rscript tools/check-v072-unchanged.R validation/my-v072-comparison.txt
-Rscript validation/run-joint-cluster.R heldout validation/my-joint-cluster
+Rscript validation/run-joint-calibration.R confirmation validation/my-joint-calibration
+python3 -I tools/verify-joint-calibration.py validation/my-joint-calibration --tamper-tests
+# Reproduce the historical joint-model study from its frozen sources:
+Rscript validation/v0.8.0-source/validation/run-joint-cluster.R heldout validation/my-joint-cluster
 python3 -I tools/verify-joint-cluster.py validation/my-joint-cluster
 Rscript tools/check-model-oracle.R validation/my-model-oracle
 Rscript tools/coverage-benchmark.R confirmatory validation/my-heldout

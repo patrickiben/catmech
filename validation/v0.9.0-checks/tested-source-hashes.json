@@ -1,0 +1,21 @@
+{
+  "DESCRIPTION": "f0e5ff374634d0adc312592c92dd7eb76b8dccb4e947919881ff11c7829fd089",
+  "NAMESPACE": "0bf55965de1f0c98b6450553b2eea3048c46cbdb067b791aa38f0b119894884a",
+  "R/analysis.R": "4cbe8d966b27f22ef13eb69e7c49b9e8d42aabdc6b20c82542c7630cb4392322",
+  "R/audit-plan.R": "319a9400d98c3abc74e5cdb07875f7f87d4e1a1d1a4f5ba2fc2e5b251d04e764",
+  "R/contamination.R": "3da564c4bac0fec7cf5e0c151a531e7bd598dbd03c5f0b51293389437597115d",
+  "R/impute.R": "39837090144d9e9244a32daebb2df28f5731b25ac89a15c47a2a3fbfee0f9b3b",
+  "R/imputer.R": "c4fd038872513e6012f2e156ae4b444d91748067b2461d94888ee2f585f97e8c",
+  "R/joint-analysis.R": "af830e8f7c23a94b5b613747314d09bb77d1caf3fe0a8073b77face5d56f4b35",
+  "R/joint-cluster.R": "713fd03adacdb8917d079e86f7368459d2ac36c7bd85799b14fa5051f1216914",
+  "R/model.R": "701295a32332a46870f89abbe20aa5bc0e768bb7816414c1a2e0cd5cabc72222",
+  "R/reference.R": "093e1d9dcd67000e5ea9a376053300f1b6b2eb09f761026f15496cec422cca49",
+  "R/simulate.R": "bdc24dbd40c6547b1f6fe12be96c340ccafe995f0504f24db17946e65a079b7d",
+  "R/spec.R": "ed6f3b74e9a1d0751c33bfa72b63da6e90b95dd75ffa0f142ef3810241ef7e15",
+  "inst/examples/audit-plan.R": "42d8b28841dca281df5ef82d7f199622b9e5f70adca79178a6a37c1c64d00f88",
+  "inst/examples/contamination.R": "9cede90a299b53ace6c377794b4255372920168e652c3c877a74e8e9a6d82b1b",
+  "inst/examples/joint-cluster.R": "1fa83087a590c232be391b1f6ed0d304bcf3e51dd0095ded58fbd9ae099a5847",
+  "inst/examples/lab.R": "7c88ab1d6eaa220973dd7fceb3b1d9b0c704b9c6d4b25cfaf78e3d730020033f",
+  "inst/examples/model.R": "791c84863c22c1a68c0b1db1b74572860e7c7a72f24356b2775ab2a39a3222bd",
+  "inst/examples/reference.R": "78aaf77a2556bf603c744a59bb0b205cd2c15ef7e745614dbbd9ae21e3dc1cd9"
+}

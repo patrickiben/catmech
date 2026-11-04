@@ -1,3 +1,27 @@
+# catmech 0.9.0
+
+- Add `catmech_joint_summary()` for population target coefficients in the exact
+  fitted joint-model design. It uses all retained posterior draws, transforms
+  the intercept and slopes to original units, and returns credible intervals,
+  convergence diagnostics and Monte Carlo errors. It does not change
+  `catmech_pool_lm()` or support arbitrary downstream formulas.
+- Vectorize conditional-mean trace calculations and increase the joint sampler's
+  initial retained run to 4,000 and maximum to 32,000 iterations per chain.
+  Diagnostic thresholds remain unchanged; the original-scale target intercept
+  is now monitored as well. Explicit historical controls retain their meaning.
+- Add an independent known-covariance Gaussian coefficient oracle, transformation
+  and refusal tests, numerical compatibility checks and a replay of the 22
+  previously failed fits. All selected failures passed with the longer schedule;
+  that selected challenge is not an estimate of future failure rates.
+- Preserve v0.8.0 sources and evidence. A fresh 2,600-cohort comparison passed
+  separate calibration, relative interval-width sensitivity and availability
+  screens. Direct primary coverage ranged from 93.0% to 96.75%; all 3,800
+  candidate fits returned. Covariance priors are unchanged and coefficient
+  sensitivity is not uniformly reduced. Contextual-covariate stress produced
+  63.5% coverage, limiting the direct summary to its declared model assumptions.
+  Full results, refusals and Monte Carlo uncertainty are retained in
+  `validation/JOINT_CALIBRATION_SYNTHESIS.md`.
+
 # catmech 0.8.0
 
 - Add explicit `cluster_model = "joint"` to normal reference imputation with

@@ -1,6 +1,6 @@
 # Assessment and release decision
 
-Assessed 2026-11-03. Version 0.8.0 is worth releasing as an **experimental, auditable toolkit for data with recorded values and a
+Assessed 2026-11-04. Version 0.9.0 is worth releasing as an **experimental, auditable toolkit for data with recorded values and a
 reference subset**, built from established methods. Real-data testing narrowed its recommended use. It does not support a novel-method
 or clinical-validity claim. Earlier assessments are preserved for [v0.1](ASSESSMENT_V0.1.md), [v0.2](ASSESSMENT_V0.2.md) and [v0.3](ASSESSMENT_V0.3.md).
 
@@ -39,6 +39,18 @@ A [later test of separate within-cluster and between-cluster slopes](../validati
 Version 0.7.2 fixes the audit planner's formula offsets and compound-stratum identification, and refuses mixed stochastic recorded-value patterns within a cluster until a shared draw is supported. The variance-component draws are explicitly approximate. The rare-count interpretation above was narrowed after review; its original protocol, decision label and numerical results remain unchanged. These corrections do not establish general coverage.
 
 Version 0.8.0 adds an explicit joint model through `pan` for sites containing both recorded-present and recorded-missing unaudited rows. It shares the site draw coherently and adds multiple-chain diagnostics, declared covariance priors and a separate [validation study](../validation/JOINT_CLUSTER_SYNTHESIS.md). It is an established bivariate Gaussian mixed model, not a novel estimator. Historical moment-model studies do not establish the new option's calibration, and this repair is not evidence that rare-count undercoverage or predictor attenuation has been cured. The default moment model remains unchanged for supported inputs.
+
+## Joint posterior inference in v0.9.0
+
+The explicit `catmech_joint_summary()` API targets the population coefficients
+of the fitted joint model. A fresh [2,600-cohort comparison](../validation/JOINT_CALIBRATION_SYNTHESIS.md)
+passed separate prespecified screens for calibration, relative interval-width
+sensitivity and sampler availability. Direct primary coverage was 93.0%–96.75%,
+and the larger sampling budget returned all 3,800 candidate fits without weaker
+diagnostics. The priors remain unchanged; coefficient sensitivity was not
+uniformly reduced. Contextual-covariate stress produced 63.5% coverage and
+substantial bias, so this is useful explicit model-based inference, not a general
+robust marginal-effect procedure. `catmech_pool_lm()` remains a separate analysis.
 
 ## Current judgment
 

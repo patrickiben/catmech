@@ -64,15 +64,17 @@ noninformative priors. `joint_control = list(prior_scale = k)` multiplies both
 scale matrices by positive `k`. Inspect sensitivity to this choice, especially
 with few informative sites or weak covariance identification.
 
-Defaults use four chains, 1,000 burn-in iterations and 2,000 retained iterations
-per chain, extending the retained run up to 8,000 when needed. The controls
+Defaults use four chains, 1,000 burn-in iterations and 4,000 retained iterations
+per chain, extending the retained run up to 32,000 when needed. The controls
 `chains`, `burnin`, `iterations`, and `max_iterations` are available through
 `joint_control`. Each chain runs in a fresh local R worker: `pan` 2.0 retains a
 cached normal draw that its public seed argument does not reset, so in-process
 calls can depend on earlier `pan` use. Isolation gives each declared chain a
 fresh sampler state and is also applied on automatic extensions. This adds
 process-startup cost. Rank-normalized R-hat must be at most 1.05, with bulk and tail
-effective sample sizes each at least 100 times the chain count. A failed
+effective sample sizes each at least 100 times the chain count. These checks cover
+all sampled fixed effects and covariance elements, both recipient-pattern
+conditional means when present, and the original-scale target intercept. A failed
 diagnostic screen refuses completion and carries the diagnostics in a
 `catmech_convergence_error`; earlier numerical failures can raise ordinary
 errors before valid traces exist. Passing these checks is evidence about numerical
@@ -88,6 +90,34 @@ Even with five gold sites, paired measurements can concentrate in very few
 sites, leaving the cross-response site covariance strongly prior-dependent.
 The initial simulations have broad paired support and do not validate that
 concentrated-reference setting.
+
+## Posterior coefficient analysis
+
+Version 0.9.0 adds `catmech_joint_summary(fit, level = .95)`. It summarizes the
+population coefficients of `T` in the **original imputation design**, using all
+retained posterior draws. It accepts no downstream formula. The default output
+contains posterior means and standard deviations, equal-tailed 95% credible
+intervals, R-hat, bulk/tail ESS, and Monte Carlo errors for the means and interval
+endpoints. The means and intervals are transformed to the original response and
+predictor units; the intercept accounts for predictor centering jointly.
+
+Under the model assumption that site effects are independent of the selected
+covariates, these are coefficients of the population mean of `T`. When covariates
+share an unmodeled site-level cause with `T`, the direct coefficient can differ
+substantially from the marginal slope; passing MCMC diagnostics does not check
+that independence assumption. The summary targets population coefficients
+rather than finite-cohort OLS coefficients. These intervals condition on the Gaussian joint
+model and its covariance priors. They do not use a cluster-robust variance,
+Rubin pooling or a Student t multiplier. CV3 addresses variance in a completed-data
+regression; it does not by itself repair biased imputations. Monte Carlo errors
+measure finite simulation error, not model adequacy.
+
+The all-reference shortcut does not fit a parameter posterior, so this function
+refuses that result without silently refitting. Other engines, coefficient/design-name mismatches,
+inconsistent transformation metadata, missing traces and failed diagnostics are
+also refused. Use `catmech_pool_lm()`
+for a separately specified downstream regression; the new summary does not
+validate use of the repaired measurement as a predictor.
 
 ## Scientific limits and validation
 
@@ -130,3 +160,22 @@ Gaussian case was conservative. Counting failed fits in the denominator gave
 prior changes materially altered widths and coverage. These results validate
 neither exact 95% calibration nor a general solution to undercoverage. See the
 synthesis for Monte Carlo intervals, paired comparisons and all failures.
+
+
+The fresh [v0.9.0 comparison](../validation/JOINT_CALIBRATION_SYNTHESIS.md) used
+2,600 cohorts and separate prospective screens for calibration, relative
+interval-width sensitivity and fit availability. All three screens passed.
+Direct coverage across the four primary Gaussian scenarios was 93.0%–96.75%,
+with lower average distance from 95% than either CV3 comparator. The null-slope
+result remains a caution rather than evidence of exact nominal calibration.
+All 3,800 candidate fits returned, including the alternative-prior requests.
+The covariance priors themselves are unchanged: the measured sensitivity gain
+concerns reported interval widths, not reduced prior influence on the posterior.
+Point-estimate sensitivity was not uniformly lower.
+
+The contextual-covariate stress deliberately violated site-effect independence.
+Direct coverage of the marginal target was 63.5%, with mean bias about -0.128;
+candidate CV3 covered 96.5% there. This limits the direct summary to its declared
+model-based target. The synthesis reports all cells, prior subsets, failures,
+paired comparisons and Monte Carlo uncertainty. CV3 still cannot guarantee
+validity after misspecified imputation or nonignorable reference selection.

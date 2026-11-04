@@ -1,0 +1,3 @@
+Recorded result of tools/verify-artifacts.py::verify_learn_pages(), invoked through runpy after the v0.9.0 version-label change.
+
+Learning pages: every decimal traced, diagram matches the figure, engine rechecked against the R package's saved results, all 24 picker snippets ran in R for the current picker: PASS
