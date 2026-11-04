@@ -183,19 +183,6 @@ catmech_joint_cluster_pan <- function(input, prior, seeds, starts, iter) {
     if (!is.null(workers)) try(parallel::stopCluster(workers), silent = TRUE)
     restore()
   }, add = TRUE)
-  # An explicit per-process port avoids inherited default-port collisions when
-  # independent outer jobs were forked from the same R session.
-  for (attempt in seq_len(20L)) {
-    port <- as.integer(20000 + (as.double(Sys.getpid()) + sample.int(40000L, 1L)) %% 40000)
-    candidate <- tryCatch(parallel::makePSOCKcluster(length(seeds), port = port,
-      setup_strategy = "parallel", setup_timeout = 60), error = identity)
-    if (!inherits(candidate, "error")) {
-      workers <- candidate
-      break
-    }
-    if (!grepl("server socket", conditionMessage(candidate), fixed = TRUE)) stop(candidate)
-  }
-  if (is.null(workers)) stop("Could not allocate an isolated joint-sampler worker port.", call. = FALSE)
   run <- function(job, input, prior, iter, library_paths) {
     .libPaths(library_paths)
     pan::pan(input$y, input$subj, input$pred, xcol = seq_len(ncol(input$pred)),
@@ -203,8 +190,30 @@ catmech_joint_cluster_pan <- function(input, prior, seeds, starts, iter) {
   }
   environment(run) <- baseenv()
   jobs <- lapply(seq_along(seeds), function(j) list(seed = seeds[j], start = starts[[j]]))
-  parallel::clusterApply(workers, jobs, run, input = input, prior = prior,
-                          iter = iter, library_paths = .libPaths())
+  result <- vector("list", length(jobs))
+  # Limit simultaneous workers to two, including under R CMD check --as-cran.
+  # Every chain still gets a new process; a finished worker is never reused.
+  for (first in seq.int(1L, length(jobs), by = 2L)) {
+    batch <- seq.int(first, min(first + 1L, length(jobs)))
+    # An explicit per-process port avoids inherited default-port collisions
+    # when independent outer jobs were forked from the same R session.
+    for (attempt in seq_len(20L)) {
+      port <- as.integer(20000 + (as.double(Sys.getpid()) + sample.int(40000L, 1L)) %% 40000)
+      candidate <- tryCatch(parallel::makePSOCKcluster(length(batch), port = port,
+        setup_strategy = "parallel", setup_timeout = 60), error = identity)
+      if (!inherits(candidate, "error")) {
+        workers <- candidate
+        break
+      }
+      if (!grepl("server socket", conditionMessage(candidate), fixed = TRUE)) stop(candidate)
+    }
+    if (is.null(workers)) stop("Could not allocate an isolated joint-sampler worker port.", call. = FALSE)
+    result[batch] <- parallel::clusterApply(workers, jobs[batch], run, input = input,
+      prior = prior, iter = iter, library_paths = .libPaths())
+    parallel::stopCluster(workers)
+    workers <- NULL
+  }
+  result
 }
 
 catmech_joint_cluster_draws <- function(data, value, gold, predictors, m, cluster, control) {

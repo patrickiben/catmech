@@ -69,7 +69,8 @@ recorded value with one shared two-dimensional site effect. It requires
 `burnin = 1000`, `iterations = 2000`, `max_iterations = 8000`, and
 `prior_scale = 1`. Chains must be at least four. Failed diagnostic screens
 restart the same seeded chains with doubled retained iterations up to the
-declared maximum, then fail with traces in a `catmech_convergence_error`.}
+declared maximum, then fail with traces in a `catmech_convergence_error`.
+Each chain uses a fresh R worker to isolate the backend's internal RNG state.}
 }
 \value{
 A `catmech_result`. Its completed target contains exact gold references

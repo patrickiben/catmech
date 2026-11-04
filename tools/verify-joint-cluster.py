@@ -152,6 +152,44 @@ def verify(out, source_root):
     errors = read_csv(out / "errors.csv")
     require({(r["cell"], int(r["replicate"]), r["method"]) for r in errors} ==
             {k for k, r in keyed.items() if r["status"] == "error"}, "Error table incomplete")
+    diagnostics = read_csv(out / "diagnostics.csv")
+    diagnostic_groups = {}
+    diagnostic_keys = set()
+    for d in diagnostics:
+        key = d["cell"], int(d["replicate"]), d["method"]
+        require(key in keyed and key[2].startswith("joint"), f"Orphan diagnostic: {key}")
+        full_key = key + (d["parameter"],)
+        require(full_key not in diagnostic_keys, f"Duplicate diagnostic parameter: {full_key}")
+        diagnostic_keys.add(full_key)
+        diagnostic_groups.setdefault(key, []).append(d)
+    for key, r in keyed.items():
+        if not key[2].startswith("joint"):
+            require(not r["attempts"] and not r["iterations_used"], f"Sampler metadata on nonjoint method: {key}")
+            continue
+        if r["status"] == "ok":
+            require(key in diagnostic_groups, f"Successful joint request lacks diagnostics: {key}")
+        if key not in diagnostic_groups:
+            continue  # A support refusal can occur before any chain exists.
+        d = diagnostic_groups[key]
+        for field, output_field, operation in (("rhat", "max_rhat", max),
+                                               ("ess_bulk", "min_ess_bulk", min),
+                                               ("ess_tail", "min_ess_tail", min)):
+            values = [number(x, field) for x in d if math.isfinite(number(x, field))]
+            close(number(r, output_field), operation(values) if values else math.nan,
+                  f"Diagnostic aggregate {key}/{field}")
+        attempts = json.loads(r["attempts"])
+        schedule = [a["iterations"] for a in attempts]
+        require(schedule in ([2000], [2000, 4000], [2000, 4000, 8000]), f"Unexpected extension schedule: {key}")
+        require(int(r["iterations_used"]) == schedule[-1], f"Last iteration metadata: {key}")
+        require(all(not a["convergence_pass"] for a in attempts[:-1]), f"Extended after passing screen: {key}")
+        last = attempts[-1]
+        screen = (number(r, "max_rhat") <= 1.05 and number(r, "min_ess_bulk") >= 400 and
+                  number(r, "min_ess_tail") >= 400)
+        require(last["convergence_pass"] == screen, f"Diagnostic screen disagrees: {key}")
+        if r["status"] == "ok":
+            require(screen, f"Failed convergence returned an interval: {key}")
+        if r["error_class"] == "catmech_convergence_error":
+            require(not screen and schedule[-1] == 8000, f"Incorrect convergence refusal: {key}")
     if pilot:
         require(not (out / "summary.csv").exists() and not (out / "paired.csv").exists(), "Pilot accuracy summary exists")
         return len(rows), nerrors, 0
@@ -189,6 +227,13 @@ def verify(out, source_root):
             mean_se=mean([number(r, "se") for r in ok]), mean_width=mean(widths), mean_width_mcse=mcse(widths),
             total_seconds=sum(number(r, "elapsed_seconds") for r in z),
             median_seconds=statistics.median(number(r, "elapsed_seconds") for r in z))
+        finite_rhat = [number(r, "max_rhat") for r in z if math.isfinite(number(r, "max_rhat"))]
+        finite_bulk = [number(r, "min_ess_bulk") for r in z if math.isfinite(number(r, "min_ess_bulk"))]
+        finite_tail = [number(r, "min_ess_tail") for r in z if math.isfinite(number(r, "min_ess_tail"))]
+        expected_summary.update(max_rhat=max(finite_rhat) if finite_rhat else math.nan,
+                                median_max_rhat=statistics.median(finite_rhat) if finite_rhat else math.nan,
+                                min_ess_bulk=min(finite_bulk) if finite_bulk else math.nan,
+                                min_ess_tail=min(finite_tail) if finite_tail else math.nan)
         for field, value in expected_summary.items():
             close(number(s, field), value, f"Summary {key}/{field}")
             checked += 1
@@ -224,9 +269,29 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path)
     parser.add_argument("--source-root", type=Path, default=Path(__file__).resolve().parents[1])
+    parser.add_argument("--compare-aborted", type=Path,
+                        help="Compare all saved aborted-run scientific fields, excluding elapsed time/source fingerprint")
     args = parser.parse_args()
     requests, errors, summaries = verify(args.output.resolve(), args.source_root.resolve())
     print(f"PASS: {requests} planned requests; {errors} recorded failures; {summaries} independently recomputed scalar summaries; source hashes match.")
+    if args.compare_aborted is not None:
+        prior = args.compare_aborted.resolve()
+        abort = json.loads((prior / "ABORTED.json").read_text())
+        require(abort["status"] == "aborted-worker-limit" and abort["accuracy_inspected"] is False,
+                "Unexpected aborted-run provenance")
+        require(read_csv(prior / "source-hashes-before.csv") == read_csv(prior / "source-hashes-at-abort.csv"),
+                "Aborted run changed sources before interruption")
+        old = read_csv(prior / "records.csv")
+        new = {(r["cell"], r["replicate"], r["method"]): r for r in read_csv(args.output / "records.csv")}
+        require(len(old) == abort["saved_requests"] == 350, "Unexpected aborted request count")
+        excluded = {"elapsed_seconds", "source_fingerprint"}
+        for row in old:
+            key = row["cell"], row["replicate"], row["method"]
+            require(key in new, f"Aborted request absent from final study: {key}")
+            require(set(row) == set(new[key]), f"Output schema changed: {key}")
+            for field in set(row) - excluded:
+                require(row[field] == new[key][field], f"Execution-only change altered {key}/{field}")
+        print(f"PASS: all {len(old)} aborted requests exactly match final scientific/status/diagnostic fields; only runtime/source fingerprint excluded.")
 
 
 if __name__ == "__main__":
