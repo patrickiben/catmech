@@ -54,6 +54,7 @@ config <- list(mode = mode, workers = workers, m = 40L, cells = cells,
   baseline_source_commit = "ae8f94086710ea1acc0df937f45ee847b6a0976b", pan_version = as.character(utils::packageVersion("pan")),
   candidate_sampler = "factorized_hw_matrixnormal_gibbs_logscale_mh_2_per_component_sd1",
   source_fingerprint = source_fingerprint, compiler = compiler, accuracy_exported = mode != "pilot")
+config$execution_backend <- "fresh_R_PSOCK_pool"
 config$validation_kind <- "dependent_numerical_replay"
 config$replays_source_fingerprint <- "607f0585be72b5e116a6d384f1c1df2f1294241737540e80deaf4aa413d2814e"
 utils::write.csv(before, file.path(out, "source-hashes-before.csv"), row.names = FALSE)
@@ -489,16 +490,37 @@ availability_screen <- function(fits, records) {
     no_observed_fit_failure_increase = no_increase, pass = fit_rate && interval_rate && no_increase))
 }
 
+# Independent R processes avoid inheriting initialized native/BLAS state by fork.
+# Workers load their own namespace and the same frozen function definitions.
+pool <- parallel::makePSOCKcluster(workers)
+parallel::clusterCall(pool, function(root, state) {
+  setwd(root)
+  pkgload::load_all(root, quiet=TRUE, compile=FALSE)
+  list2env(state, envir=.GlobalEnv)
+  old <- new.env(parent=globalenv())
+  for(f in sort(list.files(file.path(baseline_root,"R"),full.names=TRUE)))
+    if(endsWith(f,".R")) sys.source(f,envir=old)
+  stopifnot(exists("catmech_reference",envir=old,inherits=FALSE))
+  assign("old",old,envir=.GlobalEnv)
+  for(z in parse(file.path(root,"validation/run-marginal-extension.R"))) {
+    if(is.call(z) && identical(z[[1L]],as.name("<-")) && is.call(z[[3L]]) &&
+       identical(z[[3L]][[1L]],as.name("function"))) eval(z,envir=.GlobalEnv)
+  }
+  TRUE
+}, root, mget(c("root","baseline_root","mode","workers","config","cells","prior_cells",
+ "primary_cells","contextual_cells","new_control","old_control","before","source_fingerprint")))
+challenge <- length(args)>=3L && identical(args[3L],"challenge")
 all_records <- all_fits <- all_diagnostics <- list()
 started <- Sys.time()
-for (index in seq_along(cells)) {
+for (index in if(challenge) 4L else seq_along(cells)) {
   cell <- cells[index]
   reps <- config$primary_reps
-  for (chunk in split(seq_len(reps), ceiling(seq_len(reps) / 16L))) {
-    batch <- parallel::mclapply(chunk, function(r) run_replicate(cell, index, r),
-      mc.cores = workers, mc.preschedule = TRUE, mc.set.seed = FALSE)
-    if (any(vapply(batch, inherits, logical(1), what = "try-error")))
-      stop("Worker infrastructure error; saved checkpoints are not a completed study.")
+  for (chunk in if(challenge) list(34L) else split(seq_len(reps), ceiling(seq_len(reps) / 16L))) {
+    batch <- parallel::parLapply(pool, chunk, function(r,cell,index) run_replicate(cell,index,r), cell, index)
+    if (length(batch)!=length(chunk) || !all(vapply(batch,function(x)
+        is.list(x) && all(c("records","fits","diagnostics") %in% names(x)) &&
+        is.data.frame(x$records) && nrow(x$records)>0L,logical(1))))
+      stop("Worker infrastructure error; no missing cohort is allowed.")
     all_records <- c(all_records, lapply(batch, `[[`, "records"))
     all_fits <- c(all_fits, lapply(batch, `[[`, "fits"))
     all_diagnostics <- c(all_diagnostics, lapply(batch, `[[`, "diagnostics"))
@@ -514,6 +536,13 @@ for (index in seq_along(cells)) {
       cell, max(chunk), reps, nrow(records), nrow(fits), as.numeric(difftime(Sys.time(), started, units = "secs"))))
   }
 }
+parallel::stopCluster(pool)
+if(challenge) {
+  stopifnot(identical(before,hash_sources()),nrow(records)==17L,nrow(fits)==9L,all(fits$fit_status=="ok"))
+  jsonlite::write_json(list(status="pass",scope="selected isolated-worker check, not a complete study",cell="observed_mar",replicate=34L),file.path(out,"CHALLENGE.json"),auto_unbox=TRUE,pretty=TRUE)
+  quit(status=0L)
+}
+
 cohorts <- length(cells) * config$primary_reps
 expected_analyses <- 5L * cohorts + 12L * length(prior_cells) * config$prior_reps
 expected_fits <- 3L * cohorts + 6L * length(prior_cells) * config$prior_reps

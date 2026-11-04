@@ -219,6 +219,7 @@ def verify_records(out, root):
     require(completed["status"] == "complete" and completed["mode"] == mode, "Stage is not completed")
     require(settings.get("validation_kind") == "dependent_numerical_replay", "Replay scope missing")
     require(settings.get("replays_source_fingerprint") == "607f0585be72b5e116a6d384f1c1df2f1294241737540e80deaf4aa413d2814e", "Original study changed")
+    require(settings.get("execution_backend") == "fresh_R_PSOCK_pool", "Worker isolation missing")
     verify_sources(out, root, settings, completed)
     records, fits = read_csv(out/"records.csv"), read_csv(out/"fit-records.csv")
     record_map = {key(r): r for r in records}

@@ -31,3 +31,17 @@ fingerprints and control metadata. Any discrepancy needs investigation.
 The method/DGM/prior ranges/targets and limitations remain as specified in the
 original JOINT_MARGINAL_PLAN.md. No new scientific superiority claim arises
 from using more draws only after a failed numerical screen.
+
+## Execution amendment after interrupted replay
+
+The initial forked replay had a worker segfault at observed-MAR cohort34 and
+omitted that cohort. It was stopped and preserved as INCOMPLETE, with unchanged
+source hashes and full execution log. No completed-study claim is made for it.
+The cause of that process crash is not established by the log.
+
+Replace only the outer execution backend with independently started PSOCK R
+workers, loading the same frozen definitions and explicit seeds. Reject NULL,
+missing or malformed worker results immediately. First check cohort34 in this
+backend; that selected check writes CHALLENGE.json, never COMPLETE.json. Then
+run the entire grid from scratch in a new directory. No interrupted records
+are reused, no cohort is substituted, and all scientific settings stay fixed.
