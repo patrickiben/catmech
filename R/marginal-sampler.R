@@ -235,7 +235,8 @@ catmech_marginal_cluster_prepare <- function(data, value, gold, predictors, clus
   # A sufficient, deliberately conservative support condition for a half-t
   # residual covariance prior. Exact deterministic residual directions can
   # otherwise drive the likelihood to a singular covariance boundary.
-  paired_design <- stats::model.matrix(~ factor(ids[paired]) - 1)
+  paired_design <- if (length(unique(ids[paired])) == 1L)
+    matrix(1, sum(paired), 1L) else stats::model.matrix(~ factor(ids[paired]) - 1)
   if (length(predictors))
     paired_design <- cbind(paired_design, y[paired, seq.int(3L, ncol(y)), drop = FALSE])
   paired_qr <- qr(paired_design, tol = 1e-7)

@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "output": "/Users/patrickiben/Documents/catmech/validation/joint-marginal-development-factorized",
+  "source_root": "/Users/patrickiben/Documents/catmech/validation/joint-marginal-factorized-development-source",
+  "checks": {
+    "stage": "development",
+    "cohorts": 270,
+    "analysis_requests": 2790,
+    "fitted_workflow_requests": 1530,
+    "mcmc_fit_requests": 1260,
+    "returned_intervals": 2790,
+    "analysis_failures": 0,
+    "fit_failures": 0,
+    "diagnostic_rows": 32880,
+    "source_files": 35,
+    "summary_values_checked": 3534,
+    "paired_contrasts_checked": 504,
+    "bootstrap_replicates_recomputed": 2000,
+    "adoption_screens_recomputed": 4
+  },
+  "scope": "Independent reporting/grid/arithmetic audit; not proof of model validity or sampler correctness."
+}

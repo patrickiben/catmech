@@ -1,0 +1,8 @@
+2026-11-04: figure reporting controls use fabricated records only, not any catmech fitted accuracy.
+Generated the full planned 27600-analysis arithmetic grid in a temporary directory.
+Figure plotting recomputed 62 values and 124 bounds from fabricated records.
+Independent Python figure verifier: PASS for all 62 points, 124 bounds, 62 denominators, 8 MCSE comparisons and 11 input-file hashes.
+Includes stronger maximum-axis prior sensitivity, missing analysis groups and regression-only refusals.
+PNG resolution 3200x2400; vector PDF present.
+Synthetic previews are explicitly watermarked as fabricated and remain outside the repository.
+Actual confirmation figures require fresh numerical verification and visual inspection.

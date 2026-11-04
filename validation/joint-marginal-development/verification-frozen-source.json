@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "output": "/Users/patrickiben/Documents/catmech/validation/joint-marginal-development",
+  "source_root": "/Users/patrickiben/Documents/catmech/validation/joint-marginal-stage1-source",
+  "checks": {
+    "stage": "development",
+    "cohorts": 270,
+    "analysis_requests": 2310,
+    "fitted_workflow_requests": 1290,
+    "mcmc_fit_requests": 1020,
+    "returned_intervals": 2310,
+    "analysis_failures": 0,
+    "fit_failures": 0,
+    "diagnostic_rows": 19380,
+    "source_files": 35,
+    "summary_values_checked": 2926,
+    "paired_contrasts_checked": 408,
+    "bootstrap_replicates_recomputed": 2000,
+    "adoption_screens_recomputed": 4
+  },
+  "scope": "Independent reporting/grid/arithmetic audit; not proof of model validity or sampler correctness."
+}

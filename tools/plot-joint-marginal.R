@@ -167,7 +167,7 @@ render <- function() {
   points(z,10-match(z$cell,cells)+offsets[z$method],100)
   z<-plot_data[plot_data$panel=="B", ]
   axes(range(pretty(range_finite(z,TRUE))),cells,"B  Bias for the same population target",
-    "Contextual targets: 0.9, 0.9 and 0; no within-site target substitution","Mean estimate minus target",0)
+    "Same marginal targets in contextual cells: 0.9, 0.9 and 0","Mean estimate minus target",0)
   points(z,10-match(z$cell,cells)+offsets[z$method])
   z<-plot_data[plot_data$panel=="C", ]
   limits<-range(pretty(range_finite(z,TRUE)));limits[1L]<-min(0,min(z$lower[is.finite(z$lower)]))

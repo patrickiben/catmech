@@ -423,3 +423,33 @@ Preserve the earlier failed scientific candidate and its reporting verifier as
 grid, both sensitivity axes, stronger gate and new diagnostic monitor set.
 This amendment supersedes the initial candidate's covariance-prior description,
 D seeds, sensitivity grid/metric and request counts for all future runs.
+
+### Amendment 3: one-paired-site input correction before confirmation
+
+After completed D2 and before confirmation, a read-only input audit identified
+a support-check implementation error: constructing factor contrasts for paired
+rows from only one site raises a generic R contrasts error. Such data can still
+meet the separate observed-site, paired-residual-rank and degrees-of-freedom
+requirements. For this case only, construct the paired-site design as a column
+of ones. Leave the existing multi-site design path unchanged. This corrects
+input handling without changing the likelihood, prior, posterior sampler,
+controls, estimand, interval summary or scoring rules.
+
+Preserve all 35 D2 source files under
+`validation/joint-marginal-factorized-development-source`, archived at commit
+`18a0542`. Its source fingerprint is
+`3a6c65470a6198dfd9c85f99c71217446b6f17206113322d0a1c351746009c5c`.
+The [equivalence audit](v0.10.0-development/single-paired-site-equivalence.json)
+regenerated all 270 D2 public cohorts from their frozen seeds and matched every
+recorded input hash. Each cohort used at least 12 paired sites, so the corrected
+one-site branch was never entered. All prepared model objects and their
+serialized bytes were identical before and after the correction. This audit
+performed no fitting or accuracy evaluation; no D2 result was replaced.
+
+The [D2 decision](JOINT_MARGINAL_D2_DECISION.md) freezes the unchanged scientific
+candidate for the originally reserved confirmation seeds and amended 27,600-
+analysis grid. Freeze the corrected source and this amendment before launching
+confirmation. Independently verify D2 against its archived source root and
+confirmation against its own before/after source manifest. Every declared
+calibration, bias, strongest-axis sensitivity and availability screen remains
+unchanged; any unfavorable confirmation result remains reportable.

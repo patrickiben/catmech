@@ -271,3 +271,21 @@ test_that("paired support checks are stable under measurement and predictor reco
   expect_equal(transformed$input$y, sweep(original$input$y, 2L, c(-1, 1, -1), "*"),
     tolerance = 1e-10)
 })
+
+test_that("paired calibration at one site retains sufficient residual support", {
+  set.seed(171100L)
+  site <- rep(seq_len(9L), each = 8L)
+  x <- stats::rnorm(length(site))
+  d <- data.frame(recorded = 1.1 * x + stats::rnorm(length(x)),
+    reference = .5 + .7 * x + stats::rnorm(length(x)), x = x, site = as.character(site))
+  d$reference[site > 5L] <- NA_real_
+  d$recorded[site %in% 2:5] <- NA_real_
+  # Both responses have five observed sites, while the eight paired rows occur
+  # at one site. Two independent residual measurement directions are available.
+  prepared <- catmech_marginal_cluster_prepare(d, "recorded", d$reference, "x", "site")
+  expect_identical(prepared$paired_support$paired_sites, 1L)
+  expect_equal(prepared$paired_support$residual_df, 6L)
+  expect_true(all(prepared$paired_support$standardized_residual_singular_values >
+    prepared$paired_support$minimum_singular_value))
+  expect_identical(prepared$rows, seq_len(nrow(d)))
+})
