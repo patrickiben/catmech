@@ -1,0 +1,19 @@
+gaussian_balanced: 16/30 cohorts; 272 analysis requests, 144 fitted-workflow requests; 33.6s elapsed
+gaussian_balanced: 30/30 cohorts; 510 analysis requests, 270 fitted-workflow requests; 67.6s elapsed
+gaussian_unbalanced: 16/30 cohorts; 590 analysis requests, 318 fitted-workflow requests; 76.0s elapsed
+gaussian_unbalanced: 30/30 cohorts; 660 analysis requests, 360 fitted-workflow requests; 90.4s elapsed
+near_zero_icc: 16/30 cohorts; 932 analysis requests, 504 fitted-workflow requests; 121.7s elapsed
+near_zero_icc: 30/30 cohorts; 1170 analysis requests, 630 fitted-workflow requests; 163.1s elapsed
+observed_mar: 16/30 cohorts; 1442 analysis requests, 774 fitted-workflow requests; 219.2s elapsed
+observed_mar: 30/30 cohorts; 1680 analysis requests, 900 fitted-workflow requests; 298.0s elapsed
+null_slope: 16/30 cohorts; 1760 analysis requests, 948 fitted-workflow requests; 308.1s elapsed
+null_slope: 30/30 cohorts; 1830 analysis requests, 990 fitted-workflow requests; 317.9s elapsed
+student_t5: 16/30 cohorts; 1910 analysis requests, 1038 fitted-workflow requests; 328.1s elapsed
+student_t5: 30/30 cohorts; 1980 analysis requests, 1080 fitted-workflow requests; 341.0s elapsed
+contextual_x: 16/30 cohorts; 2252 analysis requests, 1224 fitted-workflow requests; 384.5s elapsed
+contextual_x: 30/30 cohorts; 2490 analysis requests, 1350 fitted-workflow requests; 462.0s elapsed
+contextual_unbalanced: 16/30 cohorts; 2570 analysis requests, 1398 fitted-workflow requests; 478.1s elapsed
+contextual_unbalanced: 30/30 cohorts; 2640 analysis requests, 1440 fitted-workflow requests; 507.0s elapsed
+contextual_null: 16/30 cohorts; 2720 analysis requests, 1488 fitted-workflow requests; 521.2s elapsed
+contextual_null: 30/30 cohorts; 2790 analysis requests, 1530 fitted-workflow requests; 537.1s elapsed
+Complete: 2790 analysis requests, 2790 intervals, 0 analysis refusals; 0 fit refusals.

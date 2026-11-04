@@ -1,0 +1,1 @@
+Frozen exact factorized-prior source files for the third masked pilot and fresh development D2, candidate commit `288febf`. Every byte matches their 35-entry source manifests. A subsequent one-paired-site input-preparation correction is checked for exact equivalence on all 270 D2 cohorts before confirmation; no statistical control, prior or interval is tuned after D2.
