@@ -667,8 +667,8 @@ def tamper_tests(out, root):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path, help="Completed stage output directory")
-    parser.add_argument("--source-root", type=Path, default=Path(__file__).resolve().parents[1],
-                        help="Source tree matching the stage's before/after hashes")
+    parser.add_argument("--source-root", type=Path, default=Path(__file__).resolve().parents[1]/"validation/v0.9.0-source",
+                        help="Frozen v0.9.0 source tree matching the stage's before/after hashes")
     parser.add_argument("--tamper-tests", action="store_true", help="Confirm altered temporary copies are rejected")
     parser.add_argument("--report", type=Path, help="Write JSON verification report (does not overwrite study evidence)")
     args = parser.parse_args()
