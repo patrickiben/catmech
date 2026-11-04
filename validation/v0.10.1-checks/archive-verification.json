@@ -1,0 +1,429 @@
+{
+  "status": "PASS",
+  "archive": "/private/var/folders/9d/wmj87f650y15l5nwl2sg2ft00000gn/T/catmech-v0101-check-mabifqhv/catmech_0.10.1.tar.gz",
+  "sha256": "7f0ba1f01cd5a426d544bd7b113d9ba9e9756ddf752f4589928b78d690fb0195",
+  "bytes": 457807,
+  "scientific_source_files": 20,
+  "archive_files": 69,
+  "source_freeze": "/Users/patrickiben/Documents/catmech/validation/marginal-extension-revalidation-isolated",
+  "release_source_equivalence": {
+    "mode": "exact_source_freeze",
+    "identical_to_confirmation_source": true
+  },
+  "files": [
+    {
+      "file": "DESCRIPTION",
+      "bytes": 1470,
+      "sha256": "59d905b2ee34e19b81adfc0562d4817665345c7bc781abb2878e99104e6a4e31",
+      "check": "original fields match after DCF unfolding; generated compilation metadata checked"
+    },
+    {
+      "file": "LICENSE",
+      "bytes": 42,
+      "sha256": "88745e68e5b59c3da1d93108ef45330b2cbe94e5498d4baa860d5e2fe213a74f",
+      "check": "byte-identical"
+    },
+    {
+      "file": "NAMESPACE",
+      "bytes": 637,
+      "sha256": "fd427ea1d038f561b2d35a3436bf264d6353aed4e704c47e16a23ed73e88a508",
+      "check": "byte-identical"
+    },
+    {
+      "file": "NEWS.md",
+      "bytes": 21377,
+      "sha256": "0ac888fbec9b50fca1c79f0ff8c64225ca2d91bb6720eae86eedb1d1070026e4",
+      "check": "byte-identical"
+    },
+    {
+      "file": "R/analysis.R",
+      "bytes": 19544,
+      "sha256": "90bb93efccd5e6985727758f49b4b81a734e550fdc8ac7a818a63a848392c0f2",
+      "check": "byte-identical"
+    },
+    {
+      "file": "R/audit-plan.R",
+      "bytes": 27370,
+      "sha256": "319a9400d98c3abc74e5cdb07875f7f87d4e1a1d1a4f5ba2fc2e5b251d04e764",
+      "check": "byte-identical"
+    },
+    {
+      "file": "R/catmech-package.R",
+      "bytes": 83,
+      "sha256": "ed2bf174b149ab29e59b887b0e6ddea420573719491dfa70ccf3dd5443d8edcf",
+      "check": "byte-identical"
+    },
+    {
+      "file": "R/contamination.R",
+      "bytes": 46121,
+      "sha256": "fa9a6929dc0fe392e2e3a3014a5a54ba5308fb0033e8a2434e435a15909e8544",
+      "check": "byte-identical"
+    },
+    {
+      "file": "R/impute.R",
+      "bytes": 11148,
+      "sha256": "39837090144d9e9244a32daebb2df28f5731b25ac89a15c47a2a3fbfee0f9b3b",
+      "check": "byte-identical"
+    },
+    {
+      "file": "R/imputer.R",
+      "bytes": 14054,
+      "sha256": "c4fd038872513e6012f2e156ae4b444d91748067b2461d94888ee2f585f97e8c",
+      "check": "byte-identical"
+    },
+    {
+      "file": "R/joint-analysis.R",
+      "bytes": 10562,
+      "sha256": "af830e8f7c23a94b5b613747314d09bb77d1caf3fe0a8073b77face5d56f4b35",
+      "check": "byte-identical"
+    },
+    {
+      "file": "R/joint-cluster.R",
+      "bytes": 18597,
+      "sha256": "713fd03adacdb8917d079e86f7368459d2ac36c7bd85799b14fa5051f1216914",
+      "check": "byte-identical"
+    },
+    {
+      "file": "R/marginal-analysis.R",
+      "bytes": 10957,
+      "sha256": "7407d584268b770d3a4d004c88dd766271b924fa445c78a47f6c118273b30433",
+      "check": "byte-identical"
+    },
+    {
+      "file": "R/marginal-sampler.R",
+      "bytes": 23204,
+      "sha256": "38ced47f94906d6f10f9572bebda506d04bc35831bb7c070eefe3ec016aba35b",
+      "check": "byte-identical"
+    },
+    {
+      "file": "R/model.R",
+      "bytes": 24648,
+      "sha256": "701295a32332a46870f89abbe20aa5bc0e768bb7816414c1a2e0cd5cabc72222",
+      "check": "byte-identical"
+    },
+    {
+      "file": "R/reference.R",
+      "bytes": 44711,
+      "sha256": "fb169115b7704f211148bcb78df94348b6a0a338f9bb03433dc237334e90e8eb",
+      "check": "byte-identical"
+    },
+    {
+      "file": "R/simulate.R",
+      "bytes": 3082,
+      "sha256": "bdc24dbd40c6547b1f6fe12be96c340ccafe995f0504f24db17946e65a079b7d",
+      "check": "byte-identical"
+    },
+    {
+      "file": "R/spec.R",
+      "bytes": 9458,
+      "sha256": "ed6f3b74e9a1d0751c33bfa72b63da6e90b95dd75ffa0f142ef3810241ef7e15",
+      "check": "byte-identical"
+    },
+    {
+      "file": "README.md",
+      "bytes": 50716,
+      "sha256": "1cd0de32dc10f674726a4319d63baa9c2638e9ee33e7b2257403fede69c63abf",
+      "check": "byte-identical"
+    },
+    {
+      "file": "build/partial.rdb",
+      "bytes": 60,
+      "sha256": "ce91947721ddd2ad2d5fdcb7292bb8d349feead88f598f9aed49f2c602f40556",
+      "check": "R-generated empty named list; byte-matched independent version-2 serialization"
+    },
+    {
+      "file": "inst/examples/audit-plan.R",
+      "bytes": 1806,
+      "sha256": "42d8b28841dca281df5ef82d7f199622b9e5f70adca79178a6a37c1c64d00f88",
+      "check": "byte-identical"
+    },
+    {
+      "file": "inst/examples/contamination.R",
+      "bytes": 3104,
+      "sha256": "9cede90a299b53ace6c377794b4255372920168e652c3c877a74e8e9a6d82b1b",
+      "check": "byte-identical"
+    },
+    {
+      "file": "inst/examples/joint-cluster.R",
+      "bytes": 1358,
+      "sha256": "1fa83087a590c232be391b1f6ed0d304bcf3e51dd0095ded58fbd9ae099a5847",
+      "check": "byte-identical"
+    },
+    {
+      "file": "inst/examples/joint-marginal.R",
+      "bytes": 2382,
+      "sha256": "f4a3859e25a39c7228a27e6562a5f1d31ca2e03d2cf0a4379e95cdd5054539b3",
+      "check": "byte-identical"
+    },
+    {
+      "file": "inst/examples/lab.R",
+      "bytes": 1049,
+      "sha256": "7c88ab1d6eaa220973dd7fceb3b1d9b0c704b9c6d4b25cfaf78e3d730020033f",
+      "check": "byte-identical"
+    },
+    {
+      "file": "inst/examples/model.R",
+      "bytes": 2683,
+      "sha256": "791c84863c22c1a68c0b1db1b74572860e7c7a72f24356b2775ab2a39a3222bd",
+      "check": "byte-identical"
+    },
+    {
+      "file": "inst/examples/reference.R",
+      "bytes": 4162,
+      "sha256": "78aaf77a2556bf603c744a59bb0b205cd2c15ef7e745614dbbd9ae21e3dc1cd9",
+      "check": "byte-identical"
+    },
+    {
+      "file": "inst/specs/lab.yaml",
+      "bytes": 263,
+      "sha256": "ec22cda8a9cd6f7e01d3cdb81954f443d2ca2f545114cc2a3b35cdedb3c392c0",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/catmech-package.Rd",
+      "bytes": 1222,
+      "sha256": "5389de9b7007375475cb50db292a461dcbc8a0ceb25ce6c1f82922ebb463c379",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/catmech_audit_plan.Rd",
+      "bytes": 6447,
+      "sha256": "5ec9e1a08aeafa3611849c84e6ec04416618997b5cb43f433b50427fad2a0d46",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/catmech_contamination.Rd",
+      "bytes": 5413,
+      "sha256": "e2d76cd6467899534aa241dc2343dae6aecf260a02f11a565b3c0ba760a4b2fc",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/catmech_derive_category.Rd",
+      "bytes": 524,
+      "sha256": "15d32e330b9c2800087f75b5e3167a82b5e3d8cad23dac51245bb39658044ec4",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/catmech_hash.Rd",
+      "bytes": 587,
+      "sha256": "77c13ce74e39c37e8580b118e752aa0d639a7db465a7c6da9ed2d7bc8a6a8f77",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/catmech_holdout_check.Rd",
+      "bytes": 2176,
+      "sha256": "644a0d50ab15262a00de455fcbee41145c3d4980b9d94b4289e28d38a8b3189e",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/catmech_impute.Rd",
+      "bytes": 1949,
+      "sha256": "93a83e11b74394c482c168e8653bce53b85b8e3610df408f3467e92d8ba205d7",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/catmech_joint_summary.Rd",
+      "bytes": 2747,
+      "sha256": "e6485455aa42621aa80fd4586b067ceec246be97b288e3d134a327fce411b1cf",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/catmech_marginal_summary.Rd",
+      "bytes": 3223,
+      "sha256": "07ad5ce4840b476ee2b94d2bbe358d746d93758ae51a6fba0232b415f866aa07",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/catmech_model.Rd",
+      "bytes": 5002,
+      "sha256": "a506aaf29b5ad5d3b53ff558f02fe37e190c1c90cede8d0fb1f6734acbc88888",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/catmech_pmm.Rd",
+      "bytes": 2483,
+      "sha256": "f0dbd40a389796849acb461edbdaa25999f41ffdf92128c74b0b221973e2faab",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/catmech_pool_lm.Rd",
+      "bytes": 3345,
+      "sha256": "bdfac1220a536b1267412cdb4b9f139eba112c1991c9a9d9c35587ae7af44ddd",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/catmech_recording_audit.Rd",
+      "bytes": 1335,
+      "sha256": "e408581bdf2ffe546e84732f889ab8dd9327476dba6a70b1749af2661d34a4be",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/catmech_reference.Rd",
+      "bytes": 13189,
+      "sha256": "4410f1e5260b060fd4125d8e0f73f0ceeafb5f096151c022bdec69abb26b9d61",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/catmech_sensitivity.Rd",
+      "bytes": 1940,
+      "sha256": "5221c025066510d7dec87c041db1869e2ee9482a6afc0f76e13d5b9b71e438dd",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/catmech_spec.Rd",
+      "bytes": 1996,
+      "sha256": "c92fb95d359711e87d6ff5e0af61614359247ddc96520a481b265563b535aa61",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/figures/logo.png",
+      "bytes": 276782,
+      "sha256": "27555217b7e8d12103cb097cf05cbddf310d0e18ac25135dc9c384516ef1b559",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/mice.impute.catmech_threshold_corruption.Rd",
+      "bytes": 4294,
+      "sha256": "b30631768e6064a003f4bbee1ffa4a1ecadd1e6765a7ded3b596733a3c38d96e",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/read_catmech_spec.Rd",
+      "bytes": 513,
+      "sha256": "88b52dc9f9bf6bd92c2be96531d2368d2b12e30dd0a06d3ef7882991e583ee83",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/simulate_catmech_lab.Rd",
+      "bytes": 1486,
+      "sha256": "6133e7e625b533ddb48665f152d756b4f5a9f0dc5c40d685d3b227bcc485a317",
+      "check": "byte-identical"
+    },
+    {
+      "file": "man/write_catmech.Rd",
+      "bytes": 565,
+      "sha256": "e4286976ee2e20e1c9a7656bcfbd34f6fada3e13fa80c435a31e7d1dd74a45c3",
+      "check": "byte-identical"
+    },
+    {
+      "file": "src/Makevars",
+      "bytes": 64,
+      "sha256": "f1e594e2101c3ec3edff3905c535eee0a892b69e955baba42f6f7d30be26375f",
+      "check": "byte-identical"
+    },
+    {
+      "file": "src/Makevars.win",
+      "bytes": 64,
+      "sha256": "f1e594e2101c3ec3edff3905c535eee0a892b69e955baba42f6f7d30be26375f",
+      "check": "byte-identical"
+    },
+    {
+      "file": "src/init.cpp",
+      "bytes": 1200,
+      "sha256": "1b9aea9a4741b80cc1b3e2970be0275331a650c158e18da98bd47a1b48cb19ec",
+      "check": "byte-identical"
+    },
+    {
+      "file": "src/marginal.cpp",
+      "bytes": 29359,
+      "sha256": "065826e17b5f4e1f2d5c178ff7986e1c64cba0dbc9b886312dd7995a271468db",
+      "check": "byte-identical"
+    },
+    {
+      "file": "tests/testthat.R",
+      "bytes": 57,
+      "sha256": "344c42a5f90f5fd401e73b2f987f0d9dfd582df3f01358536eb30244f58fc132",
+      "check": "byte-identical"
+    },
+    {
+      "file": "tests/testthat/test-analysis.R",
+      "bytes": 5984,
+      "sha256": "c7c17d81ff1b498f4b8f0e13489505dbedcca72c15034056f9eb86aed509d5fa",
+      "check": "byte-identical"
+    },
+    {
+      "file": "tests/testthat/test-api.R",
+      "bytes": 5261,
+      "sha256": "583810bad46fe346bb7e891ae71cf993309efaed8a9e453e7dd89e48e083d48b",
+      "check": "byte-identical"
+    },
+    {
+      "file": "tests/testthat/test-audit-plan.R",
+      "bytes": 15930,
+      "sha256": "c735513b5cfbb8a65195856cb577acf8f4fc193ddd9b2c5fd5ccdf6c2c5e1181",
+      "check": "byte-identical"
+    },
+    {
+      "file": "tests/testthat/test-clustered.R",
+      "bytes": 24896,
+      "sha256": "8874b0152848cef5dcc400024d7a21cf358de66fb8e652f4ecae946332348f9d",
+      "check": "byte-identical"
+    },
+    {
+      "file": "tests/testthat/test-contamination.R",
+      "bytes": 21519,
+      "sha256": "55dd9b44c8549208c15233628a93baa0674301f18eb1d56f0d2a151f54c89340",
+      "check": "byte-identical"
+    },
+    {
+      "file": "tests/testthat/test-imputer.R",
+      "bytes": 8799,
+      "sha256": "59397735157118623be797f3733f23ee87dd974cb01ea119d1a138da0c24fdfc",
+      "check": "byte-identical"
+    },
+    {
+      "file": "tests/testthat/test-joint-analysis.R",
+      "bytes": 12492,
+      "sha256": "7b5956bef7522a7fb5f5ab94c4d6eb2d0547df85c103283ab9213282e2657905",
+      "check": "byte-identical"
+    },
+    {
+      "file": "tests/testthat/test-joint-cluster.R",
+      "bytes": 17781,
+      "sha256": "7c69c4b3204c28776210fcfc0cd0dc07719d983cd6fb8b5eb224b5ab5d7fb509",
+      "check": "byte-identical"
+    },
+    {
+      "file": "tests/testthat/test-joint-trace.R",
+      "bytes": 5069,
+      "sha256": "39029edc91f1af3479189711058f1edbc9409978fef6c2d7f5b65d805a8825f7",
+      "check": "byte-identical"
+    },
+    {
+      "file": "tests/testthat/test-marginal-analysis.R",
+      "bytes": 15449,
+      "sha256": "b35413f9d0270972367a831f0ff86661dada29edfb04fe8f51992188a0a6aa40",
+      "check": "byte-identical"
+    },
+    {
+      "file": "tests/testthat/test-marginal-factorized.R",
+      "bytes": 9634,
+      "sha256": "36610de4c4b663714e41de250d13a58b7f4a0562ecbf893705bc6c7b9adfb9c2",
+      "check": "byte-identical"
+    },
+    {
+      "file": "tests/testthat/test-marginal-oracle.R",
+      "bytes": 23982,
+      "sha256": "70ff604d96bd95b098674fd7db62b95699c8981de677235977aee0e1a0ae03eb",
+      "check": "byte-identical"
+    },
+    {
+      "file": "tests/testthat/test-model.R",
+      "bytes": 8412,
+      "sha256": "fe78bf0e2dc34bdf1ddef7f17c41aecd05d66d97e05fd9035144345ffe64746d",
+      "check": "byte-identical"
+    },
+    {
+      "file": "tests/testthat/test-reference.R",
+      "bytes": 12398,
+      "sha256": "4b4ed8a59e777e38bec5d69d88b0aca7430d14546ad127c8e6c87554f95c87c9",
+      "check": "byte-identical"
+    },
+    {
+      "file": "tests/testthat/test-spec.R",
+      "bytes": 2212,
+      "sha256": "cd6d5f999bc8e8445ceba4aa453f1e1c9c2dfe7d2b488a0e203bdb8cb0de2303",
+      "check": "byte-identical"
+    }
+  ]
+}

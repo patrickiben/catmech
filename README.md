@@ -1,6 +1,6 @@
 # catmech <img src="man/figures/logo.png" align="right" width="160" alt="catmech logo: a neon cat piloting a mech suit">
 
-**An experimental R package for regression using error-prone recorded measurements and an independently checked reference subset. Version 0.10.0.**
+**An experimental R package for regression using error-prone recorded measurements and an independently checked reference subset. Version 0.10.1.**
 
 **Contextual site effects:** the explicit `joint_marginal` model estimates measurement and predictor variation together. Use `catmech_marginal_summary()` for population marginal coefficients; see the [model and assumptions](docs/JOINT_MARGINAL_METHOD.md) and [confirmation findings](validation/JOINT_MARGINAL_SYNTHESIS.md).
 
@@ -127,7 +127,7 @@ and [validation record](validation/VALIDATION.md).
 
 The [commands above](#try-it) install the dependencies and then the package. Run the second
 command from the repository directory, or build the source archive with `R CMD build .` and
-install it with `R CMD INSTALL catmech_0.10.0.tar.gz`. R 4.1 or later is required, although only R 4.6
+install it with `R CMD INSTALL catmech_0.10.1.tar.gz`. R 4.1 or later is required, although only R 4.6
 has been tested locally. Building from source also requires a C++17 compiler and the
 platform toolchain for R packages. GitHub Actions checks Linux, macOS and Windows. See the
 [validation record](validation/VALIDATION.md) and [source-build guide](docs/BUILDING.md).
@@ -352,6 +352,16 @@ See the [full results and Monte Carlo uncertainty](validation/JOINT_CALIBRATION_
 
 ### Marginal coefficients with contextual site effects
 
+Version 0.10.1 allows one further doubling to 64,000 retained iterations per
+chain when the marginal sampler fails its checks at 32,000. Every diagnostic
+monitor and cutoff remains in force; successful earlier attempts stop as before.
+The original v0.10.0 confirmation below is preserved, with the
+[numerical replay reported separately](validation/MARGINAL_EXTENSION_SYNTHESIS.md).
+The complete dependent replay returned all 12,000 MCMC fits and all 27,600
+analysis intervals. Both formerly failing cases pass at 64k; all four screens
+now pass. All 27,596 previously successful analyses are unchanged. This repeats
+the existing cohorts and is not an independent scientific confirmation.
+
 The explicit `cluster_model = "joint_marginal"` models the checked value, recorded
 value and complete continuous predictors as a joint Gaussian vector with correlated
 site effects. It estimates the population regression of the checked value on the
@@ -380,7 +390,7 @@ See the [method](docs/JOINT_MARGINAL_METHOD.md),
 [runnable example](inst/examples/joint-marginal.R) and
 [prospective validation plan](validation/JOINT_MARGINAL_PLAN.md).
 
-In the fresh **3,600-cohort confirmation**, the three contextual scenarios had
+In the v0.10.0 **3,600-cohort confirmation**, the three contextual scenarios had
 **94.00%–95.75%** coverage among returned intervals, versus **58.50%–67.00%** for
 the conditional model's direct summary of the same population slope. Mean
 absolute contextual slope bias fell from **0.1306 to 0.0046**. Contextual and
@@ -394,7 +404,7 @@ regression-scale responses. This is a comparison over declared prior ranges for
 one continuous-predictor slope. The remaining shifts are close to finite-chain
 Monte Carlo errors, so it is not evidence of prior independence.
 
-**The availability screen failed:** **2 of 3,600** default-prior candidate fits
+**The v0.10.0 availability screen failed:** **2 of 3,600** default-prior candidate fits
 refused to return, versus none for the conditional model. Both missed the
 unchanged effective-sample-size cutoff at the maximum run length. Every cell
 still returned at least **99%** of fits and intervals, but that does not satisfy
@@ -541,7 +551,7 @@ are not silently converted to the new model.
 Rscript -e 'install.packages(c("testthat", "pkgload", "roxygen2"))'
 Rscript -e 'testthat::test_local()'
 R CMD build .
-R CMD check --no-manual catmech_0.10.0.tar.gz
+R CMD check --no-manual catmech_0.10.1.tar.gz
 Rscript tools/check-v072-unchanged.R validation/my-v072-comparison.txt
 Rscript validation/run-joint-marginal.R confirmation validation/my-joint-marginal
 python3 -I tools/verify-joint-marginal.py validation/my-joint-marginal --tamper-tests

@@ -1,0 +1,10 @@
+"cell","requests","baseline_failures","marginal_failures","baseline_failure_rate","marginal_failure_rate","marginal_interval_failures","marginal_interval_failure_rate","difference","mcse"
+"gaussian_balanced",400,0,0,0,0,0,0,0,0
+"gaussian_unbalanced",400,0,0,0,0,0,0,0,0
+"near_zero_icc",400,0,0,0,0,0,0,0,0
+"observed_mar",400,0,0,0,0,0,0,0,0
+"null_slope",400,0,0,0,0,0,0,0,0
+"student_t5",400,0,0,0,0,0,0,0,0
+"contextual_x",400,0,0,0,0,0,0,0,0
+"contextual_unbalanced",400,0,0,0,0,0,0,0,0
+"contextual_null",400,0,0,0,0,0,0,0,0

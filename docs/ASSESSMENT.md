@@ -1,6 +1,6 @@
 # Assessment and release decision
 
-Assessed 2026-11-04. Version 0.10.0 is worth releasing as an **experimental, auditable toolkit for data with recorded values and a
+Assessed 2026-11-04. Version 0.10.1 is worth releasing as an **experimental, auditable toolkit for data with recorded values and a
 reference subset**, built from established methods. Real-data testing narrowed its recommended use. It does not support a novel-method
 or clinical-validity claim. Earlier assessments are preserved for [v0.1](ASSESSMENT_V0.1.md), [v0.2](ASSESSMENT_V0.2.md) and [v0.3](ASSESSMENT_V0.3.md).
 
@@ -78,6 +78,17 @@ it does not validate multiple-predictor coverage, nonlinear relationships,
 informative site sizes, rare counts, imperfect references or MNAR. The earlier
 real-data evidence does not validate the new predictor-distribution model.
 
+## Numerical extension in v0.10.1
+
+A single extra doubling to 64k fixes the two observed ESS refusals, retaining
+every check and the original model/prior. The complete dependent numerical
+replay returned all 12,000 MCMC fits and 27,600 intervals; all four screens pass.
+All27,596 formerly successful analyses remain unchanged. This is repeated
+numerical validation of the original cohorts, not independent confirmation.
+The [report](../validation/MARGINAL_EXTENSION_SYNTHESIS.md) preserves an
+interrupted forked execution and the complete replacement run in independent
+R workers. No claim of guaranteed future convergence follows.
+
 ## Current judgment
 
 | Question | Judgment |
@@ -89,7 +100,7 @@ real-data evidence does not validate the new predictor-distribution model.
 | Can it say how many records to audit? | Not validated. The planner gave a NO-GO, failing only at the 5% target. It is a documented calculation, built on classical theory. |
 | Does it repair missed errors with no new information? | No. It requires genuine reference measurements. |
 | Generally valid confidence intervals? | No. Failures are recorded for each workflow. With default intervals the oracle itself undercovered on ClinicalTrials.gov and on the Rwanda audit, and no method in the real-audit test held the oracle's clustered coverage at a 25% facility audit. The experimental clustered option came closer, and under the variance then in use still reached only 89.0% on one of nine items, against 93.2% for a recount. |
-| Does it handle clustered audits? | The opt-in `cluster_model = "joint"` handles mixed recording patterns through a shared bivariate site model. `"joint_marginal"` also models continuous predictors and their site associations; its calibration and prior-sensitivity screens passed, but its strict availability screen failed. Each model has separate assumptions and evidence. For the historical default, partly. `catmech_pool_lm(cluster = )` is a standard cluster-robust variance. `catmech_reference(cluster = )` is experimental: better worst-case coverage when the audited value is the outcome, some added error on rare items, two planned tests that came out PARTIAL, and bias when the audited value is a predictor. Planned comparisons kept it under their rule, narrowly, and an independently written setup looks better on most measures. |
+| Does it handle clustered audits? | The opt-in `cluster_model = "joint"` handles mixed recording patterns through a shared bivariate site model. `"joint_marginal"` also models continuous predictors and their site associations; its calibration and prior-sensitivity screens passed, but its v0.10.0 strict availability screen failed. The v0.10.1 numerical extension passes that screen on the same grid. Each model has separate assumptions and evidence. For the historical default, partly. `catmech_pool_lm(cluster = )` is a standard cluster-robust variance. `catmech_reference(cluster = )` is experimental: better worst-case coverage when the audited value is the outcome, some added error on rare items, two planned tests that came out PARTIAL, and bias when the audited value is a predictor. Planned comparisons kept it under their rule, narrowly, and an independently written setup looks better on most measures. |
 | Real-data evidence? | Two public datasets with real recording differences, and two public audits: Rwanda facility counts and psychology effect sizes. None is a patient-level clinical source-data audit, and the ClinicalTrials.gov reference is not independent truth. |
 | Ready for a GitHub research release? | Yes, with the recorded limitations. |
 | Ready for a methods paper or clinical use? | No. A short software paper may be realistic after review. A methods claim is not supported. |

@@ -1,6 +1,6 @@
 # Building and checking the source package
 
-Version 0.10.0 includes an original native sampler for the optional
+Version 0.10.1 includes an original native sampler for the optional
 `joint_marginal` engine. Building from source requires a C++17 compiler and the
 R build toolchain for the installed R version, including its BLAS/LAPACK and
 Fortran runtime link dependencies. `Rcpp` and `RcppArmadillo` are declared
@@ -18,9 +18,9 @@ From a repository checkout with the package dependencies installed:
 
 ```sh
 R CMD build .
-R CMD INSTALL --library=/path/to/isolated/R-library catmech_0.10.0.tar.gz
+R CMD INSTALL --library=/path/to/isolated/R-library catmech_0.10.1.tar.gz
 Rscript tools/smoke-installed.R /path/to/isolated/R-library
-R CMD check --as-cran --no-manual catmech_0.10.0.tar.gz
+R CMD check --as-cran --no-manual catmech_0.10.1.tar.gz
 ```
 
 Create the isolated library directory before installing. The installed smoke

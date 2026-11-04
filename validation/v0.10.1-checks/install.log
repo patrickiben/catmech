@@ -1,0 +1,24 @@
+* installing *source* package ‘catmech’ ...
+** this is package ‘catmech’ version ‘0.10.1’
+** using staged installation
+** libs
+specified C++17
+using C++ compiler: ‘Apple clang version 21.0.0 (clang-2100.1.1.101)’
+using C++17
+using SDK: ‘MacOSX26.5.sdk’
+clang++ -arch arm64 -std=gnu++17 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG  -I'/Library/Frameworks/R.framework/Versions/4.6/Resources/library/Rcpp/include' -I'/Library/Frameworks/R.framework/Versions/4.6/Resources/library/RcppArmadillo/include' -I/opt/R/arm64/include    -fPIC  -falign-functions=64 -Wall -g -O2   -c init.cpp -o init.o
+clang++ -arch arm64 -std=gnu++17 -I"/Library/Frameworks/R.framework/Resources/include" -DNDEBUG  -I'/Library/Frameworks/R.framework/Versions/4.6/Resources/library/Rcpp/include' -I'/Library/Frameworks/R.framework/Versions/4.6/Resources/library/RcppArmadillo/include' -I/opt/R/arm64/include    -fPIC  -falign-functions=64 -Wall -g -O2   -c marginal.cpp -o marginal.o
+clang++ -arch arm64 -std=gnu++17 -dynamiclib -Wl,-headerpad_max_install_names -undefined dynamic_lookup -L/Library/Frameworks/R.framework/Resources/lib -L/opt/R/arm64/lib -o catmech.so init.o marginal.o -L/Library/Frameworks/R.framework/Resources/lib -lRlapack -L/Library/Frameworks/R.framework/Resources/lib -lRblas /Library/Frameworks/R.framework/Resources/lib/libgfortran.5.dylib /Library/Frameworks/R.framework/Resources/lib/libquadmath.0.dylib -F/Library/Frameworks/R.framework/.. -framework R
+installing to /private/var/folders/9d/wmj87f650y15l5nwl2sg2ft00000gn/T/catmech-v0101-check-mabifqhv/smoke-library/00LOCK-catmech/00new/catmech/libs
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+*** copying figures
+** building package indices
+** testing if installed package can be loaded from temporary location
+** checking absolute paths in shared objects and dynamic libraries
+** testing if installed package can be loaded from final location
+** testing if installed package keeps a record of temporary installation path
+* DONE (catmech)

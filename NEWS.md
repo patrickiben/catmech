@@ -1,3 +1,20 @@
+# catmech 0.10.1
+
+- Extend only the marginal engine's default maximum to 64,000 retained iterations
+  per chain. Retain four chains, the same burn-in, doubling/restarts, every
+  diagnostic monitor, R-hat cutoff and bulk/tail ESS requirements. Existing
+  conditional-joint defaults and explicit user maxima retain their meaning.
+- Both original v0.10.0 convergence refusals pass the selected numerical challenge
+  at 64,000; earlier attempts reproduce the recorded history and diagnostics.
+  The likelihood, prior and interval calculation are unchanged.
+- The full same-cohort numerical replay returned all 12,000 MCMC fits and
+  27,600 intervals; all four screens pass. All 27,596 previously successful
+  analyses are unchanged. Original and interrupted evidence are preserved;
+  this is not an independent scientific confirmation.
+- Run validation workers in independent PSOCK R processes and reject missing
+  worker results. Pin macOS CI to macos-15; all 1,526 assertions pass on all
+  three platforms.
+
 # catmech 0.10.0
 
 - Add the explicit `cluster_model = "joint_marginal"` for a joint Gaussian model

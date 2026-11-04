@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "scope": "dependent numerical replay; not independent confirmation",
+  "unchanged_successful_analyses": 27596,
+  "field_comparisons": 953460,
+  "recovered_analyses": [
+    [
+      "gaussian_unbalanced",
+      "12",
+      "marginal_cv3"
+    ],
+    [
+      "gaussian_unbalanced",
+      "12",
+      "marginal_direct"
+    ],
+    [
+      "contextual_null",
+      "143",
+      "marginal_cv3"
+    ],
+    [
+      "contextual_null",
+      "143",
+      "marginal_direct"
+    ]
+  ]
+}

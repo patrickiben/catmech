@@ -189,7 +189,7 @@ confirmation seeds are declared in the protocol.
 ## Diagnostics, scope and evidence
 
 The default four chains start with 1,000 burn-in and 4,000 retained iterations,
-extending the same seeded chains to 8,000, 16,000 and at most 32,000 retained
+extending the same seeded chains to 8,000, 16,000 and at most 64,000 retained
 iterations. Rank-normalized R-hat must be at most 1.05 and bulk and tail ESS at
 least 100 times the number of chains. Monitors include means, covariance entries,
 hierarchical auxiliaries, conditional covariance blocks, within/between
@@ -232,3 +232,8 @@ nonlinear associations, imperfect reference measurements, MNAR, rare counts or
 the repaired measurement used as an analysis predictor. The existing
 `cluster_model = "joint"`, `catmech_joint_summary()` and CV3/Rubin analysis keep
 their distinct interpretations.
+
+Version 0.10.1 changes only the marginal default maximum from 32k to 64k;
+all convergence checks remain fixed. The original confirmation used 32k and
+remains historical evidence. The [numerical replay](../validation/MARGINAL_EXTENSION_SYNTHESIS.md)
+uses the same cohorts and must not be counted as independent confirmation.
