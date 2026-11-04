@@ -109,6 +109,16 @@ joint_cluster_api_fixture <- function() {
     x = c(x, -.2, .4), site = c(site, "new", "new"), row = seq_len(242L))
 }
 
+test_that("joint posterior inference is unchanged by the imputation count", {
+  d <- joint_cluster_api_fixture()
+  run <- function(m) catmech_reference(d, "raw", "gold", "x",
+    use_recorded = TRUE, cluster = "site", cluster_model = "joint", m = m, seed = 24L)
+  default_m <- run(20L)
+  study_m <- run(40L)
+  expect_identical(default_m$model_diagnostics$traces, study_m$model_diagnostics$traces)
+  expect_identical(catmech_joint_summary(default_m), catmech_joint_summary(study_m))
+})
+
 test_that("joint mode preserves anchors, original data, mids and caller RNG", {
   d <- joint_cluster_api_fixture()
   set.seed(922)
