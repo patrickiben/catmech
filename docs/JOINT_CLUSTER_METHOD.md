@@ -5,6 +5,12 @@ Version 0.8.0 adds the explicit `cluster_model = "joint"` option to
 It supports both recorded-present and recorded-missing unaudited rows within the
 same site. The default `"moment"` option preserves the earlier behavior.
 
+This page describes the conditional joint model, whose site effects are independent
+of the selected covariates. For complete continuous covariates that can share site
+causes with the target, see the separate
+[`joint_marginal` model](JOINT_MARGINAL_METHOD.md) and its population marginal
+coefficient summary. Choosing that model changes the likelihood and prior.
+
 ## Model and contribution
 
 Let `T` be the true measurement, observed only at checked reference rows, and

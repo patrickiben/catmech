@@ -1,0 +1,7 @@
+{
+  "source_commit": "295fea8",
+  "stage": "confirmation",
+  "files": 35,
+  "source_fingerprint": "607f0585be72b5e116a6d384f1c1df2f1294241737540e80deaf4aa413d2814e",
+  "purpose": "Exact source snapshot from the running frozen study; completion and verification recorded separately."
+}

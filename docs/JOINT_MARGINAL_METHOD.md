@@ -23,7 +23,8 @@ u_g ~ Normal(0, Psi)
 e_gi ~ Normal(0, Sigma).
 ```
 
-Sites are independent. Site and row vectors are independent of each other;
+Sites are independent, and row-error vectors are mutually independent. Site and
+row vectors are independent of each other;
 each covariance matrix is unrestricted and positive definite. Correlations
 between the predictor's and target's site components are estimated. Thus the
 model does not require `u_T` to be independent of observed `X`. In particular,
@@ -43,6 +44,8 @@ of means and covariances gives one draw of the coefficients, including the
 population predictor distribution's uncertainty. The intercept and slopes are
 transformed jointly to original units. Summaries use all retained draws across
 all chains, independently of the number of completed datasets.
+With no predictors, the model is bivariate and the reported intercept is the
+population target mean `mu_T`.
 
 The contextual validation example has `x = a_site + z`,
 `T = 0.5 + 0.7*x + 0.4*a_site + v_T + e_T`, with independent unit-variance
@@ -88,7 +91,9 @@ reconstructed full Q. Standard deviations and correlations are not jointly
 independent. The matrix-normal regression prior is proper and broad in the
 empirically standardized units; its coefficient covariance is Omega times the
 squared regression scale. Observed means and standard deviations used for
-scaling are retained in the result metadata.
+scaling are retained in the result metadata. These scaling constants are held
+fixed in posterior simulation: they define a data-dependent prior on the
+original-scale parameters, rather than another uncertain level of the model.
 
 This factorization makes the regression prior explicit. The first development
 candidate instead put a single Huang--Wand prior on each full covariance.
@@ -131,6 +136,28 @@ An original compiled Gibbs sampler performs these updates:
 4. Interweave site-scale moves described below, integrating both sets of site
    covariance auxiliaries and then redrawing them from their full conditionals.
 
+For step 3, let the completed, centered vectors be the row residuals when
+updating Sigma, or the site effects when updating Psi. Partition their matrix
+as `[Y, X]`, with n vectors, two measurement columns in Y and k predictor columns
+in X. Given the current auxiliaries, set
+
+```
+K = transpose(X) %*% X + I / regression_scale^2
+M = solve(K, transpose(X) %*% Y)
+S | rest ~ inverse-Wishart(n + k + 1,
+  transpose(X) %*% X + 4 * diag(1 / a_X))
+Omega | rest, B integrated out ~ inverse-Wishart(n + 3,
+  transpose(Y - X %*% M) %*% (Y - X %*% M) +
+  transpose(M) %*% M / regression_scale^2 + 4 * diag(1 / a_R))
+B | Omega, rest ~ matrix-normal(M, solve(K), Omega).
+```
+
+For a block C of dimension q, each auxiliary is then drawn independently as
+`inverse-gamma((q + 2) / 2, 2 * solve(C)[j,j] + 1 / A_j^2)`.
+The residual-covariance auxiliaries are updated in step 3; the site-covariance
+auxiliaries are updated after step 4. With k = 0, omit S and B and use the
+two-measurement covariance update alone.
+
 Final completed T values are drawn afresh from the parameter draws conditional
 on the original observations. Each site gets one shared multivariate site draw
 across all its missing patterns. Existing augmentation values do not become
@@ -138,7 +165,8 @@ additional evidence. Exact reference values are copied back without numerical
 rounding changes. Other columns remain unchanged.
 
 Near a zero site variance, a centered Gibbs covariance update can mix slowly.
-The numerical amendment adds two scale proposals per response per sweep. With
+The numerical amendment adds two scale proposals per vector coordinate,
+including each predictor, per sweep. With
 `eta ~ Normal(0,1)` and `c = exp(eta)`, scale one column of the site effects by c
 and its covariance by `Psi' = D Psi D`, where D has c in that coordinate.
 The site-effect quadratic form is unchanged. The full transformation Jacobian

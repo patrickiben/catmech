@@ -8,6 +8,13 @@ missed by a flagging rule, provided the reference sample and imputation model
 support the intended analysis. A flag, a plausibility check, and agreement with
 a category are not themselves reference measurements.
 
+For clustered data, the [conditional joint model](JOINT_CLUSTER_METHOD.md)
+supports mixed recording patterns within a site. The separate
+[marginal joint model](JOINT_MARGINAL_METHOD.md) also models complete continuous
+covariates and their site associations. Both are explicit options with additional
+Gaussian assumptions and separate validation; the simpler workflow below remains
+available.
+
 This is an implementation of established missing-data and measurement-error
 methods. Cole, Chu and Greenland described multiple imputation for measurement
 error using a validation substudy in 2006. The default below is the simpler
