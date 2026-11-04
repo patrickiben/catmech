@@ -52,6 +52,7 @@ config <- list(mode = mode, workers = workers, m = 40L, cells = cells,
   bootstrap_seed = switch(mode, pilot = NA_integer_, development = 1730000000L, confirmation = 1740000000L),
   bootstrap_reps = 2000L, new_control = new_control, old_control = old_control,
   baseline_source_commit = "ae8f94086710ea1acc0df937f45ee847b6a0976b", pan_version = as.character(utils::packageVersion("pan")),
+  candidate_sampler = "hw_gibbs_interwoven_logscale_mh_2_per_component_sd1",
   source_fingerprint = source_fingerprint, compiler = compiler, accuracy_exported = mode != "pilot")
 utils::write.csv(before, file.path(out, "source-hashes-before.csv"), row.names = FALSE)
 jsonlite::write_json(config, file.path(out, "settings.json"), auto_unbox = TRUE, pretty = TRUE, na = "null")

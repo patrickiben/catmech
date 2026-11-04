@@ -1,0 +1,29 @@
+   user  system elapsed 
+  4.276   0.084   4.364 
+  iterations convergence_pass max_rhat min_bulk_ess min_tail_ess
+1       4000            FALSE 1.008937     327.1873     951.6203
+2       8000             TRUE 1.006899     626.9226    1667.9577
+$proposals_per_component
+[1] 2
+
+$log_scale_sd
+[1] 1
+
+$auxiliary_update
+[1] "redrawn_after_collapsed_scale_moves"
+
+$acceptance
+   chain component proposed accepted acceptance_rate
+1      1         T    18000      468      0.02600000
+2      1         W    18000      709      0.03938889
+3      1        X1    18000      972      0.05400000
+4      2         T    18000      513      0.02850000
+5      2         W    18000      759      0.04216667
+6      2        X1    18000      935      0.05194444
+7      3         T    18000      492      0.02733333
+8      3         W    18000      794      0.04411111
+9      3        X1    18000      968      0.05377778
+10     4         T    18000      470      0.02611111
+11     4         W    18000      777      0.04316667
+12     4        X1    18000      901      0.05005556
+

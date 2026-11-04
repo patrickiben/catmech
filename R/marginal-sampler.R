@@ -33,6 +33,9 @@ catmech_marginal_gibbs <- function(input, seed, iterations, start = NULL,
       !is.numeric(prior$scale) || is.complex(prior$scale) || length(prior$scale) != 1L ||
       !is.finite(prior$scale) || prior$scale <= 0)
     stop("Malformed marginal covariance prior.", call. = FALSE)
+  if (is.null(prior$interweave)) prior$interweave <- TRUE
+  if (!is.logical(prior$interweave) || length(prior$interweave) != 1L || is.na(prior$interweave))
+    stop("The internal interweave flag must be TRUE or FALSE.", call. = FALSE)
   if (!is.null(fixed)) {
     if (!is.list(fixed) || !all(c("sigma", "psi") %in% names(fixed)))
       stop("Both fixed covariance matrices are required.", call. = FALSE)
@@ -44,6 +47,30 @@ catmech_marginal_gibbs <- function(input, seed, iterations, start = NULL,
   set.seed(seed)
   .Call("catmech_marginal_gibbs_cpp", list(y = input$y, subj = as.integer(input$subj)),
     as.integer(iterations), start, prior, fixed, PACKAGE = "catmech")
+}
+
+# Exact native scale-move ratio, exposed internally for a full-density/Jacobian
+# oracle. The proposal acts on completed data, so no missing entries are allowed.
+catmech_marginal_interweave_ratio <- function(y, subj, mu, u, sigma, psi, j, eta,
+                                             prior = list(family = "huang_wand", scale = 1)) {
+  if (!is.matrix(y) || !is.numeric(y) || is.complex(y) || any(!is.finite(y)) ||
+      !is.matrix(u) || !is.numeric(u) || is.complex(u) || any(!is.finite(u)) ||
+      ncol(y) != ncol(u) || !is.numeric(subj) || length(subj) != nrow(y) ||
+      any(!is.finite(subj)) || any(subj != as.integer(subj)) ||
+      !setequal(subj, seq_len(nrow(u))) || !is.numeric(mu) || is.complex(mu) ||
+      length(mu) != ncol(y) || any(!is.finite(mu)) ||
+      !is.numeric(j) || length(j) != 1L || !is.finite(j) || j != as.integer(j) ||
+      j < 1L || j > ncol(y) || !is.numeric(eta) || is.complex(eta) ||
+      length(eta) != 1L || !is.finite(eta) || !is.list(prior) ||
+      !is.character(prior$family) || length(prior$family) != 1L ||
+      !prior$family %in% c("huang_wand", "inverse_wishart") ||
+      !is.numeric(prior$scale) || length(prior$scale) != 1L ||
+      !is.finite(prior$scale) || prior$scale <= 0)
+    stop("Malformed marginal scale-move oracle input.", call. = FALSE)
+  catmech_marginal_covariance(sigma, ncol(y))
+  catmech_marginal_covariance(psi, ncol(y))
+  .Call("catmech_marginal_ratio_cpp", y, as.integer(subj), mu, u, sigma, psi,
+    as.integer(j), eta, prior, PACKAGE = "catmech")
 }
 
 catmech_marginal_hw_draw <- function(n, dimension, scale = 1, seed = 1L) {
@@ -200,7 +227,7 @@ catmech_marginal_cluster_draws <- function(data, value, gold, predictors, m, clu
       psi = diag(1 / factor, d), aux_sigma = rep(factor, d),
       aux_psi = rep(1 / factor, d), y = y)
   })
-  prior <- list(family = "huang_wand", scale = control$prior_scale)
+  prior <- list(family = "huang_wand", scale = control$prior_scale, interweave = TRUE)
   iterations <- control$iterations
   attempts <- list()
   repeat {
@@ -233,6 +260,13 @@ catmech_marginal_cluster_draws <- function(data, value, gold, predictors, m, clu
   diagnostics$backend <- "native_blocked_Gibbs"
   diagnostics$backend_isolation <- "R_seed_restored_per_chain_and_exact_restart"
   diagnostics$prior <- catmech_marginal_cluster_prior(control)
+  diagnostics$scale_interweaving <- list(proposals_per_component = 2L, log_scale_sd = 1,
+    auxiliary_update = "redrawn_after_collapsed_scale_moves",
+    acceptance = do.call(rbind, lapply(seq_len(control$chains), function(chain)
+      data.frame(chain = chain, component = problem$labels,
+        proposed = as.vector(chains[[chain]]$scale_proposed),
+        accepted = as.vector(chains[[chain]]$scale_accepted),
+        acceptance_rate = as.vector(chains[[chain]]$scale_accepted / chains[[chain]]$scale_proposed)))))
   if (!diagnostics$convergence_pass) stop(structure(list(
     message = paste0("Marginal cluster model failed convergence checks (R-hat <= 1.05 and bulk/tail ESS >= ",
       100L * control$chains, " required). Inspect the condition's model_diagnostics."),

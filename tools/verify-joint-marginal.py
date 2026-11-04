@@ -211,6 +211,13 @@ def verify_records(out, root):
         baseline_source_commit="ae8f94086710ea1acc0df937f45ee847b6a0976b", pan_version="2.0", accuracy_exported=mode != "pilot").items():
         require(settings[field] == expected, f"Protocol setting changed: {field}")
     require(1 <= settings["workers"] <= 16, "Unsupported worker count")
+    sampler = "hw_gibbs_interwoven_logscale_mh_2_per_component_sd1"
+    runner_text = (root/"validation/run-joint-marginal.R").read_text()
+    if "candidate_sampler =" in runner_text:
+        require(settings.get("candidate_sampler") == sampler, "Candidate sampler schedule changed")
+    else:
+        require(mode == "pilot" and "candidate_sampler" not in settings,
+                "Unamended sampler is restricted to the frozen first masked pilot")
     require(set(settings["compiler"]) == {"CC", "CFLAGS", "CXX17", "CXX17STD", "CXX17FLAGS", "CPPFLAGS", "LDFLAGS", "FLIBS", "R_MAKEVARS_USER", "makevars_user_sha256"}, "Compiler provenance missing")
     require(settings["compiler"]["CXX17"] and settings["compiler"]["CXX17STD"], "C++17 compiler record missing")
     require(completed["status"] == "complete" and completed["mode"] == mode, "Stage is not completed")

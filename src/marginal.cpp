@@ -56,6 +56,62 @@ arma::vec auxiliary_draw(const arma::mat& covariance, double scale) {
   return out;
 }
 
+double log_sum_exp(double a, double b) {
+  double larger = std::max(a, b);
+  return larger + std::log1p(std::exp(std::min(a, b) - larger));
+}
+
+// Reversible scale-group move, integrating the Huang--Wand auxiliaries.
+// Scaling one U column by c and the corresponding Psi row/column by c gives
+// Jacobian c^(G+d+1). The conditional Gaussian U density contributes c^-G.
+// The remaining covariance-coordinate Jacobian is c^(d+1).
+double scale_log_ratio(const arma::mat& ybar, const arma::vec& sizes,
+                       const arma::vec& mu, const arma::mat& u,
+                       const arma::mat& si, const arma::mat& pi,
+                       unsigned int j, double eta, double scale,
+                       const std::string& family) {
+  const double d = u.n_cols;
+  arma::mat residual = ybar - u;
+  residual.each_row() -= mu.t();
+  arma::vec delta = std::expm1(eta) * u.col(j);
+  double likelihood = arma::dot(sizes, delta % (residual * si.col(j)) -
+    0.5 * arma::square(delta) * si(j, j));
+  double prior_and_jacobian;
+  if (family == "huang_wand") {
+    double log_precision = std::log(2 * pi(j, j));
+    double log_rate = -std::log(scale);
+    double log_change = log_sum_exp(log_precision - 2 * eta, log_rate) -
+      log_sum_exp(log_precision, log_rate);
+    prior_and_jacobian = -(2 + 2 * d) * eta - (2 + d) / 2 * log_change + (d + 1) * eta;
+  } else {
+    const double df = d + 2;
+    prior_and_jacobian = -df * eta - .25 * scale * pi(j, j) * std::expm1(-2 * eta);
+  }
+  double out = likelihood + prior_and_jacobian;
+  return R_finite(out) ? out : R_NegInf;
+}
+
+void scale_interweave(arma::mat& u, arma::mat& psi, const arma::mat& ybar,
+                      const arma::vec& sizes, const arma::vec& mu,
+                      const arma::mat& sigma, double scale, const std::string& family,
+                      arma::vec& proposed, arma::vec& accepted) {
+  arma::mat si = inverse_spd(sigma), pi = inverse_spd(psi);
+  for (unsigned int j = 0; j < u.n_cols; ++j) {
+    // Fixed engineering settings, never adapted to interval performance.
+    for (unsigned int step = 0; step < 2; ++step) {
+      const double eta = R::rnorm(0, 1), c = std::exp(eta);
+      const double ratio = scale_log_ratio(ybar, sizes, mu, u, si, pi, j, eta, scale, family);
+      proposed[j] += 1;
+      if (std::log(R::runif(0, 1)) < ratio) {
+        u.col(j) *= c;
+        psi.row(j) *= c; psi.col(j) *= c;
+        pi.row(j) /= c; pi.col(j) /= c;
+        accepted[j] += 1;
+      }
+    }
+  }
+}
+
 struct Pattern {
   arma::uvec observed;
   arma::uvec missing;
@@ -156,6 +212,8 @@ RcppExport SEXP catmech_marginal_gibbs_cpp(SEXP input_sexp, SEXP iterations_sexp
   const unsigned int iterations = Rcpp::as<unsigned int>(iterations_sexp);
   const double scale = Rcpp::as<double>(prior["scale"]);
   const std::string family = Rcpp::as<std::string>(prior["family"]);
+  const bool interweave = prior.containsElementNamed("interweave") ?
+    Rcpp::as<bool>(prior["interweave"]) : true;
   if (n < 1 || d < 1 || iterations < 1 || subject.size() != n ||
       !R_finite(scale) || scale <= 0 ||
       (family != "huang_wand" && family != "inverse_wishart"))
@@ -203,6 +261,7 @@ RcppExport SEXP catmech_marginal_gibbs_cpp(SEXP input_sexp, SEXP iterations_sexp
   arma::vec mu(d, arma::fill::zeros), a_sigma(d, arma::fill::ones), a_psi(d, arma::fill::ones);
   arma::mat sigma(d, d, arma::fill::eye), psi(d, d, arma::fill::eye);
   arma::mat u(g, d, arma::fill::zeros);
+  arma::vec scale_proposed(d, arma::fill::zeros), scale_accepted(d, arma::fill::zeros);
   if (!Rf_isNull(start_sexp)) {
     Rcpp::List start(start_sexp);
     if (start.containsElementNamed("mu")) mu = Rcpp::as<arma::vec>(start["mu"]);
@@ -304,8 +363,11 @@ RcppExport SEXP catmech_marginal_gibbs_cpp(SEXP input_sexp, SEXP iterations_sexp
       psi = inverse_wishart(covariance_df + g, psi_scale);
       if (family == "huang_wand") {
         a_sigma = auxiliary_draw(sigma, scale);
-        a_psi = auxiliary_draw(psi, scale);
       }
+      if (interweave)
+        scale_interweave(u, psi, ybar, sizes, mu, sigma, scale, family, scale_proposed, scale_accepted);
+      // Mandatory after the collapsed-auxiliary scale move, including rejection.
+      if (family == "huang_wand") a_psi = auxiliary_draw(psi, scale);
     }
     if (!mu.is_finite() || !y.is_finite()) Rcpp::stop("Nonfinite marginal Gibbs state.");
     for (unsigned int j = 0; j < d; ++j) {
@@ -319,10 +381,34 @@ RcppExport SEXP catmech_marginal_gibbs_cpp(SEXP input_sexp, SEXP iterations_sexp
   return Rcpp::List::create(Rcpp::Named("mu") = means,
     Rcpp::Named("sigma") = sigma_draws, Rcpp::Named("psi") = psi_draws,
     Rcpp::Named("aux_sigma") = aux_sigma, Rcpp::Named("aux_psi") = aux_psi,
+    Rcpp::Named("scale_proposed") = scale_proposed,
+    Rcpp::Named("scale_accepted") = scale_accepted,
     Rcpp::Named("last") = Rcpp::List::create(Rcpp::Named("mu") = mu,
       Rcpp::Named("sigma") = sigma, Rcpp::Named("psi") = psi,
       Rcpp::Named("aux_sigma") = a_sigma, Rcpp::Named("aux_psi") = a_psi,
       Rcpp::Named("y") = y, Rcpp::Named("u") = u));
+  END_RCPP
+}
+
+RcppExport SEXP catmech_marginal_ratio_cpp(SEXP y_sexp, SEXP subject_sexp,
+                                         SEXP mu_sexp, SEXP u_sexp,
+                                         SEXP sigma_sexp, SEXP psi_sexp,
+                                         SEXP j_sexp, SEXP eta_sexp, SEXP prior_sexp) {
+  BEGIN_RCPP
+  arma::mat y = Rcpp::as<arma::mat>(y_sexp), u = Rcpp::as<arma::mat>(u_sexp);
+  arma::uvec group = Rcpp::as<arma::uvec>(subject_sexp); group -= 1;
+  Rcpp::List prior(prior_sexp);
+  arma::vec sizes(u.n_rows, arma::fill::zeros);
+  arma::mat ybar(u.n_rows, y.n_cols, arma::fill::zeros);
+  for (unsigned int i = 0; i < y.n_rows; ++i) {
+    sizes[group[i]] += 1;
+    ybar.row(group[i]) += y.row(i);
+  }
+  ybar.each_col() /= sizes;
+  return Rcpp::wrap(scale_log_ratio(ybar, sizes, Rcpp::as<arma::vec>(mu_sexp), u,
+    inverse_spd(Rcpp::as<arma::mat>(sigma_sexp)), inverse_spd(Rcpp::as<arma::mat>(psi_sexp)),
+    Rcpp::as<unsigned int>(j_sexp) - 1, Rcpp::as<double>(eta_sexp),
+    Rcpp::as<double>(prior["scale"]), Rcpp::as<std::string>(prior["family"])));
   END_RCPP
 }
 

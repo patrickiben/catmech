@@ -271,4 +271,30 @@ method or of independent human review follows from this implementation.
 
 ## Amendments
 
-None. No candidate accuracy runs preceded this protocol.
+### Amendment 1: masked-pilot numerical interweaving, before development
+
+The first completed masked pilot used source commit `8e65e4b`: nine cohorts,
+34 MCMC fits and nine oracles, with 77 requested analyses. Four MCMC requests
+failed the unchanged convergence screen at the fixed maximum; their eight
+analysis refusals are retained. The pilot exported no estimates, interval
+widths, bias or coverage. Its 35 source files are frozen under
+`validation/joint-marginal-pilot-source`; the independent verifier checked all
+646 diagnostic rows and the complete grid. This is numerical evidence only.
+
+Before development, add an exact Metropolis--Hastings interweaving move to the
+candidate Gibbs sampler. For each response component and sweep, make two
+normal log-scale proposals with standard deviation one, jointly rescaling the
+corresponding site-effect column and its site-covariance row and column. The
+acceptance ratio uses the observation likelihood, the marginal Huang--Wand
+site-covariance prior with its auxiliaries integrated out, the site-effect
+density and the transformation Jacobian. Redraw those auxiliary variables from
+their full conditionals after these moves. The target distribution, data,
+covariance priors, transformations, numerical budgets and diagnostic thresholds
+remain unchanged. Record the candidate sampler identifier in settings.
+
+Retain the first masked pilot unchanged and run the same pilot cohorts and
+seeds under the amended source in `joint-marginal-pilot-interwoven`. This paired
+engineering rerun is permitted because no pilot accuracy was exported or used.
+Review mixing, refusals and timing, and repeat independent sampler/conditional
+oracles. Development and confirmation still use their original untouched seeds
+and counts. No scored accuracy preceded this amendment.

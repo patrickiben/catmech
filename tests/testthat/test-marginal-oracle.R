@@ -97,6 +97,7 @@ test_that("fixed-covariance Gibbs mean draws agree with the observed likelihood"
     fit <- catmech_marginal_gibbs(input, seed = 170810L + chain,
       iterations = retained + burnin, fixed = list(sigma = f$sigma, psi = f$psi))
     samples[, chain, ] <- t(fit$mu[, burnin + seq_len(retained), drop = FALSE])
+    expect_true(all(fit$scale_proposed == 0 & fit$scale_accepted == 0))
     expect_equal(fit$sigma[, , c(1L, burnin + retained)],
       array(rep(f$sigma, 2L), c(d, d, 2L)), tolerance = 0)
     expect_equal(fit$psi[, , c(1L, burnin + retained)],
@@ -221,6 +222,235 @@ test_that("unknown-covariance Gibbs posterior agrees with independent pan sampli
     aa <- a[, , j]^2; bb <- b[, , j]^2
     mcse <- sqrt(posterior::mcse_mean(aa)^2 + posterior::mcse_mean(bb)^2)
     expect_lt(abs(mean(aa) - mean(bb)) / mcse, 6)
+    probabilities <- c(.025, .975)
+    qa <- stats::quantile(a[, , j], probabilities, names = FALSE)
+    qb <- stats::quantile(b[, , j], probabilities, names = FALSE)
+    mcse <- sqrt(posterior::mcse_quantile(a[, , j], probabilities, names = FALSE)^2 +
+      posterior::mcse_quantile(b[, , j], probabilities, names = FALSE)^2)
+    expect_lt(max(abs(qa - qb) / mcse), 6)
+  }
+})
+
+# Construct parameter draws with known marginal coefficients. Their within-site
+# and between-site coefficients deliberately differ. This tests a distribution's
+# transformation and summary, not affine invariance of priors under refitting.
+marginal_affine_oracle <- function() {
+  set.seed(170910L)
+  n <- 96L; groups <- rep(seq_len(12L), each = 8L)
+  x <- cbind(5 + stats::rnorm(n), -2 + stats::rnorm(n))
+  d <- data.frame(check.names = FALSE, "recorded value" = .8 + x[, 1L] + stats::rnorm(n),
+    "true value" = 1.2 + .6 * x[, 1L] - .4 * x[, 2L] + stats::rnorm(n),
+    T = x[, 1L], W = x[, 2L], "site label" = as.character(groups))
+  d[["true value"]][rep(1:8, 12L) > 4L | groups > 10L] <- NA_real_
+  d[["recorded value"]][rep(1:8, 12L) %in% c(3L, 7L) | groups == 12L] <- NA_real_
+  size <- 4000L
+  beta <- cbind(stats::rnorm(size, .6, .12), stats::rnorm(size, -.4, .10))
+  alpha <- stats::rnorm(size, 1.2, .15)
+  predictor_mu <- cbind(stats::rnorm(size, 5, .15), stats::rnorm(size, -2, .12))
+  mu <- rbind(alpha + rowSums(beta * predictor_mu),
+    .8 + .9 * predictor_mu[, 1L] + .2 * predictor_mu[, 2L], t(predictor_mu))
+  sigma <- psi <- array(NA_real_, c(4L, 4L, size))
+  s <- matrix(c(1.3, .45, .45, .9), 2L)
+  residual <- matrix(c(.8, .2, .2, .6), 2L)
+  site <- matrix(c(.4, .15, .15, .5), 2L)
+  block <- function(x, e) {
+    v <- matrix(0, 4L, 4L)
+    v[1:2, 1:2] <- x; v[3:4, 3:4] <- e
+    v
+  }
+  loading <- function(b, w) rbind(c(b, 1, 0), c(w, 0, 1), c(1, 0, 0, 0), c(0, 1, 0, 0))
+  within <- block(s, residual); between <- block(.5 * s, site)
+  for (i in seq_len(size)) {
+    a <- loading(beta[i, ] + c(.2, -.125), c(.9, .2))
+    b <- loading(beta[i, ] - c(.4, -.25), c(1.1, -.3))
+    sigma[, , i] <- a %*% within %*% t(a)
+    psi[, , i] <- b %*% between %*% t(b)
+  }
+  list(data = d, mu = mu, sigma = sigma, psi = psi,
+    coefficients = cbind(alpha, beta), predictors = c("T", "W"))
+}
+
+marginal_affine_result <- function(f) {
+  d <- f$data
+  problem <- catmech_marginal_cluster_prepare(d, "recorded value", d[["true value"]],
+    f$predictors, "site label")
+  means <- sweep(sweep(f$mu, 1L, problem$center, "-"), 1L, problem$scale, "/")
+  size <- ncol(means)
+  sigma <- psi <- array(NA_real_, c(4L, 4L, size))
+  scaling <- outer(problem$scale, problem$scale)
+  for (i in seq_len(size)) {
+    sigma[, , i] <- f$sigma[, , i] / scaling
+    psi[, , i] <- f$psi[, , i] / scaling
+  }
+  fit <- list(mu = means, sigma = sigma, psi = psi,
+    aux_sigma = matrix(1, 4L, size), aux_psi = matrix(1, 4L, size))
+  trace <- catmech_marginal_cluster_trace(problem, fit, seq_len(size))
+  traces <- array(trace, c(size / 4L, 4L, ncol(trace)),
+    dimnames = list(NULL, NULL, colnames(trace)))
+  result <- structure(list(original = d,
+    manifest = list(engine = "reference_marginal_cluster", m = 2L),
+    spec = list(cluster_model = "joint_marginal", predictors = f$predictors,
+      joint_control = list(chains = 4L, burnin = 0L, iterations = size / 4L,
+        max_iterations = size / 4L), joint_transform = problem$transform,
+      recorded_fit = "joint_marginal_gaussian"),
+    model_diagnostics = list(engine = "hw_marginal_cluster", convergence_pass = TRUE,
+      traces = traces, iterations_used = as.integer(size / 4L), transform = problem$transform)),
+    class = "catmech_result")
+  list(result = result, problem = problem)
+}
+
+test_that("multiple-predictor marginal summaries recover known affine coefficients", {
+  f <- marginal_affine_oracle()
+  prepared <- marginal_affine_result(f)
+  out <- catmech_marginal_summary(prepared$result)
+  expect_identical(out$term, c("(Intercept)", "T", "W"))
+  expect_equal(out$estimate, colMeans(f$coefficients), tolerance = 1e-12, ignore_attr = TRUE)
+  expect_equal(out$posterior_sd, apply(f$coefficients, 2L, stats::sd),
+    tolerance = 1e-12, ignore_attr = TRUE)
+  expected <- t(apply(f$coefficients, 2L, stats::quantile, c(.025, .975), names = FALSE))
+  expect_equal(unname(as.matrix(out[c("lower", "upper")])), unname(expected), tolerance = 1e-12)
+  # The final site has only predictors observed; its rows belong in the
+  # likelihood for the predictor distribution and in the prediction problem.
+  expect_identical(prepared$problem$rows, seq_len(nrow(f$data)))
+  rows <- f$data[["site label"]] == "12"
+  expect_true(all(is.na(prepared$problem$input$y[rows, 1:2])))
+  expect_true(all(is.finite(prepared$problem$input$y[rows, 3:4])))
+
+  # Apply X' = a + B X and T' = c + h T. A non-diagonal B forces the
+  # multivariable covariance solve; h<0 also exercises negative recoding.
+  b <- matrix(c(2, -.3, .6, 1.4), 2L)
+  a <- c(4, -7); h <- -2; shift <- 3
+  q <- diag(4L); q[1:2, 1:2] <- diag(h, 2L); q[3:4, 3:4] <- b
+  recoded <- f
+  recoded$predictors <- c("first predictor", "second: predictor")
+  recoded$data <- f$data
+  recoded$data[["recorded value"]] <- shift + h * f$data[["recorded value"]]
+  recoded$data[["true value"]] <- shift + h * f$data[["true value"]]
+  recoded$data[c("T", "W")] <- NULL
+  xx <- sweep(as.matrix(f$data[c("T", "W")]) %*% t(b), 2L, a, "+")
+  recoded$data[recoded$predictors] <- as.data.frame(xx)
+  recoded$mu <- sweep(q %*% f$mu, 1L, c(shift, shift, a), "+")
+  for (i in seq_len(ncol(f$mu))) {
+    recoded$sigma[, , i] <- q %*% f$sigma[, , i] %*% t(q)
+    recoded$psi[, , i] <- q %*% f$psi[, , i] %*% t(q)
+  }
+  beta <- h * f$coefficients[, 2:3] %*% solve(b)
+  recoded$coefficients <- cbind(shift + h * f$coefficients[, 1L] - as.vector(beta %*% a), beta)
+  re <- marginal_affine_result(recoded)
+  actual <- catmech_marginal_summary(re$result)
+  expect_identical(actual$term, c("(Intercept)", recoded$predictors))
+  expect_equal(actual$estimate, colMeans(recoded$coefficients), tolerance = 1e-11, ignore_attr = TRUE)
+  expect_equal(actual$posterior_sd, apply(recoded$coefficients, 2L, stats::sd),
+    tolerance = 1e-11, ignore_attr = TRUE)
+  expected <- t(apply(recoded$coefficients, 2L, stats::quantile, c(.025, .975), names = FALSE))
+  expect_equal(unname(as.matrix(actual[c("lower", "upper")])), unname(expected), tolerance = 1e-11)
+
+  bad <- f$data; bad$T <- factor(bad$T > median(bad$T))
+  expect_error(catmech_reference(bad, "recorded value", "true value", c("T", "W"),
+    cluster_model = "joint_marginal", use_recorded = TRUE, cluster = "site label"), "numeric")
+  bad <- f$data; names(bad)[names(bad) == "T"] <- "(Intercept)"
+  expect_error(catmech_reference(bad, "recorded value", "true value", c("(Intercept)", "W"),
+    cluster_model = "joint_marginal", use_recorded = TRUE, cluster = "site label"), "Intercept")
+})
+
+# Evaluate full probability densities independently of the native optimized
+# scale-move ratio. Constants cancel because the model and dimension are fixed.
+marginal_oracle_log_normal <- function(residual, covariance) {
+  residual <- as.matrix(residual)
+  -.5 * (nrow(residual) * ncol(residual) * log(2 * pi) +
+    nrow(residual) * as.numeric(determinant(covariance, logarithm = TRUE)$modulus) +
+    sum((residual %*% solve(covariance)) * residual))
+}
+marginal_oracle_log_covariance_prior <- function(covariance, family, scale) {
+  d <- nrow(covariance)
+  logdet <- as.numeric(determinant(covariance, logarithm = TRUE)$modulus)
+  precision <- solve(covariance)
+  if (family == "huang_wand")
+    -(2 + 2 * d) / 2 * logdet - (2 + d) / 2 * sum(log(2 * diag(precision) + 1 / scale))
+  else -(d + 2 + d + 1) / 2 * logdet - .25 * scale * sum(diag(precision))
+}
+
+test_that("interweaving ratios match full densities and the complete Jacobian", {
+  group <- c(1L, 2L, 1L, 3L, 3L, 3L, 2L, 3L, 1L)
+  y <- matrix(c(.2, -.4, .9, 1.1, -.7, .3, .8, .6, -.2,
+    -.1, .3, .5, -.8, .2, 1.2, .4, -.4, .7), 9L, 2L)
+  mu <- c(.3, -.2)
+  u <- matrix(c(.2, -.3, .5, -.1, .4, .2), 3L, 2L)
+  sigma <- matrix(c(.8, -.25, -.25, .6), 2L)
+  psi <- matrix(c(.6, .2, .2, .9), 2L)
+  density <- function(u, psi, family, scale) {
+    residual <- sweep(y - u[group, ], 2L, mu, "-")
+    marginal_oracle_log_normal(residual, sigma) +
+      marginal_oracle_log_normal(u, psi) +
+      marginal_oracle_log_covariance_prior(psi, family, scale)
+  }
+  for (j in 1:2) for (eta in c(-.8, .55)) {
+    transform <- diag(2L); transform[j, j] <- exp(eta)
+    proposed_u <- u %*% transform
+    proposed_psi <- transform %*% psi %*% transform
+    jacobian <- (nrow(u) + ncol(u) + 1) * eta
+    for (family in c("huang_wand", "inverse_wishart")) for (scale in c(.25, 1, 4)) {
+      expected <- density(proposed_u, proposed_psi, family, scale) -
+        density(u, psi, family, scale) + jacobian
+      actual <- catmech_marginal_interweave_ratio(y, group, mu, u, sigma, psi,
+        j, eta, prior = list(family = family, scale = scale))
+      expect_equal(actual, expected, tolerance = 1e-11)
+    }
+    # Independently differentiate the full deterministic state transformation:
+    # all U entries and the nonredundant symmetric Psi entries participate.
+    indices <- which(lower.tri(psi, diag = TRUE), arr.ind = TRUE)
+    state <- c(u, psi[indices])
+    move <- function(state) {
+      uu <- matrix(state[seq_along(u)], nrow(u), ncol(u))
+      pp <- matrix(0, 2L, 2L)
+      pp[indices] <- state[length(u) + seq_len(nrow(indices))]
+      pp <- pp + t(pp) - diag(diag(pp))
+      pp <- transform %*% pp %*% transform
+      c(uu %*% transform, pp[indices])
+    }
+    step <- 1e-5
+    derivative <- vapply(seq_along(state), function(k) {
+      upper <- lower <- state; upper[k] <- upper[k] + step; lower[k] <- lower[k] - step
+      (move(upper) - move(lower)) / (2 * step)
+    }, numeric(length(state)))
+    expect_equal(as.numeric(determinant(derivative, logarithm = TRUE)$modulus),
+      jacobian, tolerance = 1e-9)
+  }
+})
+
+test_that("hierarchical-prior posterior is unchanged by scale interweaving", {
+  set.seed(170940L)
+  group <- rep(seq_len(24L), each = 10L)
+  sigma <- matrix(c(.6, .15, .15, .5), 2L)
+  psi <- matrix(c(.8, .3, .3, .7), 2L)
+  site <- matrix(stats::rnorm(48L), 24L, 2L) %*% chol(psi)
+  y <- sweep(matrix(stats::rnorm(480L), 240L, 2L) %*% chol(sigma) + site[group, ],
+    2L, c(.4, -.3), "+")
+  y[seq(7L, 240L, 7L), 1L] <- NA_real_
+  y[seq(10L, 240L, 10L), 2L] <- NA_real_
+  retained <- 8000L; burnin <- 2000L; chains <- 4L
+  keep <- burnin + seq_len(retained)
+  run <- function(interweave, seed) {
+    output <- array(NA_real_, c(retained, chains, 12L))
+    for (chain in seq_len(chains)) {
+      f <- catmech_marginal_gibbs(list(y = y, subj = group), seed = seed + chain,
+        iterations = burnin + retained,
+        prior = list(family = "huang_wand", scale = 1, interweave = interweave))
+      expect_equal(as.vector(f$scale_proposed), rep(if (interweave) 2 * (burnin + retained) else 0, 2L))
+      expect_true(all(f$scale_accepted >= 0 & f$scale_accepted <= f$scale_proposed))
+      output[, chain, ] <- cbind(t(f$mu[, keep]), f$sigma[1L, 1L, keep],
+        f$sigma[1L, 2L, keep], f$sigma[2L, 2L, keep], f$psi[1L, 1L, keep],
+        f$psi[1L, 2L, keep], f$psi[2L, 2L, keep],
+        t(log(f$aux_sigma[, keep])), t(log(f$aux_psi[, keep])))
+    }
+    output
+  }
+  a <- run(TRUE, 170950L); b <- run(FALSE, 170970L)
+  for (j in seq_len(dim(a)[3L])) {
+    expect_lt(posterior::rhat(a[, , j]), 1.05)
+    expect_lt(posterior::rhat(b[, , j]), 1.05)
+    mcse <- sqrt(posterior::mcse_mean(a[, , j])^2 + posterior::mcse_mean(b[, , j])^2)
+    expect_lt(abs(mean(a[, , j]) - mean(b[, , j])) / mcse, 6)
     probabilities <- c(.025, .975)
     qa <- stats::quantile(a[, , j], probabilities, names = FALSE)
     qb <- stats::quantile(b[, , j], probabilities, names = FALSE)
