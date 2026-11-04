@@ -1,0 +1,104 @@
+{
+  "stage": "confirmation",
+  "contextual": {
+    "coverage_band_pass": true,
+    "bias_bound_pass": true,
+    "coverage_difference": 0.33166666666666667,
+    "coverage_mcse": 0.015247539757996358,
+    "coverage_lower": 0.30178203788815122,
+    "coverage_upper": 0.36155129544518211,
+    "no_negative_cell": true,
+    "mean_absolute_bias": {
+      "baseline_direct": 0.13058531459912207,
+      "marginal_direct": 0.0045823741615510201
+    },
+    "absolute_bias_difference": -0.12600294043757104,
+    "absolute_bias_lower": -0.13011959260372435,
+    "absolute_bias_upper": -0.11757556511612872,
+    "pass": true
+  },
+  "ordinary": {
+    "coverage_band_pass": true,
+    "bias_bound_pass": true,
+    "mean_absolute_distance": {
+      "baseline_direct": 0.0081250000000000211,
+      "marginal_direct": 0.010604636591478728
+    },
+    "distance_difference": 0.0024796365914787066,
+    "distance_lower": -0.0069363979848866561,
+    "distance_upper": 0.0081594611528822136,
+    "pass": true
+  },
+  "coefficient_prior_sensitivity": {
+    "difference": -0.0071397639135361065,
+    "mcse": 0.00028450963687400623,
+    "lower": -0.0076973925550637276,
+    "upper": -0.0065821352720084854,
+    "no_positive_cell": true,
+    "pass": true,
+    "sensitivity_definition": "candidate_max_HW_and_regression_axes_vs_baseline_IW_on_common_3_plus_5_fits",
+    "secondary_width_difference": -0.087617435262079921,
+    "secondary_width_mcse": 0.00086801265702334603,
+    "secondary_width_lower": -0.089318708807970604,
+    "secondary_width_upper": -0.085916161716189238
+  },
+  "availability": {
+    "difference": 0.00055555555555555892,
+    "mcse": 0.00039283710065919213,
+    "lower": -0.0002143910135275933,
+    "upper": 0.0013255021246387111,
+    "every_fit_return_rate_at_least_99": true,
+    "every_interval_return_rate_at_least_99": true,
+    "no_observed_fit_failure_increase": false,
+    "pass": false
+  },
+  "conditional_coverage": {
+    "baseline_direct": {
+      "gaussian_balanced": 0.96499999999999997,
+      "gaussian_unbalanced": 0.96499999999999997,
+      "near_zero_icc": 0.95250000000000001,
+      "observed_mar": 0.95250000000000001,
+      "null_slope": 0.94999999999999996,
+      "student_t5": 0.95250000000000001,
+      "contextual_x": 0.58499999999999996,
+      "contextual_unbalanced": 0.59250000000000003,
+      "contextual_null": 0.67000000000000004
+    },
+    "marginal_direct": {
+      "gaussian_balanced": 0.95750000000000002,
+      "gaussian_unbalanced": 0.96741854636591473,
+      "near_zero_icc": 0.95250000000000001,
+      "observed_mar": 0.95999999999999996,
+      "null_slope": 0.95750000000000002,
+      "student_t5": 0.96499999999999997,
+      "contextual_x": 0.95750000000000002,
+      "contextual_unbalanced": 0.93999999999999995,
+      "contextual_null": 0.94736842105263153
+    }
+  },
+  "bias": {
+    "baseline_direct": {
+      "gaussian_balanced": 0.007594054846866957,
+      "gaussian_unbalanced": -0.00020166047086167649,
+      "near_zero_icc": -0.00029730482387842731,
+      "observed_mar": -0.0047657833442946327,
+      "null_slope": 0.0051231339141636686,
+      "student_t5": -0.0037589662911466167,
+      "contextual_x": -0.13673081112938656,
+      "contextual_unbalanced": -0.13473127388727499,
+      "contextual_null": -0.12029385878070467
+    },
+    "marginal_direct": {
+      "gaussian_balanced": -0.00023206055795588516,
+      "gaussian_unbalanced": -0.008314202869699255,
+      "near_zero_icc": -0.0037574090166834673,
+      "observed_mar": -0.012236052550602309,
+      "null_slope": 0.0013671823023641192,
+      "student_t5": -0.011057491342818753,
+      "contextual_x": -0.0055811977233334899,
+      "contextual_unbalanced": 0.00028641534281986401,
+      "contextual_null": 0.0078795094184997052
+    }
+  },
+  "interpretation": "separate_prespecified_screens_no_universal_validity"
+}

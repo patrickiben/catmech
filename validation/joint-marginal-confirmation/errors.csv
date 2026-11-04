@@ -1,0 +1,5 @@
+"cell","replicate","method","fit_id","failure_stage","error_class","message","warnings"
+"gaussian_unbalanced",12,"marginal_cv3","marginal","fit","catmech_convergence_error","Marginal cluster model failed convergence checks (R-hat <= 1.05 and bulk/tail ESS >= 400 required). Inspect the condition's model_diagnostics.",""
+"gaussian_unbalanced",12,"marginal_direct","marginal","fit","catmech_convergence_error","Marginal cluster model failed convergence checks (R-hat <= 1.05 and bulk/tail ESS >= 400 required). Inspect the condition's model_diagnostics.",""
+"contextual_null",143,"marginal_cv3","marginal","fit","catmech_convergence_error","Marginal cluster model failed convergence checks (R-hat <= 1.05 and bulk/tail ESS >= 400 required). Inspect the condition's model_diagnostics.",""
+"contextual_null",143,"marginal_direct","marginal","fit","catmech_convergence_error","Marginal cluster model failed convergence checks (R-hat <= 1.05 and bulk/tail ESS >= 400 required). Inspect the condition's model_diagnostics.",""
