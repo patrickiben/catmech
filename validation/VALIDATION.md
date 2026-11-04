@@ -1,7 +1,7 @@
-# Validation record: catmech 0.7.1
+# Validation record: catmech 0.7.2
 
-Date: 2026-11-02. This is an experimental software release with independent implementation checks, prespecified synthetic studies and a public real-data
-audit. It is not clinical validation, a general coverage guarantee, or a claim to new imputation methodology. The [v0.7.0 record](v0.7.0-VALIDATION.md), [v0.6.0 record](v0.6.0-VALIDATION.md), [v0.5.0 record](v0.5.0-VALIDATION.md), [v0.4.1 record](v0.4.1-VALIDATION.md), [v0.3.1 record](v0.3.1-VALIDATION.md) and earlier ones are preserved.
+Date: 2026-11-03. This is an experimental software release with independent implementation checks, prespecified synthetic studies and a public real-data
+audit. It is not clinical validation, a general coverage guarantee, or a claim to new imputation methodology. The [v0.7.1 record](v0.7.1-VALIDATION.md), [v0.7.0 record](v0.7.0-VALIDATION.md), [v0.6.0 record](v0.6.0-VALIDATION.md), [v0.5.0 record](v0.5.0-VALIDATION.md), [v0.4.1 record](v0.4.1-VALIDATION.md), [v0.3.1 record](v0.3.1-VALIDATION.md) and earlier ones are preserved.
 
 ## Main findings
 
@@ -16,13 +16,57 @@ audit. It is not clinical validation, a general coverage guarantee, or a claim t
 - **[Test of replacements for the clustered resampling](CLUSTERED_FIX_SYNTHESIS.md), 210,000 requests.** **PARTIAL** under a new rule fixed in advance. Simulations with clustered residuals selected random-intercept imputation over a stratified jackknife draw, by a tie-break on error. On nine items of the same recount at a 25% audit, coverage was within its limits on eight and 89.0% on the ninth. Error was lower than the option without `cluster` on six common items and 4% to 5% higher on three rare ones, and both accuracy conditions failed. It replaces the resampling, and the option stays experimental. Against the resampling, error and interval stability improved and average coverage barely moved. It would have failed the first test's coverage condition, which the plan replaced before any real result with these candidates. The verdict sits within simulation noise of NO-GO, because `deliveries` cleared its coverage limit by less than one Monte Carlo standard error. The real items had all been seen under other methods, and this round has had no outside review.
 - **[Corrected variances through imputation](VARIANCE_MI_SYNTHESIS.md), 148,500 requests.** Under a rule fixed in advance, CV3 replaces the default variance in `catmech_pool_lm(cluster = )`, narrowly, and CR2 fails on width and over-coverage. New simulated cells show `catmech_reference(cluster = )` biasing slopes toward zero when the audited value is a predictor, so that use now draws a warning. No outside review.
 - **[Test on a second health system](SECOND_SYSTEM_SYNTHESIS.md), 270,000 requests.** **MIXED** under a rule fixed in advance. Errors barely clustered by district, and the option added little. Single districts dominate some slopes, which limits what the test can show.
-- **[Test of what goes wrong with rare counts](RARE_COUNTS_SYNTHESIS.md), 59,500 requests.** **HEAVY TAILS** under a rule fixed in advance: the shortfall comes from heavy-tailed cluster effects and not rarity. No other analysis, count-aware imputation or warning met its rule.
+- **[Test of what goes wrong with rare counts](RARE_COUNTS_SYNTHESIS.md), 59,500 requests.** **HEAVY TAILS** is the original rule's verdict, not an isolated causal finding: coverage fell at both tested count levels as cluster frailty changed in variance, skewness and dependence together. No other analysis, count-aware imputation or warning met its rule.
 - **[Comparators set up by fresh agents](INDEPENDENT_SETUPS_SYNTHESIS.md), 202,500 requests.** **KEEP** under the earlier rule, narrowly: `ind_mice` looks better than the option on most measures and failed only on over-coverage on two items. No human has reviewed these.
 - **[Separate within-cluster and between-cluster slopes](WITHIN_BETWEEN_SYNTHESIS.md), 529,500 requests.** **NOT ADOPTED** under a rule fixed in advance. Coverage and bias improved with the audited value as a predictor, and error rose with it as the outcome, most on small real audits. No package code changed. No human has reviewed this.
 - **[Overall check before release](OVERALL_QC.md).** Five independent AI reviewers, no human. The formulas and recomputed numbers held. Three cases gave badly wrong intervals with no signal, and they now warn or refuse in version 0.7.1. Several claims were corrected, and some items remain open.
 - **[Comparison with outside methods](OUTSIDE_METHODS_SYNTHESIS.md), 297,000 requests, with a post hoc rerun of 58,356.** **KEEP** under a rule fixed in advance that could have retired `catmech_reference(cluster = )`. The margin is narrow: with a `mice` default turned off, `mice` with `2l.lmer` matched the option's accuracy, and the option's lead was slightly wider intervals with higher coverage on real items. Its recipes for raking and the difference estimator gave intervals that were too narrow, and those methods also failed on accuracy. No package code changed, and there has been no outside review.
 
-## Software and independent checks
+## Current release corrections and checks
+
+Version 0.7.2 fixes three independently reproduced defects. The audit planner now
+subtracts formula offsets; equivalent offset and adjusted-response formulas agree
+on the pilot interval, `k`, projected widths and audit count. Compound strata are
+grouped by complete tuples rather than joined labels, preventing collisions from
+merging strata or bypassing calibration support. Clustered imputation refuses a
+site that needs stochastic draws both with and without recorded values, because
+separate fits cannot supply a shared site effect. Deterministic agreement and
+supported single-pattern sites retain their behavior. A coherent joint model for
+the refused case remains future work.
+
+The documentation now calls variance-component draws approximate and explains
+that balanced clusters alone do not establish exactness. The rare-count study's
+original **HEAVY TAILS** rule label and all its numbers are preserved, but the
+interpretation now acknowledges that frailty variance, skewness and dependence
+changed together. These fixes do not establish general inferential validity.
+
+Current check logs are in `v0.7.2-checks/`. The frozen v0.7.1 package sources are
+preserved under `v0.7.1-source/`, copied from reviewed public commit `03cae88` and
+checked against the later studies' original source manifests. The verifier still
+uses the independent-setups study's own frozen scorer and plan. Original study
+hashes, raw results, simulation settings and scored decisions are unchanged.
+Historical replay checks below are recorded evidence; the large simulations were
+not regenerated for this maintenance release.
+
+| Check rerun for 0.7.2 | Result | Evidence |
+|---|---|---|
+| Unit suite | 746 assertions passed, no failures, warnings or skips | `v0.7.2-checks/tests.log` |
+| Source build and package check | 0 errors, 0 warnings, 0 notes | `v0.7.2-checks/build.log`, `v0.7.2-checks/R-CMD-check.log` |
+| Fresh archive installation | Namespace-only smoke checks, all five bundled examples and the clustered option passed | `v0.7.2-checks/install.log`, `v0.7.2-checks/installed-smoke.log` |
+| Original workflows | 18 of 18 runs identical to frozen v0.3.1 in completions, audits, diagnostics, hashes, claims and pooling | `v0.7.2-checks/v0.3-unchanged-check.txt` |
+| Contamination and bootstrap workflows | 12 of 12 runs identical to frozen v0.4.0 | `v0.7.2-checks/v0.4.0-postfreeze-check.txt` |
+| Saved-evidence verifier | Passed source hashes, summary/decision recomputation and negative controls across all recorded studies; simulation engine and picker checks also passed | `v0.7.2-checks/artifact-verification.log` |
+| README and historical case study | All 108 checked claims agree with sources; example and link checks pass. The case study retains its November 2, v0.7.1 status | `v0.7.2-checks/fact-check.log`, `../docs/case-study/FACT_CHECK.md` |
+| Source archive integrity | 47 packaged files match current source; local assistant configuration excluded | `v0.7.2-checks/build-integrity.txt`, `v0.7.2-checks/source-package-sha256.txt` |
+
+The initial local package check reported a hidden `.claude` directory. The build
+exclusion was corrected and the cleaned archive passed the full check above;
+`v0.7.2-checks/initial-package-check.log` preserves that first result. No runtime
+dependency changed. GitHub Actions runs `--as-cran` on Ubuntu, macOS and Windows
+on every push; consult the [release commit's workflow results](https://github.com/patrickiben/catmech/actions)
+for the remote checks.
+
+## Earlier implementation and study checks
 
 | Check | Result | Evidence |
 |---|---|---|
@@ -90,7 +134,7 @@ Adversarial or AI-assisted review is not independent human refereeing. AI use is
 ```sh
 Rscript -e 'testthat::test_local()'
 R CMD build .
-R CMD check --no-manual catmech_0.7.0.tar.gz
+R CMD check --no-manual catmech_0.7.2.tar.gz
 Rscript tools/check-contamination-oracle.R validation/my-contamination-oracle
 Rscript tools/contamination-benchmark.R study validation/my-contamination-study
 python3 -I tools/real-data-fetch.py my-raw-directory validation/my-real-data

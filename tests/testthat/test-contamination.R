@@ -11,6 +11,51 @@ contamination_predictors <- c("age", "inflammation", "outcome")
 contamination_fit <- function(d, ..., m = 4, seed = 5, predictors = contamination_predictors)
   catmech_contamination(d, "lab_value", "gold", predictors, corruption_strata = "outlier_flag", m = m, seed = seed, ...)
 
+test_that("compound strata preserve ordinary labels and separate colliding tuples", {
+  ordinary <- data.frame(flag = c("No", "Yes", "No", NA_character_),
+                         site = c("B", "A", "A", "unused"))
+  recorded <- c(TRUE, TRUE, TRUE, FALSE)
+  old_keys <- paste(ordinary$flag, ordinary$site, sep = " | ")
+  old_keys[!recorded] <- NA_character_
+  old_levels <- sort(unique(old_keys[recorded]))
+  expect_identical(catmech_contamination_strata(ordinary, c("flag", "site"), recorded, "test"),
+    list(index = match(old_keys, old_levels), levels = old_levels))
+
+  colliding <- data.frame(a = c("A | B", "A", "A | B"),
+                          b = c("C", "B | C", "C"))
+  mapped <- catmech_contamination_strata(colliding, c("a", "b"), rep(TRUE, 3), "test")
+  expect_length(mapped$levels, 2L)
+  expect_false(mapped$index[1] == mapped$index[2])
+  expect_identical(mapped$index[1], mapped$index[3])
+  expect_true(any(grepl('"a"="A | B", "b"="C"', mapped$levels, fixed = TRUE)))
+  expect_true(any(grepl('"a"="A", "b"="B | C"', mapped$levels, fixed = TRUE)))
+  permutation <- c(2L, 3L, 1L)
+  reordered <- catmech_contamination_strata(colliding[permutation, ], c("a", "b"), rep(TRUE, 3), "test")
+  expect_identical(reordered$levels, mapped$levels)
+  expect_identical(reordered$index[order(permutation)], mapped$index)
+
+  # Even a user label equal to a generated disambiguation label stays distinct.
+  adversarial <- rbind(colliding[1:2, ],
+    data.frame(a = "A", b = 'B | C ["a"="A | B", "b"="C"]'))
+  unique_map <- catmech_contamination_strata(adversarial, c("a", "b"), rep(TRUE, 3), "test")
+  expect_equal(length(unique(unique_map$index)), 3L)
+  expect_false(anyDuplicated(unique_map$levels) > 0L)
+})
+
+test_that("compound label collisions cannot bypass calibration support", {
+  d <- data.frame(w = c(1, 2, 3, 4), r = c(1, 2, NA_real_, NA_real_),
+    a = c("A | B", "A | B", "A", "A"), b = c("C", "C", "B | C", "B | C"))
+  expect_error(catmech_contamination(d, "w", "r", character(),
+    corruption_strata = c("a", "b")), "No calibration rows support stratum")
+  expect_error(catmech_contamination(d, "w", "r", character(),
+    error_strata = c("a", "b")), "No calibration rows support stratum")
+  d$r <- d$w
+  complete <- catmech_contamination(d, "w", "r", character(),
+    corruption_strata = c("a", "b"), m = 2L)
+  expect_equal(length(unique(complete$contamination$corruption$corruption_stratum)), 2L)
+  expect_identical(complete$completed[[1]]$w, d$r)
+})
+
 test_that("row terms equal brute-force integration over the target", {
   m <- 1.2; s2 <- .5^2; mu <- .7; t2 <- .3^2; w <- 2.1; r <- 1.6; rv <- .2^2
   exact <- catmech_contamination_row_terms(w, numeric(), m, s2, 0)

@@ -1,0 +1,4 @@
+47 packaged files (except normalized DESCRIPTION/MD5) match the reviewed source byte for byte.
+Local .claude configuration is excluded from the source archive.
+147 local documentation links resolve.
+SHA256 d43e880448a6f8077da9708d25a0f6c157290bf604e55f16a88727da4d2abb8f  catmech_0.7.2.tar.gz

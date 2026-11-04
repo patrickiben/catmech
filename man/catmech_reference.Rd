@@ -120,10 +120,18 @@ is no estimate of between-cluster variance for unaudited clusters, and the fit i
 Fewer than five audited clusters are refused. Pool with [catmech_pool_lm()], which uses a
 cluster-robust variance for such a fit. This is the usual random-intercept imputation model
 (Schafer and Yucel, 2002; Grund and colleagues, 2018), with a moment-based draw of the
-variance components in place of a full posterior. That draw is exact in distribution only
-for balanced clusters and is weaker with one or two large sites. It is not a new method. It
+variance components in place of a full posterior. That draw is an approximation;
+balanced clusters alone do not make it an exact posterior draw with general predictors.
+Its justification is weaker with one or two large sites. It is not a new method. It
 assumes one normal intercept per cluster, so cluster-specific slopes and non-constant
 variance are not modeled. The same model is available in other software, including `mice`.
+
+Within a cluster, unaudited rows cannot require stochastic imputation through both
+the recorded-present and recorded-missing paths: the current separate fits do not
+provide a shared cluster draw across those paths, so that request is refused.
+Different clusters may use different paths. Audited rows and recorded values kept
+deterministically after complete calibration agreement do not trigger this refusal.
+Resolve one pattern with reference measurements or use a joint model supporting both.
 
 `cluster` is experimental. Version 0.6.0 replaced an earlier version that resampled audited
 clusters, in which resampling within strata understated variance. The replacement's planned

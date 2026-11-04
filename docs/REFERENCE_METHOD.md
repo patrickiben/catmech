@@ -146,7 +146,11 @@ regression: `target = x'beta + c_i + e_ij`. If the audit is stratified, put the 
 3. An unaudited cluster gets a new intercept, an audited cluster with unaudited rows gets one conditional on its
    residuals, and every imputed row gets normal noise.
 
-Records with no recorded value use the same steps without that predictor. If the audited rows cannot separate the two
+Records with no recorded value use the same steps without that predictor. A cluster that needs stochastic imputations
+for both recorded-present and recorded-missing rows is refused: the two separate fits do not define a shared cluster
+effect. Supply reference values that resolve one of those groups, or use a joint model that supports both patterns.
+Different clusters may use different patterns. Audited rows and recorded values retained deterministically do not trigger
+this refusal. If the audited rows cannot separate the two
 variances, as with one row per cluster, the intercept variance is zero, with a warning. If the predictors absorb every
 audited cluster, as with one audited cluster per stratum, the fit is refused when unaudited clusters need imputing. Fewer
 than five audited clusters are refused.
@@ -174,9 +178,12 @@ raised error on small real audits when the audited value was the outcome, so wha
 
 This is the usual random-intercept imputation model (Schafer and Yucel, 2002,
 [doi:10.1198/106186002760180608](https://doi.org/10.1198/106186002760180608); Grund, Lüdtke and Robitzsch, 2018,
-[doi:10.1177/1094428117703686](https://doi.org/10.1177/1094428117703686)), and not a new method, with a moment-based draw of the
-variance components (Henderson, 1953, [doi:10.2307/3001853](https://doi.org/10.2307/3001853)) in place of a full posterior. That draw is
-exact in distribution only for balanced clusters, and it is weakest with one or two large sites. The model assumes one normal
+[doi:10.1177/1094428117703686](https://doi.org/10.1177/1094428117703686)), and not a new method. It uses an approximate moment/pivotal
+draw of the variance components (Henderson, 1953, [doi:10.2307/3001853](https://doi.org/10.2307/3001853)), rather than a full posterior.
+Equal cluster sizes alone do not make that draw exact: with general covariates, the between-cluster sum of squares need not
+be a single scaled chi-square variable, and flooring the intercept variance at zero creates boundary mass. The algebra checks
+verify the implemented calculation, not exact posterior sampling or calibrated intervals. The approximation is especially
+uncertain with one or two large sites. The model assumes one normal
 intercept per cluster, so cluster-specific slopes and non-constant variance are not modeled.
 
 Its [planned test](../validation/CLUSTERED_FIX_SYNTHESIS.md) came out PARTIAL: coverage held on eight of nine items of a

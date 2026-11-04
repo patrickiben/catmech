@@ -1,6 +1,6 @@
 # catmech <img src="man/figures/logo.png" align="right" width="160" alt="catmech logo: a neon cat piloting a mech suit">
 
-**An experimental R package for regression when every record has a recorded value and only an audited subset has a checked reference value. Version 0.7.1.**
+**An experimental R package for regression when every record has a recorded value and only an audited subset has a checked reference value. Version 0.7.2.**
 
 **The question:** can you keep error-prone recorded values for precision without trusting them, and which method should you try first?
 
@@ -125,7 +125,7 @@ and [validation record](validation/VALIDATION.md).
 
 The [commands above](#try-it) install the dependencies and then the package. Run the second
 command from the repository directory, or build the source archive with `R CMD build .` and
-install it with `R CMD INSTALL catmech_0.7.0.tar.gz`. R 4.1 or later is required, although only R 4.6
+install it with `R CMD INSTALL catmech_0.7.2.tar.gz`. R 4.1 or later is required, although only R 4.6
 has been tested. GitHub Actions checks Linux, macOS and Windows, and all three passed. See the
 [validation record](validation/VALIDATION.md).
 
@@ -281,7 +281,11 @@ zero, and `catmech_pool_lm()` warns about this use. The option's [planned test](
 with the audited value as the outcome, came out PARTIAL: it helped where the first example's imputation fell short of a
 recount and cost some accuracy on rare items. It replaced an [earlier version](validation/CLUSTERED_SYNTHESIS.md) that
 resampled audited clusters. If the audit is stratified, put the strata in `predictors`; `cluster_strata` no longer exists. With one audited cluster per stratum, nothing can estimate between-cluster variance, so the fit is refused.
-It assumes one normal intercept per cluster. Treat the option as a check, not a default. Fewer than five audited clusters
+It assumes one normal intercept per cluster and uses approximate moment-based variance draws. Equal site sizes do not
+make those draws exact posterior samples. A site requiring stochastic imputation for both recorded-present and
+recorded-missing rows is refused, because the separate fits do not share a site effect. Supply references that resolve
+one of those groups, or use a joint model that supports both patterns. Audited rows and deterministically retained recorded
+values do not trigger that refusal. Treat the option as a check, not a default. Fewer than five audited clusters
 are refused. Very wide intervals remain possible with few audited clusters, so read the `df` column. See the
 [method](docs/REFERENCE_METHOD.md#clustered-audits-experimental).
 
@@ -304,10 +308,11 @@ Those separate slopes alone did not reproduce that result. In a [later planned t
 improved coverage when the audited value was a predictor, but had 1.258 times the option's error on real items at a 25% audit,
 and it was not adopted. Linear MI had lower bias than it on simulated predictor cells, and the option is unchanged.
 
-Short intervals on count data come from [heavy-tailed cluster effects and not from rarity](validation/RARE_COUNTS_SYNTHESIS.md). Rare counts
-with no cluster effect cover well, and common counts with heavy-tailed effects fall just as short. No fix was found in the
-package, and no warning worked, because the failures come when an influential cluster is missing from the sample, which the
-sample cannot show. Results can also turn on one or two clusters: on [another health system](validation/SECOND_SYSTEM_SYNTHESIS.md), one district
+In the [count-data experiment](validation/RARE_COUNTS_SYNTHESIS.md), coverage fell with more variable, skewed cluster frailty at both
+tested count levels. The original rule returned **HEAVY TAILS**, but the generator changes variance, skewness and dependence
+together; it does not isolate tail shape or rule out problems from rarity in other settings. No candidate fix or warning met
+its rule. Missing an influential cluster is one possible explanation for failures, rather than a mechanism established by that
+experiment. Results can also turn on one or two clusters: on [another health system](validation/SECOND_SYSTEM_SYNTHESIS.md), one district
 of four clinics reversed the sign of a slope.
 
 ## Planning an audit: not validated
@@ -418,7 +423,7 @@ are not silently converted to the new model.
 Rscript -e 'install.packages(c("testthat", "pkgload", "roxygen2"))'
 Rscript -e 'testthat::test_local()'
 R CMD build .
-R CMD check --no-manual catmech_0.7.0.tar.gz
+R CMD check --no-manual catmech_0.7.2.tar.gz
 Rscript tools/check-model-oracle.R validation/my-model-oracle
 Rscript tools/coverage-benchmark.R confirmatory validation/my-heldout
 Rscript tools/coverage-benchmark.R clinical validation/my-clinical

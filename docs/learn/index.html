@@ -196,7 +196,7 @@ footer p { max-width: 80ch; margin: 0 0 8px; }
 <main>
 <div class="wrap">
   <div class="strip" aria-label="Package status">
-    <span>Version <b>0.7.1</b></span>
+    <span>Version <b>0.7.2</b></span>
     <span>Status <b>experimental</b></span>
     <span>On CRAN <b>no</b></span>
     <span>Independent human review <b>none</b></span>
@@ -484,7 +484,7 @@ catmech_pool_lm(fit, sbp ~ recorded_kg + age + sex + race + height)</code></pre>
       <div class="verdict"><span class="chip good">Finding</span><p><b>Public data with real recording differences.</b> At a random 25% audit, over 1,000 cohorts of 600, linear imputation matched or beat the package's own error model: typical error 0.0286 against 0.0308 on ClinicalTrials.gov, and 0.0409 against 0.0408 on NHANES. The model could not tell which records were wrong.</p></div>
       <div class="verdict"><span class="chip good">Finding</span><p><b>Keeping the recorded value pays, against discarding it.</b> Intervals about half as wide (0.102 against 0.205 on ClinicalTrials.gov, and 0.154 against 0.297 on NHANES), with coverage near the oracle's. Against simply trusting the recorded value, a small audit often did not reduce error: at a 25% audit of a real recount, the recorded value alone had lower error than every audit-based method on 6 of 11 items.</p></div>
       <div class="verdict"><span class="chip warn">Inconclusive</span><p><b>A real audit</b>, a health-facility recount in Rwanda. At a 25% audit, where a reported slope differed from a recount of that one item, the error model's intervals covered 35% to 72%, against 90% to 97% for the recount. Only one reported slope, for antenatal 4th visits, clearly differed.</p></div>
-      <div class="verdict"><span class="chip warn">Partial</span><p><b>The clustered imputation option</b>, twice. Under the variance then in use, it raised coverage on common items (from 79.6% to 91.0% on early antenatal visits) and had 4% to 5% more error on rare ones. The verdict sits within simulation noise of NO-GO. Use it only when the audited value is the outcome.</p></div>
+      <div class="verdict"><span class="chip warn">Partial</span><p><b>The clustered imputation option</b>, twice. Under the variance then in use, it raised coverage on common items (from 79.6% to 91.0% on early antenatal visits) and had 4% to 5% more error on rare ones. The verdict sits within simulation noise of NO-GO. Its variance draws are approximate, even with equal site sizes. Use it only when the audited value is the outcome.</p></div>
       <div class="verdict"><span class="chip warn">Mixed</span><p><b>A second health system.</b> Errors barely clustered there, and the clustered option added little.</p></div>
       <div class="verdict"><span class="chip info">Keep, narrowly</span><p><b>The clustered option against outside methods.</b> In a rerun after the planned comparison, <code>mice</code> with the same model matched its accuracy once a default that can drop the recorded value was off.</p></div>
       <div class="verdict"><span class="chip info">Keep, narrowly</span><p><b>Against setups written by fresh AI agents that saw no results.</b> None met the rule, but the best looks better than the option on most measures, so the option is not the best available.</p></div>
@@ -506,7 +506,7 @@ catmech_pool_lm(fit, sbp ~ recorded_kg + age + sex + race + height)</code></pre>
     <details id="ai-details" open>
       <summary>AI use</summary>
       <div>
-        <p>AI systems drafted the package code and tests and did literature search, review and simulation orchestration: OpenAI Codex before version 0.4, and Anthropic Claude Code from then on. Claude Code also wrote most later study plans, decision rules, scoring and write-ups, and drafted this guide and the simulator. No independent statistician has reviewed them. <code>CONTRIBUTING.md</code> in the repository has the full disclosure.</p><p>A script checks that every decimal number on this page appears in the README or in the output of <code>tools/learn-guide-example.R</code>.</p>
+        <p>AI systems drafted the package code and tests and did literature search, review and simulation orchestration: OpenAI Codex before version 0.4, and Anthropic Claude Code from then on. Claude Code also wrote most later study plans, decision rules, scoring and write-ups, and drafted this guide and the simulator. Codex subsequently reviewed the package and implemented the current bug fixes and scientific wording corrections. No independent statistician has reviewed them. <code>CONTRIBUTING.md</code> in the repository has the full disclosure.</p><p>A script checks that every decimal number on this page appears in the README or in the output of <code>tools/learn-guide-example.R</code>.</p>
       </div>
     </details>
   </section>
@@ -579,7 +579,7 @@ catmech_pool_lm(fit, sbp ~ recorded_kg + age + sex + race + height)</code></pre>
     ],
     "sites": "Pool with cluster = \"site\": a delete-one-cluster jackknife, chosen narrowly in a planned test. It repairs the analysis step only. Linear imputation with it still covered 81% to 86% on the worst items of a real recount at a 25% audit.",
     "sitesOtherMethod": "This method has not been tested with the cluster-robust variance.",
-    "sitesOutcome": "Optional check: catmech_reference(..., cluster = \"site\") adds a random intercept for each site. It came out PARTIAL in both planned tests, within simulation noise of NO-GO, and refuses fewer than five audited clusters. Treat it as a check, not a default.",
+    "sitesOutcome": "Optional check: catmech_reference(..., cluster = \"site\") adds a random intercept for each site, with approximate variance draws. It came out PARTIAL in both planned tests, within simulation noise of NO-GO, and refuses fewer than five audited clusters. It also refuses a site needing stochastic draws for both recorded-present and recorded-missing rows; audited rows and deterministically retained recorded values do not trigger that refusal. Treat it as a check, not a default.",
     "sitesPredictor": "Do not pass cluster to catmech_reference(). With the audited value as a predictor it biased the slope toward zero in simulation, and catmech_pool_lm() warns.",
     "targetedDefault": "Doubt about the straight line would point to filling in without the recorded value, but that needs an audit that does not depend on the recorded value. With a targeted audit, this page keeps linear imputation given the recorded value.",
     "targetedOk": "A targeted audit is supported, because the recorded value is in the model.",

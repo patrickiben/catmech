@@ -16,7 +16,10 @@ validation uses ordinary R code and synthetic data, not an AI model. Human autho
 retain responsibility for scientific claims, intended-use decisions and release.
 Versions before 0.4 also used OpenAI Codex. Versions 0.4 and later used Anthropic Claude Code for the same kinds of
 drafting, search, review and simulation orchestration, and it also wrote most later study plans, decision rules, scoring
-and write-ups, at the owner's direction. The write-ups say which rounds, and no independent statistician has reviewed them.
+and write-ups, at the owner's direction. OpenAI Codex reviewed version 0.7.1 and
+implemented the three regression fixes and scientific wording corrections in
+version 0.7.2, including focused tests and release verification. The write-ups say
+which rounds, and no independent statistician has reviewed them.
 Commit trailers record Claude Code's part, and no AI system is listed as a package or citation author. This is a software assessment and exploratory
 validation record, not external peer review or a completed manuscript submission
 certification.

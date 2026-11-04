@@ -244,10 +244,34 @@ catmech_contamination_strata <- function(data, columns, rows, label) {
   parts <- lapply(data[columns], as.character)
   if (any(vapply(parts, function(z) anyNA(z[rows]), logical(1))))
     stop(label, " columns must be complete on recorded rows.", call. = FALSE)
-  key <- do.call(paste, c(unname(parts), sep = " | "))
+  # Group tuples before formatting labels: a value may itself contain " | ".
+  # Integer IDs separated by commas are injective for a fixed number of columns.
+  ids <- lapply(parts, function(z) match(z, sort(unique(z[rows]))))
+  key <- do.call(paste, c(unname(ids), sep = ","))
   key[!rows] <- NA_character_
-  labels <- sort(unique(key[rows]))
-  list(index = match(key, labels), levels = labels)
+  display <- do.call(paste, c(unname(parts), sep = " | "))
+  representatives <- which(rows)[!duplicated(key[rows])]
+  labels <- display[representatives]
+  # Sorting before disambiguation makes the mapping independent of row order.
+  ordering <- order(labels, key[representatives])
+  representatives <- representatives[ordering]
+  labels <- labels[ordering]
+  collision <- duplicated(labels) | duplicated(labels, fromLast = TRUE)
+  if (any(collision)) {
+    detail <- vapply(representatives[collision], function(i) {
+      paste(vapply(seq_along(columns), function(j) {
+        paste0(encodeString(columns[j], quote = '"'), "=",
+               encodeString(parts[[j]][i], quote = '"'))
+      }, character(1)), collapse = ", ")
+    }, character(1))
+    labels[collision] <- paste0(labels[collision], " [", detail, "]")
+    # An ordinary user label could equal a generated display label.
+    labels <- make.unique(labels, sep = " #")
+    ordering <- order(labels)
+    representatives <- representatives[ordering]
+    labels <- labels[ordering]
+  }
+  list(index = match(key, key[representatives]), levels = labels)
 }
 
 catmech_contamination_prior <- function(prior, scale) {

@@ -1,3 +1,22 @@
+# catmech 0.7.2
+
+- Refuse clustered reference imputation when one site needs stochastic fills both
+  with and without recorded values. Separate fits would draw independent effects
+  for that site and lose shared uncertainty. This case needs a joint model;
+  deterministic agreement and supported single-pattern sites remain available.
+- Include formula offsets in the audit planner's analytic response. Equivalent
+  offset and adjusted-response formulas now give the same planning calculations;
+  nonlinear functions of the audited target remain unsupported.
+- Identify compound contamination strata by their full tuples, so delimiter
+  characters in labels cannot merge distinct strata or bypass calibration support.
+  Unambiguous labels retain their existing ordering and numerical behavior.
+- Describe clustered variance-component draws as approximate. Balance alone does
+  not make them exact with general covariates. Narrow the rare-count interpretation:
+  the experiment varied frailty variance, skewness and dependence together, so its
+  historical `HEAVY TAILS` decision label does not identify an isolated mechanism.
+- Add regression checks for the three defects. Preserve frozen numerical studies
+  and their original decision rules; no new coverage guarantee is claimed.
+
 # catmech 0.7.1
 
 An overall check by five independent AI reviewers found cases where the package gave badly wrong results with no signal. These changes add warnings and refusals. Earlier studies' numbers are unchanged, and no estimate or interval changes in a case that still returns one.
@@ -10,7 +29,7 @@ An overall check by five independent AI reviewers found cases where the package 
 - `catmech_holdout_check()` no longer warns or fails with an internal message in two edge cases.
 - Documents: the recommendation table now lists all of linear MI's recorded failures and qualifies raking, the README's examples run as written, the AI disclosure states what the assistant wrote, and data sources and terms are credited. See `validation/OVERALL_QC.md`.
 - Documents: the README now opens with how the package works, with a diagram. `docs/learn/` adds a plain-language guide and a browser audit simulator, a teaching model whose engine `docs/learn/qa/compare.js` checks against the package.
-- Later planned tests, with no package code changed: on a second health system, the outcome was MIXED, with errors that barely clustered and little added by the option (`validation/SECOND_SYSTEM_SYNTHESIS.md`); the shortfall on count data came from heavy-tailed cluster effects and not rarity, with no fix or warning found (`validation/RARE_COUNTS_SYNTHESIS.md`); comparators written by fresh AI agents did not meet the rule, so the option stays, but the best of them looks better than the option on most measures (`validation/INDEPENDENT_SETUPS_SYNTHESIS.md`); separate within-cluster and between-cluster slopes helped when the audited value was a predictor and raised error on small real audits when it was the outcome, so they were not adopted (`validation/WITHIN_BETWEEN_SYNTHESIS.md`).
+- Later planned tests, with no package code changed: on a second health system, the outcome was MIXED, with errors that barely clustered and little added by the option (`validation/SECOND_SYSTEM_SYNTHESIS.md`); the count-data rule returned HEAVY TAILS, with no fix or warning found (`validation/RARE_COUNTS_SYNTHESIS.md`); the v0.7.2 interpretation correction notes that the experiment changed frailty variance and shape together; comparators written by fresh AI agents did not meet the rule, so the option stays, but the best of them looks better than the option on most measures (`validation/INDEPENDENT_SETUPS_SYNTHESIS.md`); separate within-cluster and between-cluster slopes helped when the audited value was a predictor and raised error on small real audits when it was the outcome, so they were not adopted (`validation/WITHIN_BETWEEN_SYNTHESIS.md`).
 
 # catmech 0.7.0
 

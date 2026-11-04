@@ -1,6 +1,6 @@
 # Test of what goes wrong with rare counts: results and interpretation
 
-**Rarity is not the problem. Under the [rules fixed in advance](RARE_COUNTS_PLAN.md), the shortfall comes from heavy-tailed cluster effects.** With every row recounted and no cluster effect, rare counts cover 93.67% on average under `cv3`. With a gamma cluster effect of shape 0.5 they cover 88.30%. Counts ten times as common lose just as much, going from 93.77% to 88.07%. So "rare counts are unsolved" was the wrong description. A better one is that cluster-robust intervals fall short when a few clusters are far from the rest, whatever the count level. Real rare items here do not show the shortfall, which fits: `lbw`, `resus` and `stillbirths` cover 94.0%, 96.7% and 95.1% with the option.
+**The prespecified verdict is HEAVY TAILS, but the experiment does not isolate a tail-shape mechanism.** The [rule fixed in advance](RARE_COUNTS_PLAN.md) retains that label. With every row recounted and no cluster effect, rare counts cover 93.67% on average under `cv3`. With a gamma cluster effect of shape 0.5 they cover 88.30%. Counts ten times as common also lose coverage, going from 93.77% to 88.07%. This shows a shortfall at both tested count levels when the more variable, skewed cluster multiplier is present. Rarity alone did not produce that shortfall in these designs; the experiment does not rule out its importance elsewhere. On the three real rare items, `lbw`, `resus` and `stillbirths`, the option covers 94.0%, 96.7% and 95.1%. These observations do not identify a single cause of the simulated failures.
 
 **Nothing I tried fixed it.** No other reference distribution, no count-aware imputation and no warning met its rule. No package code changes. Separately, one [independently written setup](INDEPENDENT_SETUPS_SYNTHESIS.md) did reach 94.17% on the six original cells, with wider intervals and after tuning on those same cells, which is described there.
 
@@ -16,7 +16,7 @@ Mean coverage under `cv3` with every row recounted:
 | Gamma, shape 2 | 92.10 | 91.97 |
 | Gamma, shape 0.5 | 88.30 | 88.07 |
 
-The rule's condition for **HEAVY TAILS** was at least 93 with no cluster effect and at most 90 at shape 0.5, and both hold. How heavy real cluster effects are remains unknown. These simulated cells may be more extreme than most audits, though the [second health system](SECOND_SYSTEM_SYNTHESIS.md) shows that single districts can dominate a slope in real data.
+The rule's condition for **HEAVY TAILS** was at least 93 with no cluster effect and at most 90 at shape 0.5, and both hold. This is the original rule's label, not proof of a causal mechanism. The generator uses a mean-one Gamma(shape, rate = shape) multiplier, whose variance is `1 / shape`. Changing its shape changes variance, skewness, overdispersion and within-cluster dependence together; removing it also removes that source of dependence. Gamma distributions have [exponentially decaying tails](https://www.itl.nist.gov/div898/handbook/eda/section3/eda366b.htm), so the label should not be read as a formal tail classification. Isolating tail shape would require comparisons that hold other relevant features fixed. These cells may be more extreme than most audits, though the [second health system](SECOND_SYSTEM_SYNTHESIS.md) shows that single districts can dominate a slope in real data.
 
 ## P2: another analysis
 
@@ -56,9 +56,9 @@ My explanation, which is post hoc and untested, is that an influential cluster i
 
 ## What this changes
 
-- **The documents now say** that rare counts themselves are not the problem, and that heavy-tailed cluster effects are, with no fix found in the package.
+- **The documents now distinguish** the original **HEAVY TAILS** verdict from its interpretation: coverage fell with more variable, skewed cluster frailty at both tested count levels. The design does not isolate tail shape or exclude rarity as a problem in other settings. No fix met the study's rules.
 - **No package code changes** under these rules.
 
 ## Limits
 
-These cells use one covariate pattern and three rows per cluster, and the gamma cluster effect is an assumption. Only three real rare items were available, all from one recount and all seen before. The `D` threshold was a judgment call. The same assistant wrote the plan, runner, scoring and this write-up, and no reviewer has read it.
+These cells use one covariate pattern and three rows per cluster, and the gamma cluster effect is an assumption. Only three real rare items were available, all from one recount and all seen before. The `D` threshold was a judgment call. The same assistant wrote the plan, runner, scoring and original write-up. A later AI review identified the confounding described above; this clarification changes no plan, scored verdict or numerical result. No human has reviewed the study.

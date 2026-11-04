@@ -172,10 +172,18 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #' Fewer than five audited clusters are refused. Pool with [catmech_pool_lm()], which uses a
 #' cluster-robust variance for such a fit. This is the usual random-intercept imputation model
 #' (Schafer and Yucel, 2002; Grund and colleagues, 2018), with a moment-based draw of the
-#' variance components in place of a full posterior. That draw is exact in distribution only
-#' for balanced clusters and is weaker with one or two large sites. It is not a new method. It
+#' variance components in place of a full posterior. That draw is an approximation;
+#' balanced clusters alone do not make it an exact posterior draw with general predictors.
+#' Its justification is weaker with one or two large sites. It is not a new method. It
 #' assumes one normal intercept per cluster, so cluster-specific slopes and non-constant
 #' variance are not modeled. The same model is available in other software, including `mice`.
+#'
+#' Within a cluster, unaudited rows cannot require stochastic imputation through both
+#' the recorded-present and recorded-missing paths: the current separate fits do not
+#' provide a shared cluster draw across those paths, so that request is refused.
+#' Different clusters may use different paths. Audited rows and recorded values kept
+#' deterministically after complete calibration agreement do not trigger this refusal.
+#' Resolve one pattern with reference measurements or use a joint model supporting both.
 #'
 #' `cluster` is experimental. Version 0.6.0 replaced an earlier version that resampled audited
 #' clusters, in which resampling within strata understated variance. The replacement's planned
@@ -495,11 +503,18 @@ catmech_reference_clustered_draws <- function(data, value, gold, predictors, m, 
   note <- "linear_given_recorded"
   uncertainty <- "random_intercept_drawn_each_imputation"
   ids <- data[[cluster]]
+  keep_recorded <- any(recorded & !known) &&
+    all(catmech_contamination_agreement(W[calibration], gold[calibration], 0))
+  if (!keep_recorded && any(as.character(ids[recorded & !known]) %in%
+                           as.character(ids[!recorded & !known])))
+    stop(paste0("A cluster cannot require stochastic imputation for both recorded-present and recorded-missing rows: ",
+      "a shared cluster draw across these paths is not implemented. Supply reference values for one pattern ",
+      "in each affected cluster, or use a joint model that supports both."), call. = FALSE)
   X <- catmech_model_matrix(data, predictors)
   if (any(recorded & !known)) {
     if (length(unique(ids[calibration])) < 5L)
       stop("Fewer than five audited clusters: cluster uncertainty is refused.", call. = FALSE)
-    if (all(catmech_contamination_agreement(W[calibration], gold[calibration], 0))) {
+    if (keep_recorded) {
       draws[recorded & !known, ] <- W[recorded & !known]
       note <- "recorded_kept_all_calibration_rows_agree"
       uncertainty <- "none_recorded_kept_all_calibration_rows_agree"
@@ -514,6 +529,7 @@ catmech_reference_clustered_draws <- function(data, value, gold, predictors, m, 
   if (any(!recorded & !known)) {
     filled <- catmech_reference_cluster_fill(X, gold, which(known), which(!recorded & !known), ids, m)
     if (!isTRUE(attr(filled, "separable"))) uncertainty <- "intercept_variance_zero_not_separable"
+    else if (keep_recorded) uncertainty <- "random_intercept_drawn_each_imputation"
     draws[!recorded & !known, ] <- filled
   }
   list(draws = draws, note = note, cluster_uncertainty = uncertainty)

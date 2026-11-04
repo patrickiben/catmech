@@ -1161,7 +1161,9 @@ def verify_later_studies():
     def hashes(folder, frozen=None):
         for row in rows(folder/"source-hashes.csv"):
             candidate = (ROOT/"validation"/frozen/row["file"]) if frozen else None
-            path = candidate if candidate and candidate.exists() else ROOT/row["file"]
+            package = ROOT/"validation/v0.7.1-source"/row["file"]
+            path = (candidate if candidate and candidate.exists() else
+                    package if package.exists() else ROOT/row["file"])
             assert hashlib.sha256(path.read_bytes()).hexdigest() == row["sha256"], row["file"]
     def count(path):
         with gzip.open(path, "rt", newline="", encoding="utf-8") as stream:
@@ -1173,14 +1175,14 @@ def verify_later_studies():
         unsupported = sorted(decimals(re.sub(r"\]\([^)]*\)", "]", read(name)))-decimals("".join(read(s) for s in sources)))
         assert not unsupported, (name, "Numbers with no source", unsupported)
     second = ROOT/"validation/second-system-study"
-    hashes(second)
+    hashes(second, "v0.7.1-source")
     assert count(second/"replicates.csv.gz") == 270000
     scored = run(ROOT/"tools/second-system-score.py", second)
     assert scored.strip() == read("second-system-decisions.txt").strip() and "OUTCOME: MIXED" in scored
     assert "the outcome is **MIXED**" in read("SECOND_SYSTEM_SYNTHESIS.md")
     trace("SECOND_SYSTEM_SYNTHESIS.md", "second-system-decisions.txt", "second-system-posthoc.txt", "SECOND_SYSTEM_PLAN.md")
     rare = ROOT/"validation/rare-counts-study"
-    hashes(rare)
+    hashes(rare, "v0.7.1-source")
     assert (count(rare/"part1.csv.gz"), count(rare/"part2.csv.gz"), count(rare/"part3.csv.gz")) == (18000, 21000, 20500)
     scored = run(ROOT/"tools/rare-counts-score.py", rare)
     assert scored.strip() == read("rare-counts-decisions.txt").strip()
@@ -1195,7 +1197,7 @@ def verify_later_studies():
     trace("INDEPENDENT_SETUPS_SYNTHESIS.md", "independent-setups-decisions.txt", "independent-setups-posthoc.txt", "INDEPENDENT_SETUPS_PLAN.md", "second-system-decisions.txt", "outside-methods-decisions.txt", "independent-setups/agent-reports.json")
     assert decimals("A made-up 12.345 here.")-decimals(read("independent-setups-decisions.txt")), "Negative control: a made-up number went undetected"
     slopes = ROOT/"validation/within-between-study"
-    hashes(slopes)
+    hashes(slopes, "v0.7.1-source")
     assert (count(slopes/"guard.csv.gz"), count(slopes/"zambia.csv.gz"), count(slopes/"deciding.csv.gz")) == (49500, 36000, 444000)
     scored = run(ROOT/"tools/within-between-score.py", slopes)
     assert scored.strip() == read("within-between-decisions.txt").strip() and "OUTCOME: NOT ADOPTED" in scored and "Control: this scorer reproduces" in scored

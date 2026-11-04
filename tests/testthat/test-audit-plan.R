@@ -137,6 +137,37 @@ test_that("the pilot fit is the one catmech_reference and catmech_pool_lm return
   expect_equal(plan$pilot$full_width, 2 * stats::qt(.975, 397) * sqrt(row$within_variance))
 })
 
+test_that("offset and adjusted-response analyses produce the same audit plan", {
+  frame <- audit_fixture()
+  frame$z <- frame$truth + .4 * sin(seq_len(nrow(frame)))
+  frame$y <- frame$y + 10 * frame$z
+  predictors <- c("x", "y", "z")
+  with_offset <- run_plan(frame, predictors = predictors,
+    formula = y ~ recorded + x + offset(10 * z), seed = 13L)
+  adjusted <- run_plan(frame, predictors = predictors,
+    formula = I(y - 10 * z) ~ recorded + x, seed = 13L)
+  expect_equal(with_offset$pilot$width, adjusted$pilot$width, tolerance = 1e-12)
+  expect_equal(with_offset$k, adjusted$k, tolerance = 1e-10)
+  expect_equal(with_offset$table, adjusted$table, tolerance = 1e-10)
+  expect_identical(with_offset$answer, adjusted$answer)
+})
+
+test_that("offsets enter the target-linearity check at every evaluation", {
+  frame <- audit_fixture()
+  fill <- ifelse(is.na(frame$gold), frame$recorded, frame$gold)
+  # Multiple offsets are summed by model.offset, including an offset linear in
+  # the target. These formulas describe exactly the same regression.
+  first <- catmech_audit_analysis(frame, "recorded",
+    y ~ recorded + x + offset(2 * recorded) + offset(3 * x), "recorded", fill)
+  second <- catmech_audit_analysis(frame, "recorded",
+    I(y - 2 * recorded - 3 * x) ~ recorded + x, "recorded", fill)
+  expect_equal(first, second, tolerance = 1e-12)
+  expect_equal(first$O0, frame$y - 3 * frame$x)
+  expect_equal(first$O1, rep(-2, nrow(frame)))
+  expect_error(run_plan(frame,
+    formula = y ~ recorded + x + offset(recorded^2)), "linear in the audited value")
+})
+
 test_that("the bootstrap is seeded and restores the caller's RNG", {
   frame <- audit_fixture()
   set.seed(71)

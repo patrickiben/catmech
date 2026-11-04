@@ -3,6 +3,7 @@
 ^\.git$
 ^\.github$
 ^\.gitignore$
+^\.claude$
 ^docs$
 ^validation$
 ^tools$

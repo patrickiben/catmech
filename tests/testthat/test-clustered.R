@@ -65,17 +65,83 @@ test_that("clustered imputation refuses what it cannot support", {
   expect_error(catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE, cluster = "id", m = 2), "both recorded and reference")
 })
 
-test_that("clustered imputation handles missing recorded values and full agreement", {
+test_that("clustered imputation supports different patterns in separate clusters", {
   d <- cluster_fixture()
-  gap <- which(is.na(d$gold))[1:5]
+  missing_sites <- unique(d$id[is.na(d$gold)])[1:2]
+  gap <- which(d$id %in% missing_sites)
   d$recorded[gap] <- NA
   fit <- catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE, cluster = "id", m = 3, seed = 2)
   expect_false(any(vapply(fit$completed, function(z) anyNA(z$recorded), logical(1))))
+  for (z in fit$completed) expect_equal(z$recorded[!is.na(d$gold)], d$gold[!is.na(d$gold)])
+})
+
+test_that("mixed stochastic patterns within an imputed cluster are refused", {
+  d <- cluster_fixture()
+  unaudited <- which(is.na(d$gold))[1L]
+  d$recorded[unaudited] <- NA_real_
+  set.seed(64)
+  before <- .Random.seed
+  expect_error(catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE,
+                                 cluster = "id", m = 3, seed = 2),
+               "both recorded-present and recorded-missing rows")
+  expect_identical(.Random.seed, before)
+
+  # Known references in the same site do not repair the two independent paths.
+  d <- cluster_fixture()
+  site <- d$id[which(!is.na(d$gold))[1L]]
+  hidden <- which(d$id == site)[1:2]
+  d$gold[hidden] <- NA_real_
+  d$recorded[hidden[1L]] <- NA_real_
+  expect_error(catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE,
+                                 cluster = "id", m = 3, seed = 2),
+               "shared cluster draw across these paths is not implemented")
+})
+
+test_that("missing recorded values in fixed reference rows do not trigger the guard", {
+  d <- cluster_fixture()
+  site <- d$id[which(!is.na(d$gold))[1L]]
+  fixed <- which(d$id == site)[1L]
+  d$recorded[fixed] <- NA_real_
+  d$gold[which(d$id == site)[2L]] <- NA_real_
+  fit <- catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE,
+                           cluster = "id", m = 3, seed = 2)
+  for (z in fit$completed) expect_equal(z$recorded[!is.na(d$gold)], d$gold[!is.na(d$gold)])
+})
+
+test_that("clustered imputation supports recipients that all lack recorded values", {
+  d <- cluster_fixture()
+  missing <- is.na(d$gold)
+  d$recorded[missing] <- NA_real_
+  fit <- catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE,
+                           cluster = "id", m = 4, seed = 2)
+  values <- vapply(fit$completed, function(z) z$recorded[missing], numeric(sum(missing)))
+  expect_true(all(is.finite(values)))
+  expect_true(all(apply(values, 1, stats::sd) > 0))
+})
+
+test_that("deterministically kept recorded values permit a missing-recorded path", {
   d <- cluster_fixture()
   d$recorded[!is.na(d$gold)] <- d$gold[!is.na(d$gold)]
   expect_warning(fit <- catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE, cluster = "id", m = 2, seed = 2), "audited rows agree")
   expect_identical(fit$spec$recorded_fit, "recorded_kept_all_calibration_rows_agree")
   expect_equal(fit$completed[[1]]$recorded, d$recorded)
+  missing <- which(is.na(d$gold))[1L]
+  d$recorded[missing] <- NA_real_
+  expect_warning(fit <- catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE,
+                                         cluster = "id", m = 4, seed = 2), "audited rows agree")
+  expect_identical(fit$spec$recorded_fit, "recorded_kept_all_calibration_rows_agree")
+  expect_identical(fit$spec$cluster_uncertainty, "random_intercept_drawn_each_imputation")
+  for (z in fit$completed) expect_equal(z$recorded[-missing], d$recorded[-missing])
+  expect_gt(stats::sd(vapply(fit$completed, function(z) z$recorded[missing], numeric(1))), 0)
+})
+
+test_that("full reference accepts mixed recorded availability without drawing", {
+  d <- cluster_fixture(audited = 30L)
+  d$recorded[seq(1L, nrow(d), by = 2L)] <- NA_real_
+  fit <- catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE,
+                           cluster = "id", m = 3, seed = 2)
+  expect_length(fit$manifest$imputed_rows, 0L)
+  for (z in fit$completed) expect_equal(z$recorded, d$gold)
 })
 
 test_that("strata enter as predictors, including one with a single audited cluster", {

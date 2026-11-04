@@ -1,0 +1,3 @@
+Frozen package sources from public v0.7.1 commit 03cae88929e12c94d1cb7dc1a5c4ca943b33fa54.
+Used by the later studies before the v0.7.2 review corrections.
+Original study hashes are unchanged; other hashed inputs remain at their recorded paths.

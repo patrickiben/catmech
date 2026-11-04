@@ -1,0 +1,19 @@
+Comparison of v0.3.1 frozen sources with current sources: 18 of 18 workflow runs identical in completions, audits, diagnostics, assumption hashes, claim levels and pooled results.
+model 11 identical
+noisy 11 identical
+pmm 11 identical
+reference_normal 11 identical
+reference_pmm 11 identical
+legacy 11 identical
+model 12 identical
+noisy 12 identical
+pmm 12 identical
+reference_normal 12 identical
+reference_pmm 12 identical
+legacy 12 identical
+model 13 identical
+noisy 13 identical
+pmm 13 identical
+reference_normal 13 identical
+reference_pmm 13 identical
+legacy 13 identical

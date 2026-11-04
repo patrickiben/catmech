@@ -233,14 +233,17 @@ catmech_audit_plan <- function(data, value, reference, predictors, formula, term
 }
 
 # The analysis as functions of the audited value. Linear in the value means the design is
-# D0 + y * D1 and the response O0 + y * O1, row by row, which gives every expectation below
-# in closed form.
+# D0 + y * D1 and the offset-adjusted response O0 + y * O1, row by row,
+# which gives every expectation below in closed form.
 catmech_audit_analysis <- function(data, value, formula, term, fill) {
   at <- function(y) {
     d <- data
     d[[value]] <- y
     frame <- stats::model.frame(formula, d, na.action = stats::na.fail)
-    list(D = stats::model.matrix(formula, frame), O = as.vector(stats::model.response(frame, "numeric")))
+    response <- as.vector(stats::model.response(frame, "numeric"))
+    offset <- stats::model.offset(frame)
+    if (!is.null(offset)) response <- response - offset
+    list(D = stats::model.matrix(formula, frame), O = response)
   }
   n <- nrow(data)
   parts <- tryCatch({

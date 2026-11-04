@@ -1,6 +1,6 @@
 # Assessment and release decision
 
-Assessed 2026-11-02. Version 0.7.1 is worth releasing as an **experimental, auditable toolkit for data with recorded values and a
+Assessed 2026-11-03. Version 0.7.2 is worth releasing as an **experimental, auditable toolkit for data with recorded values and a
 reference subset**, built from established methods. Real-data testing narrowed its recommended use. It does not support a novel-method
 or clinical-validity claim. Earlier assessments are preserved for [v0.1](ASSESSMENT_V0.1.md), [v0.2](ASSESSMENT_V0.2.md) and [v0.3](ASSESSMENT_V0.3.md).
 
@@ -32,9 +32,11 @@ A later [comparison with outside methods](../validation/OUTSIDE_METHODS_SYNTHESI
 
 Version 0.7.1 follows an [overall check](../validation/OVERALL_QC.md) by five independent AI reviewers. It adds a warning when every audited row agrees and recorded values are kept, a warning when one cluster determines a coefficient, and a refusal when no between-cluster variance can be estimated. These cases gave badly wrong intervals with no signal before. Earlier study numbers are unchanged.
 
-Three later planned tests changed no package code. On a [second health system](../validation/SECOND_SYSTEM_SYNTHESIS.md) the outcome was mixed, with errors that barely clustered. The shortfall on count data came from [heavy-tailed cluster effects and not rarity](../validation/RARE_COUNTS_SYNTHESIS.md), with no fix found. [Comparators written by fresh agents](../validation/INDEPENDENT_SETUPS_SYNTHESIS.md) did not meet the rule, but the best looks better than the option on most measures, so the option is not the best available.
+Three later planned tests changed no package code. On a [second health system](../validation/SECOND_SYSTEM_SYNTHESIS.md) the outcome was mixed, with errors that barely clustered. In the [count-data test](../validation/RARE_COUNTS_SYNTHESIS.md), coverage fell with more variable, skewed cluster frailty at both tested count levels. Its original **HEAVY TAILS** verdict remains, but variance, skewness and dependence changed together, so it does not isolate a tail-shape mechanism or exclude rarity as a problem elsewhere. No candidate fix met the rules. [Comparators written by fresh agents](../validation/INDEPENDENT_SETUPS_SYNTHESIS.md) did not meet the rule, but the best looks better than the option on most measures, so the option is not the best available.
 
 A [later test of separate within-cluster and between-cluster slopes](../validation/WITHIN_BETWEEN_SYNTHESIS.md), on new SNAP quality-control reviews and a new simulation, was **not adopted**, and it changed no package code. With the audited value as a predictor, coverage and bias improved, though linear MI kept lower bias in simulation. With it as the outcome, error rose: 1.258 times the option's on real items at a 25% audit, and the new simulation's outcome class missed the accuracy limit at 1.026. The slopes alone also did not match the fresh agent's setup that prompted the test. SNAP's errors barely cluster by state, and no human has reviewed this.
+
+Version 0.7.2 fixes the audit planner's formula offsets and compound-stratum identification, and refuses mixed stochastic recorded-value patterns within a cluster until a shared draw is supported. The variance-component draws are explicitly approximate. The rare-count interpretation above was narrowed after review; its original protocol, decision label and numerical results remain unchanged. These corrections do not establish general coverage.
 
 ## Current judgment
 
@@ -65,7 +67,7 @@ every connection among those methods.
 3. Test the hold-out advice prospectively, since it comes from the real-data study that suggested it.
 4. Consider non-constant variance, which remains out of scope. On the Rwanda audit it and clustering together cost the oracle up to 28 points of default coverage.
 5. Find what else separates the fresh agent's setup from the option, now that [separate slopes alone](../validation/WITHIN_BETWEEN_SYNTHESIS.md) did not match it. Any such test needs data not yet seen, since both recounts, SNAP and the new simulation have all been seen.
-6. Have someone who knows `mice` and `survey` review the [comparisons](../validation/INDEPENDENT_SETUPS_SYNTHESIS.md). Fresh agents reduce the problem of one author setting up every method, and they do not remove it. Heavy-tailed cluster effects also remain unsolved, even with every row checked.
+6. Have someone who knows `mice` and `survey` review the [comparisons](../validation/INDEPENDENT_SETUPS_SYNTHESIS.md). Fresh agents reduce the problem of one author setting up every method, and they do not remove it. Coverage shortfalls under variable, skewed cluster frailty also remain, even with every row checked; comparisons holding variance and dependence fixed would help distinguish possible mechanisms.
 7. Test whether checking errors against analysis covariates on audited rows can guide the choice of method. The real-audit results suggested this, so they cannot test it fairly, and at a 25% audit the check has low power.
 
 Neither reproducibility nor these validation checks are proof of inferential validity. AI-assisted review is disclosed, and no independent human peer review is implied.
