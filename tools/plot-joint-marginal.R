@@ -171,7 +171,7 @@ render <- function() {
   points(z,10-match(z$cell,cells)+offsets[z$method])
   z<-plot_data[plot_data$panel=="C", ]
   limits<-range(pretty(range_finite(z,TRUE)));limits[1L]<-min(0,min(z$lower[is.finite(z$lower)]))
-  axes(limits,prior_cells,"C  Sensitivity of coefficient estimates",
+  axes(limits,prior_cells,"C  Sensitivity of the single-predictor slope",
     "Old IW axis; new maximum of HW and regression-scale axes","Mean sensitivity, strongest declared axis (original units)",0)
   points(z,5-match(z$cell,prior_cells)+offsets[z$method])
   z<-plot_data[plot_data$panel=="D", ]
@@ -187,7 +187,7 @@ render <- function() {
   graphics::mtext("Sensitivity uses common old-three/new-five sets and the larger new sensitivity axis. Paired inference and all analysis refusals remain in the numerical evidence files.",side=1,outer=TRUE,line=2.4,cex=.78,col="#526073")
   graphics::par(fig=c(0,1,.914,.945),mar=rep(0,4),oma=rep(0,4),new=TRUE)
   graphics::plot.new()
-  graphics::legend("center",legend=c("v0.9 conditional joint model","New marginal joint model + hierarchical prior"),
+  graphics::legend("center",legend=c("v0.9 conditional joint: direct summary","New marginal joint: direct summary"),
     col=colors,pch=16,horiz=TRUE,bty="n",cex=.92,x.intersp=.8)
 }
 if(dir.exists(output)&&length(list.files(output,all.files=TRUE,no..=TRUE)))stop("Use a new or empty figure output directory.")

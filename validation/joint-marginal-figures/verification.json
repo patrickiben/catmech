@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "points": 62,
+  "interval_bounds": 124,
+  "denominators": 62,
+  "prior_mcse_comparisons": 8,
+  "input_files": 11,
+  "png_dimensions": [
+    3200,
+    2400
+  ],
+  "scope": "Independent plotted arithmetic and provenance; visual inspection and statistical validity are separate."
+}

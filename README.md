@@ -2,7 +2,7 @@
 
 **An experimental R package for regression using error-prone recorded measurements and an independently checked reference subset. Version 0.10.0.**
 
-**Contextual site effects:** the explicit `joint_marginal` model estimates measurement and predictor variation together. Use `catmech_marginal_summary()` for population marginal coefficients; see the [model and assumptions](docs/JOINT_MARGINAL_METHOD.md).
+**Contextual site effects:** the explicit `joint_marginal` model estimates measurement and predictor variation together. Use `catmech_marginal_summary()` for population marginal coefficients; see the [model and assumptions](docs/JOINT_MARGINAL_METHOD.md) and [confirmation findings](validation/JOINT_MARGINAL_SYNTHESIS.md).
 
 **The question:** can you keep error-prone recorded values for precision without trusting them, and which method should you try first?
 
@@ -379,6 +379,31 @@ Categorical, incomplete, site-constant or aliased predictors are unsupported.
 See the [method](docs/JOINT_MARGINAL_METHOD.md),
 [runnable example](inst/examples/joint-marginal.R) and
 [prospective validation plan](validation/JOINT_MARGINAL_PLAN.md).
+
+In the fresh **3,600-cohort confirmation**, the three contextual scenarios had
+**94.00%–95.75%** coverage among returned intervals, versus **58.50%–67.00%** for
+the conditional model's direct summary of the same population slope. Mean
+absolute contextual slope bias fell from **0.1306 to 0.0046**. Contextual and
+ordinary Gaussian calibration both passed their separate prespecified screens.
+Intervals in the four ordinary calibration cells were **12.2%–16.3% wider**; the new method did not establish
+superior ordinary-case calibration.
+
+Across **800** complete paired prior comparisons, measured slope sensitivity
+was **70.1% lower**, using the larger of the new model's covariance-scale and
+regression-scale responses. This is a comparison over declared prior ranges for
+one continuous-predictor slope. The remaining shifts are close to finite-chain
+Monte Carlo errors, so it is not evidence of prior independence.
+
+**The availability screen failed:** **2 of 3,600** default-prior candidate fits
+refused to return, versus none for the conditional model. Both missed the
+unchanged effective-sample-size cutoff at the maximum run length. Every cell
+still returned at least **99%** of fits and intervals, but that does not satisfy
+the separate requirement of no observed increase in refusals. The option remains
+experimental; these results do not validate arbitrary contextual relationships,
+multiple-predictor coverage, rare counts or use of the repaired measurement as
+an analysis predictor. See [all results, uncertainty and failed screens](validation/JOINT_MARGINAL_SYNTHESIS.md).
+
+[![Marginal-model calibration, slope prior sensitivity and fit refusals](validation/joint-marginal-figures/joint-marginal-evidence.png)](validation/joint-marginal-figures/joint-marginal-evidence.pdf)
 
 ### Earlier moment-model evidence
 

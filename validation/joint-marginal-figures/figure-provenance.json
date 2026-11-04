@@ -1,0 +1,21 @@
+{
+  "stage": "confirmation",
+  "source_fingerprint": "607f0585be72b5e116a6d384f1c1df2f1294241737540e80deaf4aa413d2814e",
+  "script_sha256": "304bc68a2ce709a0feccf949f95fbad560298df5bc787635afdf15795ad5c3e8",
+  "input_files": {
+    "COMPLETE.json": "a452590190c40739e40e772ce7ec1253ce312f79bd46ebab86d881f697b0e290",
+    "settings.json": "fe0caa3bcebd8b31c11d711269a449bd79233995976d2268f1e1c3b5a313af45",
+    "records.csv": "3f8a42297409d09639f6ca653bf4aa0a371149e56a0481b24c41db099228a6d2",
+    "fit-records.csv": "79b7fa75b912bfab668bee30a5a6d9f01f38de68b052fcad4594b263085bd4ec",
+    "summary.csv": "c696ac5a53dace47a1b277705138147d50a434c57a0594fe03ce9af37ecbbca4",
+    "prior-triples.csv": "749a55d1aeb1db2b07a39c58fcf0deebd167b2bb8427627d4fd798ad2ba9b48f",
+    "prior-summary.csv": "b69d184cdcdd9c03a18589cc8826cf5ae8d6df4bfc2f37f03e7865d60964cf9c",
+    "availability.csv": "d2ef68b84a7a617e0b93f4cbf9089d269a1cc19673366cf4b85ae3c3aa80045b",
+    "adoption.json": "c99b35f798bdf4993d4081d91cf75d79960fd0503d49af2eaed0c1b91801fc0d",
+    "source-hashes-before.csv": "c65635fdb357c6938b4aa6a2a271dedb9ea40c4734a01f05abd01e3b5a0f082c",
+    "source-hashes-after.csv": "c65635fdb357c6938b4aa6a2a271dedb9ea40c4734a01f05abd01e3b5a0f082c"
+  },
+  "points": 62,
+  "self_checks": "All plotted values recomputed from raw records and checked against saved summaries; prior comparisons use common complete old-three/new-five sets.",
+  "uncertainty": "95% Monte Carlo intervals; not posterior coefficient intervals for any individual cohort."
+}

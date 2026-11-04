@@ -219,6 +219,10 @@ The prospective repeated-sampling study is specified in the
 [validation plan](../validation/JOINT_MARGINAL_PLAN.md). Its results, failures and
 Monte Carlo uncertainty determine the empirical claims; these mathematical
 checks alone establish no coverage guarantee.
+The [completed confirmation](../validation/JOINT_MARGINAL_SYNTHESIS.md) passed
+the contextual, ordinary calibration and slope-sensitivity screens. Its strict
+availability screen failed because two candidate fits refused to return; the
+option remains experimental and the diagnostic thresholds remain unchanged.
 
 The repeated-sampling study has one continuous predictor. Multiple-predictor
 support has algebraic and numerical checks, rather than a separate coverage

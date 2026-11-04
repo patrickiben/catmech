@@ -1,0 +1,2 @@
+Command: python3 docs/case-study/fact_check.py
+120 claims, 120 match; links 174, broken 0; PDF pages 1; problems 0

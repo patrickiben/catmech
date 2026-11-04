@@ -1,0 +1,16 @@
+Visual QA: PASS, 2026-11-04.
+
+Inspected the generated 3200 x 2400 PNG and the PDF rendered by pdftoppm
+at 1800-pixel maximum dimension. All four panels, legends, labels, point
+estimates, uncertainty bounds and footnotes are visible without clipping or
+overlap. The contextual rows and zero-reference lines are identifiable.
+Panel C explicitly limits the result to the single-predictor slope.
+Both legend entries explicitly identify direct summaries; the old CV3 route
+is a separate secondary comparison in the synthesis. The final legend revision
+was generated in a new temporary directory, independently verified and visually
+inspected in PNG and rendered PDF before replacing the previous figure files.
+The plotted-data and shift/MCSE CSV files are byte-identical across that revision.
+Coverage uses returned-interval denominators; refusal panel uses all default
+requests. Their distinct denominators are stated in the panel subtitles.
+PNG and PDF convey the same plotted results. Numerical verification is in
+verification.json and is distinct from this visual inspection.

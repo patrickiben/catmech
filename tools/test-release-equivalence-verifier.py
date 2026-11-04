@@ -9,8 +9,10 @@ import copy
 import csv
 import hashlib
 import importlib.util
+import io
 import json
 from pathlib import Path
+import subprocess
 import tarfile
 import tempfile
 
@@ -96,11 +98,15 @@ def run():
         write_csv(study / "records.csv", records, ["cell", "replicate", "input_sha256"])
         archive = work / "catmech.tar.gz"
 
-        def bundle():
+        def bundle(generated=None):
             with tarfile.open(archive, "w:gz") as out:
                 for path in root.rglob("*"):
                     if path.is_file() and path.relative_to(root).parts[0] not in {"validation", "tools"}:
                         out.add(path, arcname="catmech/" + path.relative_to(root).as_posix())
+                for relative, data in (generated or {}).items():
+                    member = tarfile.TarInfo("catmech/" + relative)
+                    member.size = len(data)
+                    out.addfile(member, io.BytesIO(data))
 
         bundle()
         verifier.verify(archive, root, study)
@@ -137,10 +143,10 @@ def run():
         assert report["release_source_equivalence"]["identical_to_confirmation_source"] is False
         checks.append(dict(case="exact named correction passes with explicit receipt", result="pass"))
 
-        def reject(label, callback):
+        def reject(label, callback, errors=(AssertionError,)):
             try:
                 callback()
-            except AssertionError:
+            except errors:
                 checks.append(dict(case=label, result="rejected"))
             else:
                 raise AssertionError("Tamper accepted: " + label)
@@ -182,8 +188,28 @@ def run():
         altered_receipt("namespace test failure", lambda x: x.update(stats_detached_current_prepare_passed=False))
         altered_receipt("incorrect cohort seed", lambda x: x["cohort_checks"][0].update(data_seed=1))
         altered_receipt("unapproved correction name", lambda x: x.update(correction_id="arbitrary_change"))
+
+        # R CMD build may add only this particular empty partial-Rd cache.
+        # These controls independently serialize actual R objects, not magic bytes.
+        empty_cache, nonempty_cache = work / "empty.rdb", work / "nonempty.rdb"
+        subprocess.run(["Rscript", "--vanilla", "-e",
+            "p <- commandArgs(TRUE); saveRDS(structure(list(), names=character()), p[1L], version=2); "
+            "saveRDS(list(unexpected=1), p[2L], version=2)",
+            str(empty_cache), str(nonempty_cache)], check=True, capture_output=True, text=True)
+        bundle({"build/partial.rdb": empty_cache.read_bytes()})
+        cache_report = call()
+        cache_entry = [x for x in cache_report["files"] if x["file"] == "build/partial.rdb"]
+        assert len(cache_entry) == 1 and "byte-matched independent" in cache_entry[0]["check"]
+        checks.append(dict(case="R-generated empty named partial-Rd cache accepted", result="pass"))
+        bundle({"build/partial.rdb": nonempty_cache.read_bytes()})
+        reject("nonempty generated partial-Rd cache", call)
+        bundle({"build/partial.rdb": b"not a serialized R object"})
+        reject("malformed generated partial-Rd cache", call)
+        bundle({"build/unrecognized.rdb": empty_cache.read_bytes()})
+        reject("unrecognized generated archive file", call, (AssertionError, FileNotFoundError))
     return dict(status="PASS", evidence="synthetic verifier-policy fixtures; no real study evaluated",
-                positive_controls=2, rejected_controls=len(checks) - 2, checks=checks)
+                positive_controls=sum(x["result"] == "pass" for x in checks),
+                rejected_controls=sum(x["result"] == "rejected" for x in checks), checks=checks)
 
 
 if __name__ == "__main__":

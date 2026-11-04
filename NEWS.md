@@ -19,6 +19,17 @@
 - Building from source now requires a C++17 toolchain, Rcpp and RcppArmadillo.
   Frozen v0.9.0 sources and the first numerical pilot remain reproducible.
 
+- Validate on 3,600 fresh one-predictor cohorts. Contextual coverage was
+  94.00%–95.75% versus 58.50%–67.00% for the conditional direct summary;
+  measured slope sensitivity across both declared prior axes was 70.1% lower.
+  Contextual, ordinary calibration and sensitivity screens passed. The strict
+  availability screen failed: two of 3,600 candidate default fits refused at
+  unchanged ESS thresholds, versus none for the baseline. Ordinary intervals
+  were wider; the new model is an explicit experimental option.
+- Qualify `stats::ave` for namespace-only input preparation. All 3,600 frozen
+  confirmation inputs and prepared model objects are byte-identical after this
+  engineering correction; no confirmation fit was replaced.
+
 # catmech 0.9.0
 
 - Add `catmech_joint_summary()` for population target coefficients in the exact

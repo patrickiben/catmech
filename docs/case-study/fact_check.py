@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Check every number in the README front page, case study and PDF against its source, then write FACT_CHECK.md.
+"""Check numbers in the README front page, case study/PDF, and selected lower README claims against sources.
 
 Usage: python3 docs/case-study/fact_check.py
 Each claim recomputes its value from a source file, usually a frozen results table, which is only read. Any digit or number
-word in a document that no claim covers fails the check, and so does a claim that no longer appears in its document.
+word in the front page or case study/PDF that no claim covers fails the check, and so does a claim that no longer appears.
+Lower README claims are checked only when explicitly listed with scope L; that section is not exhaustively number-scanned.
 Also checks relative links, the README example (by running it), the PDF page count and wording rules. Exit 0 means all passed.
 """
 import csv, datetime, json, pathlib, re, statistics, subprocess, sys, tempfile
@@ -27,6 +28,12 @@ BIASED = ("pnc", "iron", "anc4")
 CLD = "validation/clustered-decisions.txt"
 FXS, FXR, FXD = "validation/clustered-fix-study/summary.csv", "validation/clustered-fix-study/ratios.csv", "validation/clustered-fix-decisions.txt"
 RARE, COMMON = ("lbw", "resus", "stillbirths"), ("deliveries", "anc1_early", "pnc", "syphilis", "iron", "anc4")
+JM = "validation/joint-marginal-confirmation/summary.csv"
+JMP = "validation/joint-marginal-confirmation/prior-summary.csv"
+JMF = "validation/joint-marginal-confirmation/fit-records.csv"
+JMA = "validation/joint-marginal-confirmation/adoption.json"
+JM_CONTEXT = ("contextual_x", "contextual_unbalanced", "contextual_null")
+JM_ORDINARY = ("gaussian_balanced", "gaussian_unbalanced", "observed_mar", "null_slope")
 
 _cache = {}
 
@@ -119,6 +126,34 @@ def fx(analysis, method="random_intercept"):
 
 def fx_ratio(analysis, field="recovery_ratio"):
     return float(one(FXR, analysis=analysis, fraction="0.25", method="random_intercept")[field])
+
+
+def jm(cell, method, field):
+    """Fresh 0.10 confirmation, independently audited against frozen source."""
+    return float(one(JM, cell=cell, method=method)[field])
+
+
+def jm_width_changes():
+    return [jm(c, "marginal_direct", "mean_width") /
+            jm(c, "baseline_direct", "mean_width") - 1 for c in JM_ORDINARY]
+
+
+def jm_sensitivity_reduction():
+    direct = [r for r in rows(JMP) if r["analysis"] == "direct"]
+    assert len(direct) == 4 and all(int(r["complete_pairs"]) == 200 for r in direct)
+    return 1 - statistics.mean(float(r["mean_marginal_coefficient_sensitivity"]) for r in direct) / \
+        statistics.mean(float(r["mean_baseline_coefficient_sensitivity"]) for r in direct)
+
+
+def jm_refusals():
+    old = [r for r in rows(JMF) if r["fit_id"] == "baseline"]
+    new = [r for r in rows(JMF) if r["fit_id"] == "marginal"]
+    assert len(old) == len(new) == 3600 and all(r["fit_status"] == "ok" for r in old)
+    failed = [r for r in new if r["fit_status"] != "ok"]
+    assert all(r["error_class"] == "catmech_convergence_error" and
+               int(r["iterations_used"]) == 32000 and float(r["min_ess_bulk"]) < 400
+               for r in failed)
+    return f"{len(failed)} of {len(new):,}"
 
 
 EXAMPLE = {}
@@ -258,6 +293,31 @@ claims = [
      lambda: worded(all(375 <= 600 * float(r["discard_k"]) / (1.25 ** 2 - 1 + float(r["discard_k"])) <= 385 for r in rows(AK)), "about 380 of 600", "discard records")),
     ("about 40 to 70", "L", "New text: records by formula when keeping recorded values (41 and 66)", AK,
      lambda: worded(all(40 <= 600 * float(r["k"]) / (1.25 ** 2 - 1 + float(r["k"])) <= 70 for r in rows(AK)), "about 40 to 70", "records")),
+    ("3,600", "L", "Fresh marginal-model confirmation cohorts, one default fit of each model per cohort", JMF,
+     lambda: f'{sum(r["fit_id"] == "baseline" for r in rows(JMF)):,}'),
+    ("94.00%", "L", "Fresh confirmation: lowest contextual marginal-direct coverage among returned intervals", JM,
+     lambda: f'{100 * min(jm(c, "marginal_direct", "coverage_conditional") for c in JM_CONTEXT):.2f}%'),
+    ("95.75%", "L", "Fresh confirmation: highest contextual marginal-direct coverage among returned intervals", JM,
+     lambda: f'{100 * max(jm(c, "marginal_direct", "coverage_conditional") for c in JM_CONTEXT):.2f}%'),
+    ("58.50%", "L", "Fresh confirmation: lowest contextual baseline-direct coverage for the same marginal target", JM,
+     lambda: f'{100 * min(jm(c, "baseline_direct", "coverage_conditional") for c in JM_CONTEXT):.2f}%'),
+    ("67.00%", "L", "Fresh confirmation: highest contextual baseline-direct coverage for the same marginal target", JM,
+     lambda: f'{100 * max(jm(c, "baseline_direct", "coverage_conditional") for c in JM_CONTEXT):.2f}%'),
+    ("0.1306 to 0.0046", "L", "Fresh confirmation: equal-cell mean absolute contextual slope bias, old to new", JM,
+     lambda: ' to '.join(f'{statistics.mean(abs(jm(c, m, "bias")) for c in JM_CONTEXT):.4f}' for m in ("baseline_direct", "marginal_direct"))),
+    ("12.2%", "L", "Fresh confirmation: smallest width increase in the four ordinary calibration cells", JM,
+     lambda: pct1(min(jm_width_changes()))),
+    ("16.3%", "L", "Fresh confirmation: largest width increase in the four ordinary calibration cells", JM,
+     lambda: pct1(max(jm_width_changes()))),
+    ("800", "L", "Fresh confirmation: common complete old-three/new-five direct prior comparisons", JMP,
+     lambda: f'{sum(int(r["complete_pairs"]) for r in rows(JMP) if r["analysis"] == "direct")}'),
+    ("70.1% lower", "L", "Fresh confirmation: reduction in equal-cell slope sensitivity, new cohortwise maximum of HW/regression axes versus old IW", JMP,
+     lambda: f'{100 * jm_sensitivity_reduction():.1f}% lower'),
+    ("2 of 3,600", "L", "Fresh confirmation: default candidate refusals at maximum iterations, with zero baseline refusals", JMF, jm_refusals),
+    ("99%", "L", "Fresh confirmation: every candidate default cell meets the at-least-99% return threshold; the separate no-increase requirement fails", JMA,
+     lambda: worded(json.loads((ROOT / JMA).read_text())["availability"]["every_fit_return_rate_at_least_99"] and
+                    json.loads((ROOT / JMA).read_text())["availability"]["every_interval_return_rate_at_least_99"] and
+                    not json.loads((ROOT / JMA).read_text())["availability"]["pass"], "99%", "return threshold or failed availability screen differs")),
 ]
 
 # Number-like text that states no finding. Listed so the coverage check can pass, and so a reader can see what was excluded.
@@ -408,7 +468,7 @@ def main():
     pdf_text = subprocess.run(["pdftotext", str(pdf), "-"], capture_output=True, text=True, check=True).stdout
     pdf_text = re.sub(r"\s+", " ", pdf_text)
     docs = {"R": clean(front), "C": clean(CASE.read_text()), "L": clean(lower)}
-    names = {"R": "README.md front page", "C": "docs/case-study/CASE_STUDY.md and PDF", "L": "README.md lower sections, numbers added or moved in this rewrite"}
+    names = {"R": "README.md front page", "C": "docs/case-study/CASE_STUDY.md and PDF", "L": "README.md lower sections, explicitly listed claims including fresh 0.10 confirmation"}
 
     results, failures = [], []
     for shown, where, meaning, source, fn in claims:
@@ -455,7 +515,7 @@ def main():
 
     lines = ["# Fact check", "",
              f"Written by [`fact_check.py`](fact_check.py). Last run: {datetime.date.today().isoformat()}. Each row recomputes the number from its source, and most sources are frozen results tables that the script only reads. "
-             "A document fails if it contains a digit or number word that no row covers, or if a row's text no longer appears in it. Rerun with `python3 docs/case-study/fact_check.py`.", "",
+             "The README front page and case study/PDF fail if they contain a digit or number word that no row covers. Lower README sections are checked only for explicitly listed L claims, including the fresh 0.10 confirmation results; their other numbers are not exhaustively scanned. Every listed claim must still appear in its document. Rerun with `python3 docs/case-study/fact_check.py`.", "",
              f"**Result: {'all ' + str(len(results)) + ' claims match their sources' if not failures else str(len(failures)) + ' problems'}.** "
              f"PDF: {pages} page, generated from the current `CASE_STUDY.md`. Relative links and README tool paths checked: {link_count}, {len(link_problems)} broken. External DOI links were not checked, because this check stays offline. "
              f"Negative controls: a changed number, an added number, an added number word, a wrong claim value, an unnegated publication claim, a listed term and broken links {'were all caught' if not misses else 'WERE NOT ALL CAUGHT'}.", ""]

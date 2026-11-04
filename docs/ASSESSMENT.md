@@ -1,6 +1,6 @@
 # Assessment and release decision
 
-Assessed 2026-11-04. Version 0.9.0 is worth releasing as an **experimental, auditable toolkit for data with recorded values and a
+Assessed 2026-11-04. Version 0.10.0 is worth releasing as an **experimental, auditable toolkit for data with recorded values and a
 reference subset**, built from established methods. Real-data testing narrowed its recommended use. It does not support a novel-method
 or clinical-validity claim. Earlier assessments are preserved for [v0.1](ASSESSMENT_V0.1.md), [v0.2](ASSESSMENT_V0.2.md) and [v0.3](ASSESSMENT_V0.3.md).
 
@@ -52,6 +52,32 @@ uniformly reduced. Contextual-covariate stress produced 63.5% coverage and
 substantial bias, so this is useful explicit model-based inference, not a general
 robust marginal-effect procedure. `catmech_pool_lm()` remains a separate analysis.
 
+## Contextual population inference in v0.10.0
+
+The explicit `joint_marginal` option jointly models continuous predictors and
+measurements, allowing their site effects to correlate. It uses a proper
+factorized covariance/regression prior and an independently checked native
+sampler. Its contribution is usable, auditable model-based inference with a
+clearer population target, not a new statistical model class.
+
+A fresh [3,600-cohort confirmation](../validation/JOINT_MARGINAL_SYNTHESIS.md)
+passed contextual calibration, ordinary Gaussian calibration and slope prior-
+sensitivity screens. Contextual coverage was 94.00%–95.75%, compared with
+58.50%–67.00% for the conditional direct summary; mean absolute contextual bias
+fell from 0.1306 to 0.0046. Measured slope sensitivity over the two declared new
+prior axes was 70.1% lower on 800 complete comparisons. Small remaining shifts
+are near finite-chain Monte Carlo error and do not show prior independence.
+
+The availability nonregression screen **failed**: two of 3,600 candidate default
+fits refused at the unchanged diagnostics, versus none for the baseline. Each
+cell still returned at least 99% of fits and intervals. Intervals in the four ordinary calibration cells were
+12.2%–16.3% wider, and ordinary calibration was not shown to improve. This supports
+an explicit experimental option for its stated contextual model, not a universal
+replacement. Repeated-sampling evidence covers one continuous-predictor slope;
+it does not validate multiple-predictor coverage, nonlinear relationships,
+informative site sizes, rare counts, imperfect references or MNAR. The earlier
+real-data evidence does not validate the new predictor-distribution model.
+
 ## Current judgment
 
 | Question | Judgment |
@@ -63,7 +89,7 @@ robust marginal-effect procedure. `catmech_pool_lm()` remains a separate analysi
 | Can it say how many records to audit? | Not validated. The planner gave a NO-GO, failing only at the 5% target. It is a documented calculation, built on classical theory. |
 | Does it repair missed errors with no new information? | No. It requires genuine reference measurements. |
 | Generally valid confidence intervals? | No. Failures are recorded for each workflow. With default intervals the oracle itself undercovered on ClinicalTrials.gov and on the Rwanda audit, and no method in the real-audit test held the oracle's clustered coverage at a 25% facility audit. The experimental clustered option came closer, and under the variance then in use still reached only 89.0% on one of nine items, against 93.2% for a recount. |
-| Does it handle clustered audits? | The opt-in `cluster_model = "joint"` now handles mixed recording patterns through a shared bivariate site model; its validation and assumptions are separate. For the historical default, partly. `catmech_pool_lm(cluster = )` is a standard cluster-robust variance. `catmech_reference(cluster = )` is experimental: better worst-case coverage when the audited value is the outcome, some added error on rare items, two planned tests that came out PARTIAL, and bias when the audited value is a predictor. Planned comparisons kept it under their rule, narrowly, and an independently written setup looks better on most measures. |
+| Does it handle clustered audits? | The opt-in `cluster_model = "joint"` handles mixed recording patterns through a shared bivariate site model. `"joint_marginal"` also models continuous predictors and their site associations; its calibration and prior-sensitivity screens passed, but its strict availability screen failed. Each model has separate assumptions and evidence. For the historical default, partly. `catmech_pool_lm(cluster = )` is a standard cluster-robust variance. `catmech_reference(cluster = )` is experimental: better worst-case coverage when the audited value is the outcome, some added error on rare items, two planned tests that came out PARTIAL, and bias when the audited value is a predictor. Planned comparisons kept it under their rule, narrowly, and an independently written setup looks better on most measures. |
 | Real-data evidence? | Two public datasets with real recording differences, and two public audits: Rwanda facility counts and psychology effect sizes. None is a patient-level clinical source-data audit, and the ClinicalTrials.gov reference is not independent truth. |
 | Ready for a GitHub research release? | Yes, with the recorded limitations. |
 | Ready for a methods paper or clinical use? | No. A short software paper may be realistic after review. A methods claim is not supported. |

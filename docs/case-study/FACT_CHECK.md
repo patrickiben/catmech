@@ -1,8 +1,8 @@
 # Fact check
 
-Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-04. Each row recomputes the number from its source, and most sources are frozen results tables that the script only reads. A document fails if it contains a digit or number word that no row covers, or if a row's text no longer appears in it. Rerun with `python3 docs/case-study/fact_check.py`.
+Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-04. Each row recomputes the number from its source, and most sources are frozen results tables that the script only reads. The README front page and case study/PDF fail if they contain a digit or number word that no row covers. Lower README sections are checked only for explicitly listed L claims, including the fresh 0.10 confirmation results; their other numbers are not exhaustively scanned. Every listed claim must still appear in its document. Rerun with `python3 docs/case-study/fact_check.py`.
 
-**Result: all 108 claims match their sources.** PDF: 1 page, generated from the current `CASE_STUDY.md`. Relative links and README tool paths checked: 170, 0 broken. External DOI links were not checked, because this check stays offline. Negative controls: a changed number, an added number, an added number word, a wrong claim value, an unnegated publication claim, a listed term and broken links were all caught.
+**Result: all 120 claims match their sources.** PDF: 1 page, generated from the current `CASE_STUDY.md`. Relative links and README tool paths checked: 174, 0 broken. External DOI links were not checked, because this check stays offline. Negative controls: a changed number, an added number, an added number word, a wrong claim value, an unnegated publication claim, a listed term and broken links were all caught.
 
 ## README.md front page
 
@@ -151,7 +151,7 @@ Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-04. Each row reco
 | `1.31e-4` | Paired MSE difference, model minus linear MI, ClinicalTrials.gov, 25% | `validation/real-data-study/paired-comparisons.csv` | Match |
 | `2.2e-5` | MCSE of that difference | `validation/real-data-study/paired-comparisons.csv` | Match |
 
-## README.md lower sections, numbers added or moved in this rewrite
+## README.md lower sections, explicitly listed claims including fresh 0.10 confirmation
 
 | As shown | What it says | Source file | Result |
 |---|---|---|---|
@@ -160,6 +160,18 @@ Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-04. Each row reco
 | `51%` | Moved text: bootstrap-donor widths against reference normal on real data, largest increase. REAL_DATA_SYNTHESIS.md says 52%, from rounded table values | `validation/real-data-study/summary.csv` | Match |
 | `about 380 of 600` | New text: mean records by formula when discarding, both pools (383 and 378) | `validation/audit-plan-study/pool-k.csv` | Match |
 | `about 40 to 70` | New text: records by formula when keeping recorded values (41 and 66) | `validation/audit-plan-study/pool-k.csv` | Match |
+| `3,600` | Fresh marginal-model confirmation cohorts, one default fit of each model per cohort | `validation/joint-marginal-confirmation/fit-records.csv` | Match |
+| `94.00%` | Fresh confirmation: lowest contextual marginal-direct coverage among returned intervals | `validation/joint-marginal-confirmation/summary.csv` | Match |
+| `95.75%` | Fresh confirmation: highest contextual marginal-direct coverage among returned intervals | `validation/joint-marginal-confirmation/summary.csv` | Match |
+| `58.50%` | Fresh confirmation: lowest contextual baseline-direct coverage for the same marginal target | `validation/joint-marginal-confirmation/summary.csv` | Match |
+| `67.00%` | Fresh confirmation: highest contextual baseline-direct coverage for the same marginal target | `validation/joint-marginal-confirmation/summary.csv` | Match |
+| `0.1306 to 0.0046` | Fresh confirmation: equal-cell mean absolute contextual slope bias, old to new | `validation/joint-marginal-confirmation/summary.csv` | Match |
+| `12.2%` | Fresh confirmation: smallest width increase in the four ordinary calibration cells | `validation/joint-marginal-confirmation/summary.csv` | Match |
+| `16.3%` | Fresh confirmation: largest width increase in the four ordinary calibration cells | `validation/joint-marginal-confirmation/summary.csv` | Match |
+| `800` | Fresh confirmation: common complete old-three/new-five direct prior comparisons | `validation/joint-marginal-confirmation/prior-summary.csv` | Match |
+| `70.1% lower` | Fresh confirmation: reduction in equal-cell slope sensitivity, new cohortwise maximum of HW/regression axes versus old IW | `validation/joint-marginal-confirmation/prior-summary.csv` | Match |
+| `2 of 3,600` | Fresh confirmation: default candidate refusals at maximum iterations, with zero baseline refusals | `validation/joint-marginal-confirmation/fit-records.csv` | Match |
+| `99%` | Fresh confirmation: every candidate default cell meets the at-least-99% return threshold; the separate no-increase requirement fails | `validation/joint-marginal-confirmation/adoption.json` | Match |
 
 ## Statements checked by grep
 

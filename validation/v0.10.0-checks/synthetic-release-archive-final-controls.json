@@ -1,0 +1,100 @@
+{
+  "status": "PASS",
+  "evidence": "synthetic verifier-policy fixtures; no real study evaluated",
+  "positive_controls": 3,
+  "rejected_controls": 20,
+  "checks": [
+    {
+      "case": "unchanged source passes strict default",
+      "result": "pass"
+    },
+    {
+      "case": "exact named correction passes with explicit receipt",
+      "result": "pass"
+    },
+    {
+      "case": "changed source rejected without waiver",
+      "result": "rejected"
+    },
+    {
+      "case": "receipt without frozen directory rejected",
+      "result": "rejected"
+    },
+    {
+      "case": "unrelated R change",
+      "result": "rejected"
+    },
+    {
+      "case": "native source change",
+      "result": "rejected"
+    },
+    {
+      "case": "extra sampler change",
+      "result": "rejected"
+    },
+    {
+      "case": "archived source alteration",
+      "result": "rejected"
+    },
+    {
+      "case": "study source manifest change",
+      "result": "rejected"
+    },
+    {
+      "case": "study input records change",
+      "result": "rejected"
+    },
+    {
+      "case": "equivalence checker change",
+      "result": "rejected"
+    },
+    {
+      "case": "cohort input hash change",
+      "result": "rejected"
+    },
+    {
+      "case": "preparation hash mismatch",
+      "result": "rejected"
+    },
+    {
+      "case": "missing cohort",
+      "result": "rejected"
+    },
+    {
+      "case": "duplicate cohort",
+      "result": "rejected"
+    },
+    {
+      "case": "new source hash change",
+      "result": "rejected"
+    },
+    {
+      "case": "namespace test failure",
+      "result": "rejected"
+    },
+    {
+      "case": "incorrect cohort seed",
+      "result": "rejected"
+    },
+    {
+      "case": "unapproved correction name",
+      "result": "rejected"
+    },
+    {
+      "case": "R-generated empty named partial-Rd cache accepted",
+      "result": "pass"
+    },
+    {
+      "case": "nonempty generated partial-Rd cache",
+      "result": "rejected"
+    },
+    {
+      "case": "malformed generated partial-Rd cache",
+      "result": "rejected"
+    },
+    {
+      "case": "unrecognized generated archive file",
+      "result": "rejected"
+    }
+  ]
+}

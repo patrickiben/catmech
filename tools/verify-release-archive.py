@@ -6,7 +6,9 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import subprocess
 import tarfile
+import tempfile
 
 
 def sha(data):
@@ -163,14 +165,25 @@ def verify(archive, root, study, equivalence=None, frozen_source=None):
     assert not missing, f"Archive omitted source files: {sorted(missing)}"
     receipts = []
     for relative, data in sorted(archived.items()):
-        original = (root / relative).read_bytes()
-        if relative == "DESCRIPTION":
+        if relative == "build/partial.rdb":
+            # R CMD build generates this empty partial-Rd cache. Recreate it
+            # exactly instead of waiving arbitrary generated binary contents.
+            with tempfile.TemporaryDirectory(prefix="catmech-partial-rdb-") as temporary:
+                expected_cache = Path(temporary) / "partial.rdb"
+                subprocess.run(["Rscript", "--vanilla", "-e",
+                    "saveRDS(structure(list(), names=character()), commandArgs(TRUE)[1L], version=2)",
+                    str(expected_cache)], check=True, capture_output=True, text=True)
+                assert data == expected_cache.read_bytes(), "Unexpected generated partial-Rd cache"
+            mode = "R-generated empty named list; byte-matched independent version-2 serialization"
+        elif relative == "DESCRIPTION":
+            original = (root / relative).read_bytes()
             wanted, actual = dcf(original), dcf(data)
             assert all(actual.get(k) == value for k, value in wanted.items()), "DESCRIPTION semantic mismatch"
             assert set(actual) - set(wanted) <= {"NeedsCompilation", "Packaged", "Author", "Maintainer"}
             assert actual["NeedsCompilation"] == "yes", "Native source not recognized"
             mode = "original fields match after DCF unfolding; generated compilation metadata checked"
         else:
+            original = (root / relative).read_bytes()
             assert original == data, f"Archive differs from checkout: {relative}"
             mode = "byte-identical"
         receipts.append(dict(file=relative, bytes=len(data), sha256=sha(data), check=mode))
