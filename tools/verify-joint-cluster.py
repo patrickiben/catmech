@@ -270,7 +270,7 @@ def verify(out, source_root):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("output", type=Path)
-    parser.add_argument("--source-root", type=Path, default=Path(__file__).resolve().parents[1])
+    parser.add_argument("--source-root", type=Path, default=Path(__file__).resolve().parents[1] / "validation" / "v0.8.0-source")
     parser.add_argument("--compare-aborted", type=Path,
                         help="Compare all saved aborted-run scientific fields, excluding elapsed time/source fingerprint")
     args = parser.parse_args()
