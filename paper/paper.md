@@ -17,13 +17,13 @@ authors:
 affiliations:
   - name: Independent Researcher
     index: 1
-date: 5 November 2026
+date: 6 November 2026
 bibliography: paper.bib
 ---
 
 # Summary
 
-In multicenter clinical trials, electronic health record (EHR) disease registries, and observational epidemiological cohorts, continuous biological and clinical measurements—such as circulating cardiac troponin, viral loads, blood pressure, serum creatinine, or tumor volume—are frequently compromised by measurement errors, transcription slips, assay lot shifts, and missing values. Traditional statistical packages handle missing data by assuming values are Missing at Random (MAR) [@rubin1987multiple; @little2019statistical] and applying standard multiple imputation algorithms [@vanbuuren2011mice; @honaker2011amelia]. However, in clinical data auditing and source-data verification (SDV), the central challenge is fundamentally different: recorded values are often present but untrusted, and an internal gold-standard reference measurement has been audited on only a fraction of records [@angelopoulos2023prediction; @robins1994estimation].
+In multicenter clinical trials, electronic health record (EHR) registries, and observational epidemiological cohorts, continuous biological and clinical measurements—such as circulating cardiac troponin, viral loads, blood pressure, serum creatinine, or tumor volume—are frequently compromised by measurement errors, transcription slips, assay lot shifts, and missing values. Traditional statistical packages handle missing data by assuming values are Missing at Random (MAR) [@rubin1987multiple; @little2019statistical] and applying standard multiple imputation algorithms [@vanbuuren2011mice; @honaker2011amelia; @white2011multiple]. However, in clinical data auditing and source-data verification (SDV), the central challenge is fundamentally different: recorded values are often present but untrusted, and an internal gold-standard reference measurement has been audited on only a fraction of records [@angelopoulos2023prediction; @robins1994estimation; @breslow2003semiparametric].
 
 `catmech` is an R package providing a mathematically rigorous, auditable framework for clinical data verification, two-phase audit sample size determination, predictive calibration checking, downstream multi-endpoint regression pooling, and regulatory audit trail generation. By explicitly modeling the contamination mixture process rather than discarding un-audited records or naively trusting recorded numbers, `catmech` retains the precision of verified recordings while correcting for contamination bias. Furthermore, the package integrates cryptographic provenance tracking (SHA-256 data and completion hashes) designed to meet strict regulatory compliance standards (FDA 21 CFR Part 11 [@fda2003part11] and ICH GCP E9 [@ich1998e9]).
 
@@ -90,7 +90,7 @@ $$T = \bar{U} + \left(1 + \frac{1}{m}\right) B, \quad \hat{\lambda} = \frac{(1 +
 To prevent undercoverage in finite clinical samples, `catmech` implements the Barnard & Rubin (1999) degrees of freedom adjustment [@barnard1999small]:
 $$\nu_m = (m - 1) \hat{\lambda}^{-2}, \quad \nu_{obs} = \left(\frac{\nu_{com} + 1}{\nu_{com} + 3}\right) \nu_{com} (1 - \hat{\lambda}), \quad \nu_{BR} = \frac{\nu_m \nu_{obs}}{\nu_m + \nu_{obs}}$$
 where $\nu_{com}$ is the complete-data degrees of freedom. Downstream model pooling covers three core clinical endpoint families:
-* **Linear Models (`catmech_pool_lm`)**: For continuous endpoints, with optional delete-one-cluster jackknife (CV3) variance estimation.
+* **Linear Models (`catmech_pool_lm`)**: For continuous endpoints, with default delete-one-cluster jackknife (CV3) variance estimation.
 * **Generalized Linear Models (`catmech_pool_glm`)**: For binary (logistic) and count (Poisson) endpoints, computing exponentiated odds ratios and incidence rate ratios with Huber–White–Liang–Zeger cluster-robust sandwich covariance [@liang1986longitudinal]:
   $$\hat{V}_{\text{sandwich}} = \hat{J}^{-1} \left(\sum_{c=1}^C s_c s_c^\top\right) \hat{J}^{-1}$$
 * **Cox Proportional Hazards Models (`catmech_pool_coxph`)**: For time-to-event survival outcomes, defining $\nu_{com} = d - p$ (where $d$ is the number of observed failure events and $p$ is the parameter count) and providing Lin & Wei (1989) cluster-robust sandwich standard errors [@lin1989robust].
@@ -213,7 +213,9 @@ X2           -0.1489    0.0382 235.7  -3.8979  0.0001 0.8617       0.7997       
 
 # Empirical Validation and Simulation Benchmarks
 
-To evaluate the statistical properties of `catmech`, extensive Monte Carlo simulation studies (encompassing over 500,000 synthetic clinical records across 10 distinct scenario configurations) were conducted. Five analytical strategies were compared for estimating an exposure effect $\beta = 0.500$ under 20% recording contamination with a 25% audit fraction:
+## 1. Synthetic Monte Carlo Studies
+
+To evaluate the statistical properties of `catmech`, extensive Monte Carlo simulation studies encompassing over 500,000 synthetic clinical records across 10 distinct scenario configurations were conducted. Five analytical strategies were compared for estimating an exposure effect $\beta = 0.500$ under 20% recording contamination with a 25% audit fraction:
 
 | Analytical Strategy | Estimated $\hat{\beta}$ | Bias | Empirical SE | Model SE | 95% Coverage |
 | :--- | :---: | :---: | :---: | :---: | :---: |
@@ -223,15 +225,42 @@ To evaluate the statistical properties of `catmech`, extensive Monte Carlo simul
 | **Standard Multiple Imputation (`mice`)** | 0.498 | -0.002 | 0.051 | 0.049 | 94.6% |
 | **`catmech` Contamination Mixture** | **0.501** | **+0.001** | **0.038** | **0.037** | **95.0%** |
 
-These findings illustrate the core advantage of `catmech`:
+These findings illustrate the primary advantage of `catmech` in settings with gross, identifiable recording errors:
 * Naive analysis suffers severe attenuation bias (bias = -0.116), dropping nominal 95% coverage to 42.3%.
 * Complete-case analysis eliminates bias but exhibits substantial loss of precision ($\text{SE} = 0.068$).
 * Standard multiple imputation treats all un-audited values as missing, achieving unbiased results but failing to exploit valid recordings ($\text{SE} = 0.051$).
 * The `catmech` contamination mixture model achieves unbiased estimation (bias = +0.001), exact 95.0% nominal coverage, and standard error ($\text{SE} = 0.038$) approaching the theoretical oracle, yielding a 44% variance reduction over complete-case analysis.
 
+## 2. Real-World Empirical Benchmarks
+
+The package was further evaluated on two large-scale public datasets containing real recording differences without synthetic corruption (33,800 requests executed across 1,000 resampled cohorts of size $N = 600$):
+
+| Dataset & Metric | Audit 25% Sample | Discard Recorded | Contamination Model | Simple Linear MI | Full Reference (Oracle) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **ClinicalTrials.gov** ($N = 27,208$) | | | | | |
+| Enrolled vs. Started discrepancy rate: 14.2% | Bias | -0.0003 | +0.0068 | +0.0001 | -0.0003 |
+| Target slope: 0.0357 log months / participant | Coverage | 92.3% | 91.2% | 91.8% | 91.2% |
+| | Mean Width | 0.205 | 0.106 | 0.102 | 0.096 |
+| | RMSE | 0.0539 | 0.0308 | 0.0286 | 0.0275 |
+| **NHANES 2017–2018** ($N = 3,908$) | | | | | |
+| Self-reported vs. measured weight discrepancy: 67.3% | Bias | -0.0063 | -0.0066 | -0.0025 | +0.0001 |
+| Target slope: 0.127 mmHg / kg | Coverage | 94.2% | 94.5% | 93.9% | 94.9% |
+| | Mean Width | 0.297 | 0.155 | 0.154 | 0.140 |
+| | RMSE | 0.0785 | 0.0408 | 0.0409 | 0.0357 |
+
+On both real datasets, retaining the recorded values cut RMSE by 43% to 48% compared to discarding un-audited records. However, when recording errors are diffuse rather than gross and separable, simple linear imputation matched or slightly outperformed the mixture model (RMSE 0.0286 vs. 0.0308 on ClinicalTrials.gov) with fewer parametric assumptions.
+
+In addition, facility-level data verification was benchmarked against the Rwanda Health Management Information System recount audit [@nshimyiryo2020health] across 11 clinical indicators and 148,500 requests, confirming that delete-one-cluster jackknife (CV3) variance estimation achieved nominal 92%–97% coverage across clinical facilities where uncorrected cluster variances suffered undercoverage.
+
+## 3. Methodological Boundary and Practical Guidance
+
+These empirical benchmarks establish a clear decision rule for clinical investigators:
+1. **Gross, Separable Recording Shifts**: When discrepancies represent transcription slips, decimal shifts, or assay calibration jumps, the `catmech` contamination mixture model is recommended to prevent severe attenuation bias while maintaining oracle-level precision.
+2. **Subtle, Diffuse Differences**: When discrepancies arise from continuous self-report rounding or mild measurement noise, `catmech`'s simple linear imputation option (`catmech_pool_lm`) is recommended as the parsimonious baseline.
+
 # Regulatory Compliance and Data Governance
 
-Regulatory submissions in biopharmaceutical and medical device clinical trials (under FDA 21 CFR Part 11 and ICH GCP E9) require an unbroken, tamper-evident audit trail for any algorithmic data imputation or measurement correction. `catmech_audit_trail()` generates complete provenance records in Markdown, JSON, or standalone HTML. The report documents:
+Regulatory submissions in biopharmaceutical and medical device clinical trials (under FDA 21 CFR Part 11 [@fda2003part11] and ICH GCP E9 [@ich1998e9]) require an unbroken, tamper-evident audit trail for any algorithmic data imputation or measurement correction. `catmech_audit_trail()` generates complete provenance records in Markdown, JSON, or standalone HTML. The report documents:
 * Full execution environment metadata (R version, operating system platform, package version, UTC execution timestamp).
 * Cryptographic SHA-256 checksums of the raw input dataset, the mathematical assumption specification, and each of the $m$ completed datasets.
 * Model convergence statistics (MCMC iterations, Gelman–Rubin $\hat{R}$, bulk and tail effective sample sizes).
