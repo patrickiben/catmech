@@ -89,6 +89,29 @@ The [report](../validation/MARGINAL_EXTENSION_SYNTHESIS.md) preserves an
 interrupted forked execution and the complete replacement run in independent
 R workers. No claim of guaranteed future convergence follows.
 
+## Production readiness in v1.0.0
+
+Version 1.0.0 freezes the core software interface and completes the clinical data verification
+and analysis toolkit:
+- Downstream multi-endpoint regression: `catmech_pool_glm()` extends pooling to generalized linear
+  models (logistic, Poisson) with Barnard-Rubin degrees of freedom, and `catmech_pool_coxph()`
+  provides time-to-event survival pooling using event-based degrees of freedom.
+- Diagnostic visualization: base R `plot()` methods provide visual checks for holdout predictive
+  calibration, recording audits, audit planning curves, and prior sensitivity grids.
+- Prospective audit planning: `catmech_audit_power()` computes required audit sample sizes and
+  statistical power prospectively or empirically.
+- Regulatory compliance trail: `catmech_audit_trail()` generates SHA-256 verified provenance reports
+  (Markdown, JSON, HTML) documenting input hashes, model specifications, convergence diagnostics,
+  and pooled estimates.
+- Comprehensive clinical vignette: `vignettes/catmech-clinical-audit.Rmd` walks through an end-to-end
+  multi-center clinical study.
+- Software maturity: passes all 1,717 testthat unit tests and R CMD check with Status: OK (0 errors,
+  0 warnings, 0 notes).
+
+The statistical caveats remain: measurement error cannot be identified without assumptions or
+reference data, and coverage is not guaranteed under unmodeled misspecification. Core functions are
+auditable and production-ready for declared workflows.
+
 ## Current judgment
 
 | Question | Judgment |

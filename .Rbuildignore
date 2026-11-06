@@ -11,3 +11,5 @@
 ^LICENSE\.md$
 ^CITATION\.cff$
 ^CONTRIBUTING\.md$
+^cran-comments\.md$
+^paper$

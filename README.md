@@ -1,6 +1,6 @@
 # catmech <img src="man/figures/logo.png" align="right" width="160" alt="catmech logo: a neon cat piloting a mech suit">
 
-**An experimental R package for regression using error-prone recorded measurements and an independently checked reference subset. Version 0.10.1.**
+**An auditable R package for regression using error-prone recorded measurements and an independently checked reference subset. Version 1.0.0.**
 
 **Contextual site effects:** the explicit `joint_marginal` model estimates measurement and predictor variation together. Use `catmech_marginal_summary()` for population marginal coefficients; see the [model and assumptions](docs/JOINT_MARGINAL_METHOD.md) and [confirmation findings](validation/JOINT_MARGINAL_SYNTHESIS.md).
 

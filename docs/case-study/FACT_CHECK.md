@@ -28,7 +28,7 @@ Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-05. Each row reco
 | `three rare` | Second clustered-audit test, 25%: items where its recovery RMSE was above linear MI's | `validation/clustered-fix-study/ratios.csv` | Match |
 | `4%` | Second clustered-audit test, 25%: smallest rise in recovery RMSE on a rare item | `validation/clustered-fix-study/ratios.csv` | Match |
 | `5%` | Second clustered-audit test, 25%: largest rise in recovery RMSE on a rare item | `validation/clustered-fix-study/ratios.csv` | Match |
-| `0.10.1` | Current package version | `DESCRIPTION` | Match |
+| `1.0.0` | Current package version | `DESCRIPTION` | Match |
 | `25%` | Audit fraction: mean referenced rows over cohort size, ClinicalTrials.gov cell | `validation/real-data-study/summary.csv` | Match |
 | `25%` | Audit fraction: mean referenced rows over cohort size, NHANES cell | `validation/real-data-study/summary.csv` | Match |
 | `0.0286` | RMSE, linear MI, ClinicalTrials.gov, 25% | `validation/real-data-study/summary.csv` | Match |

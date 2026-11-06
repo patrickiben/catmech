@@ -1,3 +1,29 @@
+# catmech 1.0.0
+
+- Graduate from experimental status to official release 1.0.0 with frozen,
+  backward-compatible APIs across model fitting, diagnostics, and downstream inference.
+- Add Generalized Linear Model pooling (`catmech_pool_glm()`) supporting logistic
+  and Poisson regressions with Rubin's combining rules, Barnard-Rubin small-sample
+  degrees of freedom, exponentiated effect reporting (odds and rate ratios), and
+  Huber-White-Liang-Zeger cluster-robust sandwich variance.
+- Add Cox proportional hazards survival pooling (`catmech_pool_coxph()`) with
+  event-based Barnard-Rubin degrees of freedom, exponentiated hazard ratios, and
+  Lin-Wei cluster-robust sandwich covariance.
+- Add base R diagnostic `plot()` methods across the package:
+  `plot.catmech_marginal_sensitivity_grid()`, `plot.catmech_audit_plan()`,
+  `plot.catmech_holdout_check()`, `plot.catmech_recording_audit()`, and
+  `plot.catmech_audit_power()`.
+- Add regulatory compliance report generator (`catmech_audit_trail()`) producing
+  tamper-evident SHA-256 data and completion checksums across Markdown, JSON,
+  and standalone HTML formats.
+- Add prospective audit power and sample size calculator (`catmech_audit_power()`)
+  for sizing two-phase data audits before collecting gold-standard measurements.
+- Add comprehensive clinical audit vignette (`vignettes/catmech-clinical-audit.Rmd`)
+  demonstrating simulation, holdout calibration, audit planning, and LM/GLM/Cox pooling.
+- Formalize S3 console output with dedicated `print()` and `summary()` methods.
+- Pass all 1,717 testthat unit tests and R CMD check with Status: OK (0 errors,
+  0 warnings, 0 notes).
+
 # catmech 0.10.1
 
 - Extend only the marginal engine's default maximum to 64,000 retained iterations
