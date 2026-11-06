@@ -2,7 +2,8 @@ Package: catmech
 Title: Auditable Model-Based Imputation and Category Sensitivity
 Version: 1.0.0
 Authors@R: person("Patrick", "Iben", role = c("aut", "cre"),
-    email = "295464172+patrickiben@users.noreply.github.com")
+    email = "295464172+patrickiben@users.noreply.github.com",
+    comment = c(ORCID = "0009-0005-2443-7973"))
 Description: Auditable completion of a continuous measurement using Gaussian
     models, predictive mean matching, an explicitly measured internal reference
     subset, or a reference-calibrated contamination model of the recorded values.

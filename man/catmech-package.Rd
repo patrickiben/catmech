@@ -11,11 +11,11 @@
 Auditable completion of a continuous measurement using Gaussian models, predictive mean matching, an explicitly measured internal reference subset, or a reference-calibrated contamination model of the recorded values. Supports flag masking, optional exact or fallible interval categories, posterior draws and per-record corruption probabilities, convergence and donor-support diagnostics, reference hold-out checks, finite-scenario sensitivity comparisons and 'mice' analysis adapters. Retains a separate retain-or-replace sensitivity engine. Does not identify measurement error without assumptions or reference information, or guarantee coverage under misspecification.
 }
 \author{
-\strong{Maintainer}: Patrick Iben \email{295464172+patrickiben@users.noreply.github.com}
+\strong{Maintainer}: Patrick Iben \email{295464172+patrickiben@users.noreply.github.com} (\href{https://orcid.org/0009-0005-2443-7973}{ORCID})
 
 Authors:
 \itemize{
-  \item Patrick Iben \email{295464172+patrickiben@users.noreply.github.com}
+  \item Patrick Iben \email{295464172+patrickiben@users.noreply.github.com} (\href{https://orcid.org/0009-0005-2443-7973}{ORCID})
 }
 
 }
