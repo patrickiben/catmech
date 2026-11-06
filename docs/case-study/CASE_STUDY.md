@@ -1,6 +1,6 @@
 # catmech: when the favored model did not win
 
-**A case study in testing an idea until the evidence said no.** Patrick Iben, independent biostatistician. Status on November 2, 2026: experimental R package, version 0.7.1, with no outside users, peer review or clinical validation.
+**A case study in testing an idea until the evidence said no.** Patrick Iben, independent biostatistician. Status on November 5, 2026: R package, version 1.0.0, with no outside users, peer review or clinical validation.
 
 | Test | Result | What the numbers said |
 |---|---|---|
@@ -17,7 +17,7 @@ Records contain mistakes, and checking every record against its source is expens
 
 ## What was built
 
-catmech is an R package that fills in unchecked values several plausible ways (multiple imputation), logs every replacement, and refuses to run when the data cannot support a request. Version 0.4 added the favored idea: a model that estimates how likely each record is to be wrong. It was tested against a deliberately plain baseline, linear imputation given the recorded value. A separate plain-Python script recomputes the reported summaries from the raw results.
+catmech is an R package for multiple imputation and audits that logs replacements and refuses to run when data cannot support a request. Version 0.4 added a model estimating each record's error probability, tested against linear imputation. Version 1.0.0 adds GLM and Cox pooling, power curves, and audit trails. A plain-Python script recomputes reported summaries.
 
 ## What the evidence showed
 

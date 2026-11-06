@@ -103,9 +103,10 @@ Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-06. Each row reco
 | `three rare` | Second clustered-audit test, 25%: items where its recovery RMSE was above linear MI's | `validation/clustered-fix-study/ratios.csv` | Match |
 | `4%` | Second clustered-audit test, 25%: smallest rise in recovery RMSE on a rare item | `validation/clustered-fix-study/ratios.csv` | Match |
 | `5%` | Second clustered-audit test, 25%: largest rise in recovery RMSE on a rare item | `validation/clustered-fix-study/ratios.csv` | Match |
-| `0.7.1` | Historical case study version (status on November 2) | `validation/v0.7.1-VALIDATION.md` | Match |
-| `November 2, 2026` | Historical case study status date | `validation/v0.7.1-VALIDATION.md` | Match |
+| `1.0.0` | Current package version | `DESCRIPTION` | Match |
+| `November 5, 2026` | Case study status date | `CITATION.cff` | Match |
 | `Version 0.4` | Release that added the recording-error model | `NEWS.md` | Match |
+| `Version 1.0.0` | Production release with GLM and Cox pooling | `NEWS.md` | Match |
 | `25%` | Audit fraction: mean referenced rows over cohort size, ClinicalTrials.gov cell | `validation/real-data-study/summary.csv` | Match |
 | `25%` | Audit fraction: mean referenced rows over cohort size, NHANES cell | `validation/real-data-study/summary.csv` | Match |
 | `0.0286` | RMSE, linear MI, ClinicalTrials.gov, 25% | `validation/real-data-study/summary.csv` | Match |
