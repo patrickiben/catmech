@@ -165,7 +165,32 @@ catmech_pool_lm <- function(result, formula, conf_level = 0.95,
     if (recorded_kept) row$interpretation <- paste0(row$interpretation, "_recorded_kept")
     row
   })
-  do.call(rbind, output)
+  res <- do.call(rbind, output)
+  structure(res, class = c("catmech_pooled_lm", "data.frame"))
+}
+
+#' Print a pooled linear model result
+#'
+#' @param x A `catmech_pooled_lm` object.
+#' @param digits Number of decimal digits to print (default 4).
+#' @param ... Unused.
+#' @return `x`, invisibly.
+#' @export
+print.catmech_pooled_lm <- function(x, digits = 4L, ...) {
+  m_val <- if (!is.null(x$m[1L])) x$m[1L] else length(x)
+  n_val <- if (!is.null(x$n[1L])) x$n[1L] else NA_integer_
+  cat("-- Catmech Pooled Linear Model --\n")
+  cat(sprintf("Completions (m): %d | Observations (n): %d\n\n", m_val, n_val))
+
+  tbl <- as.data.frame(x)
+  num_cols <- intersect(names(tbl), c("estimate", "std.error", "df", "lower", "upper",
+                                      "within_variance", "between_variance"))
+  for (col in num_cols) {
+    tbl[[col]] <- ifelse(is.finite(tbl[[col]]), round(tbl[[col]], digits), tbl[[col]])
+  }
+  disp_cols <- intersect(c("term", "estimate", "std.error", "df", "lower", "upper", "interpretation"), names(tbl))
+  print(tbl[, disp_cols, drop = FALSE], row.names = FALSE)
+  invisible(x)
 }
 
 #' Pool a prespecified generalized linear analysis of completed datasets
@@ -553,6 +578,267 @@ print.catmech_pooled_coxph <- function(x, digits = 4L, ...) {
   }
   print(tbl[, disp_cols, drop = FALSE], row.names = FALSE)
   invisible(x)
+}
+
+plot_pooled_forest <- function(x, terms = NULL, intercept = FALSE, exponentiate = NULL,
+                               col_point = "#1f77b4", col_ci = "#1f77b4", col_ref = "darkred",
+                               lwd = 2, pch = 19, cex = 1.2, main = NULL, xlab = NULL, ...) {
+  tbl <- as.data.frame(x)
+  if (!intercept && nrow(tbl) > 1L) {
+    tbl <- tbl[!tbl$term %in% c("(Intercept)", "Intercept"), , drop = FALSE]
+  }
+  if (!is.null(terms)) {
+    tbl <- tbl[tbl$term %in% terms, , drop = FALSE]
+  }
+  if (nrow(tbl) == 0L) {
+    message("No terms to plot.")
+    return(invisible(x))
+  }
+
+  has_exp <- "estimate_exp" %in% names(tbl) && all(is.finite(tbl$estimate_exp))
+  use_exp <- if (is.null(exponentiate)) has_exp else isTRUE(exponentiate)
+
+  if (use_exp && !has_exp) {
+    tbl$estimate_exp <- exp(tbl$estimate)
+    tbl$lower_exp <- exp(tbl$lower)
+    tbl$upper_exp <- exp(tbl$upper)
+  }
+
+  vals <- if (use_exp) tbl$estimate_exp else tbl$estimate
+  lows <- if (use_exp) tbl$lower_exp else tbl$lower
+  highs <- if (use_exp) tbl$upper_exp else tbl$upper
+  ref_val <- if (use_exp) 1 else 0
+
+  k <- nrow(tbl)
+  y_pos <- rev(seq_len(k))
+
+  xlim <- range(c(lows, highs, ref_val), na.rm = TRUE)
+  x_padding <- max(diff(xlim) * 0.15, 0.05)
+  xlim <- c(xlim[1L] - x_padding, xlim[2L] + x_padding)
+
+  if (is.null(xlab)) {
+    xlab <- if (use_exp) {
+      if (inherits(x, "catmech_pooled_coxph")) "Hazard Ratio (95% CI)" else "Odds Ratio (95% CI)"
+    } else {
+      "Estimate (95% CI)"
+    }
+  }
+
+  if (is.null(main)) {
+    fam <- if (!is.null(tbl$family[1L])) paste0(" (", tbl$family[1L], ")") else ""
+    main <- paste0("Catmech Pooled Forest Plot", fam)
+  }
+
+  old_mar <- graphics::par("mar")
+  on.exit(graphics::par(mar = old_mar))
+  max_len <- max(nchar(as.character(tbl$term)))
+  graphics::par(mar = c(5, max(4.5, min(10, max_len * 0.5)), 4, 6))
+
+  graphics::plot(
+    vals, y_pos,
+    type = "n",
+    xlim = xlim, ylim = c(0.5, k + 0.5),
+    xlab = xlab, ylab = "",
+    yaxt = "n", main = main,
+    panel.first = graphics::grid(col = "gray90", lty = "dotted"),
+    ...
+  )
+
+  graphics::abline(v = ref_val, lty = 2, col = col_ref, lwd = 1.5)
+
+  for (i in seq_len(k)) {
+    graphics::segments(lows[i], y_pos[i], highs[i], y_pos[i], col = col_ci, lwd = lwd)
+    tick_h <- 0.12
+    graphics::segments(lows[i], y_pos[i] - tick_h, lows[i], y_pos[i] + tick_h, col = col_ci, lwd = lwd)
+    graphics::segments(highs[i], y_pos[i] - tick_h, highs[i], y_pos[i] + tick_h, col = col_ci, lwd = lwd)
+  }
+
+  graphics::points(vals, y_pos, pch = pch, col = col_point, cex = cex)
+  graphics::axis(2, at = y_pos, labels = tbl$term, las = 1, cex.axis = 0.9)
+
+  num_labels <- sprintf("%.2f [%.2f, %.2f]", vals, lows, highs)
+  graphics::mtext(num_labels, side = 4, at = y_pos, las = 1, line = 0.5, cex = 0.8, col = "gray30")
+
+  invisible(x)
+}
+
+#' Plot pooled GLM coefficients (Forest Plot)
+#'
+#' @param x A `catmech_pooled_glm` object.
+#' @param terms Character vector of terms to plot (default `NULL` for all).
+#' @param intercept Logical: include intercept (default `FALSE`).
+#' @param exponentiate Logical: exponentiate estimates (default `TRUE` if available).
+#' @param col_point Point color (default `"#1f77b4"`).
+#' @param col_ci CI color (default `"#1f77b4"`).
+#' @param col_ref Null reference line color (default `"darkred"`).
+#' @param lwd Line width (default 2).
+#' @param pch Point symbol (default 19).
+#' @param cex Point size (default 1.2).
+#' @param main Plot title.
+#' @param xlab X-axis label.
+#' @param ... Additional arguments passed to [graphics::plot()].
+#' @return `x`, invisibly.
+#' @export
+plot.catmech_pooled_glm <- function(x, terms = NULL, intercept = FALSE, exponentiate = NULL,
+                                   col_point = "#1f77b4", col_ci = "#1f77b4", col_ref = "darkred",
+                                   lwd = 2, pch = 19, cex = 1.2, main = NULL, xlab = NULL, ...) {
+  plot_pooled_forest(x, terms = terms, intercept = intercept, exponentiate = exponentiate,
+                     col_point = col_point, col_ci = col_ci, col_ref = col_ref,
+                     lwd = lwd, pch = pch, cex = cex, main = main, xlab = xlab, ...)
+}
+
+#' Plot pooled Cox PH hazard ratios (Forest Plot)
+#'
+#' @param x A `catmech_pooled_coxph` object.
+#' @param terms Character vector of terms to plot (default `NULL` for all).
+#' @param intercept Logical: include intercept (default `FALSE`).
+#' @param exponentiate Logical: exponentiate estimates (default `TRUE` if available).
+#' @param col_point Point color (default `"#1f77b4"`).
+#' @param col_ci CI color (default `"#1f77b4"`).
+#' @param col_ref Null reference line color (default `"darkred"`).
+#' @param lwd Line width (default 2).
+#' @param pch Point symbol (default 19).
+#' @param cex Point size (default 1.2).
+#' @param main Plot title.
+#' @param xlab X-axis label.
+#' @param ... Additional arguments passed to [graphics::plot()].
+#' @return `x`, invisibly.
+#' @export
+plot.catmech_pooled_coxph <- function(x, terms = NULL, intercept = FALSE, exponentiate = NULL,
+                                     col_point = "#1f77b4", col_ci = "#1f77b4", col_ref = "darkred",
+                                     lwd = 2, pch = 19, cex = 1.2, main = NULL, xlab = NULL, ...) {
+  plot_pooled_forest(x, terms = terms, intercept = intercept, exponentiate = exponentiate,
+                     col_point = col_point, col_ci = col_ci, col_ref = col_ref,
+                     lwd = lwd, pch = pch, cex = cex, main = main, xlab = xlab, ...)
+}
+
+#' Plot pooled linear model coefficients (Forest Plot)
+#'
+#' @param x A `catmech_pooled_lm` object.
+#' @param terms Character vector of terms to plot (default `NULL` for all).
+#' @param intercept Logical: include intercept (default `FALSE`).
+#' @param exponentiate Logical: exponentiate estimates (default `FALSE`).
+#' @param col_point Point color (default `"#1f77b4"`).
+#' @param col_ci CI color (default `"#1f77b4"`).
+#' @param col_ref Null reference line color (default `"darkred"`).
+#' @param lwd Line width (default 2).
+#' @param pch Point symbol (default 19).
+#' @param cex Point size (default 1.2).
+#' @param main Plot title.
+#' @param xlab X-axis label.
+#' @param ... Additional arguments passed to [graphics::plot()].
+#' @return `x`, invisibly.
+#' @export
+plot.catmech_pooled_lm <- function(x, terms = NULL, intercept = FALSE, exponentiate = NULL,
+                                  col_point = "#1f77b4", col_ci = "#1f77b4", col_ref = "darkred",
+                                  lwd = 2, pch = 19, cex = 1.2, main = NULL, xlab = NULL, ...) {
+  plot_pooled_forest(x, terms = terms, intercept = intercept, exponentiate = exponentiate,
+                     col_point = col_point, col_ci = col_ci, col_ref = col_ref,
+                     lwd = lwd, pch = pch, cex = cex, main = main, xlab = xlab, ...)
+}
+
+#' Turn a pooled catmech model into a tidy data frame
+#'
+#' @param x An object to be tidied.
+#' @param ... Additional arguments.
+#' @return A data.frame with standardized model columns.
+#' @export
+tidy <- function(x, ...) UseMethod("tidy")
+
+#' Summarize a pooled catmech model with glance statistics
+#'
+#' @param x An object to be summarized.
+#' @param ... Additional arguments.
+#' @return A one-row data.frame.
+#' @export
+glance <- function(x, ...) UseMethod("glance")
+
+tidy_pooled_model <- function(x, conf.int = TRUE, conf.level = 0.95, exponentiate = FALSE, ...) {
+  tbl <- as.data.frame(x)
+  statistic <- tbl$estimate / tbl$std.error
+  p_val <- if ("df" %in% names(tbl) && any(is.finite(tbl$df))) {
+    2 * stats::pt(-abs(statistic), df = tbl$df)
+  } else {
+    2 * (1 - stats::pnorm(abs(statistic)))
+  }
+  df_val <- if ("df" %in% names(tbl)) tbl$df else NA_real_
+
+  res <- data.frame(
+    term = tbl$term,
+    estimate = tbl$estimate,
+    std.error = tbl$std.error,
+    statistic = statistic,
+    df = df_val,
+    p.value = p_val,
+    stringsAsFactors = FALSE
+  )
+
+  if (isTRUE(conf.int)) {
+    if (isTRUE(conf.level == 0.95) && "lower" %in% names(tbl) && "upper" %in% names(tbl)) {
+      res$conf.low <- tbl$lower
+      res$conf.high <- tbl$upper
+    } else {
+      crit <- if (any(is.finite(df_val))) stats::qt((1 + conf.level) / 2, df_val) else stats::qnorm((1 + conf.level) / 2)
+      res$conf.low <- tbl$estimate - crit * tbl$std.error
+      res$conf.high <- tbl$estimate + crit * tbl$std.error
+    }
+  }
+
+  if (isTRUE(exponentiate)) {
+    res$estimate <- exp(res$estimate)
+    if (isTRUE(conf.int)) {
+      res$conf.low <- exp(res$conf.low)
+      res$conf.high <- exp(res$conf.high)
+    }
+    res$std.error <- res$estimate * tbl$std.error
+  }
+
+  res
+}
+
+#' @export
+tidy.catmech_pooled_glm <- function(x, conf.int = TRUE, conf.level = 0.95, exponentiate = FALSE, ...) {
+  tidy_pooled_model(x, conf.int = conf.int, conf.level = conf.level, exponentiate = exponentiate, ...)
+}
+
+#' @export
+tidy.catmech_pooled_coxph <- function(x, conf.int = TRUE, conf.level = 0.95, exponentiate = FALSE, ...) {
+  tidy_pooled_model(x, conf.int = conf.int, conf.level = conf.level, exponentiate = exponentiate, ...)
+}
+
+#' @export
+tidy.catmech_pooled_lm <- function(x, conf.int = TRUE, conf.level = 0.95, exponentiate = FALSE, ...) {
+  tidy_pooled_model(x, conf.int = conf.int, conf.level = conf.level, exponentiate = exponentiate, ...)
+}
+
+#' @export
+glance.catmech_pooled_glm <- function(x, ...) {
+  data.frame(
+    nobs = if (!is.null(x$n[1L])) x$n[1L] else NA_integer_,
+    m = if (!is.null(x$m[1L])) x$m[1L] else NA_integer_,
+    family = if (!is.null(x$family[1L])) x$family[1L] else NA_character_,
+    link = if (!is.null(x$link[1L])) x$link[1L] else NA_character_,
+    stringsAsFactors = FALSE
+  )
+}
+
+#' @export
+glance.catmech_pooled_coxph <- function(x, ...) {
+  data.frame(
+    nobs = if (!is.null(x$n[1L])) x$n[1L] else NA_integer_,
+    n_events = if (!is.null(x$nevent[1L])) x$nevent[1L] else NA_integer_,
+    m = if (!is.null(x$m[1L])) x$m[1L] else NA_integer_,
+    stringsAsFactors = FALSE
+  )
+}
+
+#' @export
+glance.catmech_pooled_lm <- function(x, ...) {
+  data.frame(
+    nobs = if (!is.null(x$n[1L])) x$n[1L] else NA_integer_,
+    m = if (!is.null(x$m[1L])) x$m[1L] else NA_integer_,
+    stringsAsFactors = FALSE
+  )
 }
 
 catmech_glm_cluster_vcov <- function(fit, ids) {

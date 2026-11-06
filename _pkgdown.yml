@@ -1,0 +1,87 @@
+url: https://patrickiben.github.io/catmech
+title: catmech
+template:
+  bootstrap: 5
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [github]
+  components:
+    intro:
+      text: Get Started
+      href: index.html
+    reference:
+      text: Reference
+      href: reference/index.html
+    articles:
+      text: Vignettes
+      menu:
+        - text: "Clinical Audit & Pooled Regressions"
+          href: articles/catmech-clinical-audit.html
+    news:
+      text: News
+      href: news/index.html
+    github:
+      icon: fab fa-github fa-lg
+      href: https://github.com/patrickiben/catmech
+
+reference:
+  - title: "Audit Planning & Sample Size"
+    desc: "Calculate required audit sample sizes and prospective statistical power."
+    contents:
+      - catmech_audit_power
+      - catmech_audit_plan
+      - plot.catmech_audit_power
+      - plot.catmech_audit_plan
+
+  - title: "Imputation & Error Models"
+    desc: "Core algorithms for audit verification and multiple imputation."
+    contents:
+      - catmech_reference
+      - catmech_contamination
+      - catmech_impute
+      - catmech_pmm
+      - catmech_model
+      - catmech_spec
+      - read_catmech_spec
+      - write_catmech
+      - catmech_derive_category
+
+  - title: "Downstream Regression Pooling"
+    desc: "Rubin pooling for linear, generalized linear (GLM), and Cox proportional hazards survival models."
+    contents:
+      - catmech_pool_lm
+      - catmech_pool_glm
+      - catmech_pool_coxph
+      - catmech_compare_strategies
+      - plot.catmech_pooled_glm
+      - plot.catmech_pooled_coxph
+      - plot.catmech_pooled_lm
+      - plot.catmech_strategy_comparison
+      - tidy
+      - glance
+
+  - title: "Model Diagnostics & Calibration Checks"
+    desc: "Evaluate holdout predictive accuracy and error distributions."
+    contents:
+      - catmech_holdout_check
+      - catmech_recording_audit
+      - catmech_sensitivity
+      - catmech_marginal_summary
+      - catmech_joint_summary
+      - catmech_marginal_sensitivity_grid
+      - plot.catmech_holdout_check
+      - plot.catmech_recording_audit
+      - plot.catmech_marginal_sensitivity_grid
+
+  - title: "Regulatory Compliance & Provenance"
+    desc: "Generate SHA-256 verified provenance reports and audit trails for regulatory filings."
+    contents:
+      - catmech_audit_trail
+      - catmech_hash
+
+  - title: "Simulation Tools"
+    desc: "Generate synthetic multi-center laboratory and trial datasets."
+    contents:
+      - simulate_catmech_lab

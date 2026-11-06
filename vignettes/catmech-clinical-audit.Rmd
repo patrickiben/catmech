@@ -237,3 +237,54 @@ cat(substr(as.character(trail), 1, 1200), "\n... [truncated for display]")
 ```
 
 The resulting audit trail guarantees complete transparency, traceability, and reproducibility.
+
+---
+
+## 8. Visualizing Pooled Models with Forest Plots
+
+Clinical trial readouts and regulatory reports frequently require visual representation of effect sizes and confidence intervals. `catmech` provides native base R `plot()` methods for all pooled regression models:
+
+```{r forest_plots, fig.height = 4, fig.width = 7}
+# Forest plot for pooled logistic regression (Odds Ratios)
+plot(res_glm, exponentiate = TRUE, main = "30-Day MACE Odds Ratios (95% CI)")
+
+# Forest plot for pooled Cox survival model (Hazard Ratios)
+plot(res_cox, exponentiate = TRUE, main = "Overall Survival Hazard Ratios (95% CI)")
+```
+
+---
+
+## 9. Side-by-Side Audit Strategy Comparison
+
+To evaluate how much precision is recovered and whether point estimates shift across different ways of handling un-audited records, `catmech_compare_strategies()` evaluates all four core workflows side by side:
+
+```{r strategy_comparison, fig.height = 4.5, fig.width = 7.5}
+comp <- catmech_compare_strategies(
+  data = df,
+  value = "lab_value",
+  reference = "lab_ref",
+  formula = cardiac_index ~ lab_value + age,
+  m = 4,
+  seed = 2026
+)
+print(comp)
+
+# Forest plot comparing all 4 strategies for the target measurement
+plot(comp, term = "lab_value", main = "Audit Strategy Comparison: Biomarker Effect on Cardiac Index")
+```
+
+---
+
+## 10. Practitioner Decision Flowchart
+
+When deciding which audit imputation model or downstream pooling approach to deploy, investigators should follow this evidence-based decision framework:
+
+| Scenario / Error Pattern | Recommended Method | Rationale & Benchmark Findings |
+|---|---|---|
+| **Subtle or diffuse errors** (transcription slips, calibration drift) | `catmech_reference(use_recorded = TRUE)` | Linear MI matches or beats complex models on real recording differences (ClinicalTrials.gov & NHANES) with narrower intervals and fewer assumptions. |
+| **Gross / separable spikes** (10x decimal errors, unit confusion) | `catmech_contamination()` | The contamination mixture model explicitly estimates per-record error probability, achieving 94.0% coverage vs. 64.7% for linear MI under gross synthetic errors. |
+| **Multi-center / clustered sites** | `catmech_reference(cluster_model = "joint")` + cluster-robust pooling | Bivariate Gaussian site model handles mixed within-cluster recording patterns, with delete-one-cluster jackknife (`cv3`) variance. |
+| **Prospective sample size planning** | `catmech_audit_power(N, target_ratio)` | Computes audit sample sizes to achieve desired relative interval width; recommend audit sizes of at least 10%–15% ($n \ge 50$) for stable variance estimation. |
+| **Sensitivity check across strategies** | `catmech_compare_strategies()` | Directly compares validation subsample, naive analysis, linear MI, and contamination model side by side. |
+| **Regulatory submission** | `catmech_audit_trail()` | Cryptographically documents input SHA-256 hashes, options, and pooled results for compliance (FDA 21 CFR Part 11 / ICH E6). |
+

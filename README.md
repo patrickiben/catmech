@@ -248,6 +248,46 @@ without such tracking. See the [method](docs/CONTAMINATION_METHOD.md),
 [synthetic evidence](validation/CONTAMINATION_SYNTHESIS.md), [real-data evidence](validation/REAL_DATA_SYNTHESIS.md)
 and [example](inst/examples/contamination.R).
 
+## Compare audit strategies side by side
+
+To see how much precision is recovered and whether point estimates shift across different ways of handling un-audited records, compare all four core strategies directly on your data:
+
+```r
+comp <- catmech_compare_strategies(
+  dat_with_reference,
+  value = "lab_value",
+  reference = "reference_value",
+  formula = outcome ~ lab_value + age + sex + inflammation
+)
+print(comp)
+
+# Plot a comparative forest plot
+plot(comp, term = "lab_value")
+
+# Or fit and plot a pooled logistic or survival model directly
+pooled_glm <- catmech_pool_glm(
+  fit_contamination,
+  formula = (outcome > 0) ~ lab_value + age + sex,
+  family = binomial(),
+  exponentiate = TRUE
+)
+plot(pooled_glm, exponentiate = TRUE)
+```
+
+### Method selection guide
+
+```
+Measurement Error Pattern
+  ├── Subtle or diffuse shifts (transcription, drift)
+  │     └── catmech_reference(use_recorded = TRUE)  [Recommended baseline]
+  ├── Gross or separable outliers (10x decimal slips, unit errors)
+  │     └── catmech_contamination()                 [Mixture error model]
+  ├── Clustered multi-center data
+  │     └── catmech_reference(cluster_model = "joint") + cluster = "site"
+  └── Sensitivity check across all methods
+        └── catmech_compare_strategies()            [Side-by-side comparison]
+```
+
 ## Clustered audits: experimental
 
 Records from one site are not independent, so pool with a cluster-robust variance:

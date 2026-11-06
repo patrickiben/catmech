@@ -1,0 +1,292 @@
+#' Compare audit analysis strategies
+#'
+#' Fits a user-specified regression model across multiple audit analysis strategies
+#' on a dataset with recorded values and an audit reference subsample:
+#' \enumerate{
+#'   \item \strong{Validation subsample}: Audited records only (discards un-audited recorded values).
+#'   \item \strong{Naive analysis}: Trusts un-audited recorded values as correct without audit adjustment.
+#'   \item \strong{Linear Multiple Imputation}: Calibrates un-audited values given recorded values ([catmech_reference(use_recorded = TRUE)]).
+#'   \item \strong{Contamination Model}: Imputes un-audited values under a reference-calibrated error model ([catmech_contamination()]).
+#' }
+#'
+#' @param data A data frame containing analysis variables, recorded values, and audit references.
+#' @param value Character string naming the recorded value column.
+#' @param reference Character string naming the audit reference column (with `NA` for un-audited rows).
+#' @param formula Model formula for the downstream analysis (e.g. `outcome ~ lab_value + age`).
+#' @param predictors Character vector of predictor column names to include in the imputation models.
+#'   If `NULL`, non-target predictors from `formula` present in `data` are automatically detected.
+#' @param family Error distribution and link function for GLM (default [stats::gaussian()] for linear models;
+#'   use [stats::binomial()] for logistic regression).
+#' @param m Number of completed datasets to impute (default 10L).
+#' @param seed Random seed for reproducible imputation (default 123L).
+#' @param conf_level Confidence level (default 0.95).
+#' @param agreement_tol Tolerance for agreement audit in contamination model (default 1.0).
+#' @param cluster Optional cluster column name for cluster-robust pooling.
+#' @param ... Additional arguments passed to model estimation.
+#' @return An object of class `c("catmech_strategy_comparison", "data.frame")` containing:
+#'   \item{strategy}{Strategy label (`validation_subsample`, `naive_trust_recorded`, `linear_mi_recorded`, `contamination_model`).}
+#'   \item{term}{Model coefficient term.}
+#'   \item{estimate}{Point estimate.}
+#'   \item{std.error}{Standard error.}
+#'   \item{df}{Degrees of freedom.}
+#'   \item{lower, upper}{Confidence interval bounds.}
+#'   \item{ci_width}{Confidence interval width (upper - lower).}
+#'   \item{rel_efficiency}{Relative precision (inverse variance ratio) relative to the validation subsample.}
+#'   \item{n_total, n_audited}{Total observations and audited records count.}
+#' @export
+catmech_compare_strategies <- function(data, value, reference, formula,
+                                       predictors = NULL,
+                                       family = stats::gaussian(),
+                                       m = 10L, seed = 123L, conf_level = 0.95,
+                                       agreement_tol = 1.0, cluster = NULL, ...) {
+  if (!is.data.frame(data)) stop("data must be a data frame.", call. = FALSE)
+  if (!is.character(value) || length(value) != 1L || !value %in% names(data))
+    stop("value must name an existing column in data.", call. = FALSE)
+  if (!is.character(reference) || length(reference) != 1L || !reference %in% names(data))
+    stop("reference must name an existing column in data.", call. = FALSE)
+  if (!inherits(formula, "formula")) stop("formula must be an R formula.", call. = FALSE)
+
+  if (is.character(family)) family <- get(family, mode = "function", envir = parent.frame())()
+  if (is.function(family)) family <- family()
+  if (!inherits(family, "family")) stop("family must be a valid glm family object.", call. = FALSE)
+  is_gaussian <- identical(family$family, "gaussian") && identical(family$link, "identity")
+
+  audited_idx <- which(!is.na(data[[reference]]))
+  n_total <- nrow(data)
+  n_audited <- length(audited_idx)
+
+  if (n_audited < 5L)
+    stop("At least 5 audited records are required to compare strategies.", call. = FALSE)
+
+  # Detect imputation predictors if not supplied
+  if (is.null(predictors)) {
+    all_vars <- all.vars(formula)
+    response_var <- all_vars[1L]
+    cand_preds <- setdiff(all_vars, c(response_var, value, reference))
+    cand_preds <- intersect(cand_preds, names(data))
+    predictors <- if (length(cand_preds) > 0L) cand_preds else NULL
+  }
+
+  results <- list()
+
+  # Strategy 1: Validation subsample only (audited records)
+  d_sub <- data[audited_idx, , drop = FALSE]
+  d_sub[[value]] <- d_sub[[reference]]
+  fit_sub <- if (is_gaussian) {
+    stats::lm(formula, data = d_sub, na.action = stats::na.fail)
+  } else {
+    stats::glm(formula, data = d_sub, family = family, na.action = stats::na.fail)
+  }
+  cf_sub <- stats::coef(summary(fit_sub))
+  terms_sub <- rownames(cf_sub)
+  crit_sub <- if (is_gaussian) stats::qt((1 + conf_level) / 2, fit_sub$df.residual) else stats::qnorm((1 + conf_level) / 2)
+  sub_df <- data.frame(
+    strategy = "validation_subsample",
+    term = terms_sub,
+    estimate = cf_sub[, 1L],
+    std.error = cf_sub[, 2L],
+    df = if (is_gaussian) fit_sub$df.residual else Inf,
+    lower = cf_sub[, 1L] - crit_sub * cf_sub[, 2L],
+    upper = cf_sub[, 1L] + crit_sub * cf_sub[, 2L],
+    stringsAsFactors = FALSE
+  )
+  results[["validation_subsample"]] <- sub_df
+
+  # Strategy 2: Naive analysis (trust recorded values)
+  d_naive <- data
+  fit_naive <- if (is_gaussian) {
+    stats::lm(formula, data = d_naive, na.action = stats::na.fail)
+  } else {
+    stats::glm(formula, data = d_naive, family = family, na.action = stats::na.fail)
+  }
+  cf_naive <- stats::coef(summary(fit_naive))
+  terms_naive <- rownames(cf_naive)
+  crit_naive <- if (is_gaussian) stats::qt((1 + conf_level) / 2, fit_naive$df.residual) else stats::qnorm((1 + conf_level) / 2)
+  naive_df <- data.frame(
+    strategy = "naive_trust_recorded",
+    term = terms_naive,
+    estimate = cf_naive[, 1L],
+    std.error = cf_naive[, 2L],
+    df = if (is_gaussian) fit_naive$df.residual else Inf,
+    lower = cf_naive[, 1L] - crit_naive * cf_naive[, 2L],
+    upper = cf_naive[, 1L] + crit_naive * cf_naive[, 2L],
+    stringsAsFactors = FALSE
+  )
+  results[["naive_trust_recorded"]] <- naive_df
+
+  # Strategy 3: Linear MI given recorded value
+  res_linear <- catmech_reference(
+    data = data, value = value, reference = reference,
+    predictors = predictors, use_recorded = TRUE,
+    m = m, seed = seed, cluster = cluster
+  )
+  pooled_linear <- if (is_gaussian) {
+    catmech_pool_lm(res_linear, formula, conf_level = conf_level, cluster = cluster)
+  } else {
+    catmech_pool_glm(res_linear, formula, family = family, conf_level = conf_level, cluster = cluster)
+  }
+  linear_df <- data.frame(
+    strategy = "linear_mi_recorded",
+    term = pooled_linear$term,
+    estimate = pooled_linear$estimate,
+    std.error = pooled_linear$std.error,
+    df = pooled_linear$df,
+    lower = pooled_linear$lower,
+    upper = pooled_linear$upper,
+    stringsAsFactors = FALSE
+  )
+  results[["linear_mi_recorded"]] <- linear_df
+
+  # Strategy 4: Contamination model
+  res_contam <- catmech_contamination(
+    data = data, value = value, reference = reference,
+    predictors = predictors, m = m, seed = seed,
+    agreement_tol = agreement_tol
+  )
+  pooled_contam <- if (is_gaussian) {
+    catmech_pool_lm(res_contam, formula, conf_level = conf_level, cluster = cluster)
+  } else {
+    catmech_pool_glm(res_contam, formula, family = family, conf_level = conf_level, cluster = cluster)
+  }
+  contam_df <- data.frame(
+    strategy = "contamination_model",
+    term = pooled_contam$term,
+    estimate = pooled_contam$estimate,
+    std.error = pooled_contam$std.error,
+    df = pooled_contam$df,
+    lower = pooled_contam$lower,
+    upper = pooled_contam$upper,
+    stringsAsFactors = FALSE
+  )
+  results[["contamination_model"]] <- contam_df
+
+  # Combine and calculate efficiency
+  comb <- do.call(rbind, results)
+  comb$ci_width <- comb$upper - comb$lower
+  comb$n_total <- n_total
+  comb$n_audited <- n_audited
+
+  # Relative efficiency: variance of validation subsample / variance of strategy
+  # (Values > 1 indicate precision gains over discarding un-audited rows)
+  se_sub_map <- stats::setNames(sub_df$std.error, sub_df$term)
+  comb$rel_efficiency <- (se_sub_map[comb$term] / comb$std.error)^2
+
+  rownames(comb) <- NULL
+  structure(comb, class = c("catmech_strategy_comparison", "data.frame"))
+}
+
+#' Print strategy comparison results
+#'
+#' @param x A `catmech_strategy_comparison` object.
+#' @param digits Number of decimal digits to print (default 4).
+#' @param ... Unused.
+#' @return `x`, invisibly.
+#' @export
+print.catmech_strategy_comparison <- function(x, digits = 4L, ...) {
+  n_tot <- if (!is.null(x$n_total[1L])) x$n_total[1L] else NA_integer_
+  n_aud <- if (!is.null(x$n_audited[1L])) x$n_audited[1L] else NA_integer_
+  cat("-- Catmech Audit Strategy Comparison --\n")
+  cat(sprintf("Cohort Size (N): %d | Audited Records (n): %d (%.1f%% audit fraction)\n\n",
+              n_tot, n_aud, 100 * n_aud / n_tot))
+
+  tbl <- as.data.frame(x)
+  num_cols <- c("estimate", "std.error", "df", "lower", "upper", "ci_width", "rel_efficiency")
+  for (col in num_cols) {
+    if (col %in% names(tbl)) {
+      tbl[[col]] <- ifelse(is.finite(tbl[[col]]), round(tbl[[col]], digits), tbl[[col]])
+    }
+  }
+  disp_cols <- c("strategy", "term", "estimate", "std.error", "ci_width", "rel_efficiency")
+  print(tbl[, disp_cols, drop = FALSE], row.names = FALSE)
+  invisible(x)
+}
+
+#' Plot audit strategy comparison (Forest Plot)
+#'
+#' Draws a comparative forest plot showing point estimates and confidence intervals
+#' across all evaluated audit strategies for a chosen coefficient term.
+#'
+#' @param x A `catmech_strategy_comparison` object.
+#' @param term Character: which coefficient term to plot. If `NULL`, the first non-intercept
+#'   term is plotted.
+#' @param colors Named vector of colors for the strategies.
+#' @param lwd Line width (default 2).
+#' @param pch Point symbol (default 19).
+#' @param cex Point size (default 1.3).
+#' @param main Plot title.
+#' @param xlab X-axis label.
+#' @param ... Additional arguments passed to [graphics::plot()].
+#' @return `x`, invisibly.
+#' @export
+plot.catmech_strategy_comparison <- function(x, term = NULL,
+                                            colors = c(
+                                              validation_subsample = "#898781",
+                                              naive_trust_recorded = "#d03b3b",
+                                              linear_mi_recorded = "#2a78d6",
+                                              contamination_model = "#eb6834"
+                                            ),
+                                            lwd = 2, pch = 19, cex = 1.3,
+                                            main = NULL, xlab = NULL, ...) {
+  tbl <- as.data.frame(x)
+  avail_terms <- unique(tbl$term)
+  if (is.null(term)) {
+    non_int <- setdiff(avail_terms, c("(Intercept)", "Intercept"))
+    term <- if (length(non_int) > 0L) non_int[1L] else avail_terms[1L]
+  }
+  tbl_sub <- tbl[tbl$term == term, , drop = FALSE]
+  if (nrow(tbl_sub) == 0L) stop(sprintf("Term '%s' not found in comparison results.", term), call. = FALSE)
+
+  k <- nrow(tbl_sub)
+  y_pos <- rev(seq_len(k))
+
+  xlim <- range(c(tbl_sub$lower, tbl_sub$upper, 0), na.rm = TRUE)
+  x_padding <- max(diff(xlim) * 0.15, 0.05)
+  xlim <- c(xlim[1L] - x_padding, xlim[2L] + x_padding)
+
+  strat_labels <- c(
+    validation_subsample = "Validation Subsample (Discard un-audited)",
+    naive_trust_recorded = "Naive Analysis (Trust recorded)",
+    linear_mi_recorded = "Linear MI (use_recorded = TRUE)",
+    contamination_model = "Contamination Model (Catmech)"
+  )
+  display_names <- ifelse(tbl_sub$strategy %in% names(strat_labels),
+                          strat_labels[tbl_sub$strategy], tbl_sub$strategy)
+
+  strat_cols <- ifelse(tbl_sub$strategy %in% names(colors),
+                       colors[tbl_sub$strategy], "#1f77b4")
+
+  if (is.null(xlab)) xlab <- sprintf("Estimate: %s (95%% CI)", term)
+  if (is.null(main)) main <- sprintf("Audit Strategy Comparison: %s", term)
+
+  old_mar <- graphics::par("mar")
+  on.exit(graphics::par(mar = old_mar))
+  graphics::par(mar = c(5, 14, 4, 7))
+
+  graphics::plot(
+    tbl_sub$estimate, y_pos,
+    type = "n",
+    xlim = xlim, ylim = c(0.5, k + 0.5),
+    xlab = xlab, ylab = "",
+    yaxt = "n", main = main,
+    panel.first = graphics::grid(col = "gray90", lty = "dotted"),
+    ...
+  )
+
+  graphics::abline(v = 0, lty = 2, col = "gray50", lwd = 1.2)
+
+  for (i in seq_len(k)) {
+    col_i <- strat_cols[i]
+    graphics::segments(tbl_sub$lower[i], y_pos[i], tbl_sub$upper[i], y_pos[i], col = col_i, lwd = lwd)
+    tick_h <- 0.12
+    graphics::segments(tbl_sub$lower[i], y_pos[i] - tick_h, tbl_sub$lower[i], y_pos[i] + tick_h, col = col_i, lwd = lwd)
+    graphics::segments(tbl_sub$upper[i], y_pos[i] - tick_h, tbl_sub$upper[i], y_pos[i] + tick_h, col = col_i, lwd = lwd)
+  }
+
+  graphics::points(tbl_sub$estimate, y_pos, pch = pch, col = strat_cols, cex = cex)
+  graphics::axis(2, at = y_pos, labels = display_names, las = 1, cex.axis = 0.8)
+
+  annot <- sprintf("%.3f [%.3f, %.3f]", tbl_sub$estimate, tbl_sub$lower, tbl_sub$upper)
+  graphics::mtext(annot, side = 4, at = y_pos, las = 1, line = 0.5, cex = 0.8, col = "gray30")
+
+  invisible(x)
+}
