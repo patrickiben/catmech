@@ -557,6 +557,14 @@ catmech_contamination_parameter_summary <- function(traces) {
 #'   for unmodeled structure, not a confirmatory test. `selection` compares recorded
 #'   values on referenced and unreferenced rows; a large standardized difference
 #'   shows the reference sample is selective, and agreement cannot show the reverse.
+#' @examples
+#' set.seed(123)
+#' df <- data.frame(
+#'   recorded = c(10, 12, 14, 100, 15, 16),
+#'   ref = c(10, 12, 14, 10, NA, NA)
+#' )
+#' audit <- catmech_recording_audit(df, value = "recorded", reference = "ref", agreement_tol = 1)
+#' print(audit)
 #' @export
 catmech_recording_audit <- function(data, value, reference, by = NULL, agreement_tol = 0) {
   if (!is.data.frame(data)) stop("data must be a data frame.", call. = FALSE)
@@ -773,6 +781,13 @@ catmech_contamination_exact_test <- function(counts) {
 #'   held-out clusters are hidden together. Requires a clustered fit with `spec$cluster`.
 #' @return A list with `status`, `summary`, `rows`, `flags`, `failures`, `advice` and
 #'   `interpretation`.
+#' @examples
+#' set.seed(123)
+#' df <- data.frame(val = stats::rnorm(30, 10, 2), age = stats::rnorm(30, 50, 10))
+#' df$ref <- df$val + stats::rnorm(30, 0, 0.2)
+#' res <- catmech_reference(df, value = "val", reference = "ref", predictors = "age", m = 2, seed = 1)
+#' chk <- catmech_holdout_check(res, folds = 2L, m = 20L, seed = 1L)
+#' print(chk)
 #' @export
 catmech_holdout_check <- function(fit, folds = 5L, m = 40L, level = 0.9, seed = 1L,
                                   fold_by = c("row", "cluster")) {

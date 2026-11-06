@@ -38,6 +38,20 @@
 #' @return A data.frame with term, estimate, std.error, df, lower, upper,
 #'   within_variance, between_variance, m, n and interpretation, plus clusters
 #'   when a cluster-robust variance was used.
+#' @examples
+#' set.seed(123)
+#' n <- 40
+#' df <- data.frame(
+#'   lab = stats::rnorm(n, 10, 2),
+#'   age = stats::rnorm(n, 50, 10),
+#'   outcome = stats::rnorm(n, 5, 1)
+#' )
+#' df$lab_ref <- df$lab
+#' df$lab_ref[11:n] <- NA
+#' res <- catmech_reference(df, value = "lab", reference = "lab_ref",
+#'                          predictors = "age", m = 2, seed = 1)
+#' pooled <- catmech_pool_lm(res, outcome ~ lab + age)
+#' print(pooled)
 #' @export
 catmech_pool_lm <- function(result, formula, conf_level = 0.95,
                             allow_sensitivity = FALSE, cluster = NULL,
@@ -224,6 +238,21 @@ print.catmech_pooled_lm <- function(x, digits = 4L, ...) {
 #'   \item{m, n}{Number of completions and total observations.}
 #'   \item{family, link}{The GLM family and link function used.}
 #'   \item{interpretation}{Inference label.}
+#' @examples
+#' set.seed(123)
+#' n <- 50
+#' df <- data.frame(
+#'   lab = stats::rnorm(n, 10, 2),
+#'   age = stats::rnorm(n, 50, 10),
+#'   y = stats::rbinom(n, 1, 0.4)
+#' )
+#' df$lab_ref <- df$lab
+#' df$lab_ref[11:n] <- NA
+#' res <- catmech_reference(df, value = "lab", reference = "lab_ref",
+#'                          predictors = "age", m = 2, seed = 1)
+#' pooled_glm <- catmech_pool_glm(res, y ~ lab + age, family = stats::binomial(),
+#'                                exponentiate = TRUE)
+#' print(pooled_glm)
 #' @export
 catmech_pool_glm <- function(result, formula, family = stats::binomial(),
                              conf_level = 0.95, exponentiate = FALSE,
@@ -411,6 +440,22 @@ print.catmech_pooled_glm <- function(x, digits = 4L, ...) {
 #'   \item{between_variance}{Between-imputation variance.}
 #'   \item{m, n, nevent}{Number of completions, total observations, and events.}
 #'   \item{interpretation}{Inference label.}
+#' @examples
+#' set.seed(123)
+#' n <- 50
+#' df <- data.frame(
+#'   time = stats::rexp(n, 0.1),
+#'   status = stats::rbinom(n, 1, 0.5),
+#'   lab = stats::rnorm(n, 10, 2),
+#'   age = stats::rnorm(n, 50, 10)
+#' )
+#' df$lab_ref <- df$lab
+#' df$lab_ref[11:n] <- NA
+#' res <- catmech_reference(df, value = "lab", reference = "lab_ref",
+#'                          predictors = "age", m = 2, seed = 1)
+#' pooled_cox <- catmech_pool_coxph(res, survival::Surv(time, status) ~ lab + age,
+#'                                  exponentiate = TRUE)
+#' print(pooled_cox)
 #' @export
 catmech_pool_coxph <- function(result, formula, conf_level = 0.95,
                                exponentiate = TRUE, allow_sensitivity = FALSE,
@@ -678,6 +723,20 @@ plot_pooled_forest <- function(x, terms = NULL, intercept = FALSE, exponentiate 
 #' @param xlab X-axis label.
 #' @param ... Additional arguments passed to [graphics::plot()].
 #' @return `x`, invisibly.
+#' @examples
+#' set.seed(123)
+#' n <- 40
+#' df <- data.frame(
+#'   lab = stats::rnorm(n, 10, 2),
+#'   age = stats::rnorm(n, 50, 10),
+#'   y = stats::rbinom(n, 1, 0.4)
+#' )
+#' df$lab_ref <- df$lab
+#' df$lab_ref[11:n] <- NA
+#' res <- catmech_reference(df, value = "lab", reference = "lab_ref",
+#'                          predictors = "age", m = 2, seed = 1)
+#' pooled <- catmech_pool_glm(res, y ~ lab + age, family = stats::binomial())
+#' plot(pooled)
 #' @export
 plot.catmech_pooled_glm <- function(x, terms = NULL, intercept = FALSE, exponentiate = NULL,
                                    col_point = "#1f77b4", col_ci = "#1f77b4", col_ref = "darkred",
@@ -703,6 +762,19 @@ plot.catmech_pooled_glm <- function(x, terms = NULL, intercept = FALSE, exponent
 #' @param xlab X-axis label.
 #' @param ... Additional arguments passed to [graphics::plot()].
 #' @return `x`, invisibly.
+#' @examples
+#' set.seed(123)
+#' n <- 40
+#' df <- data.frame(
+#'   time = stats::rexp(n, 0.1), status = stats::rbinom(n, 1, 0.5),
+#'   lab = stats::rnorm(n, 10, 2), age = stats::rnorm(n, 50, 10)
+#' )
+#' df$lab_ref <- df$lab
+#' df$lab_ref[11:n] <- NA
+#' res <- catmech_reference(df, value = "lab", reference = "lab_ref",
+#'                          predictors = "age", m = 2, seed = 1)
+#' pooled <- catmech_pool_coxph(res, survival::Surv(time, status) ~ lab + age)
+#' plot(pooled)
 #' @export
 plot.catmech_pooled_coxph <- function(x, terms = NULL, intercept = FALSE, exponentiate = NULL,
                                      col_point = "#1f77b4", col_ci = "#1f77b4", col_ref = "darkred",
@@ -728,6 +800,20 @@ plot.catmech_pooled_coxph <- function(x, terms = NULL, intercept = FALSE, expone
 #' @param xlab X-axis label.
 #' @param ... Additional arguments passed to [graphics::plot()].
 #' @return `x`, invisibly.
+#' @examples
+#' set.seed(123)
+#' n <- 40
+#' df <- data.frame(
+#'   lab = stats::rnorm(n, 10, 2),
+#'   age = stats::rnorm(n, 50, 10),
+#'   y = stats::rnorm(n, 5, 1)
+#' )
+#' df$lab_ref <- df$lab
+#' df$lab_ref[11:n] <- NA
+#' res <- catmech_reference(df, value = "lab", reference = "lab_ref",
+#'                          predictors = "age", m = 2, seed = 1)
+#' pooled <- catmech_pool_lm(res, y ~ lab + age)
+#' plot(pooled)
 #' @export
 plot.catmech_pooled_lm <- function(x, terms = NULL, intercept = FALSE, exponentiate = NULL,
                                   col_point = "#1f77b4", col_ci = "#1f77b4", col_ref = "darkred",
@@ -742,6 +828,20 @@ plot.catmech_pooled_lm <- function(x, terms = NULL, intercept = FALSE, exponenti
 #' @param x An object to be tidied.
 #' @param ... Additional arguments.
 #' @return A data.frame with standardized model columns.
+#' @examples
+#' set.seed(123)
+#' n <- 40
+#' df <- data.frame(
+#'   lab = stats::rnorm(n, 10, 2),
+#'   age = stats::rnorm(n, 50, 10),
+#'   y = stats::rnorm(n, 5, 1)
+#' )
+#' df$lab_ref <- df$lab
+#' df$lab_ref[11:n] <- NA
+#' res <- catmech_reference(df, value = "lab", reference = "lab_ref",
+#'                          predictors = "age", m = 2, seed = 1)
+#' pooled <- catmech_pool_lm(res, y ~ lab + age)
+#' tidy(pooled)
 #' @export
 tidy <- function(x, ...) UseMethod("tidy")
 
@@ -750,6 +850,20 @@ tidy <- function(x, ...) UseMethod("tidy")
 #' @param x An object to be summarized.
 #' @param ... Additional arguments.
 #' @return A one-row data.frame.
+#' @examples
+#' set.seed(123)
+#' n <- 40
+#' df <- data.frame(
+#'   lab = stats::rnorm(n, 10, 2),
+#'   age = stats::rnorm(n, 50, 10),
+#'   y = stats::rnorm(n, 5, 1)
+#' )
+#' df$lab_ref <- df$lab
+#' df$lab_ref[11:n] <- NA
+#' res <- catmech_reference(df, value = "lab", reference = "lab_ref",
+#'                          predictors = "age", m = 2, seed = 1)
+#' pooled <- catmech_pool_lm(res, y ~ lab + age)
+#' glance(pooled)
 #' @export
 glance <- function(x, ...) UseMethod("glance")
 
@@ -941,6 +1055,24 @@ catmech_cluster_vcov <- function(fit, ids) {
 #'   Defaults to `stats::binomial()`.
 #' @return A list with table, status, complete, successful_envelope and
 #'   interpretation. An incomplete scenario set always has an unresolved status.
+#' @examples
+#' set.seed(123)
+#' df <- data.frame(
+#'   lab = stats::rnorm(30, 10, 2),
+#'   age = stats::rnorm(30, 50, 10),
+#'   y = stats::rnorm(30, 5, 1)
+#' )
+#' df$ref <- df$lab
+#' df$ref[11:30] <- NA
+#' res1 <- catmech_reference(df, value = "lab", reference = "ref",
+#'                           predictors = "age", m = 2, seed = 1)
+#' res2 <- catmech_reference(df, value = "lab", reference = "ref",
+#'                           predictors = "age", use_recorded = TRUE, m = 2, seed = 2)
+#' sens <- catmech_sensitivity(
+#'   list(standard = res1, recorded = res2),
+#'   formula = y ~ lab + age, term = "lab"
+#' )
+#' print(sens)
 #' @export
 catmech_sensitivity <- function(results, formula = NULL, term, reference = 0,
                                 conf_level = 0.95, expected_scenarios = NULL,

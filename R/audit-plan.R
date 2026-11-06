@@ -83,6 +83,20 @@
 #' distort a linear fit: a pilot discrepancy above 5 robust SDs of the reference, or a recorded
 #' value above 10 robust SDs from the median. Linear MI failed in the synthetic gross-error cell
 #' of the contamination study, so do not rely on a plan carrying that warning.
+#' @examples
+#' set.seed(123)
+#' n <- 120
+#' df <- data.frame(
+#'   outcome = stats::rnorm(n, 10, 2),
+#'   lab = stats::rnorm(n, 5, 1),
+#'   age = stats::rnorm(n, 50, 10)
+#' )
+#' df$ref <- df$lab + stats::rnorm(n, 0, 0.2)
+#' df$ref[41:n] <- NA
+#' plan <- catmech_audit_plan(df, value = "lab", reference = "ref",
+#'                            predictors = c("age", "outcome"), formula = outcome ~ lab + age,
+#'                            term = "lab", bootstrap = 100L, m = 2L, seed = 1L)
+#' summary(plan)
 #' @export
 catmech_audit_plan <- function(data, value, reference, predictors, formula, term,
                                fractions = c(.05, .10, .25, .50, .75), target_ratio = 1.25,
@@ -303,6 +317,20 @@ print.summary.catmech_audit_plan <- function(x, digits = 3L, ...) {
 #' @param col_target Line color for target ratio threshold (default `"firebrick"`).
 #' @param ... Additional arguments passed to [graphics::par()].
 #' @return Invisible `NULL`.
+#' @examples
+#' set.seed(123)
+#' n <- 120
+#' df <- data.frame(
+#'   outcome = stats::rnorm(n, 10, 2),
+#'   lab = stats::rnorm(n, 5, 1),
+#'   age = stats::rnorm(n, 50, 10)
+#' )
+#' df$ref <- df$lab + stats::rnorm(n, 0, 0.2)
+#' df$ref[41:n] <- NA
+#' plan <- catmech_audit_plan(df, value = "lab", reference = "ref",
+#'                            predictors = c("age", "outcome"), formula = outcome ~ lab + age,
+#'                            term = "lab", bootstrap = 100L, m = 2L, seed = 1L)
+#' plot(plan)
 #' @export
 plot.catmech_audit_plan <- function(x, y, col_curve = "royalblue",
                                     col_target = "firebrick", ...) {

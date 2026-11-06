@@ -15,6 +15,20 @@
 #' @param title Document title (default: `"Catmech Audit Trail & Compliance Report"`).
 #' @return A character vector of class `c("catmech_audit_trail", "character")` containing
 #'   the generated audit document.
+#' @examples
+#' set.seed(123)
+#' df <- data.frame(
+#'   lab = stats::rnorm(30, 10, 2),
+#'   age = stats::rnorm(30, 50, 10),
+#'   y = stats::rnorm(30, 5, 1)
+#' )
+#' df$ref <- df$lab
+#' df$ref[11:30] <- NA
+#' res <- catmech_reference(df, value = "lab", reference = "ref",
+#'                          predictors = "age", m = 2, seed = 1)
+#' pooled <- catmech_pool_lm(res, y ~ lab + age)
+#' trail <- catmech_audit_trail(res, pooled = pooled)
+#' print(trail)
 #' @export
 catmech_audit_trail <- function(object, pooled = NULL, sensitivity = NULL,
                                 format = c("markdown", "json", "html"),

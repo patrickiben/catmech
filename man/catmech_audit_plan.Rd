@@ -119,3 +119,18 @@ distort a linear fit: a pilot discrepancy above 5 robust SDs of the reference, o
 value above 10 robust SDs from the median. Linear MI failed in the synthetic gross-error cell
 of the contamination study, so do not rely on a plan carrying that warning.
 }
+\examples{
+set.seed(123)
+n <- 120
+df <- data.frame(
+  outcome = stats::rnorm(n, 10, 2),
+  lab = stats::rnorm(n, 5, 1),
+  age = stats::rnorm(n, 50, 10)
+)
+df$ref <- df$lab + stats::rnorm(n, 0, 0.2)
+df$ref[41:n] <- NA
+plan <- catmech_audit_plan(df, value = "lab", reference = "ref",
+                           predictors = c("age", "outcome"), formula = outcome ~ lab + age,
+                           term = "lab", bootstrap = 100L, m = 2L, seed = 1L)
+summary(plan)
+}

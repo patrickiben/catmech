@@ -61,3 +61,7 @@ interval precision ratio (\eqn{\rho \le \rho_{target}}) in a two-phase clinical 
 Can evaluate power prospectively from prior clinical error parameters or empirically
 from a fitted [catmech_audit_plan()].
 }
+\examples{
+pwr <- catmech_audit_power(N = 500, target_ratio = 1.3, n_sim = 200, seed = 1)
+print(pwr)
+}

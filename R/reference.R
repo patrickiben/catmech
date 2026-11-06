@@ -32,6 +32,16 @@
 #' trusted rows. This list does not identify the actual nearest-neighbor pool.
 #' `eligible_donors` counts all trusted rows; `candidate_pool_size` records the
 #' requested nearest-donor count used by the delegated matching algorithm.
+#' @examples
+#' set.seed(123)
+#' df <- data.frame(
+#'   x = stats::rnorm(30, 50, 10),
+#'   y = stats::rnorm(30, 10, 2),
+#'   flag = c(rep("No", 25), rep("Yes", 5))
+#' )
+#' res <- catmech_pmm(df, value = "y", predictors = "x", flag = "flag",
+#'                    flag_yes = "Yes", flag_no = "No", donors = 3, m = 2, seed = 1)
+#' summary(res)
 #' @export
 catmech_pmm <- function(data, value, predictors, flag = NULL,
                         flag_yes = "Yes", flag_no = "No", donors = 5L,
@@ -257,6 +267,18 @@ catmech_pmm <- function(data, value, predictors, flag = NULL,
 #' Population coefficient summaries include uncertainty in predictor
 #' means and covariances. An all-reference input still takes the exact-copy shortcut
 #' and does not fit a posterior for either joint summary function.
+#' @examples
+#' set.seed(123)
+#' n <- 40
+#' df <- data.frame(
+#'   lab_val = stats::rnorm(n, 10, 2),
+#'   age = stats::rnorm(n, 50, 10)
+#' )
+#' df$lab_ref <- df$lab_val + stats::rnorm(n, 0, 0.2)
+#' df$lab_ref[11:n] <- NA
+#' res <- catmech_reference(df, value = "lab_val", reference = "lab_ref",
+#'                          predictors = "age", use_recorded = TRUE, m = 2, seed = 1)
+#' summary(res)
 #' @export
 catmech_reference <- function(data, value, reference, predictors,
                               method = c("normal", "pmm", "pmm_abb"), donors = 5L,

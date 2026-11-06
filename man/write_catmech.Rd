@@ -18,3 +18,12 @@ The normalized output path, invisibly. Files include a lossless RDS,
 \description{
 Write a self-contained result bundle
 }
+\examples{
+set.seed(123)
+df <- data.frame(y = stats::rnorm(20), x = stats::rnorm(20))
+df$ref <- df$y; df$ref[6:20] <- NA
+res <- catmech_reference(df, value = "y", reference = "ref", predictors = "x", m = 2, seed = 1)
+tmp_dir <- file.path(tempdir(), "test_catmech_bundle")
+write_catmech(res, tmp_dir)
+unlink(tmp_dir, recursive = TRUE)
+}

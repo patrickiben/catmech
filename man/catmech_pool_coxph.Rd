@@ -49,3 +49,20 @@ Fits a Cox proportional hazards model ([survival::coxph()]) across each complete
 and pools parameter estimates and standard errors using Rubin's rules with
 Barnard & Rubin (1999) small-sample degrees of freedom based on event counts.
 }
+\examples{
+set.seed(123)
+n <- 50
+df <- data.frame(
+  time = stats::rexp(n, 0.1),
+  status = stats::rbinom(n, 1, 0.5),
+  lab = stats::rnorm(n, 10, 2),
+  age = stats::rnorm(n, 50, 10)
+)
+df$lab_ref <- df$lab
+df$lab_ref[11:n] <- NA
+res <- catmech_reference(df, value = "lab", reference = "lab_ref",
+                         predictors = "age", m = 2, seed = 1)
+pooled_cox <- catmech_pool_coxph(res, survival::Surv(time, status) ~ lab + age,
+                                 exponentiate = TRUE)
+print(pooled_cox)
+}

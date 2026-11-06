@@ -38,3 +38,18 @@ Extracts complete provenance, input and completion data hashes, model specificat
 convergence monitors, imputation statistics, and downstream pooled analyses into a
 tamper-evident audit document. Supports Markdown, JSON, and standalone HTML formats.
 }
+\examples{
+set.seed(123)
+df <- data.frame(
+  lab = stats::rnorm(30, 10, 2),
+  age = stats::rnorm(30, 50, 10),
+  y = stats::rnorm(30, 5, 1)
+)
+df$ref <- df$lab
+df$ref[11:30] <- NA
+res <- catmech_reference(df, value = "lab", reference = "ref",
+                         predictors = "age", m = 2, seed = 1)
+pooled <- catmech_pool_lm(res, y ~ lab + age)
+trail <- catmech_audit_trail(res, pooled = pooled)
+print(trail)
+}

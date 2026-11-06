@@ -10,12 +10,20 @@
 
 Auditable completion of a continuous measurement using Gaussian models, predictive mean matching, an explicitly measured internal reference subset, or a reference-calibrated contamination model of the recorded values. Supports flag masking, optional exact or fallible interval categories, posterior draws and per-record corruption probabilities, convergence and donor-support diagnostics, reference hold-out checks, finite-scenario sensitivity comparisons and 'mice' analysis adapters. Retains a separate retain-or-replace sensitivity engine. Does not identify measurement error without assumptions or reference information, or guarantee coverage under misspecification.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/patrickiben/catmech}
+  \item Report bugs at \url{https://github.com/patrickiben/catmech/issues}
+}
+
+}
 \author{
-\strong{Maintainer}: Patrick Iben \email{295464172+patrickiben@users.noreply.github.com} (\href{https://orcid.org/0009-0005-2443-7973}{ORCID})
+\strong{Maintainer}: Patrick Iben \email{patrickiben@gmail.com} (\href{https://orcid.org/0009-0005-2443-7973}{ORCID})
 
 Authors:
 \itemize{
-  \item Patrick Iben \email{295464172+patrickiben@users.noreply.github.com} (\href{https://orcid.org/0009-0005-2443-7973}{ORCID})
+  \item Patrick Iben \email{patrickiben@gmail.com} (\href{https://orcid.org/0009-0005-2443-7973}{ORCID})
 }
 
 }

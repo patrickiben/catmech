@@ -42,3 +42,7 @@ Synthetic data only. The coefficient of lab_true in the outcome model is
 actual corruption. category_error_rate deliberately violates the package's
 exact-category assumption. Truth fields must never enter imputation predictors.
 }
+\examples{
+dat <- simulate_catmech_lab(n = 50, seed = 123)
+head(dat)
+}

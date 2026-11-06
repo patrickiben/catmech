@@ -53,3 +53,18 @@
 \description{
 Plot pooled linear model coefficients (Forest Plot)
 }
+\examples{
+set.seed(123)
+n <- 40
+df <- data.frame(
+  lab = stats::rnorm(n, 10, 2),
+  age = stats::rnorm(n, 50, 10),
+  y = stats::rnorm(n, 5, 1)
+)
+df$lab_ref <- df$lab
+df$lab_ref[11:n] <- NA
+res <- catmech_reference(df, value = "lab", reference = "lab_ref",
+                         predictors = "age", m = 2, seed = 1)
+pooled <- catmech_pool_lm(res, y ~ lab + age)
+plot(pooled)
+}

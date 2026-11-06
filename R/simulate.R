@@ -14,6 +14,9 @@
 #'   Student t residuals with 3 degrees of freedom for the latent measurement.
 #' @param thresholds Four interval endpoints for Low, Medium, High.
 #' @return A data.frame with lab_true and corrupted for validation only.
+#' @examples
+#' dat <- simulate_catmech_lab(n = 50, seed = 123)
+#' head(dat)
 #' @export
 simulate_catmech_lab <- function(n = 300L, seed = 1L, corruption_probability = 1,
                                 missing_rate = 0.2, flag_rate = 0.1,

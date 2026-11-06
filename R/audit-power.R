@@ -30,6 +30,9 @@
 #'   \item{power_target}{The target statistical power.}
 #'   \item{N}{Total cohort size.}
 #'   \item{k_summary}{Point estimate and uncertainty bounds for the two-phase variance factor \eqn{k}.}
+#' @examples
+#' pwr <- catmech_audit_power(N = 500, target_ratio = 1.3, n_sim = 200, seed = 1)
+#' print(pwr)
 #' @export
 catmech_audit_power <- function(plan = NULL, N = NULL, target_ratio = 1.25,
                                 power_target = 0.80, error_rate = 0.15,
@@ -180,6 +183,9 @@ print.catmech_audit_power <- function(x, digits = 3L, ...) {
 #' @param lwd Line width (default 2).
 #' @param ... Additional arguments passed to [graphics::plot()].
 #' @return `x`, invisibly.
+#' @examples
+#' pwr <- catmech_audit_power(N = 500, target_ratio = 1.3, n_sim = 200, seed = 1)
+#' plot(pwr)
 #' @export
 plot.catmech_audit_power <- function(x, col = "#1f77b4", lwd = 2, ...) {
   tbl <- x$table

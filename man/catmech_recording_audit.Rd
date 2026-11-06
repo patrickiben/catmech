@@ -30,3 +30,12 @@ A list with `status`, `overall`, `by`, `heterogeneity`, `selection` and
 A descriptive first step for any data with both recorded and reference values.
 It fits no model, so it can be read before a modeling assumption is chosen.
 }
+\examples{
+set.seed(123)
+df <- data.frame(
+  recorded = c(10, 12, 14, 100, 15, 16),
+  ref = c(10, 12, 14, 10, NA, NA)
+)
+audit <- catmech_recording_audit(df, value = "recorded", reference = "ref", agreement_tol = 1)
+print(audit)
+}

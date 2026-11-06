@@ -56,3 +56,19 @@ Fits a generalized linear model ([stats::glm()]) across each completed dataset
 and pools parameter estimates and standard errors using Rubin's rules with
 Barnard & Rubin (1999) small-sample degrees of freedom.
 }
+\examples{
+set.seed(123)
+n <- 50
+df <- data.frame(
+  lab = stats::rnorm(n, 10, 2),
+  age = stats::rnorm(n, 50, 10),
+  y = stats::rbinom(n, 1, 0.4)
+)
+df$lab_ref <- df$lab
+df$lab_ref[11:n] <- NA
+res <- catmech_reference(df, value = "lab", reference = "lab_ref",
+                         predictors = "age", m = 2, seed = 1)
+pooled_glm <- catmech_pool_glm(res, y ~ lab + age, family = stats::binomial(),
+                               exponentiate = TRUE)
+print(pooled_glm)
+}

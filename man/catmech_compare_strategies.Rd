@@ -68,3 +68,17 @@ on a dataset with recorded values and an audit reference subsample:
   \item \strong{Contamination Model}: Imputes un-audited values under a reference-calibrated error model ([catmech_contamination()]).
 }
 }
+\examples{
+set.seed(123)
+n <- 50
+df <- data.frame(
+  outcome = stats::rnorm(n, 10, 2),
+  lab = stats::rnorm(n, 5, 1),
+  age = stats::rnorm(n, 50, 10)
+)
+df$ref <- df$lab + stats::rnorm(n, 0, 0.2)
+df$ref[16:n] <- NA
+comp <- catmech_compare_strategies(df, value = "lab", reference = "ref",
+                                   formula = outcome ~ lab + age, m = 2, seed = 1)
+print(comp)
+}

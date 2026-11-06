@@ -55,3 +55,11 @@ level. A clean result is not proof of validity: held-out rows share the referenc
 selection process, the check has limited power with few errors, and it does not
 address nonignorable selection or a reference that is itself wrong.
 }
+\examples{
+set.seed(123)
+df <- data.frame(val = stats::rnorm(30, 10, 2), age = stats::rnorm(30, 50, 10))
+df$ref <- df$val + stats::rnorm(30, 0, 0.2)
+res <- catmech_reference(df, value = "val", reference = "ref", predictors = "age", m = 2, seed = 1)
+chk <- catmech_holdout_check(res, folds = 2L, m = 20L, seed = 1L)
+print(chk)
+}

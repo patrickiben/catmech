@@ -156,6 +156,14 @@ preserve_rng <- function() {
 #' @param directory New or empty output directory. Existing files are never overwritten.
 #' @return The normalized output path, invisibly. Files include a lossless RDS,
 #'   long CSV, per-cell audit, diagnostics, JSON manifest and session information.
+#' @examples
+#' set.seed(123)
+#' df <- data.frame(y = stats::rnorm(20), x = stats::rnorm(20))
+#' df$ref <- df$y; df$ref[6:20] <- NA
+#' res <- catmech_reference(df, value = "y", reference = "ref", predictors = "x", m = 2, seed = 1)
+#' tmp_dir <- file.path(tempdir(), "test_catmech_bundle")
+#' write_catmech(res, tmp_dir)
+#' unlink(tmp_dir, recursive = TRUE)
 #' @export
 write_catmech <- function(result, directory) {
   if (!inherits(result, "catmech_result")) stop("Expected catmech_result.", call. = FALSE)

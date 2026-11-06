@@ -106,6 +106,13 @@ value_in_bounds <- function(v, bound) {
 #' @param x Numeric values. Missing values remain missing.
 #' @param thresholds,levels Endpoints and category labels as in [catmech_spec()].
 #' @return A factor with the specified levels. Out-of-domain values give NA.
+#' @examples
+#' vals <- c(3.2, 5.5, 7.8, 12.0)
+#' catmech_derive_category(
+#'   vals,
+#'   thresholds = c(-Inf, 5, 10, Inf),
+#'   levels = c("low", "med", "high")
+#' )
 #' @export
 catmech_derive_category <- function(x, thresholds, levels) {
   thresholds <- normalize_thresholds(thresholds)
@@ -136,6 +143,12 @@ validate_spec <- function(spec) {
 #' @param path Path to a YAML file. YAML expression evaluation is disabled.
 #' @return A validated catmech_spec object. Legacy prototype YAML is deliberately
 #'   rejected; see inst/specs/lab.yaml for the supported schema.
+#' @examples
+#' spec_file <- system.file("specs", "lab.yaml", package = "catmech")
+#' if (file.exists(spec_file)) {
+#'   sp <- read_catmech_spec(spec_file)
+#'   print(sp)
+#' }
 #' @export
 read_catmech_spec <- function(path) {
   validate_spec(yaml::read_yaml(path, eval.expr = FALSE))
@@ -148,6 +161,13 @@ read_catmech_spec <- function(path) {
 #' have distinct type tags. No numerical rounding or null-dropping is applied.
 #' @param spec A list, usually a validated catmech_spec.
 #' @return A SHA-256 hex string. This hashes assumptions, not the input dataset.
+#' @examples
+#' sp <- catmech_spec(
+#'   value = "lab", category = "stage",
+#'   levels = c("low", "med", "high"),
+#'   thresholds = c(-Inf, 5, 10, Inf)
+#' )
+#' catmech_hash(sp)
 #' @export
 catmech_hash <- function(spec) {
   digest::digest(canonical_json(spec), algo = "sha256", serialize = FALSE)

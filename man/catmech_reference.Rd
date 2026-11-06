@@ -210,3 +210,16 @@ Population coefficient summaries include uncertainty in predictor
 means and covariances. An all-reference input still takes the exact-copy shortcut
 and does not fit a posterior for either joint summary function.
 }
+\examples{
+set.seed(123)
+n <- 40
+df <- data.frame(
+  lab_val = stats::rnorm(n, 10, 2),
+  age = stats::rnorm(n, 50, 10)
+)
+df$lab_ref <- df$lab_val + stats::rnorm(n, 0, 0.2)
+df$lab_ref[11:n] <- NA
+res <- catmech_reference(df, value = "lab_val", reference = "lab_ref",
+                         predictors = "age", use_recorded = TRUE, m = 2, seed = 1)
+summary(res)
+}

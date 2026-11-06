@@ -16,3 +16,10 @@ A validated catmech_spec object. Legacy prototype YAML is deliberately
 \description{
 Read a strict YAML assumption specification
 }
+\examples{
+spec_file <- system.file("specs", "lab.yaml", package = "catmech")
+if (file.exists(spec_file)) {
+  sp <- read_catmech_spec(spec_file)
+  print(sp)
+}
+}

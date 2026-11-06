@@ -17,3 +17,11 @@ A factor with the specified levels. Out-of-domain values give NA.
 \description{
 Derive exact interval categories
 }
+\examples{
+vals <- c(3.2, 5.5, 7.8, 12.0)
+catmech_derive_category(
+  vals,
+  thresholds = c(-Inf, 5, 10, Inf),
+  levels = c("low", "med", "high")
+)
+}

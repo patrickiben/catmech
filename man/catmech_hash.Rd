@@ -17,3 +17,11 @@ Named maps are sorted, sequence order is retained, and numeric values use
 full round-trip precision. Missing values, signed infinities and strings
 have distinct type tags. No numerical rounding or null-dropping is applied.
 }
+\examples{
+sp <- catmech_spec(
+  value = "lab", category = "stage",
+  levels = c("low", "med", "high"),
+  thresholds = c(-Inf, 5, 10, Inf)
+)
+catmech_hash(sp)
+}

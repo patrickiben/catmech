@@ -64,3 +64,22 @@ visible, and do not select the most favorable result. The interval envelope
 is descriptive; it is not a confidence interval over arbitrary misspecification.
 It covers only the supplied finite set and inherits each member's limitations.
 }
+\examples{
+set.seed(123)
+df <- data.frame(
+  lab = stats::rnorm(30, 10, 2),
+  age = stats::rnorm(30, 50, 10),
+  y = stats::rnorm(30, 5, 1)
+)
+df$ref <- df$lab
+df$ref[11:30] <- NA
+res1 <- catmech_reference(df, value = "lab", reference = "ref",
+                          predictors = "age", m = 2, seed = 1)
+res2 <- catmech_reference(df, value = "lab", reference = "ref",
+                          predictors = "age", use_recorded = TRUE, m = 2, seed = 2)
+sens <- catmech_sensitivity(
+  list(standard = res1, recorded = res2),
+  formula = y ~ lab + age, term = "lab"
+)
+print(sens)
+}

@@ -64,3 +64,18 @@ When every audited row agreed and recorded values were kept, the interpretation
   This package policy does not assert that every PMM application is invalid.
   Only univariate linear models with at least one named coefficient are supported.
 }
+\examples{
+set.seed(123)
+n <- 40
+df <- data.frame(
+  lab = stats::rnorm(n, 10, 2),
+  age = stats::rnorm(n, 50, 10),
+  outcome = stats::rnorm(n, 5, 1)
+)
+df$lab_ref <- df$lab
+df$lab_ref[11:n] <- NA
+res <- catmech_reference(df, value = "lab", reference = "lab_ref",
+                         predictors = "age", m = 2, seed = 1)
+pooled <- catmech_pool_lm(res, outcome ~ lab + age)
+print(pooled)
+}

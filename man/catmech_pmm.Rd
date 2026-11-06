@@ -61,3 +61,14 @@ trusted rows. This list does not identify the actual nearest-neighbor pool.
 `eligible_donors` counts all trusted rows; `candidate_pool_size` records the
 requested nearest-donor count used by the delegated matching algorithm.
 }
+\examples{
+set.seed(123)
+df <- data.frame(
+  x = stats::rnorm(30, 50, 10),
+  y = stats::rnorm(30, 10, 2),
+  flag = c(rep("No", 25), rep("Yes", 5))
+)
+res <- catmech_pmm(df, value = "y", predictors = "x", flag = "flag",
+                   flag_yes = "Yes", flag_no = "No", donors = 3, m = 2, seed = 1)
+summary(res)
+}

@@ -21,3 +21,7 @@
 \description{
 Displays statistical power versus audit sample size with reference threshold lines.
 }
+\examples{
+pwr <- catmech_audit_power(N = 500, target_ratio = 1.3, n_sim = 200, seed = 1)
+plot(pwr)
+}

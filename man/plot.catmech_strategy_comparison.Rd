@@ -44,3 +44,19 @@ term is plotted.}
 Draws a comparative forest plot showing point estimates and confidence intervals
 across all evaluated audit strategies for a chosen coefficient term.
 }
+\examples{
+set.seed(123)
+n <- 50
+df <- data.frame(
+  outcome = stats::rnorm(n, 10, 2),
+  lab = stats::rnorm(n, 5, 1),
+  age = stats::rnorm(n, 50, 10)
+)
+df$ref <- df$lab + stats::rnorm(n, 0, 0.2)
+df$ref[16:n] <- NA
+comp <- catmech_compare_strategies(
+  df, value = "lab", reference = "ref",
+  formula = outcome ~ lab + age, m = 2, seed = 1
+)
+plot(comp, term = "lab")
+}
