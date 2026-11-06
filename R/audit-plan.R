@@ -221,15 +221,130 @@ catmech_audit_plan <- function(data, value, reference, predictors, formula, term
     "The analysis is linear MI with Rubin's rules, using the same formula and predictors.",
     "The reference is exact and measures the same quantity as the recorded value.",
     "The relative widths come from a large-sample formula; small audits run wider and vary more.")
-  list(status = if (length(flags)) "review_flags" else "no_flags", flags = flags, k = k_table, table = table,
-    answer = answer,
-    pilot = data.frame(records = n, reference_rows = sum(known), calibration_rows = sum(calibration),
-      disagreements = sum(!agree), width = pilot_fit$width, full_width = pilot_fit$full_width,
-      within_variance = pilot_fit$within, between_variance = pilot_fit$between,
-      discard_width = discard_fit$width, discard_full_width = discard_fit$full_width,
-      largest_discrepancy_ratio = gross$pilot_ratio, largest_recorded_z = gross$recorded_z,
-      selection_z = selection, bootstrap_usable = usable, recorded_fit = pilot_fit$note, row.names = NULL),
-    assumptions = assumptions)
+  structure(
+    list(status = if (length(flags)) "review_flags" else "no_flags", flags = flags, k = k_table, table = table,
+      answer = answer,
+      pilot = data.frame(records = n, reference_rows = sum(known), calibration_rows = sum(calibration),
+        disagreements = sum(!agree), width = pilot_fit$width, full_width = pilot_fit$full_width,
+        within_variance = pilot_fit$within, between_variance = pilot_fit$between,
+        discard_width = discard_fit$width, discard_full_width = discard_fit$full_width,
+        largest_discrepancy_ratio = gross$pilot_ratio, largest_recorded_z = gross$recorded_z,
+        selection_z = selection, bootstrap_usable = usable, recorded_fit = pilot_fit$note, row.names = NULL),
+      assumptions = assumptions),
+    class = c("catmech_audit_plan", "list")
+  )
+}
+
+#' Print a catmech audit size plan
+#'
+#' @param x A `catmech_audit_plan` object.
+#' @param digits Number of decimal digits to print (default 3).
+#' @param ... Unused.
+#' @return `x`, invisibly.
+#' @export
+print.catmech_audit_plan <- function(x, digits = 3L, ...) {
+  ans <- x$answer
+  cat("-- Catmech Audit Size Plan --\n")
+  cat(sprintf("Target ratio:       <= %sx full-audit width\n", round(ans$target_ratio, 2L)))
+  rec_ci <- if (is.finite(ans$records_lower) && is.finite(ans$records_upper)) {
+    sprintf(" [95%% CI: %d, %d]", ans$records_lower, ans$records_upper)
+  } else ""
+  cat(sprintf("Recommended audit:  %d records (fraction: %s)%s\n",
+              ans$records, round(ans$fraction, digits), rec_ci))
+  if (is.data.frame(x$pilot) && nrow(x$pilot)) {
+    p <- x$pilot
+    cat(sprintf("Pilot audit:        %d / %d records (disagreements: %d)\n",
+                p$reference_rows, p$records, p$disagreements))
+  }
+  cat("Status:             ", x$status, "\n", sep = "")
+  if (length(x$flags)) {
+    cat("Flags:              ", paste(x$flags, collapse = ", "), "\n", sep = "")
+  }
+  invisible(x)
+}
+
+#' Summary of a catmech audit plan
+#'
+#' @param object A `catmech_audit_plan` object.
+#' @param ... Additional arguments (currently ignored).
+#' @return An object of class `summary.catmech_audit_plan`.
+#' @export
+summary.catmech_audit_plan <- function(object, ...) {
+  structure(object, class = c("summary.catmech_audit_plan", "catmech_audit_plan", "list"))
+}
+
+#' Print summary of a catmech audit plan
+#'
+#' @param x An object of class `summary.catmech_audit_plan`.
+#' @param digits Number of decimal digits to print (default 3).
+#' @param ... Unused.
+#' @return `x`, invisibly.
+#' @export
+print.summary.catmech_audit_plan <- function(x, digits = 3L, ...) {
+  print.catmech_audit_plan(x, digits = digits, ...)
+  cat("\nRelative width across planned fractions:\n")
+  sub_cols <- intersect(c("fraction", "records", "additional_records", "relative_width", "relative_lower", "relative_upper", "predictive_lower", "predictive_upper"), names(x$table))
+  tbl <- x$table[, sub_cols, drop = FALSE]
+  for (nm in setdiff(names(tbl), c("records", "additional_records"))) {
+    tbl[[nm]] <- round(tbl[[nm]], digits)
+  }
+  print(tbl, row.names = FALSE)
+  invisible(x)
+}
+
+#' Plot a catmech audit plan
+#'
+#' Displays the planned precision curve showing relative interval width
+#' across audit sampling fractions, bootstrap confidence bands, and the target precision ratio.
+#'
+#' @param x A `catmech_audit_plan` object.
+#' @param y Unused.
+#' @param col_curve Line color for relative width curve (default `"royalblue"`).
+#' @param col_target Line color for target ratio threshold (default `"firebrick"`).
+#' @param ... Additional arguments passed to [graphics::par()].
+#' @return Invisible `NULL`.
+#' @export
+plot.catmech_audit_plan <- function(x, y, col_curve = "royalblue",
+                                    col_target = "firebrick", ...) {
+  old_par <- graphics::par(no.readonly = TRUE)
+  on.exit(graphics::par(old_par), add = TRUE)
+  graphics::par(mar = c(4.5, 4.5, 3.5, 1.5), ...)
+
+  tbl <- x$table
+  ans <- x$answer
+  f <- tbl$fraction
+  w <- tbl$relative_width
+  w_lo <- tbl$relative_lower
+  w_hi <- tbl$relative_upper
+
+  y_lim <- c(min(c(1, w_lo, ans$target_ratio), na.rm = TRUE) * 0.95,
+             max(c(w_hi, ans$target_ratio * 1.1), na.rm = TRUE))
+
+  graphics::plot(f, w, type = "n", xlim = c(0, max(f)), ylim = y_lim,
+                 xlab = "Audit Sampling Fraction (f)",
+                 ylab = "Relative Interval Width vs. Full Audit",
+                 main = "Audit Sample Size Precision Plan")
+
+  graphics::polygon(c(f, rev(f)), c(w_lo, rev(w_hi)),
+                    col = grDevices::adjustcolor(col_curve, alpha.f = 0.15), border = NA)
+  graphics::lines(f, w, col = col_curve, lwd = 2.2)
+  graphics::lines(f, w_lo, col = col_curve, lty = 3)
+  graphics::lines(f, w_hi, col = col_curve, lty = 3)
+
+  graphics::abline(h = ans$target_ratio, col = col_target, lty = 2, lwd = 1.5)
+  if (is.finite(ans$fraction) && ans$fraction <= max(f)) {
+    graphics::abline(v = ans$fraction, col = "gray40", lty = 3)
+    graphics::points(ans$fraction, ans$target_ratio, pch = 19, col = col_target, cex = 1.3)
+    graphics::text(ans$fraction, ans$target_ratio,
+                   labels = sprintf("  f = %.2f\n  (%d records)", ans$fraction, ans$records),
+                   pos = 4, cex = 0.85, col = col_target)
+  }
+  graphics::legend("topright",
+                   legend = c("Predicted Relative Width", "95% Bootstrap CI",
+                              sprintf("Target (<= %.2fx)", ans$target_ratio)),
+                   col = c(col_curve, col_curve, col_target),
+                   lty = c(1, 3, 2), lwd = c(2.2, 1, 1.5), bty = "n", cex = 0.9)
+  invisible(NULL)
 }
 
 # The analysis as functions of the audited value. Linear in the value means the design is

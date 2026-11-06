@@ -268,3 +268,25 @@ test_that("each risk to the plan raises a clear warning and a flag", {
   expect_warning(s <- catmech_audit_plan(chosen, "recorded", "gold", c("x", "y"), y ~ recorded + x, "recorded", bootstrap = 100L, m = 5L), "simple random pilot")
   expect_true("pilot_looks_selective" %in% s$flags)
 })
+
+test_that("catmech_audit_plan S3 print and summary methods format cleanly", {
+  plan <- run_plan(audit_fixture(), fractions = c(0.1, 0.2))
+  expect_s3_class(plan, "catmech_audit_plan")
+  txt <- utils::capture.output(val <- print(plan))
+  expect_identical(val, plan)
+  expect_true(any(grepl("Catmech Audit Size Plan", txt)))
+  expect_true(any(grepl("Recommended audit:", txt)))
+  expect_true(any(grepl("Pilot audit:", txt)))
+
+  s <- summary(plan)
+  expect_s3_class(s, "summary.catmech_audit_plan")
+  s_txt <- utils::capture.output(s_val <- print(s))
+  expect_identical(s_val, s)
+  expect_true(any(grepl("Relative width across planned fractions:", s_txt)))
+  expect_true(any(grepl("fraction records", s_txt)))
+
+  # Test plot method
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  expect_silent(plot(plan))
+})

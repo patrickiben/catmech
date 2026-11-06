@@ -296,3 +296,127 @@ test_that("marginal numerical budget extends without changing conditional defaul
   expect_identical(catmech:::catmech_joint_cluster_control()$max_iterations, 32000L)
   expect_identical(catmech:::catmech_marginal_cluster_control(list(max_iterations=32000L))$max_iterations, 32000L)
 })
+
+test_that("marginal summary supports predictor-role formulas and rejects malformed targets", {
+  fixture <- marginal_public_fixture()
+  fit <- fixture$fit
+  default_summary <- catmech_marginal_summary(fit)
+  expect_identical(catmech_marginal_summary(fit, formula = recorded ~ x), default_summary)
+  expect_identical(catmech_marginal_summary(fit, response = "recorded", covariates = "x"), default_summary)
+  rev_summary <- catmech_marginal_summary(fit, formula = x ~ recorded)
+  expect_identical(rev_summary, catmech_marginal_summary(fit, response = "x"))
+  expect_identical(rev_summary, catmech_marginal_summary(fit, response = "x", covariates = "recorded"))
+  expect_identical(rev_summary$term, c("(Intercept)", "recorded"))
+  expect_true(all(is.finite(unlist(rev_summary[c("estimate", "posterior_sd", "lower", "upper")]))))
+  expect_gt(rev_summary$estimate[2L], 0)
+  int_summary <- catmech_marginal_summary(fit, formula = x ~ 1)
+  expect_identical(int_summary$term, "(Intercept)")
+  expect_warning(catmech_pool_lm(fit, x ~ recorded),
+    "catmech_marginal_summary\\(result, formula = \\.\\.\\.\\)")
+
+  expect_error(catmech_marginal_summary(fit, formula = x ~ recorded, response = "x"), "either formula or")
+  expect_error(catmech_marginal_summary(fit, formula = ~ recorded), "two-sided")
+  expect_error(catmech_marginal_summary(fit, formula = I(x + 1) ~ recorded), "single modeled variable")
+  expect_error(catmech_marginal_summary(fit, formula = unknown ~ recorded), "audited value or one of spec\\$predictors")
+  expect_error(catmech_marginal_summary(fit, formula = x ~ recorded - 1), "intercept")
+  expect_error(catmech_marginal_summary(fit, formula = x ~ recorded + offset(recorded)), "offset")
+  expect_error(catmech_marginal_summary(fit, formula = x ~ I(recorded^2)), "plain variable names")
+  expect_error(catmech_marginal_summary(fit, formula = x ~ unknown), "audited value or one of spec\\$predictors")
+  expect_error(catmech_marginal_summary(fit, formula = x ~ recorded:x), "additive")
+  expect_error(catmech_marginal_summary(fit, formula = x ~ x + recorded), "cannot also appear as a covariate")
+  expect_error(catmech_marginal_summary(fit, response = "unknown"), "audited value or one of spec\\$predictors")
+  expect_error(catmech_marginal_summary(fit, response = "x", covariates = "x"), "remaining modeled variables")
+  expect_error(catmech_marginal_summary(fit, response = "x", covariates = c("recorded", "recorded")), "unique")
+})
+
+test_that("adaptive chain continuation matches a single run of the same total length", {
+  d <- marginal_public_fixture()$data
+  doubled <- catmech_reference(d, "recorded", "reference", "x", m = 5L,
+    seed = 822302L, use_recorded = TRUE, cluster = "site",
+    cluster_model = "joint_marginal",
+    joint_control = list(chains = 4L, burnin = 500L, iterations = 1000L, max_iterations = 8000L))
+  direct <- catmech_reference(d, "recorded", "reference", "x", m = 5L,
+    seed = 822302L, use_recorded = TRUE, cluster = "site",
+    cluster_model = "joint_marginal",
+    joint_control = list(chains = 4L, burnin = 500L, iterations = 8000L, max_iterations = 8000L))
+  expect_identical(nrow(doubled$model_diagnostics$attempts), 4L)
+  expect_identical(doubled$model_diagnostics$iterations_used, 8000L)
+  expect_identical(doubled$model_diagnostics$traces, direct$model_diagnostics$traces)
+  expect_identical(doubled$model_diagnostics$scale_interweaving, direct$model_diagnostics$scale_interweaving)
+  expect_identical(doubled$completed, direct$completed)
+  expect_identical(catmech_marginal_summary(doubled), catmech_marginal_summary(direct))
+  expect_identical(catmech_marginal_summary(doubled, formula = x ~ recorded),
+    catmech_marginal_summary(direct, formula = x ~ recorded))
+})
+
+test_that("catmech_sensitivity supports marginal_summary across prior scenarios", {
+  fixture <- marginal_public_fixture()
+  fit1 <- fixture$fit
+  fit_err <- simpleError("Sampler failed convergence")
+  res <- catmech_sensitivity(list(default = fit1, failed = fit_err),
+    term = "x", method = "marginal_summary")
+  expect_identical(nrow(res$table), 2L)
+  expect_identical(res$table$status, c("ok", "failed"))
+  expect_identical(res$status, "unresolved_incomplete_set")
+  expect_true(is.finite(res$table$estimate[1L]))
+  expect_true(is.na(res$table$estimate[2L]))
+  expect_identical(res$table$direction[1L], "above")
+
+  rev_res <- catmech_sensitivity(list(default = fit1), formula = x ~ recorded,
+    term = "recorded", method = "marginal_summary")
+  expect_identical(rev_res$table$status, "ok")
+  expect_true(is.finite(rev_res$table$estimate[1L]))
+
+  expect_error(catmech_sensitivity(list(a = fit1), formula = "not_formula", term = "x",
+    method = "marginal_summary"), "formula must be an R formula or NULL")
+})
+
+test_that("catmech_marginal_sensitivity_grid computes 2-axis statistics and formats cleanly", {
+  fixture <- marginal_public_fixture()
+  fit1 <- fixture$fit
+
+  # Error handling on invalid arguments
+  expect_error(catmech_marginal_sensitivity_grid("not_a_fit"),
+               "fit must be a catmech_result or a named list")
+  expect_error(catmech_marginal_sensitivity_grid(fit1, prior_scales = -1),
+               "prior_scales must be a vector of positive numbers")
+  expect_error(catmech_marginal_sensitivity_grid(fit1, regression_scales = 0),
+               "regression_scales must be a vector of positive numbers")
+  expect_error(catmech_marginal_sensitivity_grid(fit1, conf_level = 1.5),
+               "conf_level must be between zero and one")
+
+  # Precomputed list of results
+  list_grid <- catmech_marginal_sensitivity_grid(
+    fit = list(prior_1_reg_10 = fit1, prior_2_reg_10 = fit1, prior_1_reg_20 = fit1),
+    term = "x", prior_scales = c(1, 2), regression_scales = c(10, 20)
+  )
+  expect_s3_class(list_grid, "catmech_marginal_sensitivity_grid")
+  expect_true(list_grid$complete)
+  expect_identical(list_grid$term, "x")
+  expect_equal(list_grid$statistic, 0, tolerance = 1e-10)
+  expect_equal(list_grid$axis_summary$mean_abs_change, c(0, 0), tolerance = 1e-10)
+  expect_true(is.finite(list_grid$mcse_mean))
+
+  # Test print method
+  printed <- capture.output(print(list_grid))
+  expect_true(any(grepl("Catmech Joint Marginal Prior Sensitivity Grid", printed)))
+  expect_true(any(grepl("Target term: x", printed)))
+  expect_true(any(grepl("Primary sensitivity statistic", printed)))
+  expect_true(any(grepl("complete: TRUE", printed)))
+
+  # Grid with refitting on small grid
+  grid_refit <- catmech_marginal_sensitivity_grid(
+    fit = fit1, term = "x",
+    prior_scales = c(1, 2), regression_scales = c(10, 20)
+  )
+  expect_true(grid_refit$complete)
+  expect_true(is.finite(grid_refit$statistic))
+  expect_true(grid_refit$statistic >= 0)
+  expect_identical(nrow(grid_refit$axis_summary), 2L)
+  expect_true(all(is.finite(grid_refit$axis_summary$mean_abs_change)))
+
+  # Test plot method
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  expect_silent(plot(grid_refit))
+})

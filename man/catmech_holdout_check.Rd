@@ -4,19 +4,29 @@
 \alias{catmech_holdout_check}
 \title{Score an imputation model on reference rows it did not see}
 \usage{
-catmech_holdout_check(fit, folds = 5L, m = 40L, level = 0.9, seed = 1L)
+catmech_holdout_check(
+  fit,
+  folds = 5L,
+  m = 40L,
+  level = 0.9,
+  seed = 1L,
+  fold_by = c("row", "cluster")
+)
 }
 \arguments{
-\item{fit}{A `catmech_result` from [catmech_contamination()], or from
-[catmech_reference()] with `method = "normal"`, with or without `use_recorded`.}
+\item{fit}{A `catmech_result` from [catmech_contamination()] or [catmech_reference()].}
 
 \item{folds}{Number of folds, at least two.}
 
-\item{m}{Completions per refit, at least 20, used for predictive intervals.}
+\item{m}{Number of imputations per fold refit, at least twenty.}
 
-\item{level}{Nominal central predictive interval level.}
+\item{level}{Nominal central coverage level, between zero and one.}
 
-\item{seed}{Nonnegative integer seed, with caller RNG restored.}
+\item{seed}{Nonnegative integer seed. Caller RNG is preserved.}
+
+\item{fold_by}{`"row"` (default) for stratified row-level cross-validation, or
+`"cluster"` for cluster-level holdout cross-validation where all reference rows in
+held-out clusters are hidden together. Requires a clustered fit with `spec$cluster`.}
 }
 \value{
 A list with `status`, `summary` (one row of metrics), `rows` (one per
@@ -24,6 +34,9 @@ A list with `status`, `summary` (one row of metrics), `rows` (one per
   nonempty when predictions are no better than the recorded value or the stratum error
   rate. On two real datasets that happened while `status` stayed clean, and simpler
   methods did as well or better. It is a reading from that study, not a tested rule.
+
+A list with `status`, `summary`, `rows`, `flags`, `failures`, `advice` and
+  `interpretation`.
 }
 \description{
 Hides folds of reference values, refits the same workflow and compares its

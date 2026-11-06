@@ -31,12 +31,31 @@ model does not require `u_T` to be independent of observed `X`. In particular,
 rows with neither T nor W still inform the model through their observed X.
 
 Let `V = Psi + Sigma`, with the recorded value excluded from the set of analysis
-predictors. The population marginal regression is
+predictors. By default (`formula = NULL`, `response = NULL`, `covariates = NULL`),
+the population marginal regression of `T` on `X` is
 
 ```
 beta = solve(V_XX, V_XT)
 alpha = mu_T - transpose(beta) %*% mu_X.
 ```
+
+When `formula` (or `response` and `covariates`) selects another modeled variable
+`Y` as the response and a subset `P` of the remaining modeled variables from
+`(T, X)` (always excluding the noisy recorded proxy `W`), `catmech_marginal_summary()`
+evaluates the population marginal regression of `Y` on `P`:
+
+```
+beta = solve(V_PP, V_PY)
+alpha = mu_Y - transpose(beta) %*% mu_P.
+```
+
+In particular, when the scientific outcome `y` is included in `predictors = c("x", "y")`
+during `catmech_reference(..., cluster_model = "joint_marginal")`, calling
+`catmech_marginal_summary(fit, formula = y ~ recorded + x)` summarizes the
+population regression of `y` on the true measurement `T` (identified by the
+audited column name `recorded`) and `x` directly from the joint posterior `(T, W, X, Y)`
+without drawing fresh unaudited-cluster random intercepts that attenuate the slope
+of `T`.
 
 This is the regression for an individual under the model. Site sizes must be
 noninformative for the stated population interpretation. Each posterior draw
@@ -120,7 +139,8 @@ requiring all fits to return. Width sensitivity is separate. This comparison
 covers the declared perturbations; it does not establish insensitivity to every
 prior family or combination of hyperparameters. Finite-chain error can
 contribute to small measured changes, so posterior mean Monte Carlo errors
-are also retained.
+are also retained. The helper [catmech_marginal_sensitivity_grid()] automates
+this 2-axis evaluation protocol on a fitted model.
 
 ## Sampler and missing patterns
 
@@ -189,13 +209,14 @@ confirmation seeds are declared in the protocol.
 ## Diagnostics, scope and evidence
 
 The default four chains start with 1,000 burn-in and 4,000 retained iterations,
-extending the same seeded chains to 8,000, 16,000 and at most 64,000 retained
-iterations. Rank-normalized R-hat must be at most 1.05 and bulk and tail ESS at
-least 100 times the number of chains. Monitors include means, covariance entries,
-hierarchical auxiliaries, conditional covariance blocks, within/between
-regression matrices, original-unit marginal coefficients and conditional
-means for both missing-target recording patterns. Passing the diagnostic screen
-does not prove convergence or coverage.
+extending the same seeded chains to 8,000, 16,000, 32,000 and at most 64,000
+retained iterations by resuming each chain from its terminal Markov state and
+saved RNG state without re-running completed sweeps. Rank-normalized R-hat must
+be at most 1.05 and bulk and tail ESS at least 100 times the number of chains.
+Monitors include means, covariance entries, hierarchical auxiliaries, conditional
+covariance blocks, within/between regression matrices, original-unit marginal
+coefficients and conditional means for both missing-target recording patterns.
+Passing the diagnostic screen does not prove convergence or coverage.
 
 The public engine requires complete continuous numeric predictors, sufficient
 paired measurement support, at least five observed sites for each measurement,

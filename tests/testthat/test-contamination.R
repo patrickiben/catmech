@@ -384,3 +384,29 @@ test_that("the hold-out check says when a model shows no skill", {
   expect_identical(scored$summary$engine, "reference_normal_recorded")
   expect_true(all(is.na(scored$rows$posterior_corruption)))
 })
+
+test_that("catmech_recording_audit and catmech_holdout_check S3 print methods format cleanly", {
+  f <- contamination_fixture()
+  audit <- catmech_recording_audit(f$data, "lab_value", "gold", by = "outlier_flag")
+  expect_s3_class(audit, "catmech_recording_audit")
+  a_txt <- utils::capture.output(a_val <- print(audit))
+  expect_identical(a_val, audit)
+  expect_true(any(grepl("Catmech Recording Audit", a_txt)))
+  expect_true(any(grepl("Status:", a_txt)))
+  expect_true(any(grepl("Disagreements:", a_txt)))
+
+  linear <- catmech_reference(f$data, "lab_value", "gold", contamination_predictors, use_recorded = TRUE, m = 4, seed = 5)
+  scored <- catmech_holdout_check(linear, folds = 3, m = 20, seed = 7)
+  expect_s3_class(scored, "catmech_holdout_check")
+  h_txt <- utils::capture.output(h_val <- print(scored))
+  expect_identical(h_val, scored)
+  expect_true(any(grepl("Catmech Holdout Cross-Validation Check", h_txt)))
+  expect_true(any(grepl("Predictive coverage:", h_txt)))
+  expect_true(any(grepl("Predictive RMSE:", h_txt)))
+
+  # Test plot methods
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  expect_silent(plot(audit))
+  expect_silent(plot(scored))
+})

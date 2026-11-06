@@ -629,10 +629,101 @@ catmech_recording_audit <- function(data, value, reference, by = NULL, agreement
              ". Consider declaring these as strata."),
     if (is.finite(smd) && abs(smd) / sqrt(1 / selection_n[1L] + 1 / selection_n[2L]) > 3.29)
       "Recorded values differ between referenced and unreferenced rows by more than sampling noise, so reference selection may not be simple random sampling.")
-  list(status = status, overall = overall, by = table_by, heterogeneity = heterogeneity,
-       selection = data.frame(measure = "recorded_value_standardized_difference", value = smd,
-                              stringsAsFactors = FALSE),
-       notes = as.character(notes))
+  structure(
+    list(status = status, overall = overall, by = table_by, heterogeneity = heterogeneity,
+         selection = data.frame(measure = "recorded_value_standardized_difference", value = smd,
+                                stringsAsFactors = FALSE),
+         notes = as.character(notes)),
+    class = c("catmech_recording_audit", "list")
+  )
+}
+
+#' Print a catmech recording audit result
+#'
+#' @param x A `catmech_recording_audit` object.
+#' @param digits Number of decimal digits to print (default 4).
+#' @param ... Unused.
+#' @return `x`, invisibly.
+#' @export
+print.catmech_recording_audit <- function(x, digits = 4L, ...) {
+  ov <- x$overall
+  cat("-- Catmech Recording Audit --\n")
+  cat("Status:             ", x$status, "\n", sep = "")
+  dis_pct <- if (is.finite(ov$disagreement_rate)) sprintf(" (%.1f%%)", 100 * ov$disagreement_rate) else ""
+  cat(sprintf("Disagreements:      %d / %d calibration rows%s\n",
+              ov$disagreements, ov$calibration_rows, dis_pct))
+  ref_pct <- if (is.finite(ov$reference_rate)) sprintf(" (%.1f%%)", 100 * ov$reference_rate) else ""
+  cat(sprintf("Reference subset:   %d / %d total rows%s\n",
+              ov$reference_rows, ov$rows, ref_pct))
+  if (is.finite(ov$error_mean) && is.finite(ov$error_sd)) {
+    cat(sprintf("Error distribution: mean = %s, SD = %s\n",
+                round(ov$error_mean, digits), round(ov$error_sd, digits)))
+  }
+  if (!is.null(x$selection) && nrow(x$selection) && is.finite(x$selection$value[1L])) {
+    cat(sprintf("Selection SMD:      %s\n", round(x$selection$value[1L], digits)))
+  }
+  if (!is.null(x$heterogeneity) && nrow(x$heterogeneity)) {
+    cat("Heterogeneity across strata:\n")
+    print(x$heterogeneity, row.names = FALSE)
+  }
+  if (length(x$notes) && any(nzchar(x$notes))) {
+    cat("\nNotes:\n")
+    for (note in x$notes[nzchar(x$notes)]) cat("  * ", note, "\n", sep = "")
+  }
+  invisible(x)
+}
+
+#' Plot a recording audit summary
+#'
+#' Displays disagreement rates across strata or overall error distribution.
+#'
+#' @param x A `catmech_recording_audit` object.
+#' @param y Unused.
+#' @param col_points Color for stratum points (default `"navy"`).
+#' @param ... Additional arguments passed to [graphics::par()].
+#' @return Invisible `NULL`.
+#' @export
+plot.catmech_recording_audit <- function(x, y, col_points = "navy", ...) {
+  old_par <- graphics::par(no.readonly = TRUE)
+  on.exit(graphics::par(old_par), add = TRUE)
+  graphics::par(mar = c(4.5, 6.5, 3.5, 1.5), ...)
+
+  b <- x$by
+  ov <- x$overall
+  ov_rate <- if (is.finite(ov$disagreement_rate)) ov$disagreement_rate else 0
+
+  if (!is.null(b) && nrow(b) > 0L) {
+    labels <- paste0(b$column, ": ", b$level)
+    y_pos <- seq_along(labels)
+    x_lim <- c(0, max(c(b$upper, ov_rate, 0.1), na.rm = TRUE) * 1.1)
+
+    graphics::plot(b$disagreement_rate, y_pos, type = "n",
+                   xlim = x_lim, ylim = c(0.5, length(y_pos) + 0.5),
+                   xlab = "Disagreement Rate", ylab = "", yaxt = "n",
+                   main = "Recording Disagreement Rates by Stratum")
+    graphics::axis(2, at = y_pos, labels = labels, las = 1, cex.axis = 0.85)
+    graphics::abline(v = ov_rate, col = "firebrick", lty = 2, lwd = 1.5)
+
+    for (i in seq_along(y_pos)) {
+      if (is.finite(b$lower[i]) && is.finite(b$upper[i])) {
+        graphics::lines(c(b$lower[i], b$upper[i]), c(y_pos[i], y_pos[i]), col = col_points, lwd = 1.5)
+      }
+    }
+    graphics::points(b$disagreement_rate, y_pos, pch = 19, col = col_points, cex = 1.2)
+    graphics::legend("topright", legend = c("Stratum Rate (95% Jeffreys)", "Overall Rate"),
+                     col = c(col_points, "firebrick"), pch = c(19, NA), lty = c(1, 2),
+                     bty = "n", cex = 0.85)
+  } else {
+    rates <- c(ov_rate, ov$lower, ov$upper)
+    graphics::barplot(ov_rate, ylim = c(0, max(rates, 0.1) * 1.2),
+                      names.arg = "Overall", ylab = "Disagreement Rate",
+                      col = "aliceblue", border = "steelblue",
+                      main = "Overall Recording Disagreement Rate")
+    if (is.finite(ov$lower) && is.finite(ov$upper)) {
+      graphics::arrows(0.7, ov$lower, 0.7, ov$upper, code = 3, angle = 90, length = 0.05, col = "navy")
+    }
+  }
+  invisible(NULL)
 }
 
 catmech_contamination_exact_test <- function(counts) {
@@ -672,8 +763,20 @@ catmech_contamination_exact_test <- function(counts) {
 #' level. A clean result is not proof of validity: held-out rows share the reference
 #' selection process, the check has limited power with few errors, and it does not
 #' address nonignorable selection or a reference that is itself wrong.
+#' @param fit A `catmech_result` from [catmech_contamination()] or [catmech_reference()].
+#' @param folds Number of folds, at least two.
+#' @param m Number of imputations per fold refit, at least twenty.
+#' @param level Nominal central coverage level, between zero and one.
+#' @param seed Nonnegative integer seed. Caller RNG is preserved.
+#' @param fold_by `"row"` (default) for stratified row-level cross-validation, or
+#'   `"cluster"` for cluster-level holdout cross-validation where all reference rows in
+#'   held-out clusters are hidden together. Requires a clustered fit with `spec$cluster`.
+#' @return A list with `status`, `summary`, `rows`, `flags`, `failures`, `advice` and
+#'   `interpretation`.
 #' @export
-catmech_holdout_check <- function(fit, folds = 5L, m = 40L, level = 0.9, seed = 1L) {
+catmech_holdout_check <- function(fit, folds = 5L, m = 40L, level = 0.9, seed = 1L,
+                                  fold_by = c("row", "cluster")) {
+  fold_by <- match.arg(fold_by)
   if (!inherits(fit, "catmech_result")) stop("Expected a catmech_result.", call. = FALSE)
   engine <- fit$manifest$engine
   if (!isTRUE(engine %in% c("reference_contamination", "reference_normal", "reference_normal_recorded", "reference_joint_cluster", "reference_marginal_cluster")))
@@ -694,14 +797,40 @@ catmech_holdout_check <- function(fit, folds = 5L, m = 40L, level = 0.9, seed = 
   if (length(rows) < 2L * folds) stop("Too few reference rows for this many folds.", call. = FALSE)
   agree <- catmech_contamination_agreement(W, R, tol)
   group <- ifelse(is.na(W[rows]), "no_recorded_value", ifelse(agree[rows], "agrees", "disagrees"))
+  if (fold_by == "cluster") {
+    cluster_col <- spec$cluster
+    if (is.null(cluster_col) || !is.character(cluster_col) || length(cluster_col) != 1L ||
+        is.na(cluster_col) || !cluster_col %in% names(data))
+      stop("fold_by='cluster' requires a clustered fit with spec$cluster.", call. = FALSE)
+    cluster_ids <- data[[cluster_col]][rows]
+    unique_clusters <- unique(cluster_ids)
+    if (length(unique_clusters) < 2L * folds)
+      stop("Too few reference clusters for this many folds.", call. = FALSE)
+  }
   restore <- preserve_rng()
   on.exit(restore(), add = TRUE)
   set.seed(as.integer(seed))
   assignment <- integer(length(rows))
-  for (g in unique(group)) {
-    members <- which(group == g)
-    fold_labels <- rep_len(sample.int(folds), length(members))
-    assignment[members[sample.int(length(members))]] <- fold_labels[sample.int(length(fold_labels))]
+  if (fold_by == "row") {
+    for (g in unique(group)) {
+      members <- which(group == g)
+      fold_labels <- rep_len(sample.int(folds), length(members))
+      assignment[members[sample.int(length(members))]] <- fold_labels[sample.int(length(fold_labels))]
+    }
+  } else {
+    cluster_group <- vapply(unique_clusters, function(cid) {
+      c_rows <- rows[cluster_ids == cid]
+      c_grps <- group[rows %in% c_rows]
+      if ("disagrees" %in% c_grps) "disagrees" else if ("agrees" %in% c_grps) "agrees" else "no_recorded_value"
+    }, character(1L))
+    cluster_fold_map <- integer(length(unique_clusters))
+    names(cluster_fold_map) <- as.character(unique_clusters)
+    for (cg in unique(cluster_group)) {
+      c_members <- unique_clusters[cluster_group == cg]
+      fold_labels <- rep_len(sample.int(folds), length(c_members))
+      cluster_fold_map[as.character(c_members[sample.int(length(c_members))])] <- fold_labels[sample.int(length(fold_labels))]
+    }
+    assignment <- unname(cluster_fold_map[as.character(cluster_ids)])
   }
   refit <- function(train, fold_seed) {
     if (contamination) {
@@ -789,7 +918,7 @@ catmech_holdout_check <- function(fit, folds = 5L, m = 40L, level = 0.9, seed = 
   if (is.finite(ks) && ks < .01) flags <- c(flags, "predictive_distribution_rejected")
   if (is.finite(calibration_z) && abs(calibration_z) > stats::qnorm(.995))
     flags <- c(flags, "corruption_probability_miscalibrated")
-  summary <- data.frame(engine = engine, holdout_rows = n, folds_completed = length(results),
+  summary <- data.frame(engine = engine, fold_by = fold_by, holdout_rows = n, folds_completed = length(results),
     with_recorded = sum(has_w), errors_observed = errors, errors_expected = expected,
     calibration_z = calibration_z, brier_model = brier, brier_stratum_rate = brier_rate,
     nominal_level = level, predictive_coverage = phat, ks_p_value = ks,
@@ -804,7 +933,101 @@ catmech_holdout_check <- function(fit, folds = 5L, m = 40L, level = 0.9, seed = 
     if (is.finite(brier) && brier >= brier_rate)
       "Error probabilities are no better than the stratum error rate, so do not read them as per-record labels.")
   if (length(advice)) advice <- c(advice, "Consider catmech_reference(use_recorded = TRUE) or generalized raking.")
-  list(status = status, summary = summary, rows = scored, flags = flags, failures = failures, advice = advice,
-       interpretation = paste("Scores imputation against held-out references from the same selection process.",
-         "A clean result is not proof of validity; see the function documentation."))
+  structure(
+    list(status = status, summary = summary, rows = scored, flags = flags, failures = failures, advice = advice,
+         interpretation = paste("Scores imputation against held-out references from the same selection process.",
+           "A clean result is not proof of validity; see the function documentation.")),
+    class = c("catmech_holdout_check", "list")
+  )
+}
+
+#' Print a catmech holdout check result
+#'
+#' @param x A `catmech_holdout_check` object.
+#' @param digits Number of decimal digits to print (default 4).
+#' @param ... Unused.
+#' @return `x`, invisibly.
+#' @export
+print.catmech_holdout_check <- function(x, digits = 4L, ...) {
+  cat("-- Catmech Holdout Cross-Validation Check --\n")
+  cat("Status:              ", x$status, "\n", sep = "")
+  if (is.null(x$summary)) {
+    cat("Note:                No fold produced a fit.\n")
+    if (length(x$failures)) {
+      cat("Failures:\n")
+      for (f in x$failures) cat("  * ", f, "\n", sep = "")
+    }
+    return(invisible(x))
+  }
+  s <- x$summary
+  cat(sprintf("Folds completed:     %d (holdout rows: %d, partitioned by: %s)\n",
+              s$folds_completed, s$holdout_rows, s$fold_by))
+  ks_str <- if (is.finite(s$ks_p_value)) sprintf(" (uniform PIT KS p-value: %s)", round(s$ks_p_value, digits)) else ""
+  cat(sprintf("Predictive coverage: %s (nominal: %s)%s\n",
+              round(s$predictive_coverage, digits), round(s$nominal_level, digits), ks_str))
+  rmse_rec_str <- if (is.finite(s$rmse_recorded)) sprintf(" vs recorded = %s", round(s$rmse_recorded, digits)) else ""
+  cat(sprintf("Predictive RMSE:     model = %s%s\n",
+              round(s$rmse_model, digits), rmse_rec_str))
+  cat(sprintf("Mean interval width: %s\n", round(s$mean_interval_width, digits)))
+  if (length(x$flags)) {
+    cat("Flags:               ", paste(x$flags, collapse = ", "), "\n", sep = "")
+  } else {
+    cat("Flags:               none\n")
+  }
+  if (length(x$advice)) {
+    cat("\nAdvice:\n")
+    for (adv in x$advice) cat("  * ", adv, "\n", sep = "")
+  }
+  invisible(x)
+}
+
+#' Plot holdout check calibration diagnostics
+#'
+#' Displays a 2-panel diagnostic plot of predictive calibration:
+#' 1. Uniformity histogram of randomized Probability Integral Transform (PIT) values.
+#' 2. Scatter plot of predictive means versus observed reference values.
+#'
+#' @param x A `catmech_holdout_check` object.
+#' @param y Unused.
+#' @param ... Additional arguments passed to [graphics::par()].
+#' @return Invisible `NULL`.
+#' @export
+plot.catmech_holdout_check <- function(x, y, ...) {
+  if (is.null(x$rows) || !nrow(x$rows)) {
+    message("No holdout rows to plot.")
+    return(invisible(NULL))
+  }
+  old_par <- graphics::par(no.readonly = TRUE)
+  on.exit(graphics::par(old_par), add = TRUE)
+  graphics::par(mfrow = c(1, 2), mar = c(4.5, 4.5, 3.5, 1.5), ...)
+
+  rows <- x$rows
+  s <- x$summary
+
+  pits <- rows$pit[is.finite(rows$pit)]
+  ks_pval <- if (!is.null(s$ks_p_value) && is.finite(s$ks_p_value)) s$ks_p_value else NA_real_
+  ks_label <- if (is.finite(ks_pval)) sprintf("KS p = %.3f", ks_pval) else ""
+
+  graphics::hist(pits, breaks = seq(0, 1, by = 0.1), freq = FALSE,
+                 col = "aliceblue", border = "steelblue",
+                 xlab = "Randomized Probability Integral Transform (PIT)",
+                 ylab = "Density", main = paste("Uniform PIT Diagnostic\n", ks_label))
+  graphics::abline(h = 1.0, col = "firebrick", lty = 2, lwd = 1.5)
+
+  r_vals <- rows$reference[is.finite(rows$reference) & is.finite(rows$predictive_mean)]
+  p_vals <- rows$predictive_mean[is.finite(rows$reference) & is.finite(rows$predictive_mean)]
+  lims <- range(c(r_vals, p_vals), na.rm = TRUE)
+
+  cov_pct <- if (!is.null(s$predictive_coverage) && is.finite(s$predictive_coverage)) {
+    sprintf("%.1f%% (nom: %.0f%%)", 100 * s$predictive_coverage, 100 * s$nominal_level)
+  } else ""
+
+  graphics::plot(r_vals, p_vals, pch = 19, col = grDevices::adjustcolor("navy", alpha.f = 0.4),
+                 xlim = lims, ylim = lims,
+                 xlab = "Observed Reference Value",
+                 ylab = "Predictive Mean",
+                 main = paste("Predictive Calibration\nCoverage:", cov_pct))
+  graphics::abline(0, 1, col = "firebrick", lty = 2, lwd = 1.5)
+
+  invisible(NULL)
 }

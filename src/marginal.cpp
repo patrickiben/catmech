@@ -210,6 +210,7 @@ struct Pattern {
   arma::uvec observed;
   arma::uvec missing;
   std::vector<unsigned int> rows;
+  arma::mat observed_values;
 };
 
 void save_matrix(Rcpp::NumericVector& output, const arma::mat& value,
@@ -217,10 +218,8 @@ void save_matrix(Rcpp::NumericVector& output, const arma::mat& value,
   std::copy(value.begin(), value.end(), output.begin() + index * value.n_elem);
 }
 
-arma::vec predict_target(const arma::mat& y, const arma::uvec& group,
-                         const arma::vec& mu, const arma::mat& sigma,
-                         const arma::mat& psi, bool draw) {
-  const unsigned int n = y.n_rows, d = y.n_cols, g = group.max() + 1;
+std::vector<Pattern> build_prediction_patterns(const arma::mat& y) {
+  const unsigned int n = y.n_rows, d = y.n_cols;
   std::map<std::string, unsigned int> index;
   std::vector<Pattern> patterns;
   for (unsigned int i = 0; i < n; ++i) {
@@ -239,6 +238,23 @@ arma::vec predict_target(const arma::mat& y, const arma::uvec& group,
     }
     patterns[index[key]].rows.push_back(i);
   }
+  for (Pattern& pattern : patterns) {
+    if (pattern.observed.n_elem) {
+      pattern.observed_values.set_size(pattern.observed.n_elem, pattern.rows.size());
+      for (unsigned int r = 0; r < pattern.rows.size(); ++r) {
+        arma::vec response = y.row(pattern.rows[r]).t();
+        pattern.observed_values.col(r) = response.elem(pattern.observed);
+      }
+    }
+  }
+  return patterns;
+}
+
+arma::vec predict_target_patterns(const arma::mat& y, const arma::uvec& group,
+                                  unsigned int g, const std::vector<Pattern>& patterns,
+                                  const arma::vec& mu, const arma::mat& sigma,
+                                  const arma::mat& psi, bool draw) {
+  const unsigned int d = y.n_cols;
   arma::mat pi = inverse_spd(psi);
   std::vector<arma::mat> precision(g, pi), observed_inverse;
   arma::mat rhs(g, d, arma::fill::zeros);
@@ -248,24 +264,33 @@ arma::vec predict_target(const arma::mat& y, const arma::uvec& group,
       oi = inverse_spd(sigma.submat(pattern.observed, pattern.observed));
       arma::mat embedded(d, d, arma::fill::zeros);
       embedded.submat(pattern.observed, pattern.observed) = oi;
-      for (unsigned int row : pattern.rows) {
+      arma::vec mu_obs = mu.elem(pattern.observed);
+      const unsigned int m_obs = pattern.observed.n_elem;
+      const unsigned int* obs_idx = pattern.observed.memptr();
+      arma::vec diff(m_obs), contribution(m_obs);
+      for (unsigned int r = 0; r < pattern.rows.size(); ++r) {
+        unsigned int row = pattern.rows[r];
         unsigned int j = group[row];
         precision[j] += embedded;
-        arma::vec response = y.row(row).t();
-        arma::vec contribution = oi * (response.elem(pattern.observed) - mu.elem(pattern.observed));
-        for (unsigned int k = 0; k < pattern.observed.n_elem; ++k)
-          rhs(j, pattern.observed[k]) += contribution[k];
+        const double* obs_col = pattern.observed_values.colptr(r);
+        for (unsigned int k = 0; k < m_obs; ++k)
+          diff[k] = obs_col[k] - mu_obs[k];
+        contribution = oi * diff;
+        for (unsigned int k = 0; k < m_obs; ++k)
+          rhs(j, obs_idx[k]) += contribution[k];
       }
     }
     observed_inverse.push_back(oi);
   }
   arma::mat u(g, d);
+  std::vector<arma::vec> site_location(g);
   for (unsigned int j = 0; j < g; ++j) {
     arma::mat upper = chol_lower(precision[j]).t();
     arma::vec value = arma::solve(arma::trimatu(upper),
       arma::solve(arma::trimatl(upper.t()), rhs.row(j).t()));
     if (draw) value += arma::solve(arma::trimatu(upper), normals(d));
     u.row(j) = value.t();
+    site_location[j] = mu + value;
   }
   arma::vec out = y.col(0);
   for (unsigned int p = 0; p < patterns.size(); ++p) {
@@ -280,17 +305,30 @@ arma::vec predict_target(const arma::mat& y, const arma::uvec& group,
     }
     if (!R_finite(variance) || variance <= 0)
       Rcpp::stop("Marginal target conditional variance is not positive.");
-    for (unsigned int row : pattern.rows) {
-      arma::vec location = mu + u.row(group[row]).t();
+    const unsigned int m_obs = pattern.observed.n_elem;
+    const unsigned int* obs_idx = pattern.observed.memptr();
+    arma::vec diff(m_obs);
+    for (unsigned int r = 0; r < pattern.rows.size(); ++r) {
+      unsigned int row = pattern.rows[r];
+      const arma::vec& location = site_location[group[row]];
       double value = location[0];
-      if (pattern.observed.n_elem) {
-        arma::vec response = y.row(row).t();
-        value += arma::as_scalar(regression * (response.elem(pattern.observed) - location.elem(pattern.observed)));
+      if (m_obs) {
+        const double* obs_col = pattern.observed_values.colptr(r);
+        for (unsigned int k = 0; k < m_obs; ++k)
+          diff[k] = obs_col[k] - location[obs_idx[k]];
+        value += arma::as_scalar(regression * diff);
       }
       out[row] = draw ? R::rnorm(value, std::sqrt(variance)) : value;
     }
   }
   return out;
+}
+
+arma::vec predict_target(const arma::mat& y, const arma::uvec& group,
+                         const arma::vec& mu, const arma::mat& sigma,
+                         const arma::mat& psi, bool draw) {
+  return predict_target_patterns(y, group, group.max() + 1, build_prediction_patterns(y),
+    mu, sigma, psi, draw);
 }
 }
 
@@ -355,6 +393,15 @@ RcppExport SEXP catmech_marginal_gibbs_cpp(SEXP input_sexp, SEXP iterations_sexp
     }
     patterns[pattern_index[key]].rows.push_back(i);
   }
+  for (Pattern& pattern : patterns) {
+    if (pattern.observed.n_elem) {
+      pattern.observed_values.set_size(pattern.observed.n_elem, pattern.rows.size());
+      for (unsigned int r = 0; r < pattern.rows.size(); ++r) {
+        arma::vec value = y.row(pattern.rows[r]).t();
+        pattern.observed_values.col(r) = value.elem(pattern.observed);
+      }
+    }
+  }
 
   arma::vec mu(d, arma::fill::zeros), a_sigma(d, arma::fill::ones), a_psi(d, arma::fill::ones);
   arma::mat sigma(d, d, arma::fill::eye), psi(d, d, arma::fill::eye);
@@ -398,6 +445,8 @@ RcppExport SEXP catmech_marginal_gibbs_cpp(SEXP input_sexp, SEXP iterations_sexp
   for (unsigned int iteration = 0; iteration < iterations; ++iteration) {
     if (iteration % 128 == 0) Rcpp::checkUserInterrupt();
     // Augment only missing entries. Every observed component remains immutable.
+    std::vector<arma::vec> site_location(g);
+    for (unsigned int j = 0; j < g; ++j) site_location[j] = mu + u.row(j).t();
     for (const Pattern& pattern : patterns) {
       arma::mat regression, conditional = sigma.submat(pattern.missing, pattern.missing);
       if (pattern.observed.n_elem) {
@@ -406,16 +455,24 @@ RcppExport SEXP catmech_marginal_gibbs_cpp(SEXP input_sexp, SEXP iterations_sexp
         conditional -= regression * sigma.submat(pattern.observed, pattern.missing);
       }
       arma::mat chol = chol_lower(conditional);
-      for (unsigned int row : pattern.rows) {
-        arma::vec location = mu + u.row(group[row]).t();
-        arma::vec center = location.elem(pattern.missing);
-        if (pattern.observed.n_elem) {
-          arma::vec value = y.row(row).t();
-          center += regression * (value.elem(pattern.observed) - location.elem(pattern.observed));
+      const unsigned int m_obs = pattern.observed.n_elem, m_mis = pattern.missing.n_elem;
+      const unsigned int* obs_idx = pattern.observed.memptr();
+      const unsigned int* mis_idx = pattern.missing.memptr();
+      arma::vec diff(m_obs), center(m_mis), draw(m_mis);
+      for (unsigned int r = 0; r < pattern.rows.size(); ++r) {
+        unsigned int row = pattern.rows[r];
+        const arma::vec& location = site_location[group[row]];
+        for (unsigned int k = 0; k < m_mis; ++k)
+          center[k] = location[mis_idx[k]];
+        if (m_obs) {
+          const double* obs_col = pattern.observed_values.colptr(r);
+          for (unsigned int k = 0; k < m_obs; ++k)
+            diff[k] = obs_col[k] - location[obs_idx[k]];
+          center += regression * diff;
         }
-        arma::vec draw = center + chol * normals(pattern.missing.n_elem);
-        for (unsigned int k = 0; k < pattern.missing.n_elem; ++k)
-          y(row, pattern.missing[k]) = draw[k];
+        draw = center + chol * normals(m_mis);
+        for (unsigned int k = 0; k < m_mis; ++k)
+          y(row, mis_idx[k]) = draw[k];
       }
     }
     arma::mat ybar(g, d, arma::fill::zeros);
@@ -591,6 +648,9 @@ RcppExport SEXP catmech_marginal_derived_cpp(SEXP input_sexp, SEXP fit_sexp,
   }
   const unsigned int base_count = k + 1 + !recorded.empty() + !absent.empty();
   const unsigned int count = base_count + 2 * (3 + 2 * k);
+  const unsigned int g = group.max() + 1;
+  const std::vector<Pattern> prediction_patterns = (!recorded.empty() || !absent.empty()) ?
+    build_prediction_patterns(y) : std::vector<Pattern>();
   Rcpp::NumericMatrix out(keep.size(), count);
   for (int row = 0; row < keep.size(); ++row) {
     if (row % 256 == 0) Rcpp::checkUserInterrupt();
@@ -609,7 +669,8 @@ RcppExport SEXP catmech_marginal_derived_cpp(SEXP input_sexp, SEXP fit_sexp,
     }
     out(row, 0) = intercept;
     if (!recorded.empty() || !absent.empty()) {
-      arma::vec predicted = predict_target(y, group, mu.col(it), sigma.slice(it), psi.slice(it), false);
+      arma::vec predicted = predict_target_patterns(y, group, g, prediction_patterns,
+        mu.col(it), sigma.slice(it), psi.slice(it), false);
       unsigned int column = k + 1;
       if (!recorded.empty()) {
         double sum = 0;

@@ -43,7 +43,8 @@ catmech_marginal_cluster_prior <- function(control) {
 # Internal reproducible kernels; fixed covariance and inverse-Wishart options
 # exist for independent numerical checks, not as user-selectable model controls.
 catmech_marginal_gibbs <- function(input, seed, iterations, start = NULL,
-                                  prior = list(family = "huang_wand", scale = 1), fixed = NULL) {
+                                  prior = list(family = "huang_wand", scale = 1), fixed = NULL,
+                                  rng_state = NULL) {
   check_count(iterations, "iterations", 1L)
   check_count(seed, "seed", 1L)
   if (!is.list(input) || !is.matrix(input$y) || !is.numeric(input$y) ||
@@ -76,9 +77,11 @@ catmech_marginal_gibbs <- function(input, seed, iterations, start = NULL,
   }
   restore <- preserve_rng()
   on.exit(restore(), add = TRUE)
-  set.seed(seed)
-  .Call("catmech_marginal_gibbs_cpp", list(y = input$y, subj = as.integer(input$subj)),
+  if (is.null(rng_state)) set.seed(seed) else assign(".Random.seed", rng_state, envir = .GlobalEnv)
+  out <- .Call("catmech_marginal_gibbs_cpp", list(y = input$y, subj = as.integer(input$subj)),
     as.integer(iterations), start, prior, fixed, PACKAGE = "catmech")
+  attr(out$last, "rng_state") <- get(".Random.seed", envir = .GlobalEnv, inherits = FALSE)
+  out
 }
 
 # Exact native scale-move ratio, exposed internally for a full-density/Jacobian
@@ -158,7 +161,10 @@ catmech_marginal_covariance <- function(x, dimension) {
   invisible(x)
 }
 
-catmech_marginal_coefficients <- function(mu, sigma, psi, transform, predictors) {
+catmech_marginal_coefficients <- function(mu, sigma, psi, transform, predictors,
+                                          response_index = 1L,
+                                          covariate_indices = if (length(predictors)) seq.int(3L, length(predictors) + 2L) else integer(),
+                                          covariate_names = predictors) {
   d <- length(predictors) + 2L
   catmech_marginal_covariance(sigma, d)
   catmech_marginal_covariance(psi, d)
@@ -169,12 +175,18 @@ catmech_marginal_coefficients <- function(mu, sigma, psi, transform, predictors)
   scale <- unlist(transform$response_scale[labels], use.names = FALSE)
   if (length(center) != d || length(scale) != d || any(!is.finite(c(center, scale))) || any(scale <= 0))
     stop("Marginal response transformations are malformed.", call. = FALSE)
+  r <- as.integer(response_index)
+  x <- as.integer(covariate_indices)
+  if (length(r) != 1L || is.na(r) || r < 1L || r > d || r == 2L ||
+      anyNA(x) || anyDuplicated(x) || any(x < 1L | x > d | x == 2L | x == r) ||
+      !is.character(covariate_names) || length(covariate_names) != length(x) ||
+      anyNA(covariate_names) || anyDuplicated(covariate_names) || "(Intercept)" %in% covariate_names)
+    stop("Malformed marginal regression target indices.", call. = FALSE)
   means <- center + scale * mu
-  if (!length(predictors)) return(stats::setNames(means[1L], "(Intercept)"))
+  if (!length(x)) return(stats::setNames(means[r], "(Intercept)"))
   total <- sigma + psi
-  x <- seq.int(3L, d)
-  beta <- as.vector(solve(total[x, x, drop = FALSE], total[x, 1L])) * scale[1L] / scale[x]
-  stats::setNames(c(means[1L] - sum(beta * means[x]), beta), c("(Intercept)", predictors))
+  beta <- as.vector(solve(total[x, x, drop = FALSE], total[x, r])) * scale[r] / scale[x]
+  stats::setNames(c(means[r] - sum(beta * means[x]), beta), c("(Intercept)", covariate_names))
 }
 
 # Conditional target draws use observed components only, integrating and then
@@ -317,13 +329,45 @@ catmech_marginal_cluster_draws <- function(data, value, gold, predictors, m, clu
   prior <- list(family = "conditional_regression", scale = control$prior_scale,
     regression_scale = control$regression_scale, interweave = TRUE)
   iterations <- control$iterations
+  completed_iterations <- 0L
+  chains <- vector("list", control$chains)
+  parts <- vector("list", control$chains)
   attempts <- list()
   repeat {
-    chains <- lapply(seq_len(control$chains), function(chain)
-      catmech_marginal_gibbs(problem$input, seeds[chain], control$burnin + iterations,
-        starts[[chain]], prior))
-    retained <- control$burnin + seq_len(iterations)
-    parts <- lapply(chains, function(fit) catmech_marginal_cluster_trace(problem, fit, retained))
+    if (completed_iterations == 0L) {
+      chains <- lapply(seq_len(control$chains), function(chain) {
+        fit <- catmech_marginal_gibbs(problem$input, seeds[chain], control$burnin + iterations,
+          starts[[chain]], prior)
+        retained <- control$burnin + seq_len(iterations)
+        list(mu = fit$mu[, retained, drop = FALSE],
+          sigma = fit$sigma[, , retained, drop = FALSE],
+          psi = fit$psi[, , retained, drop = FALSE],
+          aux_sigma = fit$aux_sigma[, retained, drop = FALSE],
+          aux_psi = fit$aux_psi[, retained, drop = FALSE],
+          scale_proposed = fit$scale_proposed,
+          scale_accepted = fit$scale_accepted,
+          last = fit$last)
+      })
+      parts <- lapply(chains, function(fit)
+        catmech_marginal_cluster_trace(problem, fit, seq_len(iterations)))
+    } else {
+      extra <- iterations - completed_iterations
+      for (chain in seq_len(control$chains)) {
+        prev <- chains[[chain]]
+        fit <- catmech_marginal_gibbs(problem$input, seeds[chain], extra,
+          prev$last, prior, rng_state = attr(prev$last, "rng_state"))
+        parts[[chain]] <- rbind(parts[[chain]],
+          catmech_marginal_cluster_trace(problem, fit, seq_len(extra)))
+        chains[[chain]] <- list(
+          mu = cbind(prev$mu, fit$mu),
+          sigma = array(c(prev$sigma, fit$sigma), c(d, d, iterations)),
+          psi = array(c(prev$psi, fit$psi), c(d, d, iterations)),
+          scale_proposed = prev$scale_proposed + fit$scale_proposed,
+          scale_accepted = prev$scale_accepted + fit$scale_accepted,
+          last = fit$last)
+      }
+    }
+    completed_iterations <- iterations
     traces <- array(NA_real_, c(iterations, control$chains, ncol(parts[[1L]])),
       dimnames = list(iteration = as.character(seq_len(iterations)),
         chain = as.character(seq_len(control$chains)), parameter = colnames(parts[[1L]])))
@@ -370,9 +414,8 @@ catmech_marginal_cluster_draws <- function(data, value, gold, predictors, m, clu
       as.integer(ceiling(iterations / 2)) else as.integer(round(seq(1, iterations, length.out = allocation[chain])))
     for (post in keep) {
       next_column <- next_column + 1L
-      k <- control$burnin + post
       target <- catmech_marginal_cluster_predict(problem$y, problem$cluster,
-        chains[[chain]]$mu[, k], chains[[chain]]$sigma[, , k], chains[[chain]]$psi[, , k])
+        chains[[chain]]$mu[, post], chains[[chain]]$sigma[, , post], chains[[chain]]$psi[, , post])
       draws[, next_column] <- target * problem$scale[1L] + problem$center[1L]
       draws[!is.na(gold), next_column] <- gold[!is.na(gold)]
       selected[[next_column]] <- data.frame(imputation = next_column, chain = chain, retained_iteration = post)

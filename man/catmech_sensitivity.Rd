@@ -6,13 +6,15 @@
 \usage{
 catmech_sensitivity(
   results,
-  formula,
+  formula = NULL,
   term,
   reference = 0,
   conf_level = 0.95,
   expected_scenarios = NULL,
   cluster = NULL,
-  cluster_variance = c("cv3", "cr1s")
+  cluster_variance = c("cv3", "cr1s"),
+  method = c("pool_lm", "pool_glm", "pool_coxph", "marginal_summary", "joint_summary"),
+  family = stats::binomial()
 )
 }
 \arguments{
@@ -20,13 +22,18 @@ catmech_sensitivity(
 conditions captured with tryCatch(..., error = identity). Supply every
 prespecified scenario, including failures.}
 
-\item{formula}{A prespecified linear analysis formula, identical across scenarios.}
+\item{formula}{A prespecified linear analysis formula, identical across scenarios.
+When `method = "marginal_summary"`, `formula` is optional and defaults to the
+population regression of the true measurement on the continuous predictors;
+it can also specify a custom response and covariate subset (e.g. `outcome ~ recorded + x`).
+When `method = "joint_summary"`, `formula` is not used.}
 
 \item{term}{Name of the coefficient to compare.}
 
 \item{reference}{Reference value, usually zero, for interval-direction reporting.}
 
-\item{conf_level}{Conditional confidence level passed to [catmech_pool_lm()].}
+\item{conf_level}{Conditional confidence level passed to [catmech_pool_lm()] or
+[catmech_marginal_summary()] / [catmech_joint_summary()].}
 
 \item{expected_scenarios}{Optional character vector naming the complete
 prespecified set. Omitted members are recorded as failures; unplanned extras
@@ -36,6 +43,16 @@ are rejected. Without this argument only supplied scenarios can be checked.}
 and without `catmech_reference(cluster = )` can be compared under the same variance.
 Without `cluster`, a fit with its own cluster column uses a cluster-robust variance and
 a fit without one a model-based variance, and their widths are not comparable.}
+
+\item{method}{Estimation method: `"pool_lm"` (default) for multiple-imputation
+pooling of linear fits, `"pool_glm"` for generalized linear model pooling,
+`"pool_coxph"` for Cox proportional hazards model pooling via [catmech_pool_coxph()],
+`"marginal_summary"` for population marginal inference from
+[catmech_marginal_summary()], or `"joint_summary"` for fixed-effect summaries from
+[catmech_joint_summary()].}
+
+\item{family}{Error distribution and link function for `method = "pool_glm"`.
+Defaults to `stats::binomial()`.}
 }
 \value{
 A list with table, status, complete, successful_envelope and

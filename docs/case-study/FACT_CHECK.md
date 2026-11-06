@@ -1,6 +1,6 @@
 # Fact check
 
-Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-04. Each row recomputes the number from its source, and most sources are frozen results tables that the script only reads. The README front page and case study/PDF fail if they contain a digit or number word that no row covers. Lower README sections are checked only for explicitly listed L claims, including the fresh 0.10 confirmation results; their other numbers are not exhaustively scanned. Every listed claim must still appear in its document. Rerun with `python3 docs/case-study/fact_check.py`.
+Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-05. Each row recomputes the number from its source, and most sources are frozen results tables that the script only reads. The README front page and case study/PDF fail if they contain a digit or number word that no row covers. Lower README sections are checked only for explicitly listed L claims, including the fresh 0.10 confirmation results; their other numbers are not exhaustively scanned. Every listed claim must still appear in its document. Rerun with `python3 docs/case-study/fact_check.py`.
 
 **Result: all 120 claims match their sources.** PDF: 1 page, generated from the current `CASE_STUDY.md`. Relative links and README tool paths checked: 175, 0 broken. External DOI links were not checked, because this check stays offline. Negative controls: a changed number, an added number, an added number word, a wrong claim value, an unnegated publication claim, a listed term and broken links were all caught.
 

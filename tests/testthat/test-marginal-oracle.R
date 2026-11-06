@@ -290,7 +290,7 @@ marginal_affine_result <- function(f) {
     dimnames = list(NULL, NULL, colnames(trace)))
   result <- structure(list(original = d,
     manifest = list(engine = "reference_marginal_cluster", m = 2L),
-    spec = list(cluster_model = "joint_marginal", predictors = f$predictors,
+    spec = list(value = "recorded value", cluster_model = "joint_marginal", predictors = f$predictors,
       joint_control = list(chains = 4L, burnin = 0L, iterations = size / 4L,
         max_iterations = size / 4L), joint_transform = problem$transform,
       recorded_fit = "joint_marginal_gaussian"),
@@ -352,6 +352,54 @@ test_that("multiple-predictor marginal summaries recover known affine coefficien
   bad <- f$data; names(bad)[names(bad) == "T"] <- "(Intercept)"
   expect_error(catmech_reference(bad, "recorded value", "true value", c("(Intercept)", "W"),
     cluster_model = "joint_marginal", use_recorded = TRUE, cluster = "site label"), "Intercept")
+})
+
+test_that("marginal summaries with the audited value as a predictor match exact covariance solves", {
+  f <- marginal_affine_oracle()
+  prepared <- marginal_affine_result(f)
+  size <- ncol(f$mu)
+  oracle_draws <- function(r_idx, x_idx) {
+    out <- matrix(NA_real_, size, 1L + length(x_idx))
+    for (i in seq_len(size)) {
+      v <- f$sigma[, , i] + f$psi[, , i]
+      m <- f$mu[, i]
+      if (!length(x_idx)) {
+        out[i, 1L] <- m[r_idx]
+      } else {
+        b <- as.vector(solve(v[x_idx, x_idx, drop = FALSE], v[x_idx, r_idx]))
+        out[i, ] <- c(m[r_idx] - sum(b * m[x_idx]), b)
+      }
+    }
+    out
+  }
+  full_expected <- oracle_draws(3L, c(1L, 4L))
+  by_formula <- catmech_marginal_summary(prepared$result, formula = T ~ `recorded value` + W)
+  by_args <- catmech_marginal_summary(prepared$result, response = "T",
+    covariates = c("recorded value", "W"))
+  by_default_covs <- catmech_marginal_summary(prepared$result, response = "T")
+  expect_identical(by_formula, by_args)
+  expect_identical(by_formula, by_default_covs)
+  expect_identical(by_formula$term, c("(Intercept)", "recorded value", "W"))
+  expect_equal(by_formula$estimate, colMeans(full_expected), tolerance = 1e-11, ignore_attr = TRUE)
+  expect_equal(by_formula$posterior_sd, apply(full_expected, 2L, stats::sd),
+    tolerance = 1e-11, ignore_attr = TRUE)
+  q_full <- t(apply(full_expected, 2L, stats::quantile, c(.025, .975), names = FALSE))
+  expect_equal(unname(as.matrix(by_formula[c("lower", "upper")])), unname(q_full), tolerance = 1e-11)
+
+  uni_expected <- oracle_draws(3L, 1L)
+  uni_summary <- catmech_marginal_summary(prepared$result, formula = T ~ `recorded value`)
+  expect_identical(uni_summary$term, c("(Intercept)", "recorded value"))
+  expect_equal(uni_summary$estimate, colMeans(uni_expected), tolerance = 1e-11, ignore_attr = TRUE)
+  expect_equal(uni_summary$posterior_sd, apply(uni_expected, 2L, stats::sd),
+    tolerance = 1e-11, ignore_attr = TRUE)
+
+  int_expected <- oracle_draws(3L, integer())
+  int_summary <- catmech_marginal_summary(prepared$result, formula = T ~ 1)
+  expect_identical(int_summary,
+    catmech_marginal_summary(prepared$result, response = "T", covariates = character()))
+  expect_identical(int_summary$term, "(Intercept)")
+  expect_equal(int_summary$estimate, mean(int_expected), tolerance = 1e-12)
+  expect_equal(int_summary$posterior_sd, stats::sd(int_expected), tolerance = 1e-12)
 })
 
 # Evaluate full probability densities independently of the native optimized

@@ -4,7 +4,13 @@
 \alias{catmech_marginal_summary}
 \title{Summarize population marginal coefficients from a joint covariate model}
 \usage{
-catmech_marginal_summary(result, level = 0.95)
+catmech_marginal_summary(
+  result,
+  level = 0.95,
+  formula = NULL,
+  response = NULL,
+  covariates = NULL
+)
 }
 \arguments{
 \item{result}{A converged result from [catmech_reference()] with
@@ -13,6 +19,22 @@ fitted parameter posterior and cannot be summarized by this function.}
 
 \item{level}{Central posterior credible interval probability, strictly between
 zero and one.}
+
+\item{formula}{Optional two-sided additive linear formula with an intercept
+(for example `outcome ~ recorded + x`) naming a response and covariates from
+the audited value (`spec$value`, mapped to the true measurement `T`) and the
+complete numeric predictors in `spec$predictors`. Use this when the audited
+measurement is an analysis predictor and the scientific outcome was included
+in `predictors` during [catmech_reference()]. Cannot be combined with
+`response` or `covariates`.}
+
+\item{response}{Optional name of the population regression response, either
+`spec$value` or one of `spec$predictors`. Defaults to `spec$value`.}
+
+\item{covariates}{Optional character vector of population regression covariates
+chosen from `c(spec$value, spec$predictors)` excluding `response`. When
+`response` is supplied and `covariates` is `NULL`, all remaining modeled
+variables in `c(spec$value, spec$predictors)` are used.}
 }
 \value{
 A data frame with `term`, `estimate`, `posterior_sd`, `lower`, `upper`,
@@ -28,9 +50,15 @@ model, allowing site effects in the measurement and predictors to be correlated.
 \details{
 The model is `(T,W,X) = mu + b_site + e`, with independent Gaussian site and
 row vectors having unrestricted covariance matrices `Psi` and `Sigma`.
-For every posterior draw, let `V = Psi + Sigma`. The marginal slopes are
-`solve(V[X,X], V[X,T])` and the intercept is `mu[T] - mu[X]' beta`, transformed
-back to the original units. This is the population linear regression for an
+For every posterior draw, let `V = Psi + Sigma`. By default, the marginal slopes
+are `solve(V[X,X], V[X,T])` and the intercept is `mu[T] - mu[X]' beta`,
+transformed back to the original units. When `formula`, `response` or
+`covariates` selects another modeled response `Y` and covariate set `P` from
+`(T, X)` (excluding the noisy proxy `W`), the marginal slopes are
+`solve(V[P,P], V[P,Y])` and the intercept is `mu[Y] - mu[P]' beta` in original
+units. This allows the audited measurement `T` to serve as an analysis predictor
+(`Y ~ T + X`) without the unaudited-cluster slope attenuation of the moment
+model. This is the population linear regression for an
 individual sampled under the model, not a within-site coefficient or the OLS
 slope of the completed cohort. Site size must be noninformative. The Gaussian
 covariate model is an additional assumption; categorical, incomplete and

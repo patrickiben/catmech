@@ -224,3 +224,16 @@ test_that("joint summaries recheck the original-scale intercept combination", {
   expect_gt(error$model_diagnostics$summary$rhat[1L], 1.05)
   expect_equal(dim(error$model_diagnostics$traces), c(n, 4L, 3L))
 })
+
+test_that("catmech_sensitivity supports joint_summary across scenarios", {
+  oracle <- joint_analysis_oracle()
+  fit1 <- oracle$fit
+  fit_err <- simpleError("Pan joint convergence error")
+  res <- catmech_sensitivity(list(default = fit1, failed = fit_err), term = "age",
+    method = "joint_summary")
+  expect_identical(nrow(res$table), 2L)
+  expect_identical(res$table$status, c("ok", "failed"))
+  expect_identical(res$status, "unresolved_incomplete_set")
+  expect_true(is.finite(res$table$estimate[1L]))
+  expect_true(is.na(res$table$estimate[2L]))
+})

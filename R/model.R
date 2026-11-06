@@ -186,12 +186,13 @@ catmech_model <- function(data, value, predictors, flag = NULL,
       completed_y[, j] <- out
       direct_traces[j, ] <- c(draw$beta, draw$sigma)
     }
-    model_diagnostics <- list(engine = "independent_normal", status = "not_applicable",
+    model_diagnostics <- structure(list(engine = "independent_normal", status = "not_applicable",
       convergence_pass = TRUE, summary = data.frame(parameter = parameter_names,
         rhat = NA_real_, ess_bulk = rep(as.numeric(m), length(parameter_names)),
         ess_tail = rep(as.numeric(m), length(parameter_names))),
       traces = direct_traces,
-      reason = "Independent posterior-predictive draws; no informative category likelihood on masked rows.")
+      reason = "Independent posterior-predictive draws; no informative category likelihood on masked rows."),
+      class = c("catmech_model_diagnostics", "list"))
   } else {
     full_design <- catmech_model_design(X)
     trace_names <- c(parameter_names, "latent_mean")
@@ -436,8 +437,8 @@ catmech_model_chain_diagnostics <- function(traces) {
   pass <- all(is.finite(summary$rhat) & is.finite(summary$ess_bulk) &
                 is.finite(summary$ess_tail) & summary$rhat <= 1.05 &
                 summary$ess_bulk >= minimum_ess & summary$ess_tail >= minimum_ess)
-  list(engine = "gibbs_category_likelihood", status = if (pass) "passed" else "failed",
+  structure(list(engine = "gibbs_category_likelihood", status = if (pass) "passed" else "failed",
     convergence_pass = pass, summary = summary, traces = traces,
     thresholds = list(max_rhat = 1.05, min_bulk_ess = minimum_ess,
-                      min_tail_ess = minimum_ess))
+                      min_tail_ess = minimum_ess)), class = c("catmech_model_diagnostics", "list"))
 }

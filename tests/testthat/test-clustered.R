@@ -315,6 +315,21 @@ test_that("the hold-out check keeps the cluster option when it refits", {
   check <- suppressWarnings(catmech_holdout_check(fit, folds = 3L, m = 20L, seed = 6))
   expect_false(is.null(check$status))
   expect_length(check$failures, 0L)
+  expect_identical(check$summary$fold_by, "row")
+
+  cluster_check <- suppressWarnings(catmech_holdout_check(fit, folds = 3L, m = 20L, seed = 6, fold_by = "cluster"))
+  expect_identical(cluster_check$summary$fold_by, "cluster")
+  expect_length(cluster_check$failures, 0L)
+  expect_true(all(cluster_check$rows$covered %in% c(TRUE, FALSE)))
+  # In cluster-level folds, every cluster with reference rows belongs to exactly one fold
+  known_clusters <- split(d$id[cluster_check$rows$row], cluster_check$rows$fold)
+  cluster_fold_sets <- lapply(known_clusters, unique)
+  expect_identical(length(intersect(cluster_fold_sets[[1L]], cluster_fold_sets[[2L]])), 0L)
+  expect_identical(length(intersect(cluster_fold_sets[[1L]], cluster_fold_sets[[3L]])), 0L)
+  expect_identical(length(intersect(cluster_fold_sets[[2L]], cluster_fold_sets[[3L]])), 0L)
+
+  plain_fit <- catmech_reference(d, "recorded", "gold", "x", use_recorded = TRUE, m = 2L, seed = 1L)
+  expect_error(catmech_holdout_check(plain_fit, fold_by = "cluster"), "requires a clustered fit")
 })
 
 test_that("the default cluster variance matches delete-one-cluster refits", {

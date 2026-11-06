@@ -144,10 +144,12 @@ predictor needs separate validation of the imputation/analysis relationship.
 The earlier moment model's predictor-slope attenuation is neither attributed
 to this implementation nor declared cured by it.
 
-`catmech_holdout_check()` retains the joint model and its controls, but splits
-reference rows rather than entire sites. Other references in the same site can
-still inform a held-out row, so this does not test transport to wholly
-unaudited sites. Its Wilson and uniform-PIT flags use row-level calculations
+`catmech_holdout_check()` retains the joint model and its controls. By default
+(`fold_by = "row"`), it splits reference rows across folds; other references in
+the same site can still inform a held-out row. To evaluate transport to wholly
+unaudited sites, set `fold_by = "cluster"`, which partitions audited clusters across
+folds and masks all reference observations within held-out clusters simultaneously.
+Its Wilson and uniform-PIT flags use row-level calculations
 without a cluster correction. With dependent rows, treat those flags as
 descriptive diagnostics, not calibrated tests of site-level predictive validity.
 
