@@ -13,3 +13,5 @@
 ^CONTRIBUTING\.md$
 ^cran-comments\.md$
 ^paper$
+^_pkgdown\.yml$
+(^|/)\.DS_Store$

@@ -15,6 +15,8 @@ Description: Auditable completion of a continuous measurement using Gaussian
     without assumptions or reference information, or guarantee coverage under
     misspecification.
 License: MIT + file LICENSE
+URL: https://github.com/patrickiben/catmech
+BugReports: https://github.com/patrickiben/catmech/issues
 Encoding: UTF-8
 Depends: R (>= 4.1.0)
 Imports: Rcpp, digest, graphics, grDevices, jsonlite, mice (>= 3.16.0), pan (>= 2.0), parallel, posterior, stats, survival, truncnorm, utils, yaml
