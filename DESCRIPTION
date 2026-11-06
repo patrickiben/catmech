@@ -19,6 +19,7 @@ Depends: R (>= 4.1.0)
 Imports: Rcpp, digest, graphics, grDevices, jsonlite, mice (>= 3.16.0), pan (>= 2.0), parallel, posterior, stats, survival, truncnorm, utils, yaml
 LinkingTo: Rcpp, RcppArmadillo
 SystemRequirements: C++17
-Suggests: testthat (>= 3.0.0), roxygen2, pkgload
+Suggests: testthat (>= 3.0.0), roxygen2, pkgload, knitr, rmarkdown
+VignetteBuilder: knitr
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.1.1

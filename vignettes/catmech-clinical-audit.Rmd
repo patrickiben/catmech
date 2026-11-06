@@ -1,0 +1,239 @@
+---
+title: "Auditable Clinical Data Verification and Analysis with catmech"
+author: "Patrick Iben"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Auditable Clinical Data Verification and Analysis with catmech}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 4.5
+)
+```
+
+## Introduction
+
+In multi-center clinical trials, epidemiological studies, and electronic health record (EHR) registries, continuous laboratory measurements (such as troponin, serum creatinine, or viral load) frequently suffer from data quality issues:
+
+1. **Missing values** due to uncollected or lost samples.
+2. **Gross recording errors and data contamination** resulting from transcription mistakes, assay batch errors, or EHR unit conversion discrepancies.
+3. **Internal reference audits** where a secondary gold-standard measurement is audited on a subset of patient records.
+
+The **`catmech`** package provides a mathematically sound, auditable framework for completing contaminated measurements, planning audit sample sizes, evaluating predictive calibration, and pooling downstream linear, generalized linear (GLM), and survival (Cox PH) regressions under Rubin's rules with Barnard–Rubin degrees of freedom.
+
+---
+
+## 1. Simulating a Multi-Center Clinical Registry
+
+We simulate a realistic 10-hospital clinical registry with $N = 250$ patients. Each patient has:
+* An audited gold-standard reference measurement (`lab_true`).
+* A recorded measurement (`lab_value`) corrupted in a fraction of patients.
+* Patient covariates (`age`, `sex`, `site`).
+* Three downstream clinical endpoints:
+  - Continuous outcome (`cardiac_index`).
+  - Binary 30-day major adverse cardiac event (`mace_30d`).
+  - Time-to-event overall survival (`time`, `death_event`).
+
+```{r simulation}
+library(catmech)
+library(survival)
+
+set.seed(2026)
+n <- 250
+site <- sample(1:10, n, replace = TRUE)
+age <- round(rnorm(n, mean = 62, sd = 10))
+sex <- sample(c("M", "F"), n, replace = TRUE, prob = c(0.55, 0.45))
+
+# Latent true biomarker
+lab_true <- rnorm(n, mean = 6.0 + 0.03 * (age - 62), sd = 1.2)
+
+# Corrupted recorded measurement (12% gross contamination)
+corrupted <- rbinom(n, 1, prob = 0.12) == 1
+lab_recorded <- lab_true
+lab_recorded[corrupted] <- lab_recorded[corrupted] + rnorm(sum(corrupted), mean = 4.5, sd = 2.0)
+
+# Reference audit on a 25% random pilot
+audited <- rbinom(n, 1, prob = 0.25) == 1
+lab_reference <- ifelse(audited, lab_true, NA_real_)
+
+# Clinical outcomes
+cardiac_index <- 2.8 - 0.25 * lab_true + 0.01 * (age - 62) + rnorm(n, sd = 0.5)
+pr_mace <- plogis(-2.0 + 0.45 * (lab_true - 6.0) + 0.02 * (age - 62))
+mace_30d <- rbinom(n, 1, prob = pr_mace)
+
+# Survival times
+haz <- exp(0.35 * (lab_true - 6.0) + 0.02 * (age - 62)) * 0.08
+surv_time <- rexp(n, rate = haz)
+censor_time <- runif(n, 1, 10)
+time <- pmin(surv_time, censor_time)
+death_event <- as.numeric(surv_time <= censor_time)
+
+df <- data.frame(
+  patient_id = 1:n,
+  site = site,
+  age = age,
+  sex = factor(sex),
+  lab_value = lab_recorded,
+  lab_ref = lab_reference,
+  cardiac_index = cardiac_index,
+  mace_30d = mace_30d,
+  time = time,
+  death_event = death_event
+)
+head(df[, c("patient_id", "site", "age", "lab_value", "lab_ref", "mace_30d")])
+```
+
+---
+
+## 2. Fitting the Reference-Calibrated Contamination Model
+
+We fit `catmech_contamination()` using the audited subset to model both the probability of corruption and the measurement error mixture:
+
+```{r fit_model}
+fit_contam <- catmech_contamination(
+  data = df,
+  value = "lab_value",
+  reference = "lab_ref",
+  predictors = c("age", "cardiac_index"),
+  m = 4,
+  seed = 42
+)
+print(fit_contam)
+```
+
+The MCMC sampler generates $m = 4$ auditable completions of the target biomarker while properly reflecting parameter uncertainty.
+
+---
+
+## 3. Diagnostic Checks & Base R Visualizations
+
+### Predictive Holdout Calibration
+`catmech_holdout_check()` tests whether the imputation model is well-calibrated using cross-validation over the audited reference cases:
+
+```{r holdout_check}
+holdout <- catmech_holdout_check(
+  fit_contam,
+  folds = 3L,
+  m = 20L,
+  seed = 99
+)
+print(holdout)
+plot(holdout)
+```
+
+The left panel displays the uniform randomized Probability Integral Transform (PIT) histogram with a Kolmogorov–Smirnov test, while the right panel verifies mean predictive calibration.
+
+---
+
+## 4. Prospective Audit Sample Size & Power Planning
+
+Before undertaking a chart abstraction audit, investigators can prospectively compute the required sample size and statistical power using `catmech_audit_power()`:
+
+```{r audit_power}
+pwr <- catmech_audit_power(
+  N = 1000,
+  target_ratio = 1.25,
+  power_target = 0.80,
+  error_rate = 0.12,
+  correlation = 0.82
+)
+print(pwr)
+plot(pwr)
+```
+
+The power curve highlights the minimum audit sample size needed to guarantee that the confidence interval width remains within 25% of an ideal full-cohort audit.
+
+---
+
+## 5. Downstream Multi-Endpoint Model Pooling
+
+`catmech` supports downstream pooling across diverse outcome types:
+
+### A. Linear Regression (`catmech_pool_lm`)
+For continuous outcomes, pooling estimates slope parameters with Rubin's combining rules and cluster-robust standard errors:
+
+```{r pool_lm}
+res_lm <- catmech_pool_lm(
+  fit_contam,
+  cardiac_index ~ lab_value + age,
+  cluster = "site"
+)
+print(res_lm)
+```
+
+### B. Generalized Linear Models (`catmech_pool_glm`)
+For binary outcomes (such as 30-day MACE), `catmech_pool_glm()` fits logistic regression across all completions, reporting odds ratios via `exponentiate = TRUE`:
+
+```{r pool_glm}
+res_glm <- catmech_pool_glm(
+  fit_contam,
+  mace_30d ~ lab_value + age,
+  family = binomial(),
+  exponentiate = TRUE
+)
+print(res_glm)
+```
+
+### C. Survival Proportional Hazards (`catmech_pool_coxph`)
+For time-to-event outcomes, `catmech_pool_coxph()` fits Cox proportional hazards models using observed event counts for Barnard–Rubin degrees of freedom:
+
+```{r pool_coxph}
+res_cox <- catmech_pool_coxph(
+  fit_contam,
+  Surv(time, death_event) ~ lab_value + age,
+  exponentiate = TRUE,
+  cluster = "site"
+)
+print(res_cox)
+```
+
+---
+
+## 6. Sensitivity Envelope Across Modeling Assumptions
+
+Investigators can prespecify alternative modeling assumptions (e.g., contamination mixture model vs. reference model) and evaluate whether the conclusion is robust across all scenarios:
+
+```{r sensitivity}
+fit_ref <- catmech_reference(
+  data = df,
+  value = "lab_value",
+  reference = "lab_ref",
+  predictors = c("age", "cardiac_index"),
+  m = 4,
+  seed = 42
+)
+
+sens <- catmech_sensitivity(
+  results = list(contamination = fit_contam, reference = fit_ref),
+  formula = cardiac_index ~ lab_value + age,
+  term = "lab_value",
+  method = "pool_lm",
+  reference = 0
+)
+print(sens)
+```
+
+---
+
+## 7. Tamper-Evident Regulatory Audit Trail
+
+To satisfy regulatory standards (such as FDA 21 CFR Part 11 and ICH GCP E9), `catmech_audit_trail()` outputs a cryptographically verified record containing SHA-256 checksums of input data, assumptions, and all completions:
+
+```{r audit_trail}
+trail <- catmech_audit_trail(
+  object = fit_contam,
+  pooled = res_cox,
+  sensitivity = sens,
+  format = "markdown"
+)
+cat(substr(as.character(trail), 1, 1200), "\n... [truncated for display]")
+```
+
+The resulting audit trail guarantees complete transparency, traceability, and reproducibility.
