@@ -199,8 +199,6 @@ claims = [
     ("5%", "RC", "Second clustered-audit test, 25%: largest rise in recovery RMSE on a rare item", FXR, lambda: pct0(max(fx_ratio(a) for a in RARE) - 1)),
     ("1.0.0", "RC", "Current package version", "DESCRIPTION", lambda: re.search(r"^Version: (.+)$", (ROOT / "DESCRIPTION").read_text(), re.M).group(1)),
     ("November 5, 2026", "C", "Case study status date", "CITATION.cff", lambda: has("CITATION.cff", r"date-released: 2026-11-05", "November 5, 2026")),
-    ("Version 0.4", "C", "Release that added the recording-error model", "NEWS.md", lambda: has("NEWS.md", r"# catmech 0\.4\.0\n\n- Add `catmech_contamination\(\)`", "Version 0.4")),
-    ("Version 1.0.0", "C", "Production release with GLM and Cox pooling", "NEWS.md", lambda: has("NEWS.md", r"# catmech 1\.0\.0", "Version 1.0.0")),
     ("25%", "RC", "Audit fraction: mean referenced rows over cohort size, ClinicalTrials.gov cell", RD, lambda: pct0(audit_pct("ctgov", "audit_25pct"))),
     ("25%", "RC", "Audit fraction: mean referenced rows over cohort size, NHANES cell", RD, lambda: pct0(audit_pct("nhanes", "audit_25pct"))),
     ("0.0286", "RC", "RMSE, linear MI, ClinicalTrials.gov, 25%", RD, lambda: f4(rd("ctgov", "audit_25pct", "cole_mi", "rmse"))),

@@ -1,6 +1,6 @@
 # Assessment and release decision
 
-Assessed 2026-11-04. Version 0.10.1 is worth releasing as an **experimental, auditable toolkit for data with recorded values and a
+Assessed 2026-11-05. Version 1.0.0 graduates to an official production release as an **auditable toolkit for data with recorded values and a
 reference subset**, built from established methods. Real-data testing narrowed its recommended use. It does not support a novel-method
 or clinical-validity claim. Earlier assessments are preserved for [v0.1](ASSESSMENT_V0.1.md), [v0.2](ASSESSMENT_V0.2.md) and [v0.3](ASSESSMENT_V0.3.md).
 

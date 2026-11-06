@@ -2,7 +2,7 @@
 
 Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-06. Each row recomputes the number from its source, and most sources are frozen results tables that the script only reads. The README front page and case study/PDF fail if they contain a digit or number word that no row covers. Lower README sections are checked only for explicitly listed L claims, including the fresh 0.10 confirmation results; their other numbers are not exhaustively scanned. Every listed claim must still appear in its document. Rerun with `python3 docs/case-study/fact_check.py`.
 
-**Result: all 120 claims match their sources.** PDF: 1 page, generated from the current `CASE_STUDY.md`. Relative links and README tool paths checked: 175, 0 broken. External DOI links were not checked, because this check stays offline. Negative controls: a changed number, an added number, an added number word, a wrong claim value, an unnegated publication claim, a listed term and broken links were all caught.
+**Result: all 118 claims match their sources.** PDF: 1 page, generated from the current `CASE_STUDY.md`. Relative links and README tool paths checked: 175, 0 broken. External DOI links were not checked, because this check stays offline. Negative controls: a changed number, an added number, an added number word, a wrong claim value, an unnegated publication claim, a listed term and broken links were all caught.
 
 ## README.md front page
 
@@ -105,8 +105,6 @@ Written by [`fact_check.py`](fact_check.py). Last run: 2026-11-06. Each row reco
 | `5%` | Second clustered-audit test, 25%: largest rise in recovery RMSE on a rare item | `validation/clustered-fix-study/ratios.csv` | Match |
 | `1.0.0` | Current package version | `DESCRIPTION` | Match |
 | `November 5, 2026` | Case study status date | `CITATION.cff` | Match |
-| `Version 0.4` | Release that added the recording-error model | `NEWS.md` | Match |
-| `Version 1.0.0` | Production release with GLM and Cox pooling | `NEWS.md` | Match |
 | `25%` | Audit fraction: mean referenced rows over cohort size, ClinicalTrials.gov cell | `validation/real-data-study/summary.csv` | Match |
 | `25%` | Audit fraction: mean referenced rows over cohort size, NHANES cell | `validation/real-data-study/summary.csv` | Match |
 | `0.0286` | RMSE, linear MI, ClinicalTrials.gov, 25% | `validation/real-data-study/summary.csv` | Match |

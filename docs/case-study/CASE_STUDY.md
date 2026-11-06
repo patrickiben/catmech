@@ -17,7 +17,7 @@ Records contain mistakes, and checking every record against its source is expens
 
 ## What was built
 
-catmech is an R package for multiple imputation and audits that logs replacements and refuses to run when data cannot support a request. Version 0.4 added a model estimating each record's error probability, tested against linear imputation. Version 1.0.0 adds GLM and Cox pooling, power curves, and audit trails. A plain-Python script recomputes reported summaries.
+catmech is an R package for multiple imputation and audits that logs replacements and refuses to run when data cannot support a request. The project tested a contamination model estimating each record's error probability against a plain linear imputation baseline. The toolkit provides regression pooling, power calculations, and auditable trails. A plain-Python script recomputes reported summaries.
 
 ## What the evidence showed
 
