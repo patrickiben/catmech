@@ -67,6 +67,8 @@
 <li>
 <strong>App Validation Harness</strong>: Interactive browser learning pages (<code>docs/learn/index.html</code> and <code>docs/learn/simulator.html</code>) verified across gates <code>A0</code>–<code>A10</code> via <code>web_gate.py --local</code> and stamped <strong><code>OWNER-APPROVED: True</code></strong> against page hashes <code>d94e13a7b66c865e</code> and <code>80cafcd68fec48c7</code>.</li>
 <li>
+<strong>Multimodal R-Package Educational Companion (<code>education/</code>)</strong>: Schema-v2 <code>MULTIMODAL</code> (<code>DOCUMENT</code>, <code>ONE_PAGER</code>, <code>INTERACTIVE</code>) educational companion passing <code>g14_companion_gate.py</code> (<code>PASS</code>, exit 0; 30 passage units <code>C01</code>–<code>C30</code> covering 100% of <code>paper/manuscript.Rmd</code> lines <code>1..350</code>, 12 lessons <code>S1</code>–<code>S12</code>, 12 transfer items <code>T01</code>–<code>T12</code>, FK grade <code>6.29</code>), <code>check_companion_lock.py</code> (<code>PASS: 2 fresh, 0 stale, 0 missing</code>), <code>Rscript education/run_companion_labs.R</code> (<code>16/16</code> live R labs &amp; refusal checks), <code>Rscript education/interactive_tutor.R --non-interactive</code> (<code>12/12</code> interactive R console tutor prompts), and <code>python3 education/verify_educational_companion.py</code> (<code>exit 0</code>).</li>
+<li>
 <strong>Artifact Verification</strong>: <code>python3 tools/verify-artifacts.py</code> passes all 10 simulation benchmark studies, oracle checks, and learning pages.</li>
 <li>
 <strong>Documentation</strong>: Fast, self-contained <code>@examples</code> for all 26 exported functions, all lines formatted &lt; 85 characters. Built-in vignette (<code>vignettes/catmech-clinical-audit.Rmd</code>) builds cleanly.</li>
@@ -126,6 +128,15 @@
 │   ├── manuscript.tex        # Rendered LaTeX source
 │   ├── verify_paper_numbers.py # Automated G2/G17/G19/G22 verifier (411 checks)
 │   └── VALIDATION_LEDGER_2026-11-06.md # 24-gate Pre-Submission Validation Harness ledger
+├── education/                # Multimodal G14 R-Package Educational Companion
+│   ├── COMPANION.md / .pdf   # 30-unit source-locked companion (24 pages)
+│   ├── STUDY_GUIDE.md / .pdf # 12-lesson concise study guide (8 pages)
+│   ├── ONE_PAGER.md / .pdf   # 1-page clinical audit decision &amp; boundary card
+│   ├── companion_lab.html    # Interactive HTML5 Companion Studio &amp; 12-item Practice Lab
+│   ├── run_companion_labs.R  # 16 executable R package labs &amp; 4 refusal/warning labs
+│   ├── interactive_tutor.R   # Interactive R console tutor (`catmech_tutor()`)
+│   ├── g14_companion_manifest.json # Schema-v2 MULTIMODAL G14 manifest
+│   └── verify_educational_companion.py # End-to-end Educational Companion verifier
 ├── _pkgdown.yml              # Pkgdown documentation website configuration
 └── .github/workflows/
     └── pkgdown.yaml          # GitHub Actions workflow for automated pkgdown build</code></pre>
