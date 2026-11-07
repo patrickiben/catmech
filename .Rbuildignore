@@ -16,4 +16,6 @@
 ^_pkgdown\.yml$
 ^_site$
 ^HANDOFF\.md$
+^README\.md$
+^man/figures$
 (^|/)\.DS_Store$
