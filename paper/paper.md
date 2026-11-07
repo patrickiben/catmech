@@ -90,6 +90,7 @@ $$T = \bar{U} + \left(1 + \frac{1}{m}\right) B, \quad \hat{\lambda} = \frac{(1 +
 To prevent undercoverage in finite clinical samples, `catmech` implements the Barnard & Rubin (1999) degrees of freedom adjustment [@barnard1999small]:
 $$\nu_m = (m - 1) \hat{\lambda}^{-2}, \quad \nu_{obs} = \left(\frac{\nu_{com} + 1}{\nu_{com} + 3}\right) \nu_{com} (1 - \hat{\lambda}), \quad \nu_{BR} = \frac{\nu_m \nu_{obs}}{\nu_m + \nu_{obs}}$$
 where $\nu_{com}$ is the complete-data degrees of freedom. Downstream model pooling covers three core clinical endpoint families:
+
 * **Linear Models (`catmech_pool_lm`)**: For continuous endpoints, with default delete-one-cluster jackknife (CV3) variance estimation.
 * **Generalized Linear Models (`catmech_pool_glm`)**: For binary (logistic) and count (Poisson) endpoints, computing exponentiated odds ratios and incidence rate ratios with Huber–White–Liang–Zeger cluster-robust sandwich covariance [@liang1986longitudinal]:
   $$\hat{V}_{\text{sandwich}} = \hat{J}^{-1} \left(\sum_{c=1}^C s_c s_c^\top\right) \hat{J}^{-1}$$
@@ -98,6 +99,7 @@ where $\nu_{com}$ is the complete-data degrees of freedom. Downstream model pool
 ## 4. Diagnostic Screens and Visualizations
 
 `catmech` provides unified S3 `plot()` diagnostics:
+
 * **Holdout Cross-Validation (`catmech_holdout_check()`)**: Partitions audited records into $K$ cross-validation folds and computes the randomized Probability Integral Transform (PIT) [@dawid1984present]:
   $$u_i = F(R_i \mid \mathcal{D}_{-k}) \sim \text{Uniform}(0, 1)$$
   A two-panel diagnostic displays the PIT histogram with a Kolmogorov–Smirnov uniformity test alongside reference vs. predictive calibration scatter.
@@ -210,17 +212,16 @@ report <- catmech_audit_trail(
 )
 ```
 
-The resulting pooled summary for the Cox proportional hazards model yields an auditable table reporting point estimates, Lin–Wei cluster-robust standard errors, Barnard–Rubin finite-sample degrees of freedom, hazard ratios, and 95% confidence intervals:
+The resulting pooled summary for the Cox proportional hazards model yields an auditable table reporting log-hazard point estimates, Lin–Wei cluster-robust standard errors, Barnard–Rubin finite-sample degrees of freedom, exponentiated hazard ratios (`estimate_exp`), and 95% confidence intervals:
 
 ```text
-Downstream Model Pooling: Cox Proportional Hazards
-Rubin Combining Rules with Barnard-Rubin (1999) Adjustment
-Complete degrees of freedom (nu_com = events - p): 242
+-- Catmech Pooled Cox PH Model --
+Completions (m): 10 | Observations (n): 1000 | Events: 735
 
-             Estimate Robust.SE    df   t.stat p.value     HR 95% CI Lower 95% CI Upper
-T_imputed     0.4821    0.0541 218.4   8.9113 <0.0001 1.6195       1.4552       1.8024
-X1            0.2104    0.0418 238.1   5.0335 <0.0001 1.2342       1.1368       1.3399
-X2           -0.1489    0.0382 235.7  -3.8979  0.0001 0.8617       0.7997       0.9284
+      term estimate std.error     df   lower  upper estimate_exp lower_exp upper_exp
+ lab_value   0.1632    0.0314 6.5933  0.0881 0.2384       1.1773    1.0921    1.2692
+       age   0.0056    0.0041 7.4010 -0.0038 0.0151       1.0056    0.9962    1.0152
+      sexM  -0.0541    0.0433 7.3074 -0.1555 0.0474       0.9474    0.8560    1.0485
 ```
 
 # Empirical Validation and Simulation Benchmarks
@@ -238,6 +239,7 @@ To evaluate the statistical properties of `catmech`, extensive Monte Carlo simul
 | **`catmech` Contamination Mixture** | **0.501** | **+0.001** | **0.038** | **0.037** | **95.0%** |
 
 These findings illustrate the primary advantage of `catmech` in settings with gross, identifiable recording errors:
+
 * Naive analysis suffers severe attenuation bias (bias = -0.116), dropping nominal 95% coverage to 42.3%.
 * Complete-case analysis eliminates bias but exhibits substantial loss of precision ($\text{SE} = 0.068$).
 * Standard multiple imputation treats all un-audited values as missing, achieving unbiased results but failing to exploit valid recordings ($\text{SE} = 0.051$).
@@ -267,6 +269,7 @@ In addition, facility-level data verification was benchmarked against the Rwanda
 ## 3. The Simulation-to-Practice Divergence and Methodological Guidance
 
 A central methodological insight established by these empirical benchmarks is the divergence between synthetic Monte Carlo evaluations and real-world clinical audits:
+
 * **Synthetic gross errors favor mixture modeling**: When data errors represent discrete, bimodal corruption events (e.g., transcription slips, decimal shifts, or assay calibration jumps), the Bayesian contamination mixture model is essential to eliminate severe attenuation bias and cut variance by 44% over complete-case analysis.
 * **Real-world subtle errors favor linear multiple imputation**: In actual registry audits where discrepancies are diffuse and continuous (e.g., self-report rounding or mild procedural differences), simple linear imputation matches or exceeds mixture modeling in predictive accuracy (RMSE 0.0286 vs. 0.0308 on ClinicalTrials.gov) with fewer parametric assumptions and zero convergence overhead.
 
@@ -275,6 +278,7 @@ This empirical divergence highlights why `catmech` incorporates prospective audi
 # Regulatory Compliance and Data Governance
 
 Regulatory submissions in biopharmaceutical and medical device clinical trials (under FDA 21 CFR Part 11 [@fda2003part11] and ICH GCP E9 [@ich1998e9]) require an unbroken, tamper-evident audit trail for any algorithmic data imputation or measurement correction. `catmech_audit_trail()` generates complete provenance records in Markdown, JSON, or standalone HTML. The report documents:
+
 * Full execution environment metadata (R version, operating system platform, package version, UTC execution timestamp).
 * Cryptographic SHA-256 checksums of the raw input dataset, the mathematical assumption specification, and each of the $m$ completed datasets.
 * Model convergence statistics (MCMC iterations, Gelman–Rubin $\hat{R}$, bulk and tail effective sample sizes).
@@ -283,6 +287,7 @@ Regulatory submissions in biopharmaceutical and medical device clinical trials (
 # Quality Assurance and Verification
 
 `catmech` has been developed under an automated software verification harness:
+
 * **Unit Tests**: 1,754 unit tests executed via `testthat`, achieving 0 failures, 0 warnings, and 0 skips.
 * **CRAN Conformance**: Fully compliant with CRAN package policies, passing `R CMD check --no-manual` with `Status: OK` (0 errors, 0 warnings, 0 notes).
 * **Independent Artifact Verification**: Verified against an independent Python verification suite (`verify-artifacts.py` and `fact_check.py`) confirming exact correspondence across 118 claims, 10 distinct simulation benchmark studies, and hundreds of thousands of historical requests.

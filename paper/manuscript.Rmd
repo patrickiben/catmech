@@ -1,10 +1,6 @@
 ---
 title: "Statistical Inference and Two-Phase Audit Design for Contaminated Measurements in Clinical Research: The catmech R Package"
-author:
-  - name: Patrick Iben
-    affiliation: Independent Biostatistician
-    email: patrickiben@gmail.com
-    orcid: 0009-0005-2443-7973
+author: "Patrick Iben (Independent Biostatistician; patrickiben@gmail.com; ORCID: 0009-0005-2443-7973)"
 date: "November 6, 2026"
 output:
   pdf_document:
@@ -91,6 +87,7 @@ $$\nu_{obs} = \left(\frac{\nu_{com} + 1}{\nu_{com} + 3}\right) \nu_{com} (1 - \h
 where $\nu_{com}$ is the complete-data degrees of freedom.
 
 Downstream pooling covers three core clinical endpoint families:
+
 1. **Continuous Endpoints (`catmech_pool_lm`)**: Fits linear models with default delete-one-cluster jackknife (CV3) variance estimation, where $\nu_{com} = N - p$.
 2. **Binary and Count Endpoints (`catmech_pool_glm`)**: Fits generalized linear models (logistic and Poisson) with Huber–White–Liang–Zeger cluster-robust sandwich covariance [@liang1986longitudinal]:
    $$\hat{V}_{\text{sandwich}} = \hat{J}^{-1} \left(\sum_{c=1}^C s_c s_c^\top\right) \hat{J}^{-1}$$
@@ -116,6 +113,7 @@ The `catmech` package is structured into modular S3 components designed for comp
 | **Sensitivity & Provenance** | `catmech_sensitivity()`, `catmech_audit_trail()` | Multi-scenario sensitivity envelopes and cryptographic SHA-256 regulatory compliance reporting. |
 
 A central operational requirement of regulatory clinical trials and modern observational research is that multiple imputation cannot remain restricted to continuous linear regression. In confirmatory trials, the primary estimands are predominantly time-to-event endpoints (e.g., overall survival, progression-free survival, major adverse cardiovascular events analyzed via Cox proportional hazards) or binary categorical endpoints (e.g., objective clinical response, 30-day mortality, toxicities analyzed via logistic regression). `catmech` directly integrates audit-adjusted imputation with these core clinical endpoints through `catmech_pool_coxph()` and `catmech_pool_glm()`:
+
 * **Survival Modeling (`catmech_pool_coxph`)**: Computes pooled log-hazard ratios $\bar{\theta}$ and Lin & Wei (1989) score-residual sandwich covariance [@lin1989robust], defining complete-data degrees of freedom strictly as $\nu_{com} = d - p$ (where $d$ is the observed event count and $p$ is the parameter count). Point estimates and Barnard-Rubin $t$-intervals are exponentiated to yield pooled hazard ratios ($\text{HR}$).
 * **Binary and Generalized Linear Modeling (`catmech_pool_glm`)**: Employs Huber--White--Liang--Zeger cluster-robust sandwich covariance [@liang1986longitudinal], providing robust inference against variance misspecification with exponentiated odds ratios ($\text{OR}$) or incidence rate ratios ($\text{IRR}$).
 * **Unified Model Exploration**: All pooling functions integrate with `broom` methods (`tidy()`, `glance()`) and automated visualization (`catmech_forest_plot()`), allowing clinical study teams to compare naive, complete-case, standard imputation, and mixture strategies across multiple endpoint families simultaneously.
@@ -193,6 +191,7 @@ However, our empirical investigations across large-scale real-world registries w
 In these real-world regimes, the empirical results challenge methodological dogma: simple linear imputation (`catmech_reference(use_recorded = TRUE)`) matched or slightly outperformed the mixture model in predictive accuracy (RMSE of 0.0286 vs. 0.0308 on ClinicalTrials.gov) while requiring substantially fewer parametric assumptions and zero MCMC convergence overhead.
 
 This divergence is not a defect of the mixture engine, but a crucial empirical finding: *simulated gross errors favor mixture modeling, but real-world diffuse errors favor linear multiple imputation*. Methodologically, this divergence proves why the decision framework formalized in Section 6 is essential. Rather than assuming that a complex Bayesian mixture model is universally optimal, trialists must treat the choice of imputation model as an empirical question. `catmech` operationalizes this principle by providing:
+
 1. Exploratory diagnostic screening via `catmech_recording_audit()` to quantify error rate and detect between-stratum heterogeneity before model fitting;
 2. Out-of-sample predictive cross-validation via `catmech_holdout_check()` to guard against overfitted or miscalibrated imputation distributions;
 3. Direct strategy benchmarking via `catmech_compare_strategies()` to evaluate whether data characteristics justify the mixture model's complexity or are robustly served by linear data augmentation.
@@ -202,6 +201,7 @@ By bridging prospective two-phase sample size determination, robust multi-endpoi
 # Regulatory Compliance and Data Governance
 
 Regulatory submissions in biopharmaceutical and medical device trials (FDA 21 CFR Part 11 [@fda2003part11] and ICH GCP E9 [@ich1998e9]) require a tamper-evident audit trail for any algorithmic data imputation. `catmech_audit_trail()` generates complete provenance records in Markdown, JSON, or standalone HTML, capturing:
+
 1. Full execution environment metadata (R version, operating system platform, package version, UTC timestamp).
 2. Cryptographic SHA-256 checksums of the raw input dataset, model specification, and each of the $m$ completed datasets.
 3. Convergence metrics (MCMC iterations, Gelman-Rubin $\hat{R}$, bulk and tail effective sample sizes).
@@ -210,6 +210,7 @@ Regulatory submissions in biopharmaceutical and medical device trials (FDA 21 CF
 # Quality Assurance and Verification
 
 `catmech` has been developed under an automated software verification harness:
+
 * **Unit Tests**: 1,754 unit tests executed via `testthat`, achieving 0 failures, 0 warnings, and 0 skips.
 * **CRAN Conformance**: Fully compliant with CRAN package policies, passing `R CMD check --no-manual` with `Status: OK` (0 errors, 0 warnings, 0 notes).
 * **Automated Fact Checking**: Verified against an independent Python verification suite (`verify-artifacts.py` and `fact_check.py`) confirming exact correspondence across 118 claims, 10 distinct simulation benchmark studies, and hundreds of thousands of historical requests.

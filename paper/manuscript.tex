@@ -77,6 +77,7 @@
 \makeatother
 \hypersetup{
   pdftitle={Statistical Inference and Two-Phase Audit Design for Contaminated Measurements in Clinical Research: The catmech R Package},
+  pdfauthor={Patrick Iben (Independent Biostatistician; patrickiben@gmail.com; ORCID: 0009-0005-2443-7973)},
   pdfkeywords={\xmpquote{clinical audits}, \xmpquote{measurement
 error}, \xmpquote{two-phase sampling}, \xmpquote{multiple
 imputation}, \xmpquote{survival analysis}, \xmpquote{robust sandwich
@@ -86,7 +87,9 @@ covariance}, \xmpquote{R package}, \xmpquote{regulatory compliance}},
 
 \title{Statistical Inference and Two-Phase Audit Design for Contaminated
 Measurements in Clinical Research: The catmech R Package}
-\author{true}
+\author{Patrick Iben (Independent Biostatistician;
+\href{mailto:patrickiben@gmail.com}{\nolinkurl{patrickiben@gmail.com}};
+ORCID: 0009-0005-2443-7973)}
 \date{November 6, 2026}
 
 \begin{document}
@@ -302,27 +305,36 @@ Barnard \& Rubin (1999) small-sample adjustment
 \[\nu_{obs} = \left(\frac{\nu_{com} + 1}{\nu_{com} + 3}\right) \nu_{com} (1 - \hat{\lambda}), \quad \nu_{BR} = \frac{\nu_m \nu_{obs}}{\nu_m + \nu_{obs}}\]
 where \(\nu_{com}\) is the complete-data degrees of freedom.
 
-Downstream pooling covers three core clinical endpoint families: 1.
-\textbf{Continuous Endpoints (\texttt{catmech\_pool\_lm})}: Fits linear
-models with default delete-one-cluster jackknife (CV3) variance
-estimation, where \(\nu_{com} = N - p\). 2. \textbf{Binary and Count
-Endpoints (\texttt{catmech\_pool\_glm})}: Fits generalized linear models
-(logistic and Poisson) with Huber--White--Liang--Zeger cluster-robust
-sandwich covariance \citep{liang1986longitudinal}:
-\[\hat{V}_{\text{sandwich}} = \hat{J}^{-1} \left(\sum_{c=1}^C s_c s_c^\top\right) \hat{J}^{-1}\]
-where
-\(s_c = \sum_{i \in \text{cluster } c} \frac{\partial \ell_i}{\partial \theta}\)
-are cluster score residuals and \(\hat{J}\) is the observed Fisher
-information matrix. Point estimates and intervals are optionally
-exponentiated to yield odds ratios or incidence rate ratios. 3.
-\textbf{Time-to-Event Survival Endpoints
-(\texttt{catmech\_pool\_coxph})}: Fits Cox proportional hazards models
-with Lin \& Wei (1989) score-residual sandwich covariance
-\citep{lin1989robust}. The complete degrees of freedom are defined
-strictly as \(\nu_{com} = d - p\), where \(d\) is the number of observed
-failure events and \(p\) is the parameter count. Hazard ratios
-\(\text{HR} = \exp(\bar{\theta})\) and confidence intervals are computed
-using the Barnard-Rubin \(\nu_{BR}\) \(t\)-distribution.
+Downstream pooling covers three core clinical endpoint families:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Continuous Endpoints (\texttt{catmech\_pool\_lm})}: Fits
+  linear models with default delete-one-cluster jackknife (CV3) variance
+  estimation, where \(\nu_{com} = N - p\).
+\item
+  \textbf{Binary and Count Endpoints (\texttt{catmech\_pool\_glm})}:
+  Fits generalized linear models (logistic and Poisson) with
+  Huber--White--Liang--Zeger cluster-robust sandwich covariance
+  \citep{liang1986longitudinal}:
+  \[\hat{V}_{\text{sandwich}} = \hat{J}^{-1} \left(\sum_{c=1}^C s_c s_c^\top\right) \hat{J}^{-1}\]
+  where
+  \(s_c = \sum_{i \in \text{cluster } c} \frac{\partial \ell_i}{\partial \theta}\)
+  are cluster score residuals and \(\hat{J}\) is the observed Fisher
+  information matrix. Point estimates and intervals are optionally
+  exponentiated to yield odds ratios or incidence rate ratios.
+\item
+  \textbf{Time-to-Event Survival Endpoints
+  (\texttt{catmech\_pool\_coxph})}: Fits Cox proportional hazards models
+  with Lin \& Wei (1989) score-residual sandwich covariance
+  \citep{lin1989robust}. The complete degrees of freedom are defined
+  strictly as \(\nu_{com} = d - p\), where \(d\) is the number of
+  observed failure events and \(p\) is the parameter count. Hazard
+  ratios \(\text{HR} = \exp(\bar{\theta})\) and confidence intervals are
+  computed using the Barnard-Rubin \(\nu_{BR}\) \(t\)-distribution.
+\end{enumerate}
 
 \subsection{Out-of-Sample Predictive Calibration
 Checking}\label{out-of-sample-predictive-calibration-checking}
@@ -396,24 +408,33 @@ categorical endpoints (e.g., objective clinical response, 30-day
 mortality, toxicities analyzed via logistic regression).
 \texttt{catmech} directly integrates audit-adjusted imputation with
 these core clinical endpoints through \texttt{catmech\_pool\_coxph()}
-and \texttt{catmech\_pool\_glm()}: * \textbf{Survival Modeling
-(\texttt{catmech\_pool\_coxph})}: Computes pooled log-hazard ratios
-\(\bar{\theta}\) and Lin \& Wei (1989) score-residual sandwich
-covariance \citep{lin1989robust}, defining complete-data degrees of
-freedom strictly as \(\nu_{com} = d - p\) (where \(d\) is the observed
-event count and \(p\) is the parameter count). Point estimates and
-Barnard-Rubin \(t\)-intervals are exponentiated to yield pooled hazard
-ratios (\(\text{HR}\)). * \textbf{Binary and Generalized Linear Modeling
-(\texttt{catmech\_pool\_glm})}: Employs Huber--White--Liang--Zeger
-cluster-robust sandwich covariance \citep{liang1986longitudinal},
-providing robust inference against variance misspecification with
-exponentiated odds ratios (\(\text{OR}\)) or incidence rate ratios
-(\(\text{IRR}\)). * \textbf{Unified Model Exploration}: All pooling
-functions integrate with \texttt{broom} methods (\texttt{tidy()},
-\texttt{glance()}) and automated visualization
-(\texttt{catmech\_forest\_plot()}), allowing clinical study teams to
-compare naive, complete-case, standard imputation, and mixture
-strategies across multiple endpoint families simultaneously.
+and \texttt{catmech\_pool\_glm()}:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Survival Modeling (\texttt{catmech\_pool\_coxph})}: Computes
+  pooled log-hazard ratios \(\bar{\theta}\) and Lin \& Wei (1989)
+  score-residual sandwich covariance \citep{lin1989robust}, defining
+  complete-data degrees of freedom strictly as \(\nu_{com} = d - p\)
+  (where \(d\) is the observed event count and \(p\) is the parameter
+  count). Point estimates and Barnard-Rubin \(t\)-intervals are
+  exponentiated to yield pooled hazard ratios (\(\text{HR}\)).
+\item
+  \textbf{Binary and Generalized Linear Modeling
+  (\texttt{catmech\_pool\_glm})}: Employs Huber--White--Liang--Zeger
+  cluster-robust sandwich covariance \citep{liang1986longitudinal},
+  providing robust inference against variance misspecification with
+  exponentiated odds ratios (\(\text{OR}\)) or incidence rate ratios
+  (\(\text{IRR}\)).
+\item
+  \textbf{Unified Model Exploration}: All pooling functions integrate
+  with \texttt{broom} methods (\texttt{tidy()}, \texttt{glance()}) and
+  automated visualization (\texttt{catmech\_forest\_plot()}), allowing
+  clinical study teams to compare naive, complete-case, standard
+  imputation, and mixture strategies across multiple endpoint families
+  simultaneously.
+\end{itemize}
 
 \section{Synthetic Monte Carlo Simulation
 Studies}\label{synthetic-monte-carlo-simulation-studies}
@@ -640,15 +661,25 @@ Methodologically, this divergence proves why the decision framework
 formalized in Section 6 is essential. Rather than assuming that a
 complex Bayesian mixture model is universally optimal, trialists must
 treat the choice of imputation model as an empirical question.
-\texttt{catmech} operationalizes this principle by providing: 1.
-Exploratory diagnostic screening via
-\texttt{catmech\_recording\_audit()} to quantify error rate and detect
-between-stratum heterogeneity before model fitting; 2. Out-of-sample
-predictive cross-validation via \texttt{catmech\_holdout\_check()} to
-guard against overfitted or miscalibrated imputation distributions; 3.
-Direct strategy benchmarking via \texttt{catmech\_compare\_strategies()}
-to evaluate whether data characteristics justify the mixture model's
-complexity or are robustly served by linear data augmentation.
+\texttt{catmech} operationalizes this principle by providing:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Exploratory diagnostic screening via
+  \texttt{catmech\_recording\_audit()} to quantify error rate and detect
+  between-stratum heterogeneity before model fitting;
+\item
+  Out-of-sample predictive cross-validation via
+  \texttt{catmech\_holdout\_check()} to guard against overfitted or
+  miscalibrated imputation distributions;
+\item
+  Direct strategy benchmarking via
+  \texttt{catmech\_compare\_strategies()} to evaluate whether data
+  characteristics justify the mixture model's complexity or are robustly
+  served by linear data augmentation.
+\end{enumerate}
 
 By bridging prospective two-phase sample size determination, robust
 multi-endpoint pooling across linear, logistic, and Cox survival models,
@@ -664,27 +695,46 @@ Regulatory submissions in biopharmaceutical and medical device trials
 \citep{ich1998e9}) require a tamper-evident audit trail for any
 algorithmic data imputation. \texttt{catmech\_audit\_trail()} generates
 complete provenance records in Markdown, JSON, or standalone HTML,
-capturing: 1. Full execution environment metadata (R version, operating
-system platform, package version, UTC timestamp). 2. Cryptographic
-SHA-256 checksums of the raw input dataset, model specification, and
-each of the \(m\) completed datasets. 3. Convergence metrics (MCMC
-iterations, Gelman-Rubin \(\hat{R}\), bulk and tail effective sample
-sizes). 4. Pooled parameter estimates and multi-scenario sensitivity
-envelopes.
+capturing:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Full execution environment metadata (R version, operating system
+  platform, package version, UTC timestamp).
+\item
+  Cryptographic SHA-256 checksums of the raw input dataset, model
+  specification, and each of the \(m\) completed datasets.
+\item
+  Convergence metrics (MCMC iterations, Gelman-Rubin \(\hat{R}\), bulk
+  and tail effective sample sizes).
+\item
+  Pooled parameter estimates and multi-scenario sensitivity envelopes.
+\end{enumerate}
 
 \section{Quality Assurance and
 Verification}\label{quality-assurance-and-verification}
 
 \texttt{catmech} has been developed under an automated software
-verification harness: * \textbf{Unit Tests}: 1,754 unit tests executed
-via \texttt{testthat}, achieving 0 failures, 0 warnings, and 0 skips. *
-\textbf{CRAN Conformance}: Fully compliant with CRAN package policies,
-passing \texttt{R\ CMD\ check\ -\/-no-manual} with \texttt{Status:\ OK}
-(0 errors, 0 warnings, 0 notes). * \textbf{Automated Fact Checking}:
-Verified against an independent Python verification suite
-(\texttt{verify-artifacts.py} and \texttt{fact\_check.py}) confirming
-exact correspondence across 118 claims, 10 distinct simulation benchmark
-studies, and hundreds of thousands of historical requests.
+verification harness:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Unit Tests}: 1,754 unit tests executed via \texttt{testthat},
+  achieving 0 failures, 0 warnings, and 0 skips.
+\item
+  \textbf{CRAN Conformance}: Fully compliant with CRAN package policies,
+  passing \texttt{R\ CMD\ check\ -\/-no-manual} with
+  \texttt{Status:\ OK} (0 errors, 0 warnings, 0 notes).
+\item
+  \textbf{Automated Fact Checking}: Verified against an independent
+  Python verification suite (\texttt{verify-artifacts.py} and
+  \texttt{fact\_check.py}) confirming exact correspondence across 118
+  claims, 10 distinct simulation benchmark studies, and hundreds of
+  thousands of historical requests.
+\end{itemize}
 
 \section{Availability and Software
 Details}\label{availability-and-software-details}

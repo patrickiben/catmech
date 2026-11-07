@@ -9,6 +9,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Patrick Iben (Independent Biostatistician; patrickiben@gmail.com; ORCID: 0009-0005-2443-7973)" />
 
 <meta name="date" content="2026-11-06" />
 
@@ -1619,11 +1620,8 @@ border-radius: 0px;
 <h1 class="title toc-ignore">Statistical Inference and Two-Phase Audit
 Design for Contaminated Measurements in Clinical Research: The catmech R
 Package</h1>
-<h4 class="author">Patrick Iben</h4>
-<address class="author_afil">
-Independent
-Biostatistician<br><a class="author_email" href="mailto:#"><a href="mailto:patrickiben@gmail.com" class="email">patrickiben@gmail.com</a></a>
-</address>
+<h4 class="author">Patrick Iben (Independent Biostatistician; <a href="mailto:patrickiben@gmail.com" class="email">patrickiben@gmail.com</a>; ORCID:
+0009-0005-2443-7973)</h4>
 <h4 class="date">November 6, 2026</h4>
 <div class="abstract">
 <p class="abstract">Abstract</p>
@@ -1686,8 +1684,8 @@ and inconsistent unit conversions <span class="citation">(Carroll et al.
 authorities mandate source-data verification (SDV) and targeted clinical
 audits, wherein trial monitors review primary source documents (e.g.,
 clinical chart re-abstractions, central laboratory re-assays) for a
-subsample of patients <span class="citation">(<em>Guidance for
-Industry</em> 2003; <em>ICH Harmonised Tripartite Guideline</em>
+subsample of patients <span class="citation">(U.S. Food and Drug
+Administration 2003; International Conference on Harmonisation
 1998)</span>. When discrepancies between the originally recorded
 measurement and the audited reference standard are uncovered,
 biostatisticians and trialists confront an inferential dilemma:</p>
@@ -1721,7 +1719,7 @@ audit planning, predictive calibration diagnostics, and multi-endpoint
 model pooling. The package unites two-phase sampling theory <span class="citation">(Cochran 1977; Breslow et al. 2003)</span> with
 reference-calibrated Bayesian mixture modeling <span class="citation">(Huang and Wand 2013)</span>, Barnard-Rubin
 finite-sample inference <span class="citation">(Barnard and Rubin
-1999)</span>, and cryptographic data provenance <span class="citation">(<em>Guidance for Industry</em> 2003)</span>.</p>
+1999)</span>, and cryptographic data provenance <span class="citation">(U.S. Food and Drug Administration 2003)</span>.</p>
 </div>
 <div id="statistical-theory-and-methodology" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> Statistical Theory and
@@ -1836,11 +1834,12 @@ intervals. <code>catmech</code> implements the Barnard &amp; Rubin
 \hat{\lambda}), \quad \nu_{BR} = \frac{\nu_m \nu_{obs}}{\nu_m +
 \nu_{obs}}\]</span> where <span class="math inline">\(\nu_{com}\)</span>
 is the complete-data degrees of freedom.</p>
-<p>Downstream pooling covers three core clinical endpoint families: 1.
-<strong>Continuous Endpoints (<code>catmech_pool_lm</code>)</strong>:
-Fits linear models with default delete-one-cluster jackknife (CV3)
-variance estimation, where <span class="math inline">\(\nu_{com} = N -
-p\)</span>. 2. <strong>Binary and Count Endpoints
+<p>Downstream pooling covers three core clinical endpoint families:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Continuous Endpoints
+(<code>catmech_pool_lm</code>)</strong>: Fits linear models with default
+delete-one-cluster jackknife (CV3) variance estimation, where <span class="math inline">\(\nu_{com} = N - p\)</span>.</li>
+<li><strong>Binary and Count Endpoints
 (<code>catmech_pool_glm</code>)</strong>: Fits generalized linear models
 (logistic and Poisson) with Huber–White–Liang–Zeger cluster-robust
 sandwich covariance <span class="citation">(Liang and Zeger
@@ -1850,8 +1849,8 @@ sandwich covariance <span class="citation">(Liang and Zeger
 \in \text{cluster } c} \frac{\partial \ell_i}{\partial \theta}\)</span>
 are cluster score residuals and <span class="math inline">\(\hat{J}\)</span> is the observed Fisher
 information matrix. Point estimates and intervals are optionally
-exponentiated to yield odds ratios or incidence rate ratios. 3.
-<strong>Time-to-Event Survival Endpoints
+exponentiated to yield odds ratios or incidence rate ratios.</li>
+<li><strong>Time-to-Event Survival Endpoints
 (<code>catmech_pool_coxph</code>)</strong>: Fits Cox proportional
 hazards models with Lin &amp; Wei (1989) score-residual sandwich
 covariance <span class="citation">(Lin and Wei 1989)</span>. The
@@ -1859,7 +1858,8 @@ complete degrees of freedom are defined strictly as <span class="math inline">\(
 events and <span class="math inline">\(p\)</span> is the parameter
 count. Hazard ratios <span class="math inline">\(\text{HR} =
 \exp(\bar{\theta})\)</span> and confidence intervals are computed using
-the Barnard-Rubin <span class="math inline">\(\nu_{BR}\)</span> <span class="math inline">\(t\)</span>-distribution.</p>
+the Barnard-Rubin <span class="math inline">\(\nu_{BR}\)</span> <span class="math inline">\(t\)</span>-distribution.</li>
+</ol>
 </div>
 <div id="out-of-sample-predictive-calibration-checking" class="section level2" number="2.5">
 <h2><span class="header-section-number">2.5</span> Out-of-Sample
@@ -1948,7 +1948,9 @@ categorical endpoints (e.g., objective clinical response, 30-day
 mortality, toxicities analyzed via logistic regression).
 <code>catmech</code> directly integrates audit-adjusted imputation with
 these core clinical endpoints through <code>catmech_pool_coxph()</code>
-and <code>catmech_pool_glm()</code>: * <strong>Survival Modeling
+and <code>catmech_pool_glm()</code>:</p>
+<ul>
+<li><strong>Survival Modeling
 (<code>catmech_pool_coxph</code>)</strong>: Computes pooled log-hazard
 ratios <span class="math inline">\(\bar{\theta}\)</span> and Lin &amp;
 Wei (1989) score-residual sandwich covariance <span class="citation">(Lin and Wei 1989)</span>, defining complete-data
@@ -1956,19 +1958,20 @@ degrees of freedom strictly as <span class="math inline">\(\nu_{com} = d
 - p\)</span> (where <span class="math inline">\(d\)</span> is the
 observed event count and <span class="math inline">\(p\)</span> is the
 parameter count). Point estimates and Barnard-Rubin <span class="math inline">\(t\)</span>-intervals are exponentiated to yield
-pooled hazard ratios (<span class="math inline">\(\text{HR}\)</span>). *
-<strong>Binary and Generalized Linear Modeling
+pooled hazard ratios (<span class="math inline">\(\text{HR}\)</span>).</li>
+<li><strong>Binary and Generalized Linear Modeling
 (<code>catmech_pool_glm</code>)</strong>: Employs
 Huber–White–Liang–Zeger cluster-robust sandwich covariance <span class="citation">(Liang and Zeger 1986)</span>, providing robust
 inference against variance misspecification with exponentiated odds
 ratios (<span class="math inline">\(\text{OR}\)</span>) or incidence
-rate ratios (<span class="math inline">\(\text{IRR}\)</span>). *
-<strong>Unified Model Exploration</strong>: All pooling functions
+rate ratios (<span class="math inline">\(\text{IRR}\)</span>).</li>
+<li><strong>Unified Model Exploration</strong>: All pooling functions
 integrate with <code>broom</code> methods (<code>tidy()</code>,
 <code>glance()</code>) and automated visualization
 (<code>catmech_forest_plot()</code>), allowing clinical study teams to
 compare naive, complete-case, standard imputation, and mixture
-strategies across multiple endpoint families simultaneously.</p>
+strategies across multiple endpoint families simultaneously.</li>
+</ul>
 </div>
 <div id="synthetic-monte-carlo-simulation-studies" class="section level1" number="4">
 <h1><span class="header-section-number">4</span> Synthetic Monte Carlo
@@ -2269,16 +2272,19 @@ Methodologically, this divergence proves why the decision framework
 formalized in Section 6 is essential. Rather than assuming that a
 complex Bayesian mixture model is universally optimal, trialists must
 treat the choice of imputation model as an empirical question.
-<code>catmech</code> operationalizes this principle by providing: 1.
-Exploratory diagnostic screening via
+<code>catmech</code> operationalizes this principle by providing:</p>
+<ol style="list-style-type: decimal">
+<li>Exploratory diagnostic screening via
 <code>catmech_recording_audit()</code> to quantify error rate and detect
-between-stratum heterogeneity before model fitting; 2. Out-of-sample
-predictive cross-validation via <code>catmech_holdout_check()</code> to
-guard against overfitted or miscalibrated imputation distributions; 3.
-Direct strategy benchmarking via
+between-stratum heterogeneity before model fitting;</li>
+<li>Out-of-sample predictive cross-validation via
+<code>catmech_holdout_check()</code> to guard against overfitted or
+miscalibrated imputation distributions;</li>
+<li>Direct strategy benchmarking via
 <code>catmech_compare_strategies()</code> to evaluate whether data
 characteristics justify the mixture model’s complexity or are robustly
-served by linear data augmentation.</p>
+served by linear data augmentation.</li>
+</ol>
 <p>By bridging prospective two-phase sample size determination, robust
 multi-endpoint pooling across linear, logistic, and Cox survival models,
 and cryptographic 21 CFR Part 11 audit trails, <code>catmech</code>
@@ -2289,33 +2295,41 @@ mathematically grounded framework for clinical data verification.</p>
 <h1><span class="header-section-number">8</span> Regulatory Compliance
 and Data Governance</h1>
 <p>Regulatory submissions in biopharmaceutical and medical device trials
-(FDA 21 CFR Part 11 <span class="citation">(<em>Guidance for
-Industry</em> 2003)</span> and ICH GCP E9 <span class="citation">(<em>ICH Harmonised Tripartite Guideline</em>
+(FDA 21 CFR Part 11 <span class="citation">(U.S. Food and Drug
+Administration 2003)</span> and ICH GCP E9 <span class="citation">(International Conference on Harmonisation
 1998)</span>) require a tamper-evident audit trail for any algorithmic
 data imputation. <code>catmech_audit_trail()</code> generates complete
-provenance records in Markdown, JSON, or standalone HTML, capturing: 1.
-Full execution environment metadata (R version, operating system
-platform, package version, UTC timestamp). 2. Cryptographic SHA-256
-checksums of the raw input dataset, model specification, and each of the
-<span class="math inline">\(m\)</span> completed datasets. 3.
-Convergence metrics (MCMC iterations, Gelman-Rubin <span class="math inline">\(\hat{R}\)</span>, bulk and tail effective sample
-sizes). 4. Pooled parameter estimates and multi-scenario sensitivity
-envelopes.</p>
+provenance records in Markdown, JSON, or standalone HTML, capturing:</p>
+<ol style="list-style-type: decimal">
+<li>Full execution environment metadata (R version, operating system
+platform, package version, UTC timestamp).</li>
+<li>Cryptographic SHA-256 checksums of the raw input dataset, model
+specification, and each of the <span class="math inline">\(m\)</span>
+completed datasets.</li>
+<li>Convergence metrics (MCMC iterations, Gelman-Rubin <span class="math inline">\(\hat{R}\)</span>, bulk and tail effective sample
+sizes).</li>
+<li>Pooled parameter estimates and multi-scenario sensitivity
+envelopes.</li>
+</ol>
 </div>
 <div id="quality-assurance-and-verification" class="section level1" number="9">
 <h1><span class="header-section-number">9</span> Quality Assurance and
 Verification</h1>
 <p><code>catmech</code> has been developed under an automated software
-verification harness: * <strong>Unit Tests</strong>: 1,754 unit tests
-executed via <code>testthat</code>, achieving 0 failures, 0 warnings,
-and 0 skips. * <strong>CRAN Conformance</strong>: Fully compliant with
-CRAN package policies, passing <code>R CMD check --no-manual</code> with
-<code>Status: OK</code> (0 errors, 0 warnings, 0 notes). *
-<strong>Automated Fact Checking</strong>: Verified against an
+verification harness:</p>
+<ul>
+<li><strong>Unit Tests</strong>: 1,754 unit tests executed via
+<code>testthat</code>, achieving 0 failures, 0 warnings, and 0
+skips.</li>
+<li><strong>CRAN Conformance</strong>: Fully compliant with CRAN package
+policies, passing <code>R CMD check --no-manual</code> with
+<code>Status: OK</code> (0 errors, 0 warnings, 0 notes).</li>
+<li><strong>Automated Fact Checking</strong>: Verified against an
 independent Python verification suite (<code>verify-artifacts.py</code>
 and <code>fact_check.py</code>) confirming exact correspondence across
 118 claims, 10 distinct simulation benchmark studies, and hundreds of
-thousands of historical requests.</p>
+thousands of historical requests.</li>
+</ul>
 </div>
 <div id="availability-and-software-details" class="section level1" number="10">
 <h1><span class="header-section-number">10</span> Availability and
@@ -2365,11 +2379,6 @@ Developments: Some Personal Views: Statistical Theory: The Prequential
 Approach.”</span> <em>Journal of the Royal Statistical Society: Series A
 (General)</em> 147 (2): 278–92. <a href="https://doi.org/10.2307/2981683">https://doi.org/10.2307/2981683</a>.
 </div>
-<div id="ref-fda2003part11" class="csl-entry">
-<em>Guidance for Industry: Part 11, Electronic Records; Electronic
-Signatures — Scope and Application</em>. 2003. U.S. Food; Drug
-Administration.
-</div>
 <div id="ref-honaker2011amelia" class="csl-entry">
 Honaker, James, Gary King, and Matthew Blackwell. 2011.
 <span>“<span>Amelia II</span>: A Program for Missing Data.”</span>
@@ -2381,10 +2390,11 @@ Variance Properties in Multilevel Models.”</span> <em>Biometrika</em>
 100 (2): 439–53. <a href="https://doi.org/10.1093/biomet/ass072">https://doi.org/10.1093/biomet/ass072</a>.
 </div>
 <div id="ref-ich1998e9" class="csl-entry">
-<em>ICH Harmonised Tripartite Guideline: Statistical Principles for
-Clinical Trials (E9)</em>. 1998. International Conference on
-Harmonisation of Technical Requirements for Registration of
-Pharmaceuticals for Human Use.
+International Conference on Harmonisation. 1998. <em><span>ICH</span>
+Harmonised Tripartite Guideline: Statistical Principles for Clinical
+Trials (<span>E9</span>)</em>. International Conference on Harmonisation
+of Technical Requirements for Registration of Pharmaceuticals for Human
+Use.
 </div>
 <div id="ref-liang1986longitudinal" class="csl-entry">
 Liang, Kung-Yee, and Scott L. Zeger. 1986. <span>“Longitudinal Data
@@ -2415,6 +2425,11 @@ Surveys</em>. John Wiley &amp; Sons. <a href="https://doi.org/10.1002/9780470316
 Rubin, Donald B. 1996. <span>“Multiple Imputation After 18+
 Years.”</span> <em>Journal of the American Statistical Association</em>
 91 (434): 473–89. <a href="https://doi.org/10.1080/01621459.1996.10476908">https://doi.org/10.1080/01621459.1996.10476908</a>.
+</div>
+<div id="ref-fda2003part11" class="csl-entry">
+U.S. Food and Drug Administration. 2003. <em>Guidance for Industry: Part
+11, Electronic Records; Electronic Signatures — Scope and
+Application</em>. U.S. Food; Drug Administration.
 </div>
 <div id="ref-white2011multiple" class="csl-entry">
 White, Ian R., Patrick Royston, and Angela M. Wood. 2011.

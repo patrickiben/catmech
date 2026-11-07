@@ -209,15 +209,18 @@ The diagnostic printout highlights the error rate and stratum heterogeneity befo
 
 ```text
 -- Catmech Recording Audit --
-Status:             heterogeneity_detected
-Disagreements:      48 / 60 calibration rows (80.0%)
+Status:             errors_observed
+Disagreements:      15 / 60 calibration rows (25.0%)
 Reference subset:   60 / 600 total rows (10.0%)
-Error distribution: mean = 1.9842, SD = 0.8123
-Selection SMD:      0.0412
+Error distribution: mean = 1.9639, SD = 0.9262
+Selection SMD:      -0.0246
 Heterogeneity across strata:
-  column level disagreements calibration_rows disagreement_rate lower upper
- outlier     0             6               40             0.150 0.063 0.284
- outlier     1            42               20             1.000 0.840 1.000
+       column levels      p_value
+ outlier_flag      2 1.270818e-11
+         site      3 1.000000e+00
+
+Notes:
+  * Disagreement rates differ across: outlier_flag. Consider declaring these as strata.
 ```
 
 When the table points to the contamination model:
@@ -329,6 +332,9 @@ that case. Audited rows and deterministically retained recorded values do not tr
 are refused. Very wide intervals remain possible with few audited clusters, so read the `df` column. See the
 [method](docs/REFERENCE_METHOD.md#clustered-audits-experimental).
 
+<details>
+<summary><strong>Mixed recording patterns within sites: joint cluster model (Click to expand)</strong></summary>
+
 ### Mixed recording patterns within sites
 
 Version 0.8.0 adds `cluster_model = "joint"`. It models the checked and recorded measurements together, using one
@@ -386,6 +392,11 @@ Use the direct summary for its declared model-based target, not as a general rob
 See the [full results and Monte Carlo uncertainty](validation/JOINT_CALIBRATION_SYNTHESIS.md).
 
 [![Calibration, prior-width sensitivity, convergence refusals and contextual stress](validation/joint-calibration-figures/joint-calibration-evidence.png)](validation/joint-calibration-figures/joint-calibration-evidence.pdf)
+
+</details>
+
+<details>
+<summary><strong>Marginal coefficients with contextual site effects (Click to expand)</strong></summary>
 
 ### Marginal coefficients with contextual site effects
 
@@ -451,6 +462,8 @@ multiple-predictor coverage, rare counts or use of the repaired measurement as
 an analysis predictor. See [all results, uncertainty and failed screens](validation/JOINT_MARGINAL_SYNTHESIS.md).
 
 [![Marginal-model calibration, slope prior sensitivity and fit refusals](validation/joint-marginal-figures/joint-marginal-evidence.png)](validation/joint-marginal-figures/joint-marginal-evidence.pdf)
+
+</details>
 
 <details>
 <summary><strong>Earlier moment-model evidence and validation history (Click to expand)</strong></summary>
