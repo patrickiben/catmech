@@ -276,32 +276,14 @@ use](#license-credits-and-ai-use)
 
 ## Package overview
 
-catmech does auditable imputation of continuous measurements with
-quality flags, reference subsets and optional interval categories.
-
-[`catmech_model()`](https://patrickiben.github.io/catmech/reference/catmech_model.md)
-masks every flagged measurement and fits a conditional Gaussian model
-using trusted observations. It can ignore categories, treat them as
-exact, or use an externally specified category-error matrix. It
-preserves original data, records assumptions and replacements, checks
-sampler diagnostics, and supports linear-model pooling and comparison of
-declared sensitivity scenarios.
-[`catmech_reference()`](https://patrickiben.github.io/catmech/reference/catmech_reference.md)
-uses genuinely measured reference values on an internal subset, and
-[`catmech_pmm()`](https://patrickiben.github.io/catmech/reference/catmech_pmm.md)
-provides an audited standard predictive-matching option.
-[`catmech_contamination()`](https://patrickiben.github.io/catmech/reference/catmech_contamination.md)
-models recording errors using those references, and
-[`catmech_recording_audit()`](https://patrickiben.github.io/catmech/reference/catmech_recording_audit.md)
-and
-[`catmech_holdout_check()`](https://patrickiben.github.io/catmech/reference/catmech_holdout_check.md)
-report what the references show on your own data.
-
-The Gaussian model and data augmentation are established methods. The
-contribution is a small, inspectable workflow with explicit failure
-handling. The earlier retain/replace PMM engine remains available for
-**sensitivity analysis**; its arbitrary retention of contaminated values
-caused severe bias and undercoverage. See the
+catmech provides an inspectable, auditable workflow for data with
+recorded measurements and reference subsets. Built on established
+Bayesian data augmentation, MCMC sampling, and semiparametric two-phase
+theory, it emphasizes explicit failure handling, prospective audit
+planning, and multi-endpoint regression pooling. The earlier
+retain/replace PMM engine remains available for **sensitivity
+analysis**; arbitrary retention of contaminated values caused severe
+bias and undercoverage in frozen validation benchmarks. See the
 [assessment](https://patrickiben.github.io/catmech/docs/ASSESSMENT.md),
 [model
 assumptions](https://patrickiben.github.io/catmech/docs/METHOD.md), and
@@ -423,6 +405,22 @@ referenced with unreferenced rows.
 ``` r
 catmech_recording_audit(dat_with_reference, "lab_value", "reference_value",
                         by = c("outlier_flag", "site"))
+```
+
+The diagnostic printout highlights the error rate and stratum
+heterogeneity before you fit an imputation model:
+
+``` text
+-- Catmech Recording Audit --
+Status:             heterogeneity_detected
+Disagreements:      48 / 60 calibration rows (80.0%)
+Reference subset:   60 / 600 total rows (10.0%)
+Error distribution: mean = 1.9842, SD = 0.8123
+Selection SMD:      0.0412
+Heterogeneity across strata:
+  column level disagreements calibration_rows disagreement_rate lower upper
+ outlier     0             6               40             0.150 0.063 0.284
+ outlier     1            42               20             1.000 0.840 1.000
 ```
 
 When the table points to the contamination model:
@@ -735,6 +733,9 @@ screens](https://patrickiben.github.io/catmech/validation/JOINT_MARGINAL_SYNTHES
 [![Marginal-model calibration, slope prior sensitivity and fit
 refusals](validation/joint-marginal-figures/joint-marginal-evidence.png)](https://patrickiben.github.io/catmech/validation/joint-marginal-figures/joint-marginal-evidence.pdf)
 
+**Earlier moment-model evidence and validation history (Click to
+expand)**
+
 ### Earlier moment-model evidence
 
 The earlier moment model’s random-intercept regression is available
@@ -922,6 +923,8 @@ references. These are simulation studies, not clinical validation or a
 general coverage theorem. Nonlinearity, missed contamination,
 informative selection, incompatible analysis models and dependent
 records remain limitations.
+
+**Legacy API: v0.1 PMM sensitivity semantics (Click to expand)**
 
 ## Legacy API
 

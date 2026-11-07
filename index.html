@@ -202,9 +202,7 @@
 <div class="section level2">
 <h2 id="package-overview">Package overview<a class="anchor" aria-label="anchor" href="#package-overview"></a>
 </h2>
-<p>catmech does auditable imputation of continuous measurements with quality flags, reference subsets and optional interval categories.</p>
-<p><code><a href="reference/catmech_model.html">catmech_model()</a></code> masks every flagged measurement and fits a conditional Gaussian model using trusted observations. It can ignore categories, treat them as exact, or use an externally specified category-error matrix. It preserves original data, records assumptions and replacements, checks sampler diagnostics, and supports linear-model pooling and comparison of declared sensitivity scenarios. <code><a href="reference/catmech_reference.html">catmech_reference()</a></code> uses genuinely measured reference values on an internal subset, and <code><a href="reference/catmech_pmm.html">catmech_pmm()</a></code> provides an audited standard predictive-matching option. <code><a href="reference/catmech_contamination.html">catmech_contamination()</a></code> models recording errors using those references, and <code><a href="reference/catmech_recording_audit.html">catmech_recording_audit()</a></code> and <code><a href="reference/catmech_holdout_check.html">catmech_holdout_check()</a></code> report what the references show on your own data.</p>
-<p>The Gaussian model and data augmentation are established methods. The contribution is a small, inspectable workflow with explicit failure handling. The earlier retain/replace PMM engine remains available for <strong>sensitivity analysis</strong>; its arbitrary retention of contaminated values caused severe bias and undercoverage. See the <a href="docs/ASSESSMENT.html">assessment</a>, <a href="docs/METHOD.html">model assumptions</a>, and <a href="validation/VALIDATION.html">validation record</a>.</p>
+<p>catmech provides an inspectable, auditable workflow for data with recorded measurements and reference subsets. Built on established Bayesian data augmentation, MCMC sampling, and semiparametric two-phase theory, it emphasizes explicit failure handling, prospective audit planning, and multi-endpoint regression pooling. The earlier retain/replace PMM engine remains available for <strong>sensitivity analysis</strong>; arbitrary retention of contaminated values caused severe bias and undercoverage in frozen validation benchmarks. See the <a href="docs/ASSESSMENT.html">assessment</a>, <a href="docs/METHOD.html">model assumptions</a>, and <a href="validation/VALIDATION.html">validation record</a>.</p>
 </div>
 <div class="section level2">
 <h2 id="install">Install<a class="anchor" aria-label="anchor" href="#install"></a>
@@ -269,8 +267,19 @@
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/catmech_recording_audit.html">catmech_recording_audit</a></span><span class="op">(</span><span class="va">dat_with_reference</span>, <span class="st">"lab_value"</span>, <span class="st">"reference_value"</span>,</span>
 <span>                        by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"outlier_flag"</span>, <span class="st">"site"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>The diagnostic printout highlights the error rate and stratum heterogeneity before you fit an imputation model:</p>
+<pre class="text"><code>-- Catmech Recording Audit --
+Status:             heterogeneity_detected
+Disagreements:      48 / 60 calibration rows (80.0%)
+Reference subset:   60 / 600 total rows (10.0%)
+Error distribution: mean = 1.9842, SD = 0.8123
+Selection SMD:      0.0412
+Heterogeneity across strata:
+  column level disagreements calibration_rows disagreement_rate lower upper
+ outlier     0             6               40             0.150 0.063 0.284
+ outlier     1            42               20             1.000 0.840 1.000</code></pre>
 <p>When the table points to the contamination model:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_contamination</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/catmech_contamination.html">catmech_contamination</a></span><span class="op">(</span></span>
 <span>  <span class="va">dat_with_reference</span>, <span class="st">"lab_value"</span>, <span class="st">"reference_value"</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"inflammation"</span>, <span class="st">"outcome"</span><span class="op">)</span>,</span>
@@ -285,7 +294,7 @@
 <h2 id="compare-audit-strategies-side-by-side">Compare audit strategies side by side<a class="anchor" aria-label="anchor" href="#compare-audit-strategies-side-by-side"></a>
 </h2>
 <p>To see how much precision is recovered and whether point estimates shift across different ways of handling un-audited records, compare all four core strategies directly on your data:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/catmech_compare_strategies.html">catmech_compare_strategies</a></span><span class="op">(</span></span>
 <span>  <span class="va">dat_with_reference</span>,</span>
 <span>  value <span class="op">=</span> <span class="st">"lab_value"</span>,</span>
@@ -323,7 +332,7 @@
 <h2 id="clustered-audits-experimental">Clustered audits: experimental<a class="anchor" aria-label="anchor" href="#clustered-audits-experimental"></a>
 </h2>
 <p>Records from one site are not independent, so pool with a cluster-robust variance:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_recorded</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/catmech_reference.html">catmech_reference</a></span><span class="op">(</span></span>
 <span>  <span class="va">dat_with_reference</span>, <span class="st">"lab_value"</span>, <span class="st">"reference_value"</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"inflammation"</span>, <span class="st">"outcome"</span><span class="op">)</span>,</span>
@@ -332,7 +341,7 @@
 <span><span class="fu"><a href="reference/catmech_pool_lm.html">catmech_pool_lm</a></span><span class="op">(</span><span class="va">fit_recorded</span>, <span class="va">outcome</span> <span class="op">~</span> <span class="va">lab_value</span> <span class="op">+</span> <span class="va">age</span> <span class="op">+</span> <span class="va">sex</span> <span class="op">+</span> <span class="va">inflammation</span>, cluster <span class="op">=</span> <span class="st">"site"</span><span class="op">)</span></span></code></pre></div>
 <p>That applies a delete-one-cluster jackknife variance (<code>cv3</code>) to each completed dataset, then Rubin’s rules with complete-data degrees of freedom of clusters minus one. A <a href="validation/VARIANCE_MI_SYNTHESIS.html">planned test</a> chose it, narrowly, over the earlier default, which undercovered <a href="validation/VARIANCE_CHECK_RESULTS.html">even with every row checked</a>. Intervals can still be too narrow with few clusters or a few influential ones, and this variance does not repair a shortfall in the imputation itself: linear imputation still undercovered on real items with it. A coefficient that a single cluster determines, such as a site type found at one site, draws a warning, because its interval can be far too narrow. Use <code>cluster_variance = "cr1s"</code> to reproduce earlier results.</p>
 <p>If the audited value is the analysis outcome, you can also add a random intercept for the cluster to the imputation model by passing <code>cluster</code> to the fit. <code><a href="reference/catmech_pool_lm.html">catmech_pool_lm()</a></code> then uses that column by default:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_clustered</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/catmech_reference.html">catmech_reference</a></span><span class="op">(</span></span>
 <span>  <span class="va">dat_with_reference</span>, <span class="st">"lab_value"</span>, <span class="st">"reference_value"</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"inflammation"</span><span class="op">)</span>,</span>
@@ -344,7 +353,7 @@
 <h3 id="mixed-recording-patterns-within-sites">Mixed recording patterns within sites<a class="anchor" aria-label="anchor" href="#mixed-recording-patterns-within-sites"></a>
 </h3>
 <p>Version 0.8.0 adds <code>cluster_model = "joint"</code>. It models the checked and recorded measurements together, using one shared pair of site effects. A site can contain rows with recorded values, rows without them, and audited rows in either pattern. A site with neither measurement observed is predicted from the population model. Checked values stay exact, and the raw input remains in <code>original</code>.</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_joint</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/catmech_reference.html">catmech_reference</a></span><span class="op">(</span></span>
 <span>  <span class="va">dat_with_reference</span>, <span class="st">"lab_value"</span>, <span class="st">"reference_value"</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"sex"</span>, <span class="st">"inflammation"</span><span class="op">)</span>,</span>
@@ -369,7 +378,7 @@
 </h3>
 <p>Version 0.10.1 allows one further doubling to 64,000 retained iterations per chain when the marginal sampler fails its checks at 32,000. Every diagnostic monitor and cutoff remains in force; successful earlier attempts stop as before. The original v0.10.0 confirmation below is preserved, with the <a href="validation/MARGINAL_EXTENSION_SYNTHESIS.html">numerical replay reported separately</a>. The complete dependent replay returned all 12,000 MCMC fits and all 27,600 analysis intervals. Both formerly failing cases pass at 64k; all four screens now pass. All 27,596 previously successful analyses are unchanged. This repeats the existing cohorts and is not an independent scientific confirmation.</p>
 <p>The explicit <code>cluster_model = "joint_marginal"</code> models the checked value, recorded value and complete continuous predictors as a joint Gaussian vector with correlated site effects. It estimates the population regression of the checked value on the predictors from the total site-plus-row covariance. This includes uncertainty in the predictor distribution and preserves the distinction between a marginal slope and a within-site slope.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fit_marginal</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/catmech_reference.html">catmech_reference</a></span><span class="op">(</span></span>
 <span>  <span class="va">dat_with_reference</span>, <span class="st">"lab_value"</span>, <span class="st">"reference_value"</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"inflammation"</span><span class="op">)</span>,</span>
@@ -382,6 +391,8 @@
 <p>Across <strong>800</strong> complete paired prior comparisons, measured slope sensitivity was <strong>70.1% lower</strong>, using the larger of the new model’s covariance-scale and regression-scale responses. This is a comparison over declared prior ranges for one continuous-predictor slope. The remaining shifts are close to finite-chain Monte Carlo errors, so it is not evidence of prior independence.</p>
 <p><strong>The v0.10.0 availability screen failed:</strong> <strong>2 of 3,600</strong> default-prior candidate fits refused to return, versus none for the conditional model. Both missed the unchanged effective-sample-size cutoff at the maximum run length. Every cell still returned at least <strong>99%</strong> of fits and intervals, but that does not satisfy the separate requirement of no observed increase in refusals. The option remains experimental; these results do not validate arbitrary contextual relationships, multiple-predictor coverage, rare counts or use of the repaired measurement as an analysis predictor. See <a href="validation/JOINT_MARGINAL_SYNTHESIS.html">all results, uncertainty and failed screens</a>.</p>
 <p><a href="validation/joint-marginal-figures/joint-marginal-evidence.pdf"><img src="validation/joint-marginal-figures/joint-marginal-evidence.png" alt="Marginal-model calibration, slope prior sensitivity and fit refusals"></a></p>
+<details><summary><strong>Earlier moment-model evidence and validation history (Click to expand)</strong>
+</summary></details>
 </div>
 <div class="section level3">
 <h3 id="earlier-moment-model-evidence">Earlier moment-model evidence<a class="anchor" aria-label="anchor" href="#earlier-moment-model-evidence"></a>
@@ -390,6 +401,7 @@
 <p><a href="validation/INDEPENDENT_SETUPS_SYNTHESIS.html">Comparator setups written by fresh AI agents</a>, who saw no results, are in <code>tools/independent-setups/</code>. None met the rule, so the option stays, but <code>ind_mice</code>, with separate within-cluster and between-cluster slopes, reached 92% on all 11 real items at a 25% audit against the option’s nine, at about the same accuracy, and largely removed the bias when the audited value was a predictor. It missed the rule by covering above 98% on two items. These are unreviewed research code and not package features.</p>
 <p>Those separate slopes alone did not reproduce that result. In a <a href="validation/WITHIN_BETWEEN_SYNTHESIS.html">later planned test</a>, adding cluster means to the option improved coverage when the audited value was a predictor, but had 1.258 times the option’s error on real items at a 25% audit, and it was not adopted. Linear MI had lower bias than it on simulated predictor cells, and the option is unchanged.</p>
 <p>In the <a href="validation/RARE_COUNTS_SYNTHESIS.html">count-data experiment</a>, coverage fell with more variable, skewed cluster frailty at both tested count levels. The original rule returned <strong>HEAVY TAILS</strong>, but the generator changes variance, skewness and dependence together; it does not isolate tail shape or rule out problems from rarity in other settings. No candidate fix or warning met its rule. Missing an influential cluster is one possible explanation for failures, rather than a mechanism established by that experiment. Results can also turn on one or two clusters: on <a href="validation/SECOND_SYSTEM_SYNTHESIS.html">another health system</a>, one district of four clinics reversed the sign of a slope.</p>
+
 </div>
 </div>
 <div class="section level2">
@@ -400,7 +412,7 @@
 <div class="section level2">
 <h2 id="use-categories-only-under-an-explicit-observation-model">Use categories only under an explicit observation model<a class="anchor" aria-label="anchor" href="#use-categories-only-under-an-explicit-observation-model"></a>
 </h2>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">labels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Low"</span>, <span class="st">"Medium"</span>, <span class="st">"High"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Example sensitivity assumption, not an estimated or clinically validated matrix.</span></span>
@@ -441,78 +453,81 @@
 <li>Later planned tests on <a href="validation/SECOND_SYSTEM_SYNTHESIS.html">another health system</a>, of <a href="validation/RARE_COUNTS_SYNTHESIS.html">rare counts</a> and of <a href="validation/INDEPENDENT_SETUPS_SYNTHESIS.html">independently written setups</a> change no package code, nor does a <a href="validation/WITHIN_BETWEEN_SYNTHESIS.html">test of separate slopes</a>.</li>
 </ul>
 <p>The <a href="validation/COVERAGE_PLAN.html">v0.2 coverage protocol</a> transfers useful controls from the author’s carryover, False Floor, calibration and assumption-audit research. Independent numerical oracles check the category sampler and the reference model’s joint predictive distribution, including shared parameter uncertainty. Clinical-format synthetic fixtures include missed flags, site shifts and rounded records. <a href="docs/RESEARCH_TRANSFER_PLAN.html">Transfer details</a> state what does and does not carry over. The <a href="validation/EXTENSION_SYNTHESIS.html">extension study</a> reports matched-information PMM comparisons, the value of actual reference measurements, and failures under selective or inaccurate references. These are simulation studies, not clinical validation or a general coverage theorem. Nonlinearity, missed contamination, informative selection, incompatible analysis models and dependent records remain limitations.</p>
+<details><summary><strong>Legacy API: v0.1 PMM sensitivity semantics (Click to expand)</strong>
+</summary></details>
 </div>
 <div class="section level2">
 <h2 id="legacy-api">Legacy API<a class="anchor" aria-label="anchor" href="#legacy-api"></a>
 </h2>
 <p><code><a href="reference/catmech_spec.html">catmech_spec()</a></code> and <code><a href="reference/catmech_impute.html">catmech_impute()</a></code> retain the v0.1 PMM sensitivity semantics. Their <code>corruption_probability</code> is an imposed replacement probability, not a posterior corruption estimate. <code><a href="reference/catmech_pool_lm.html">catmech_pool_lm()</a></code> refuses this engine unless <code>allow_sensitivity = TRUE</code>; that override labels the result as sensitivity-only. See the <a href="docs/LEGACY_METHOD.html">legacy method</a>, <a href="inst/examples/lab.R">example</a>, and <a href="validation/benchmark/RESULTS.html">historical benchmark</a>. Existing specifications are not silently converted to the new model.</p>
+
 </div>
 <div class="section level2">
 <h2 id="reproduce">Reproduce<a class="anchor" aria-label="anchor" href="#reproduce"></a>
 </h2>
-<div class="sourceCode" id="cb14"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'install.packages(c("testthat", "pkgload", "roxygen2"))'</span></span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'testthat::test_local()'</span></span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="ex">R</span> CMD build .</span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="ex">R</span> CMD check <span class="at">--no-manual</span> catmech_1.0.0.tar.gz</span>
-<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="ex">Rscript</span> tools/check-v072-unchanged.R validation/my-v072-comparison.txt</span>
-<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="ex">Rscript</span> validation/run-joint-marginal.R confirmation validation/my-joint-marginal</span>
-<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/verify-joint-marginal.py validation/my-joint-marginal <span class="at">--tamper-tests</span></span>
-<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co"># Reproduce the previous direct-interval comparison from its frozen sources:</span></span>
-<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="ex">Rscript</span> validation/v0.9.0-source/validation/run-joint-calibration.R confirmation validation/my-joint-calibration</span>
-<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/verify-joint-calibration.py validation/my-joint-calibration <span class="at">--tamper-tests</span></span>
-<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="co"># Reproduce the historical joint-model study from its frozen sources:</span></span>
-<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="ex">Rscript</span> validation/v0.8.0-source/validation/run-joint-cluster.R heldout validation/my-joint-cluster</span>
-<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/verify-joint-cluster.py validation/my-joint-cluster</span>
-<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a><span class="ex">Rscript</span> tools/check-model-oracle.R validation/my-model-oracle</span>
-<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a><span class="ex">Rscript</span> tools/coverage-benchmark.R confirmatory validation/my-heldout</span>
-<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a><span class="ex">Rscript</span> tools/coverage-benchmark.R clinical validation/my-clinical</span>
-<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a><span class="ex">Rscript</span> tools/check-reference-oracle.R validation/my-reference-oracle</span>
-<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a><span class="ex">Rscript</span> tools/check-pooling-guards.R validation/my-pooling-guards</span>
-<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a><span class="ex">Rscript</span> tools/extension-benchmark.R distribution validation/my-distribution</span>
-<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a><span class="ex">Rscript</span> tools/extension-benchmark.R reference validation/my-reference-study</span>
-<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a><span class="ex">Rscript</span> tools/extension-benchmark.R stress validation/my-reference-stress</span>
-<span id="cb14-22"><a href="#cb14-22" tabindex="-1"></a><span class="ex">Rscript</span> tools/extension-benchmark.R controls validation/my-reference-controls</span>
-<span id="cb14-23"><a href="#cb14-23" tabindex="-1"></a><span class="ex">Rscript</span> tools/check-contamination-oracle.R validation/my-contamination-oracle</span>
-<span id="cb14-24"><a href="#cb14-24" tabindex="-1"></a><span class="ex">Rscript</span> tools/contamination-benchmark.R study validation/my-contamination-study</span>
-<span id="cb14-25"><a href="#cb14-25" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/real-data-fetch.py my-raw-directory validation/my-real-data</span>
-<span id="cb14-26"><a href="#cb14-26" tabindex="-1"></a><span class="ex">Rscript</span> tools/real-data-prepare.R my-raw-directory validation/my-real-data</span>
-<span id="cb14-27"><a href="#cb14-27" tabindex="-1"></a><span class="ex">Rscript</span> tools/real-data-benchmark.R study validation/my-real-data-study</span>
-<span id="cb14-28"><a href="#cb14-28" tabindex="-1"></a><span class="ex">Rscript</span> tools/merged-audit-pilot.R study validation/merged-audit-pilot/my-study 400</span>
-<span id="cb14-29"><a href="#cb14-29" tabindex="-1"></a><span class="ex">Rscript</span> tools/audit-plan-benchmark.R study validation/my-audit-plan-study</span>
-<span id="cb14-30"><a href="#cb14-30" tabindex="-1"></a><span class="ex">Rscript</span> tools/clustered-benchmark.R study validation/my-clustered-study</span>
-<span id="cb14-31"><a href="#cb14-31" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/clustered-score.py my-clustered-decisions.txt validation/my-clustered-study</span>
-<span id="cb14-32"><a href="#cb14-32" tabindex="-1"></a><span class="ex">Rscript</span> tools/clustered-review-checks.R validation/my-clustered-review</span>
-<span id="cb14-33"><a href="#cb14-33" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/clustered-posthoc.py</span>
-<span id="cb14-34"><a href="#cb14-34" tabindex="-1"></a><span class="ex">Rscript</span> tools/clustered-fix-benchmark.R study validation/my-clustered-fix-study</span>
-<span id="cb14-35"><a href="#cb14-35" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/clustered-fix-score.py my-clustered-fix-decisions.txt validation/my-clustered-fix-study</span>
-<span id="cb14-36"><a href="#cb14-36" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/clustered-fix-posthoc.py</span>
-<span id="cb14-37"><a href="#cb14-37" tabindex="-1"></a><span class="ex">Rscript</span> tools/clustered-fix-replay.R validation/my-clustered-fix-replay</span>
-<span id="cb14-38"><a href="#cb14-38" tabindex="-1"></a><span class="ex">Rscript</span> tools/oracle-variance-check.R validation/my-variance-check</span>
-<span id="cb14-39"><a href="#cb14-39" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/oracle-variance-score.py my-variance-decisions.txt validation/my-variance-check</span>
-<span id="cb14-40"><a href="#cb14-40" tabindex="-1"></a><span class="ex">Rscript</span> tools/check-cluster-algebra.R my-cluster-algebra-check.txt</span>
-<span id="cb14-41"><a href="#cb14-41" tabindex="-1"></a><span class="ex">Rscript</span> tools/variance-mi-benchmark.R study validation/my-variance-mi-study</span>
-<span id="cb14-42"><a href="#cb14-42" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/variance-mi-score.py my-variance-mi-decisions.txt validation/my-variance-mi-study</span>
-<span id="cb14-43"><a href="#cb14-43" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/variance-mi-posthoc.py</span>
-<span id="cb14-44"><a href="#cb14-44" tabindex="-1"></a><span class="ex">Rscript</span> tools/variance-mi-replay.R validation/my-variance-mi-replay</span>
-<span id="cb14-45"><a href="#cb14-45" tabindex="-1"></a><span class="ex">Rscript</span> tools/outside-methods-benchmark.R study validation/my-outside-methods-study</span>
-<span id="cb14-46"><a href="#cb14-46" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/outside-methods-score.py validation/my-outside-methods-study my-outside-methods-decisions.txt</span>
-<span id="cb14-47"><a href="#cb14-47" tabindex="-1"></a><span class="ex">Rscript</span> tools/outside-methods-sensitivity.R validation/my-outside-methods-sensitivity</span>
-<span id="cb14-48"><a href="#cb14-48" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/outside-methods-sensitivity-score.py</span>
-<span id="cb14-49"><a href="#cb14-49" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/outside-methods-posthoc.py</span>
-<span id="cb14-50"><a href="#cb14-50" tabindex="-1"></a><span class="ex">Rscript</span> tools/outside-methods-twophase-check.R my-twophase-check.txt</span>
-<span id="cb14-51"><a href="#cb14-51" tabindex="-1"></a><span class="ex">Rscript</span> tools/second-system-benchmark.R study validation/my-second-system-study</span>
-<span id="cb14-52"><a href="#cb14-52" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/second-system-score.py validation/my-second-system-study my-second-system-decisions.txt</span>
-<span id="cb14-53"><a href="#cb14-53" tabindex="-1"></a><span class="ex">Rscript</span> tools/second-system-posthoc.R</span>
-<span id="cb14-54"><a href="#cb14-54" tabindex="-1"></a><span class="ex">Rscript</span> tools/rare-counts-benchmark.R study validation/my-rare-counts-study</span>
-<span id="cb14-55"><a href="#cb14-55" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/rare-counts-score.py validation/my-rare-counts-study my-rare-counts-decisions.txt</span>
-<span id="cb14-56"><a href="#cb14-56" tabindex="-1"></a><span class="ex">Rscript</span> tools/independent-setups-benchmark.R study validation/my-independent-setups-study</span>
-<span id="cb14-57"><a href="#cb14-57" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/independent-setups-score.py validation/my-independent-setups-study my-independent-setups-decisions.txt</span>
-<span id="cb14-58"><a href="#cb14-58" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/independent-setups-posthoc.py</span>
-<span id="cb14-59"><a href="#cb14-59" tabindex="-1"></a><span class="ex">Rscript</span> tools/within-between-benchmark.R study validation/my-within-between-study</span>
-<span id="cb14-60"><a href="#cb14-60" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/within-between-score.py validation/my-within-between-study my-within-between-decisions.txt</span>
-<span id="cb14-61"><a href="#cb14-61" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/within-between-posthoc.py validation/my-within-between-study my-within-between-posthoc.txt</span>
-<span id="cb14-62"><a href="#cb14-62" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/within-between-shared-cells.py validation/my-within-between-study my-within-between-shared-cells.txt</span>
-<span id="cb14-63"><a href="#cb14-63" tabindex="-1"></a><span class="ex">python3</span> tools/verify-artifacts.py</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode sh"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'install.packages(c("testthat", "pkgload", "roxygen2"))'</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'testthat::test_local()'</span></span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a><span class="ex">R</span> CMD build .</span>
+<span id="cb15-4"><a href="#cb15-4" tabindex="-1"></a><span class="ex">R</span> CMD check <span class="at">--no-manual</span> catmech_1.0.0.tar.gz</span>
+<span id="cb15-5"><a href="#cb15-5" tabindex="-1"></a><span class="ex">Rscript</span> tools/check-v072-unchanged.R validation/my-v072-comparison.txt</span>
+<span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="ex">Rscript</span> validation/run-joint-marginal.R confirmation validation/my-joint-marginal</span>
+<span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/verify-joint-marginal.py validation/my-joint-marginal <span class="at">--tamper-tests</span></span>
+<span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="co"># Reproduce the previous direct-interval comparison from its frozen sources:</span></span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="ex">Rscript</span> validation/v0.9.0-source/validation/run-joint-calibration.R confirmation validation/my-joint-calibration</span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/verify-joint-calibration.py validation/my-joint-calibration <span class="at">--tamper-tests</span></span>
+<span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a><span class="co"># Reproduce the historical joint-model study from its frozen sources:</span></span>
+<span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a><span class="ex">Rscript</span> validation/v0.8.0-source/validation/run-joint-cluster.R heldout validation/my-joint-cluster</span>
+<span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/verify-joint-cluster.py validation/my-joint-cluster</span>
+<span id="cb15-14"><a href="#cb15-14" tabindex="-1"></a><span class="ex">Rscript</span> tools/check-model-oracle.R validation/my-model-oracle</span>
+<span id="cb15-15"><a href="#cb15-15" tabindex="-1"></a><span class="ex">Rscript</span> tools/coverage-benchmark.R confirmatory validation/my-heldout</span>
+<span id="cb15-16"><a href="#cb15-16" tabindex="-1"></a><span class="ex">Rscript</span> tools/coverage-benchmark.R clinical validation/my-clinical</span>
+<span id="cb15-17"><a href="#cb15-17" tabindex="-1"></a><span class="ex">Rscript</span> tools/check-reference-oracle.R validation/my-reference-oracle</span>
+<span id="cb15-18"><a href="#cb15-18" tabindex="-1"></a><span class="ex">Rscript</span> tools/check-pooling-guards.R validation/my-pooling-guards</span>
+<span id="cb15-19"><a href="#cb15-19" tabindex="-1"></a><span class="ex">Rscript</span> tools/extension-benchmark.R distribution validation/my-distribution</span>
+<span id="cb15-20"><a href="#cb15-20" tabindex="-1"></a><span class="ex">Rscript</span> tools/extension-benchmark.R reference validation/my-reference-study</span>
+<span id="cb15-21"><a href="#cb15-21" tabindex="-1"></a><span class="ex">Rscript</span> tools/extension-benchmark.R stress validation/my-reference-stress</span>
+<span id="cb15-22"><a href="#cb15-22" tabindex="-1"></a><span class="ex">Rscript</span> tools/extension-benchmark.R controls validation/my-reference-controls</span>
+<span id="cb15-23"><a href="#cb15-23" tabindex="-1"></a><span class="ex">Rscript</span> tools/check-contamination-oracle.R validation/my-contamination-oracle</span>
+<span id="cb15-24"><a href="#cb15-24" tabindex="-1"></a><span class="ex">Rscript</span> tools/contamination-benchmark.R study validation/my-contamination-study</span>
+<span id="cb15-25"><a href="#cb15-25" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/real-data-fetch.py my-raw-directory validation/my-real-data</span>
+<span id="cb15-26"><a href="#cb15-26" tabindex="-1"></a><span class="ex">Rscript</span> tools/real-data-prepare.R my-raw-directory validation/my-real-data</span>
+<span id="cb15-27"><a href="#cb15-27" tabindex="-1"></a><span class="ex">Rscript</span> tools/real-data-benchmark.R study validation/my-real-data-study</span>
+<span id="cb15-28"><a href="#cb15-28" tabindex="-1"></a><span class="ex">Rscript</span> tools/merged-audit-pilot.R study validation/merged-audit-pilot/my-study 400</span>
+<span id="cb15-29"><a href="#cb15-29" tabindex="-1"></a><span class="ex">Rscript</span> tools/audit-plan-benchmark.R study validation/my-audit-plan-study</span>
+<span id="cb15-30"><a href="#cb15-30" tabindex="-1"></a><span class="ex">Rscript</span> tools/clustered-benchmark.R study validation/my-clustered-study</span>
+<span id="cb15-31"><a href="#cb15-31" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/clustered-score.py my-clustered-decisions.txt validation/my-clustered-study</span>
+<span id="cb15-32"><a href="#cb15-32" tabindex="-1"></a><span class="ex">Rscript</span> tools/clustered-review-checks.R validation/my-clustered-review</span>
+<span id="cb15-33"><a href="#cb15-33" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/clustered-posthoc.py</span>
+<span id="cb15-34"><a href="#cb15-34" tabindex="-1"></a><span class="ex">Rscript</span> tools/clustered-fix-benchmark.R study validation/my-clustered-fix-study</span>
+<span id="cb15-35"><a href="#cb15-35" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/clustered-fix-score.py my-clustered-fix-decisions.txt validation/my-clustered-fix-study</span>
+<span id="cb15-36"><a href="#cb15-36" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/clustered-fix-posthoc.py</span>
+<span id="cb15-37"><a href="#cb15-37" tabindex="-1"></a><span class="ex">Rscript</span> tools/clustered-fix-replay.R validation/my-clustered-fix-replay</span>
+<span id="cb15-38"><a href="#cb15-38" tabindex="-1"></a><span class="ex">Rscript</span> tools/oracle-variance-check.R validation/my-variance-check</span>
+<span id="cb15-39"><a href="#cb15-39" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/oracle-variance-score.py my-variance-decisions.txt validation/my-variance-check</span>
+<span id="cb15-40"><a href="#cb15-40" tabindex="-1"></a><span class="ex">Rscript</span> tools/check-cluster-algebra.R my-cluster-algebra-check.txt</span>
+<span id="cb15-41"><a href="#cb15-41" tabindex="-1"></a><span class="ex">Rscript</span> tools/variance-mi-benchmark.R study validation/my-variance-mi-study</span>
+<span id="cb15-42"><a href="#cb15-42" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/variance-mi-score.py my-variance-mi-decisions.txt validation/my-variance-mi-study</span>
+<span id="cb15-43"><a href="#cb15-43" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/variance-mi-posthoc.py</span>
+<span id="cb15-44"><a href="#cb15-44" tabindex="-1"></a><span class="ex">Rscript</span> tools/variance-mi-replay.R validation/my-variance-mi-replay</span>
+<span id="cb15-45"><a href="#cb15-45" tabindex="-1"></a><span class="ex">Rscript</span> tools/outside-methods-benchmark.R study validation/my-outside-methods-study</span>
+<span id="cb15-46"><a href="#cb15-46" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/outside-methods-score.py validation/my-outside-methods-study my-outside-methods-decisions.txt</span>
+<span id="cb15-47"><a href="#cb15-47" tabindex="-1"></a><span class="ex">Rscript</span> tools/outside-methods-sensitivity.R validation/my-outside-methods-sensitivity</span>
+<span id="cb15-48"><a href="#cb15-48" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/outside-methods-sensitivity-score.py</span>
+<span id="cb15-49"><a href="#cb15-49" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/outside-methods-posthoc.py</span>
+<span id="cb15-50"><a href="#cb15-50" tabindex="-1"></a><span class="ex">Rscript</span> tools/outside-methods-twophase-check.R my-twophase-check.txt</span>
+<span id="cb15-51"><a href="#cb15-51" tabindex="-1"></a><span class="ex">Rscript</span> tools/second-system-benchmark.R study validation/my-second-system-study</span>
+<span id="cb15-52"><a href="#cb15-52" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/second-system-score.py validation/my-second-system-study my-second-system-decisions.txt</span>
+<span id="cb15-53"><a href="#cb15-53" tabindex="-1"></a><span class="ex">Rscript</span> tools/second-system-posthoc.R</span>
+<span id="cb15-54"><a href="#cb15-54" tabindex="-1"></a><span class="ex">Rscript</span> tools/rare-counts-benchmark.R study validation/my-rare-counts-study</span>
+<span id="cb15-55"><a href="#cb15-55" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/rare-counts-score.py validation/my-rare-counts-study my-rare-counts-decisions.txt</span>
+<span id="cb15-56"><a href="#cb15-56" tabindex="-1"></a><span class="ex">Rscript</span> tools/independent-setups-benchmark.R study validation/my-independent-setups-study</span>
+<span id="cb15-57"><a href="#cb15-57" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/independent-setups-score.py validation/my-independent-setups-study my-independent-setups-decisions.txt</span>
+<span id="cb15-58"><a href="#cb15-58" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/independent-setups-posthoc.py</span>
+<span id="cb15-59"><a href="#cb15-59" tabindex="-1"></a><span class="ex">Rscript</span> tools/within-between-benchmark.R study validation/my-within-between-study</span>
+<span id="cb15-60"><a href="#cb15-60" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/within-between-score.py validation/my-within-between-study my-within-between-decisions.txt</span>
+<span id="cb15-61"><a href="#cb15-61" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/within-between-posthoc.py validation/my-within-between-study my-within-between-posthoc.txt</span>
+<span id="cb15-62"><a href="#cb15-62" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-I</span> tools/within-between-shared-cells.py validation/my-within-between-study my-within-between-shared-cells.txt</span>
+<span id="cb15-63"><a href="#cb15-63" tabindex="-1"></a><span class="ex">python3</span> tools/verify-artifacts.py</span></code></pre></div>
 <p>Use new output directories. The <code>outside-methods</code> and <code>independent-setups</code> runners also need <code>survey</code>, <code>lme4</code> and <code>pan</code>, <code>tools/second-system-prepare.R</code> needs <code>readxl</code>, and <code>tools/check-cluster-algebra.R</code> needs <code>lme4</code> and <code>mitools</code>. <a href="validation/VALIDATION.html">Validation</a> lists further commands, including the real-audit study. <code>tools/clustered-benchmark.R</code>, <code>tools/clustered-review-checks.R</code> and <code>tools/clustered-fix-benchmark.R</code> ran on the resampling that version 0.6.0 replaced, so run those three from commit <code>8c81044</code>. <code>tools/clustered-fix-replay.R</code> needs the variance that was the default through 0.6.0, so run it from <code>8982952</code>. Archived v0.1 to v0.5.0 sources retain the historical benchmark inputs; their hashes are checked against those frozen versions. A fresh ClinicalTrials.gov download will differ from the dated pool because the registry changes. The v0.3.1 guards reject unsupported analyses and gate experimental reference-PMM pooling; successful scalar estimates and intervals are unchanged. See <a href="validation/VALIDATION.html">validation</a> for evidence, environment and remaining gaps.</p>
 </div>
 <div class="section level2">

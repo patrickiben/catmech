@@ -3,7 +3,7 @@
 **Date:** November 6, 2026  
 **Repository Path:** `/Users/patrickiben/Documents/catmech`  
 **Git Remote:** `https://github.com/patrickiben/catmech.git` (branch:
-`main`, commit: `7cbb1ff`)  
+`main`, commit: `3551a5f`)  
 **Package Version:** `1.0.0`  
 **Maintainer:** Patrick Iben (`patrickiben@gmail.com`, ORCID:
 `0009-0005-2443-7973`)  
@@ -67,8 +67,13 @@ standalone HTML formats.
 The package is **100% audited, verified, and ready for official CRAN
 submission**.
 
-- **Git History**: Clean tree at commit `7cbb1ff` on `main`, pushed to
+- **Git History**: Clean tree at commit `3551a5f` on `main`, pushed to
   GitHub.
+- **GitHub Actions CI**: **100% GREEN (`✓`)** on all workflows:
+  - `R-CMD-check`: Passed on macOS (arm64), Ubuntu (Linux), and Windows
+    Server (`✓`).
+  - `pkgdown`: Passed and deployed to GitHub Pages (`gh-pages` branch)
+    (`✓`).
 - **Test Suite**: **1,754 unit tests** passing with **0 failures, 0
   warnings, 0 skips**
   ([`testthat::test_local()`](https://testthat.r-lib.org/reference/test_package.html)).
@@ -84,6 +89,31 @@ submission**.
 - **Documentation**: Fast, self-contained `@examples` for all 26
   exported functions, all lines formatted \< 85 characters. Built-in
   vignette (`vignettes/catmech-clinical-audit.Rmd`) builds cleanly.
+
+### 2.1 Peer Review Refinements (v1.0.0 Release Candidate)
+
+- **README Streamlining**: Consolidated redundancy in
+  `## Package overview`, wrapped technical validation history
+  (`Earlier moment-model evidence`, `Legacy API`) in collapsible
+  `<details>` blocks to prevent user scroll fatigue, and added an
+  annotated diagnostic console output block for
+  [`catmech_recording_audit()`](https://patrickiben.github.io/catmech/reference/catmech_recording_audit.md).
+- **Academic Manuscript Discussion Expansion**: In both
+  `paper/manuscript.Rmd` and `paper/paper.md`, explicitly framed the
+  simulation-to-practice divergence (synthetic gross errors favoring
+  mixture models vs. real-world subtle discrepancies favoring linear MI)
+  as a key methodological insight that justifies the decision framework
+  and empirical strategy comparison.
+- **Multi-Endpoint Clinical Elevation**: Prominently featured
+  `catmech_pool_coxph` (Lin–Wei sandwich standard errors, event-based
+  Barnard–Rubin degrees of freedom $\nu_{com} = d - p$) and
+  `catmech_pool_glm` (Huber–White–Liang–Zeger sandwich standard errors)
+  in Section 3 and Table 1 alongside linear models.
+- **CI / GitHub Actions Fix**: Resolved `pkgdown` deployment collision
+  with existing `docs/` directory by configuring `_site/` target in
+  `_pkgdown.yml` and `.github/workflows/pkgdown.yaml`. Both `pkgdown`
+  and `R-CMD-check` pass with 100% green checkmarks (`✓`) across macOS,
+  Ubuntu, and Windows.
 
 ------------------------------------------------------------------------
 
@@ -223,7 +253,7 @@ Copy and paste the block below into the first prompt of your new chat:
 I am continuing work on the `catmech` R package (version 1.0.0).
 
 Repository path: `/Users/patrickiben/Documents/catmech`
-Git Remote: `https://github.com/patrickiben/catmech.git` (branch `main`, clean at commit `7cbb1ff`)
+Git Remote: `https://github.com/patrickiben/catmech.git` (branch `main`, clean at commit `3551a5f`)
 Maintainer: Patrick Iben (`patrickiben@gmail.com`, ORCID: `0009-0005-2443-7973`)
 
 The package is fully implemented, documented, and QC'd for official release 1.0.0:
