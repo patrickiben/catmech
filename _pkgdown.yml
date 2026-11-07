@@ -1,5 +1,6 @@
 url: https://patrickiben.github.io/catmech
 title: catmech
+destination: _site
 template:
   bootstrap: 5
 
