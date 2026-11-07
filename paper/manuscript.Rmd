@@ -23,8 +23,8 @@ header-includes:
   - \emergencystretch=2em
   - \AtBeginDocument{\sloppy}
 abstract: |
-  Continuous measurements in multicenter clinical trials, electronic health record (EHR) disease registries, and observational epidemiological cohorts are frequently compromised by transcription mistakes, unit conversion errors, assay calibration shifts, and missing values. Traditional statistical packages address missing covariates under Missing at Random (MAR) assumptions, discarding untrusted observations and imputing from scratch. In source-data verification (SDV) and clinical audit designs, however, recorded values are present but unreliable, and a gold-standard reference measurement is audited on only a fraction of records. Naive analysis of recorded values suffers attenuation bias, complete-case analysis of audited records inflates standard errors, and standard multiple imputation needlessly discards the precision of valid recordings. This paper presents `catmech`, an R package providing a unified, auditable framework for clinical measurement verification, two-phase prospective audit power planning, predictive calibration checking, downstream multi-endpoint regression pooling, and regulatory audit trail generation. We derive the analytical conditional posteriors for reference-calibrated contamination mixture models, formalize prospective power calculation using two-phase influence function expansions, and establish cluster-robust covariance estimators with Barnard-Rubin finite-sample degrees of freedom for linear models (CV3 jackknife), generalized linear models (CR1S Huber-White-Liang-Zeger sandwich), and Cox proportional hazards survival models (event-based model covariance and clustered Lin-Wei sandwich). We evaluate the package across 10 frozen validation archives (over 500,000 requests), including the synthetic contamination study (52,950 requests), two public paired-discrepancy benchmarks on ClinicalTrials.gov ($N = 27,208$) and NHANES 2017--2018 ($N = 3,908$; 33,800 requests), clustered variance evaluations (148,500 requests), and facility-level recounts from the Rwanda Health Management Information System and psychology effect-size recounts (45,600 requests). Retaining recorded measurements reduces root mean squared error by 43% to 48% over discarding unaudited values on ClinicalTrials.gov and NHANES. We articulate an evidence-based decision rule and report all pre-specified negative and inconclusive findings: the contamination mixture model avoids severe attenuation bias and narrows confidence intervals by 44% relative to complete-case analysis under simulated gross, separable errors, whereas simple linear imputation is preferred under subtle, diffuse real-world discrepancies. Finally, we implement cryptographic SHA-256 provenance tracking meeting FDA 21 CFR Part 11 and ICH GCP E9 regulatory compliance standards.
-keywords: [clinical audits, measurement error, two-phase sampling, multiple imputation, survival analysis, robust sandwich covariance, R package, regulatory compliance]
+  Continuous measurements in multicenter clinical trials, electronic health record (EHR) disease registries, and observational epidemiological cohorts are frequently compromised by transcription mistakes, unit conversion errors, assay calibration shifts, and missing values. Traditional statistical packages address missing covariates under Missing at Random (MAR) assumptions, discarding untrusted observations and imputing from scratch. In source-data verification (SDV) and clinical audit designs, however, recorded values are present but unreliable, and a gold-standard reference measurement is audited on only a fraction of records. Naive analysis of recorded values suffers attenuation bias, complete-case analysis of audited records inflates standard errors, and standard multiple imputation needlessly discards the precision of valid recordings. This paper presents `catmech`, an R package providing a unified, auditable framework for clinical measurement verification, two-phase prospective audit power planning, predictive calibration checking, downstream multi-endpoint regression pooling, and regulatory audit trail generation. We derive the analytical conditional posteriors for reference-calibrated contamination mixture models, formalize prospective power calculation using two-phase influence function expansions, and establish cluster-robust covariance estimators with Barnard-Rubin finite-sample degrees of freedom for linear models (CV3 jackknife), generalized linear models (CR1S Huber-White-Liang-Zeger sandwich), and Cox proportional hazards survival models (event-based model covariance and clustered Lin-Wei sandwich). We evaluate the package across 10 frozen validation archives (over 500,000 requests), including the synthetic contamination study (52,950 requests), two public paired-discrepancy benchmarks on ClinicalTrials.gov ($N = 27,208$) and NHANES 2017--2018 ($N = 3,908$; 33,800 requests), clustered variance evaluations (148,500 requests), and facility-level recounts from the Rwanda Health Management Information System and psychology effect-size recounts (45,600 requests). Retaining recorded measurements reduces root mean squared error by 43% to 48% over discarding unaudited values on ClinicalTrials.gov and NHANES. We articulate an evidence-based decision rule and report all pre-specified negative and inconclusive findings: the contamination mixture model avoids severe attenuation bias and narrows confidence intervals by 44% relative to complete-case analysis under simulated gross, separable errors, whereas simple linear imputation is preferred under subtle, diffuse real-world discrepancies. Finally, `catmech_audit_trail()` records SHA-256 hashes of the input data, assumptions, and completed datasets to support documentation under FDA 21 CFR Part 11 and ICH E9; it does not by itself make an analysis system compliant.
+keywords: [clinical audits, measurement error, two-phase sampling, multiple imputation, survival analysis, robust sandwich covariance, R package, regulatory documentation]
 ---
 
 # Introduction
@@ -114,7 +114,7 @@ The `catmech` package is structured into modular S3 components designed for comp
 | **Data diagnostics** | `catmech_recording_audit()`, `catmech_holdout_check()` | Stratum-specific discrepancy auditing (Jeffreys beta intervals) and out-of-sample rank-PIT checks. |
 | **Imputation engines** | `catmech_contamination()`, `catmech_reference()` | Reference-calibrated collapsed slice-within-Gibbs mixture model and Gaussian reference MI (`RcppArmadillo`). |
 | **Model pooling** | `catmech_pool_lm()`, `catmech_pool_glm()`, `catmech_pool_coxph()`, `catmech_compare_strategies()` | Multi-endpoint pooling with Rubin rules, Barnard-Rubin df, cluster-robust covariance, and strategy comparison. |
-| **Provenance** | `catmech_sensitivity()`, `catmech_audit_trail()` | Multi-scenario sensitivity envelopes and cryptographic SHA-256 regulatory compliance reporting. |
+| **Provenance** | `catmech_sensitivity()`, `catmech_audit_trail()` | Multi-scenario sensitivity envelopes and SHA-256 provenance reports for regulatory documentation. |
 
 While several mature R packages address missing data or measurement error, none combine two-phase audit power planning, reference-calibrated contamination mixture modeling, multi-endpoint pooling with cluster-robust covariance and Barnard-Rubin degrees of freedom, and cryptographic regulatory compliance tracking:
 
@@ -127,7 +127,7 @@ While several mature R packages address missing data or measurement error, none 
 | **Linear Model Pooling** | **Yes** (BR + CV3) | Yes (BR df) | Yes (SIMEX) | Yes (Reg. Cal.) | Yes (Rubin df) |
 | **GLM (Logit/Poisson)** | **Yes** (Sandwich) | Yes (BR df) | Yes (SIMEX) | No | Yes (Rubin df) |
 | **Cox PH Pooling** | **Yes** (Lin-Wei) | Partial (`coxph`) | No | No | No |
-| **SHA-256 Audit Trail** | **Yes** (Part 11) | No | No | No | No |
+| **SHA-256 Audit Trail** | **Yes** | No | No | No | No |
 
 In confirmatory clinical trials, primary estimands are frequently time-to-event survival endpoints or binary response endpoints rather than continuous linear outcomes. All `catmech` pooling functions export `broom`-style S3 methods (`tidy()`, `glance()`) and S3 forest-plot visualization (`plot()`), while `catmech_compare_strategies()` compares four benchmark strategies (`validation_subsample` complete-case, `naive_trust_recorded` naive analysis, `linear_mi_recorded` using `catmech_reference(use_recorded = TRUE)`, and `contamination_model` using `catmech_contamination()`) side by side for continuous (`lm`) and generalized linear (`glm`) endpoints.
 
@@ -190,7 +190,7 @@ comp <- catmech_compare_strategies(
   formula = outcome ~ lab_value + age + sex, m = 10, seed = 2026
 )
 
-# 8. Cryptographic SHA-256 regulatory audit trail (FDA 21 CFR Part 11 / ICH GCP E9)
+# 8. SHA-256 provenance report (supports FDA 21 CFR Part 11 / ICH E9 documentation)
 report <- catmech_audit_trail(
   object = fit, pooled = pool_survival, format = "markdown", path = "audit_trail.md"
 )
@@ -326,9 +326,9 @@ This simulation-to-practice divergence demonstrates why `catmech` is designed ar
 2. Out-of-sample predictive cross-validation via `catmech_holdout_check()`, comparing held-out Brier and RMSE skill scores against raw recorded values rather than relying on the low-power KS uniformity alarm alone;
 3. Direct side-by-side strategy comparison via `catmech_compare_strategies()` so study teams can verify whether the data support mixture modeling, linear MI, complete-case analysis, or unadjusted recorded values.
 
-# Regulatory compliance and data governance
+# Regulatory documentation and data governance
 
-Regulatory submissions in biopharmaceutical and medical device trials (FDA 21 CFR Part 11 [@fda2003part11] and ICH GCP E9 [@ich1998e9]) require a tamper-evident audit trail for any algorithmic data imputation. `catmech_audit_trail()` generates complete provenance records in Markdown, JSON, or standalone HTML, capturing:
+Clinical trial analyses are expected to be documented and reproducible: FDA 21 CFR Part 11 [@fda2003part11] governs electronic records and audit trails, and ICH E9 [@ich1998e9] asks that data handling and statistical methods be prespecified and documented. `catmech_audit_trail()` supports that documentation. It does not certify compliance, which depends on the validated system, access controls, and procedures around the analysis. It generates provenance records in Markdown, JSON, or standalone HTML, capturing:
 
 1. Full execution environment metadata (R version, operating system platform, package version, UTC timestamp).
 2. Cryptographic SHA-256 checksums of the raw input dataset, model specification, and each of the $m$ completed datasets.
@@ -340,7 +340,7 @@ Regulatory submissions in biopharmaceutical and medical device trials (FDA 21 CF
 `catmech` has been developed under an automated software verification harness:
 
 * **Unit tests**: 1,754 unit tests executed via `testthat`, achieving 0 failures, 0 warnings, and 0 skips.
-* **CRAN conformance**: Fully compliant with CRAN package policies, passing `R CMD check --no-manual` with `Status: OK` (0 errors, 0 warnings, 0 notes).
+* **CRAN conformance**: `R CMD check --as-cran` reports 0 errors and 0 warnings.
 * **Automated artifact verification**: Verified against an independent Python verification suite (`verify-artifacts.py`, `verify-release-archive.py`, and `verify_paper_numbers.py`) confirming exact correspondence across 10 frozen simulation and empirical benchmark archives and over 500,000 replicate requests.
 
 # Availability and software details

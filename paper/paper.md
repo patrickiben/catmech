@@ -9,7 +9,7 @@ tags:
   - audit planning
   - survival analysis
   - data integrity
-  - regulatory compliance
+  - regulatory documentation
 authors:
   - name: Patrick Iben
     orcid: 0009-0005-2443-7973
@@ -25,7 +25,7 @@ bibliography: paper.bib
 
 In multicenter clinical trials, electronic health record (EHR) registries, and observational epidemiological cohorts, continuous biological and clinical measurements (such as circulating cardiac troponin, viral loads, blood pressure, serum creatinine, or tumor volume) are frequently compromised by measurement errors, transcription slips, assay lot shifts, and missing values. Traditional statistical packages handle missing data by assuming values are Missing at Random (MAR) [@rubin1987multiple; @little2019statistical] and applying standard multiple imputation algorithms [@vanbuuren2011mice; @honaker2011amelia; @white2011multiple]. However, in clinical data auditing and source-data verification (SDV), the central challenge is fundamentally different: recorded values are often present but untrusted, and an internal gold-standard reference measurement has been audited on only a fraction of records [@angelopoulos2023prediction; @robins1994estimation; @breslow2003semiparametric].
 
-`catmech` is an R package providing a mathematically rigorous, auditable framework for clinical data verification, two-phase audit sample size determination, predictive calibration checking, downstream multi-endpoint regression pooling, and regulatory audit trail generation. By modeling either a reference-calibrated contamination mixture (`catmech_contamination()`) or a linear reference calibration model (`catmech_reference(use_recorded = TRUE)`) rather than discarding unaudited records or naively trusting recorded numbers, `catmech` retains the precision of verified recordings while correcting for contamination bias. Furthermore, the package integrates cryptographic provenance tracking (SHA-256 data and completion hashes) designed to meet strict regulatory compliance standards (FDA 21 CFR Part 11 [@fda2003part11] and ICH GCP E9 [@ich1998e9]).
+`catmech` is an R package providing a mathematically rigorous, auditable framework for clinical data verification, two-phase audit sample size determination, predictive calibration checking, downstream multi-endpoint regression pooling, and regulatory audit trail generation. By modeling either a reference-calibrated contamination mixture (`catmech_contamination()`) or a linear reference calibration model (`catmech_reference(use_recorded = TRUE)`) rather than discarding unaudited records or naively trusting recorded numbers, `catmech` retains the precision of verified recordings while correcting for contamination bias. The package also records SHA-256 hashes of the input data, assumptions, and completed datasets to support regulatory documentation (FDA 21 CFR Part 11 [@fda2003part11] and ICH E9 [@ich1998e9]); this supports, but does not by itself establish, compliance.
 
 # Statement of need
 
@@ -52,7 +52,7 @@ While several mature R packages address missing data or measurement error, none 
 | **Linear Model Pooling** | **Yes** (BR + CV3) | Yes (BR df) | Yes (SIMEX) | Yes (Reg. Cal.) | Yes (Rubin df) |
 | **GLM (Logit/Poisson)** | **Yes** (Sandwich) | Yes (BR df) | Yes (SIMEX) | No | Yes (Rubin df) |
 | **Cox PH Pooling** | **Yes** (Lin-Wei) | Partial (`coxph`) | No | No | No |
-| **SHA-256 Audit Trail** | **Yes** (Part 11) | No | No | No | No |
+| **SHA-256 Audit Trail** | **Yes** | No | No | No | No |
 
 # Mathematical framework and methodology
 
@@ -205,7 +205,7 @@ comp <- catmech_compare_strategies(
 )
 plot(comp, term = "lab_value")
 
-# 8. Regulatory compliance audit report (FDA 21 CFR Part 11)
+# 8. SHA-256 provenance report (supports FDA 21 CFR Part 11 documentation)
 report <- catmech_audit_trail(
   object = fit,
   pooled = pool_survival,
@@ -290,9 +290,9 @@ A central methodological insight established by these empirical benchmarks is th
 
 This empirical divergence highlights why `catmech` incorporates prospective audit planning (`catmech_audit_power()`), diagnostic discrepancy auditing (`catmech_recording_audit()`), predictive cross-validation (`catmech_holdout_check()`), and automated strategy comparison (`catmech_compare_strategies()`), ensuring that trialists let empirical data guide the choice of model rather than relying on unverified assumptions.
 
-# Regulatory compliance and data governance
+# Regulatory documentation and data governance
 
-Regulatory submissions in biopharmaceutical and medical device clinical trials (under FDA 21 CFR Part 11 [@fda2003part11] and ICH GCP E9 [@ich1998e9]) require an unbroken, tamper-evident audit trail for any algorithmic data imputation or measurement correction. `catmech_audit_trail()` generates complete provenance records in Markdown, JSON, or standalone HTML. The report documents:
+Clinical trial analyses are expected to be documented and reproducible: FDA 21 CFR Part 11 [@fda2003part11] governs electronic records and audit trails, and ICH E9 [@ich1998e9] asks that data handling and statistical methods be prespecified and documented. `catmech_audit_trail()` supports that documentation; it does not certify compliance, which depends on the validated system, access controls, and procedures around the analysis. It generates provenance records in Markdown, JSON, or standalone HTML. The report documents:
 
 * Full execution environment metadata (R version, operating system platform, package version, UTC execution timestamp).
 * Cryptographic SHA-256 checksums of the raw input dataset, the mathematical assumption specification, and each of the $m$ completed datasets.
@@ -304,7 +304,7 @@ Regulatory submissions in biopharmaceutical and medical device clinical trials (
 `catmech` has been developed under an automated software verification harness:
 
 * **Unit tests**: 1,754 unit tests executed via `testthat`, achieving 0 failures, 0 warnings, and 0 skips.
-* **CRAN conformance**: Fully compliant with CRAN package policies, passing `R CMD check --no-manual` with `Status: OK` (0 errors, 0 warnings, 0 notes).
+* **CRAN conformance**: `R CMD check --as-cran` reports 0 errors and 0 warnings.
 * **Independent artifact verification**: Verified against an independent Python verification suite (`verify-artifacts.py`, `verify-release-archive.py`, and `verify_paper_numbers.py`) confirming exact correspondence across 10 frozen simulation and empirical benchmark studies and over 500,000 replicate requests.
 
 # Availability and dependencies

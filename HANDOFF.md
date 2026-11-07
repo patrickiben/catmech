@@ -2,7 +2,7 @@
 
 **Date:** November 6, 2026  
 **Repository Path:** `/Users/patrickiben/Documents/catmech`  
-**Git Remote:** `https://github.com/patrickiben/catmech.git` (branch: `main`, commit: `5e03ced`)  
+**Git Remote:** `https://github.com/patrickiben/catmech.git` (branch: `main`; run `git log -1` for the current commit)  
 **Package Version:** `1.0.0`  
 **Maintainer:** Patrick Iben (`patrickiben@gmail.com`, ORCID: `0009-0005-2443-7973`)  
 **License:** MIT  
@@ -28,15 +28,15 @@ Instead of either discarding un-audited records (inflating standard errors) or n
 
 The package is **100% audited, verified, and ready for official CRAN submission**.
 
-* **Git History**: Clean tree at commit `5e03ced` on `main`, pushed to GitHub.
+* **Git History**: Clean tree on `main`, pushed to GitHub.
 * **GitHub Actions CI**: **100% GREEN (`✓`)** on all workflows:
   * `R-CMD-check`: Passed on macOS (arm64), Ubuntu (Linux), and Windows Server (`✓`).
   * `pkgdown`: Passed and deployed to GitHub Pages (`gh-pages` branch) (`✓`).
 * **Test Suite**: **1,754 unit tests** passing with **0 failures, 0 warnings, 0 skips** (`testthat::test_local()`).
-* **R CMD check**: Passes `R CMD check --as-cran catmech_1.0.0.tar.gz` with **0 errors, 0 warnings** (only 2 standard environment notes regarding local HTML tidy and .DS_Store).
+* **R CMD check**: Passes `R CMD check --as-cran catmech_1.0.0.tar.gz` with **0 errors, 0 warnings** (3 notes: new submission, plus local HTML Tidy and .DS_Store environment notes). CRAN incoming checks with remote URL/DOI and file-URI checks enabled report only the new-submission note.
 * **Fact Check**: `python3 docs/case-study/fact_check.py` validates all **118 empirical claims** across frozen benchmark tables with 100% agreement, 0 broken links, and 1-page PDF constraint compliance.
 * **Paper & Manuscript Verification**: `python3 paper/verify_paper_numbers.py` validates **411 synthetic, real-data, clustered, and code/script surface claims** across `paper/manuscript.Rmd`, `paper/manuscript.tex`, and `paper/paper.md` (plus negative control).
-* **Pre-Submission Validation Harness**: Full 24-gate audit + 5-agent Lean Reader Wave (`G5` Persona A & B, `G12`, `G13`, `G18`) recorded in `paper/VALIDATION_LEDGER_2026-11-06.md` (`check_gate_basis.py` stamped `FRESH 7, STALE 0, NO-BASIS 0`; `check_prose_style_v2.py` `ALL GREEN`; `check_citations.py` `20 OK | 5 REVIEW | 0 FLAG, 0 uncited`; `scrub_ai_artifacts.py` `0 hits`; `check_spelling_us.py` `0 hits`; `pdflatex` 15 pages, `errors=0 undefined=0 overfull=0`).
+* **Pre-Submission Validation Harness**: Full 24-gate audit + 5-agent Lean Reader Wave (`G5` Persona A & B, `G12`, `G13`, `G18`) recorded in `paper/VALIDATION_LEDGER_2026-11-06.md` (`check_gate_basis.py` stamped `FRESH 7, STALE 0, NO-BASIS 0`; `check_prose_style_v2.py` `ALL GREEN`; `check_citations.py` `21 OK | 4 REVIEW | 0 FLAG, 0 uncited` (REVIEW items hand-checked); `scrub_ai_artifacts.py` `0 hits`; `check_spelling_us.py` `0 hits`; `pdflatex` 15 pages, `errors=0 undefined=0 overfull=0`).
 * **App Validation Harness**: Interactive browser learning pages (`docs/learn/index.html` and `docs/learn/simulator.html`) verified across gates `A0`–`A10` via `web_gate.py --local` and stamped **`OWNER-APPROVED: True`** against page hashes `d94e13a7b66c865e` and `80cafcd68fec48c7`.
 * **Artifact Verification**: `python3 tools/verify-artifacts.py` passes all 10 simulation benchmark studies, oracle checks, and learning pages.
 * **Documentation**: Fast, self-contained `@examples` for all 26 exported functions, all lines formatted < 85 characters. Built-in vignette (`vignettes/catmech-clinical-audit.Rmd`) builds cleanly.
@@ -90,10 +90,10 @@ catmech/
 │   ├── paper.md              # JOSS submission manuscript
 │   ├── paper.bib             # CrossRef-verified bibliography (25 entries, 0 flags)
 │   ├── manuscript.Rmd        # Academic LaTeX/PDF/HTML manuscript (JSS/SMMR)
-│   ├── manuscript.pdf        # Rendered academic PDF (10 pages, 0 overfull boxes)
+│   ├── manuscript.pdf        # Rendered academic PDF (15 pages, 0 overfull boxes)
 │   ├── manuscript.html       # Rendered academic HTML
 │   ├── manuscript.tex        # Rendered LaTeX source
-│   ├── verify_paper_numbers.py # Automated G2/G17/G19/G22 verifier (343 checks)
+│   ├── verify_paper_numbers.py # Automated G2/G17/G19/G22 verifier (411 checks)
 │   └── VALIDATION_LEDGER_2026-11-06.md # 24-gate Pre-Submission Validation Harness ledger
 ├── _pkgdown.yml              # Pkgdown documentation website configuration
 └── .github/workflows/
@@ -161,7 +161,7 @@ Copy and paste the block below into the first prompt of your new chat:
 I am continuing work on the `catmech` R package (version 1.0.0).
 
 Repository path: `/Users/patrickiben/Documents/catmech`
-Git Remote: `https://github.com/patrickiben/catmech.git` (branch `main`, clean at commit `5e03ced`)
+Git Remote: `https://github.com/patrickiben/catmech.git` (branch `main`)
 Maintainer: Patrick Iben (`patrickiben@gmail.com`, ORCID: `0009-0005-2443-7973`)
 
 The package is fully implemented, documented, and QC'd for official release 1.0.0:

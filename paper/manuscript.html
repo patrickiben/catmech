@@ -1664,8 +1664,10 @@ findings: the contamination mixture model avoids severe attenuation bias
 and narrows confidence intervals by 44% relative to complete-case
 analysis under simulated gross, separable errors, whereas simple linear
 imputation is preferred under subtle, diffuse real-world discrepancies.
-Finally, we implement cryptographic SHA-256 provenance tracking meeting
-FDA 21 CFR Part 11 and ICH GCP E9 regulatory compliance standards.</p>
+Finally, <code>catmech_audit_trail()</code> records SHA-256 hashes of
+the input data, assumptions, and completed datasets to support
+documentation under FDA 21 CFR Part 11 and ICH E9; it does not by itself
+make an analysis system compliant.</p>
 </div>
 
 </div>
@@ -2013,8 +2015,8 @@ df, cluster-robust covariance, and strategy comparison.</td>
 <td align="left"><strong>Provenance</strong></td>
 <td align="left"><code>catmech_sensitivity()</code>,
 <code>catmech_audit_trail()</code></td>
-<td align="left">Multi-scenario sensitivity envelopes and cryptographic
-SHA-256 regulatory compliance reporting.</td>
+<td align="left">Multi-scenario sensitivity envelopes and SHA-256
+provenance reports for regulatory documentation.</td>
 </tr>
 </tbody>
 </table>
@@ -2039,7 +2041,7 @@ cryptographic regulatory compliance tracking:</p>
 <th align="center"><code>mice</code> <span class="citation">(Buuren and
 Groothuis-Oudshoorn 2011)</span></th>
 <th align="center"><code>simex</code> <span class="citation">(Lederer
-and Küchenhoff 2008)</span></th>
+and Küchenhoff 2006)</span></th>
 <th align="center"><code>mecor</code> <span class="citation">(Nab et al.
 2021)</span></th>
 <th align="center"><code>Amelia</code> <span class="citation">(Honaker
@@ -2105,7 +2107,7 @@ et al. 2011)</span></th>
 </tr>
 <tr class="even">
 <td align="left"><strong>SHA-256 Audit Trail</strong></td>
-<td align="center"><strong>Yes</strong> (Part 11)</td>
+<td align="center"><strong>Yes</strong></td>
 <td align="center">No</td>
 <td align="center">No</td>
 <td align="center">No</td>
@@ -2190,7 +2192,7 @@ comp &lt;- catmech_compare_strategies(
   formula = outcome ~ lab_value + age + sex, m = 10, seed = 2026
 )
 
-# 8. Cryptographic SHA-256 regulatory audit trail (FDA 21 CFR Part 11 / ICH GCP E9)
+# 8. SHA-256 provenance report (supports FDA 21 CFR Part 11 / ICH E9 documentation)
 report &lt;- catmech_audit_trail(
   object = fit, pooled = pool_survival, format = &quot;markdown&quot;, path = &quot;audit_trail.md&quot;
 )</code></pre>
@@ -2900,15 +2902,19 @@ whether the data support mixture modeling, linear MI, complete-case
 analysis, or unadjusted recorded values.</li>
 </ol>
 </div>
-<div id="regulatory-compliance-and-data-governance" class="section level1" number="9">
-<h1><span class="header-section-number">9</span> Regulatory compliance
-and data governance</h1>
-<p>Regulatory submissions in biopharmaceutical and medical device trials
-(FDA 21 CFR Part 11 <span class="citation">(U.S. Food and Drug
-Administration 2003)</span> and ICH GCP E9 <span class="citation">(International Conference on Harmonisation
-1998)</span>) require a tamper-evident audit trail for any algorithmic
-data imputation. <code>catmech_audit_trail()</code> generates complete
-provenance records in Markdown, JSON, or standalone HTML, capturing:</p>
+<div id="regulatory-documentation-and-data-governance" class="section level1" number="9">
+<h1><span class="header-section-number">9</span> Regulatory
+documentation and data governance</h1>
+<p>Clinical trial analyses are expected to be documented and
+reproducible: FDA 21 CFR Part 11 <span class="citation">(U.S. Food and
+Drug Administration 2003)</span> governs electronic records and audit
+trails, and ICH E9 <span class="citation">(International Conference on
+Harmonisation 1998)</span> asks that data handling and statistical
+methods be prespecified and documented.
+<code>catmech_audit_trail()</code> supports that documentation. It does
+not certify compliance, which depends on the validated system, access
+controls, and procedures around the analysis. It generates provenance
+records in Markdown, JSON, or standalone HTML, capturing:</p>
 <ol style="list-style-type: decimal">
 <li>Full execution environment metadata (R version, operating system
 platform, package version, UTC timestamp).</li>
@@ -2932,9 +2938,8 @@ verification harness:</p>
 <li><strong>Unit tests</strong>: 1,754 unit tests executed via
 <code>testthat</code>, achieving 0 failures, 0 warnings, and 0
 skips.</li>
-<li><strong>CRAN conformance</strong>: Fully compliant with CRAN package
-policies, passing <code>R CMD check --no-manual</code> with
-<code>Status: OK</code> (0 errors, 0 warnings, 0 notes).</li>
+<li><strong>CRAN conformance</strong>:
+<code>R CMD check --as-cran</code> reports 0 errors and 0 warnings.</li>
 <li><strong>Automated artifact verification</strong>: Verified against
 an independent Python verification suite
 (<code>verify-artifacts.py</code>,
@@ -3024,9 +3029,9 @@ of Technical Requirements for Registration of Pharmaceuticals for Human
 Use. <a href="https://database.ich.org/sites/default/files/E9_Guideline.pdf">https://database.ich.org/sites/default/files/E9_Guideline.pdf</a>.
 </div>
 <div id="ref-leeder2008simex" class="csl-entry">
-Lederer, Wolfgang, and Helmut Küchenhoff. 2008. <span>“A Short
-Introduction to the <span>SIMEX</span> and <span>MCSIMEX</span> Packages
-in <span>R</span>.”</span> <em>R News</em> 8 (2): 26–31. <a href="https://CRAN.R-project.org/package=simex">https://CRAN.R-project.org/package=simex</a>.
+Lederer, Wolfgang, and Helmut Küchenhoff. 2006. <span>“A Short
+Introduction to the <span>SIMEX</span> and <span>MCSIMEX</span>.”</span>
+<em>R News</em> 6 (4): 26–31. <a href="https://CRAN.R-project.org/package=simex">https://CRAN.R-project.org/package=simex</a>.
 </div>
 <div id="ref-liang1986longitudinal" class="csl-entry">
 Liang, Kung-Yee, and Scott L. Zeger. 1986. <span>“Longitudinal Data

@@ -224,7 +224,7 @@ print(sens)
 
 ## 7. Tamper-Evident Regulatory Audit Trail
 
-To satisfy regulatory standards (such as FDA 21 CFR Part 11 and ICH GCP E9), `catmech_audit_trail()` outputs a cryptographically verified record containing SHA-256 checksums of input data, assumptions, and all completions:
+To support regulatory documentation (such as under FDA 21 CFR Part 11 and ICH E9), `catmech_audit_trail()` outputs a record containing SHA-256 checksums of input data, assumptions, and all completions. The record supports, but does not by itself establish, compliance:
 
 ```{r audit_trail}
 trail <- catmech_audit_trail(
@@ -286,5 +286,5 @@ When deciding which audit imputation model or downstream pooling approach to dep
 | **Multi-center / clustered sites** | `catmech_reference(cluster_model = "joint")` + cluster-robust pooling | Bivariate Gaussian site model handles mixed within-cluster recording patterns, with delete-one-cluster jackknife (`cv3`) variance. |
 | **Prospective sample size planning** | `catmech_audit_power(N, target_ratio)` | Computes audit sample sizes to achieve desired relative interval width; recommend audit sizes of at least 10%–15% ($n \ge 50$) for stable variance estimation. |
 | **Sensitivity check across strategies** | `catmech_compare_strategies()` | Directly compares validation subsample, naive analysis, linear MI, and contamination model side by side. |
-| **Regulatory submission** | `catmech_audit_trail()` | Cryptographically documents input SHA-256 hashes, options, and pooled results for compliance (FDA 21 CFR Part 11 / ICH E6). |
+| **Regulatory submission** | `catmech_audit_trail()` | Cryptographically documents input SHA-256 hashes, options, and pooled results for regulatory documentation (FDA 21 CFR Part 11 / ICH E9). |
 

@@ -122,7 +122,7 @@
   pdfkeywords={\xmpquote{clinical audits}, \xmpquote{measurement
 error}, \xmpquote{two-phase sampling}, \xmpquote{multiple
 imputation}, \xmpquote{survival analysis}, \xmpquote{robust sandwich
-covariance}, \xmpquote{R package}, \xmpquote{regulatory compliance}},
+covariance}, \xmpquote{R package}, \xmpquote{regulatory documentation}},
   hidelinks,
   pdfcreator={LaTeX via pandoc}}
 
@@ -176,8 +176,10 @@ the contamination mixture model avoids severe attenuation bias and
 narrows confidence intervals by 44\% relative to complete-case analysis
 under simulated gross, separable errors, whereas simple linear
 imputation is preferred under subtle, diffuse real-world discrepancies.
-Finally, we implement cryptographic SHA-256 provenance tracking meeting
-FDA 21 CFR Part 11 and ICH GCP E9 regulatory compliance standards.
+Finally, \texttt{catmech\_audit\_trail()} records SHA-256 hashes of the
+input data, assumptions, and completed datasets to support documentation
+under FDA 21 CFR Part 11 and ICH E9; it does not by itself make an
+analysis system compliant.
 \end{abstract}
 
 \section{Introduction}\label{introduction}
@@ -509,7 +511,7 @@ Rubin rules, Barnard-Rubin df, cluster-robust covariance, and strategy
 comparison. \\
 \textbf{Provenance} & \texttt{catmech\_sensitivity()},
 \texttt{catmech\_audit\_trail()} & Multi-scenario sensitivity envelopes
-and cryptographic SHA-256 regulatory compliance reporting. \\
+and SHA-256 provenance reports for regulatory documentation. \\
 \end{longtable}
 }
 
@@ -558,8 +560,7 @@ Yes (SIMEX) & Yes (Reg. Cal.) & Yes (Rubin df) \\
 Yes (SIMEX) & No & Yes (Rubin df) \\
 \textbf{Cox PH Pooling} & \textbf{Yes} (Lin-Wei) & Partial
 (\texttt{coxph}) & No & No & No \\
-\textbf{SHA-256 Audit Trail} & \textbf{Yes} (Part 11) & No & No & No &
-No \\
+\textbf{SHA-256 Audit Trail} & \textbf{Yes} & No & No & No & No \\
 \end{longtable}
 }
 
@@ -641,7 +642,7 @@ clinical cohort (\(N = 1,000\), 25\% reference audit
   \AttributeTok{formula =}\NormalTok{ outcome }\SpecialCharTok{\textasciitilde{}}\NormalTok{ lab\_value }\SpecialCharTok{+}\NormalTok{ age }\SpecialCharTok{+}\NormalTok{ sex, }\AttributeTok{m =} \DecValTok{10}\NormalTok{, }\AttributeTok{seed =} \DecValTok{2026}
 \NormalTok{)}
 
-\CommentTok{\# 8. Cryptographic SHA{-}256 regulatory audit trail (FDA 21 CFR Part 11 / ICH GCP E9)}
+\CommentTok{\# 8. SHA{-}256 provenance report (supports FDA 21 CFR Part 11 / ICH E9 documentation)}
 \NormalTok{report }\OtherTok{\textless{}{-}} \FunctionTok{catmech\_audit\_trail}\NormalTok{(}
   \AttributeTok{object =}\NormalTok{ fit, }\AttributeTok{pooled =}\NormalTok{ pool\_survival, }\AttributeTok{format =} \StringTok{"markdown"}\NormalTok{, }\AttributeTok{path =} \StringTok{"audit\_trail.md"}
 \NormalTok{)}
@@ -1220,15 +1221,17 @@ flagship estimator:
   analysis, or unadjusted recorded values.
 \end{enumerate}
 
-\section{Regulatory compliance and data
-governance}\label{regulatory-compliance-and-data-governance}
+\section{Regulatory documentation and data
+governance}\label{regulatory-documentation-and-data-governance}
 
-Regulatory submissions in biopharmaceutical and medical device trials
-(FDA 21 CFR Part 11 \citep{fda2003part11} and ICH GCP E9
-\citep{ich1998e9}) require a tamper-evident audit trail for any
-algorithmic data imputation. \texttt{catmech\_audit\_trail()} generates
-complete provenance records in Markdown, JSON, or standalone HTML,
-capturing:
+Clinical trial analyses are expected to be documented and reproducible:
+FDA 21 CFR Part 11 \citep{fda2003part11} governs electronic records and
+audit trails, and ICH E9 \citep{ich1998e9} asks that data handling and
+statistical methods be prespecified and documented.
+\texttt{catmech\_audit\_trail()} supports that documentation. It does
+not certify compliance, which depends on the validated system, access
+controls, and procedures around the analysis. It generates provenance
+records in Markdown, JSON, or standalone HTML, capturing:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -1261,9 +1264,8 @@ verification harness:
   \textbf{Unit tests}: 1,754 unit tests executed via \texttt{testthat},
   achieving 0 failures, 0 warnings, and 0 skips.
 \item
-  \textbf{CRAN conformance}: Fully compliant with CRAN package policies,
-  passing \texttt{R\ CMD\ check\ -\/-no-manual} with
-  \texttt{Status:\ OK} (0 errors, 0 warnings, 0 notes).
+  \textbf{CRAN conformance}: \texttt{R\ CMD\ check\ -\/-as-cran} reports
+  0 errors and 0 warnings.
 \item
   \textbf{Automated artifact verification}: Verified against an
   independent Python verification suite (\texttt{verify-artifacts.py},
