@@ -84,16 +84,22 @@ submission**.
   **118 empirical claims** across frozen benchmark tables with 100%
   agreement, 0 broken links, and 1-page PDF constraint compliance.
 - **Paper & Manuscript Verification**:
-  `python3 paper/verify_paper_numbers.py` validates **343 synthetic,
+  `python3 paper/verify_paper_numbers.py` validates **411 synthetic,
   real-data, clustered, and code/script surface claims** across
   `paper/manuscript.Rmd`, `paper/manuscript.tex`, and `paper/paper.md`
   (plus negative control).
-- **Pre-Submission Validation Harness**: Full 24-gate audit recorded in
+- **Pre-Submission Validation Harness**: Full 24-gate audit + 5-agent
+  Lean Reader Wave (`G5` Persona A & B, `G12`, `G13`, `G18`) recorded in
   `paper/VALIDATION_LEDGER_2026-11-06.md` (`check_gate_basis.py` stamped
-  `FRESH 8, STALE 0, NO-BASIS 0`; `check_prose_style_v2.py` `ALL GREEN`;
-  `check_citations.py` `20 OK | 5 REVIEW | 0 FLAG`;
+  `FRESH 7, STALE 0, NO-BASIS 0`; `check_prose_style_v2.py` `ALL GREEN`;
+  `check_citations.py` `20 OK | 5 REVIEW | 0 FLAG, 0 uncited`;
   `scrub_ai_artifacts.py` `0 hits`; `check_spelling_us.py` `0 hits`;
-  `pdflatex` `errors=0 undefined=0 overfull=0`).
+  `pdflatex` 15 pages, `errors=0 undefined=0 overfull=0`).
+- **App Validation Harness**: Interactive browser learning pages
+  (`docs/learn/index.html` and `docs/learn/simulator.html`) verified
+  across gates `A0`–`A10` via `web_gate.py --local` and stamped
+  **`OWNER-APPROVED: True`** against page hashes `d94e13a7b66c865e` and
+  `80cafcd68fec48c7`.
 - **Artifact Verification**: `python3 tools/verify-artifacts.py` passes
   all 10 simulation benchmark studies, oracle checks, and learning
   pages.
