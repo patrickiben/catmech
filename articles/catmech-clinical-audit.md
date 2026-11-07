@@ -335,11 +335,12 @@ print(sens)
 
 ## 7. Tamper-Evident Regulatory Audit Trail
 
-To satisfy regulatory standards (such as FDA 21 CFR Part 11 and ICH GCP
-E9),
+To support regulatory documentation (such as under FDA 21 CFR Part 11
+and ICH E9),
 [`catmech_audit_trail()`](https://patrickiben.github.io/catmech/reference/catmech_audit_trail.md)
-outputs a cryptographically verified record containing SHA-256 checksums
-of input data, assumptions, and all completions:
+outputs a record containing SHA-256 checksums of input data,
+assumptions, and all completions. The record supports, but does not by
+itself establish, compliance:
 
 ``` r
 trail <- catmech_audit_trail(
@@ -351,7 +352,7 @@ trail <- catmech_audit_trail(
 cat(substr(as.character(trail), 1, 1200), "\n... [truncated for display]")
 #> # Catmech Audit Trail & Compliance Report
 #> 
-#> **Generated:** 2026-11-07T19:19:05Z UTC | **Catmech Version:** 1.0.0
+#> **Generated:** 2026-11-07T20:34:00Z UTC | **Catmech Version:** 1.0.0
 #> **R Version:** 4.6.2 | **Platform:** x86_64-pc-linux-gnu
 #> 
 #> ---
@@ -362,10 +363,10 @@ cat(substr(as.character(trail), 1, 1200), "\n... [truncated for display]")
 #> - **Assumption Specification Hash:** `bd63c8176604952318d2bc2124bbf603535d58a7cc5963191ed07da19eae4dcf`
 #> - **Completed Dataset Checksums:**
 #> 
-#>   - Completion `m=1`: `cf442c7284ea912c522aac649a584cf9613ad1fc1036d3f318f3d88d1f050785`
-#>   - Completion `m=2`: `f3f5b3eb2258fac7c17f74903c09a54522c157bd3751f03fab919d33c03abeb2`
-#>   - Completion `m=3`: `6e348ac7190dcb9f27b28265a1ea49e6cfcfdc2496021c8f9d1e959e702b29c9`
-#>   - Completion `m=4`: `1222dcd6aaa6f9e737d5da15df163b24ee6f87b1e53a22992a896d88b8f5a055`
+#>   - Completion `m=1`: `6bd311b329ac5284a66002c45aa82f048b6a183dbc9d26e3e3e4897974039d44`
+#>   - Completion `m=2`: `772af80a37f0117d7b188dd13192a5ef14fa3ac88d80ed5a4f82514952a9c820`
+#>   - Completion `m=3`: `69f8af742c3709174d1f7cf1ae7420a4d1b4ceafa3c0cc41ceb7ba46417fdc5b`
+#>   - Completion `m=4`: `f1c5e4bec298d721a569808a17b6b3cb5deec741c771f058affa29a71a2e3497`
 #> 
 #> ## 2. Cohort Specification & Imputation Profile
 #> 
@@ -468,4 +469,4 @@ decision framework:
 | **Multi-center / clustered sites**                                    | `catmech_reference(cluster_model = "joint")` + cluster-robust pooling                                           | Bivariate Gaussian site model handles mixed within-cluster recording patterns, with delete-one-cluster jackknife (`cv3`) variance.                                |
 | **Prospective sample size planning**                                  | `catmech_audit_power(N, target_ratio)`                                                                          | Computes audit sample sizes to achieve desired relative interval width; recommend audit sizes of at least 10%–15% ($n \geq 50$) for stable variance estimation.   |
 | **Sensitivity check across strategies**                               | [`catmech_compare_strategies()`](https://patrickiben.github.io/catmech/reference/catmech_compare_strategies.md) | Directly compares validation subsample, naive analysis, linear MI, and contamination model side by side.                                                          |
-| **Regulatory submission**                                             | [`catmech_audit_trail()`](https://patrickiben.github.io/catmech/reference/catmech_audit_trail.md)               | Cryptographically documents input SHA-256 hashes, options, and pooled results for compliance (FDA 21 CFR Part 11 / ICH E6).                                       |
+| **Regulatory submission**                                             | [`catmech_audit_trail()`](https://patrickiben.github.io/catmech/reference/catmech_audit_trail.md)               | Cryptographically documents input SHA-256 hashes, options, and pooled results for regulatory documentation (FDA 21 CFR Part 11 / ICH E9).                         |

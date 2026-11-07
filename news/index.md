@@ -2,9 +2,11 @@
 
 ## catmech 1.0.0
 
-- Graduate from experimental status to official release 1.0.0 with
-  frozen, backward-compatible APIs across model fitting, diagnostics,
-  and downstream inference.
+- First CRAN release. The public API is stable and backward-compatible
+  across model fitting, diagnostics, and downstream inference. The
+  clustered imputation option (`catmech_reference(cluster = )`) and the
+  joint-marginal engine remain experimental, and the audit-size planner
+  keeps its NO-GO validation status.
 - Add Generalized Linear Model pooling
   ([`catmech_pool_glm()`](https://patrickiben.github.io/catmech/reference/catmech_pool_glm.md))
   supporting logistic and Poisson regressions with Rubin’s combining
@@ -52,8 +54,9 @@
 - Formalize S3 console output with dedicated
   [`print()`](https://rdrr.io/r/base/print.html) and
   [`summary()`](https://rdrr.io/r/base/summary.html) methods.
-- Pass all 1,754 testthat unit tests and R CMD check with Status: OK (0
-  errors, 0 warnings, 0 notes).
+- Pass all 1,754 testthat unit tests. `R CMD check --as-cran` reports 0
+  errors and 0 warnings; the only notes are the new-submission note and
+  local-environment notes.
 
 ## catmech 0.10.1
 

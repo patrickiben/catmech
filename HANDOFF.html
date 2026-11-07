@@ -36,7 +36,7 @@
 
 <div id="catmech-v100--chat-handoff--project-context-packet" class="section level1">
 
-<p><strong>Date:</strong> November 6, 2026<br><strong>Repository Path:</strong> <code>/Users/patrickiben/Documents/catmech</code><br><strong>Git Remote:</strong> <code>https://github.com/patrickiben/catmech.git</code> (branch: <code>main</code>, commit: <code>5e03ced</code>)<br><strong>Package Version:</strong> <code>1.0.0</code><br><strong>Maintainer:</strong> Patrick Iben (<code>patrickiben@gmail.com</code>, ORCID: <code>0009-0005-2443-7973</code>)<br><strong>License:</strong> MIT</p>
+<p><strong>Date:</strong> November 6, 2026<br><strong>Repository Path:</strong> <code>/Users/patrickiben/Documents/catmech</code><br><strong>Git Remote:</strong> <code>https://github.com/patrickiben/catmech.git</code> (branch: <code>main</code>; run <code>git log -1</code> for the current commit)<br><strong>Package Version:</strong> <code>1.0.0</code><br><strong>Maintainer:</strong> Patrick Iben (<code>patrickiben@gmail.com</code>, ORCID: <code>0009-0005-2443-7973</code>)<br><strong>License:</strong> MIT</p>
 <hr><div class="section level2">
 <h2 id="id_1-executive-summary--purpose">1. Executive Summary &amp; Purpose<a class="anchor" aria-label="anchor" href="#id_1-executive-summary--purpose"></a></h2>
 <p><code>catmech</code> is an R package for auditable multiple imputation, prospective audit planning, measurement error modeling, and downstream regression pooling. It addresses situations where observational cohorts, electronic health record (EHR) registries, or clinical trial data contain continuous measurements subject to recording errors, unit slips, or transcription errors, and where a gold-standard reference measurement has been audited on a subset of records.</p>
@@ -46,7 +46,7 @@
 <h2 id="id_2-current-status--verification-health">2. Current Status &amp; Verification Health<a class="anchor" aria-label="anchor" href="#id_2-current-status--verification-health"></a></h2>
 <p>The package is <strong>100% audited, verified, and ready for official CRAN submission</strong>.</p>
 <ul><li>
-<strong>Git History</strong>: Clean tree at commit <code>5e03ced</code> on <code>main</code>, pushed to GitHub.</li>
+<strong>Git History</strong>: Clean tree on <code>main</code>, pushed to GitHub.</li>
 <li>
 <strong>GitHub Actions CI</strong>: <strong>100% GREEN (<code>✓</code>)</strong> on all workflows:
 <ul><li>
@@ -57,13 +57,13 @@
 <li>
 <strong>Test Suite</strong>: <strong>1,754 unit tests</strong> passing with <strong>0 failures, 0 warnings, 0 skips</strong> (<code><a href="https://testthat.r-lib.org/reference/test_package.html" class="external-link">testthat::test_local()</a></code>).</li>
 <li>
-<strong>R CMD check</strong>: Passes <code>R CMD check --as-cran catmech_1.0.0.tar.gz</code> with <strong>0 errors, 0 warnings</strong> (only 2 standard environment notes regarding local HTML tidy and .DS_Store).</li>
+<strong>R CMD check</strong>: Passes <code>R CMD check --as-cran catmech_1.0.0.tar.gz</code> with <strong>0 errors, 0 warnings</strong> (3 notes: new submission, plus local HTML Tidy and .DS_Store environment notes). CRAN incoming checks with remote URL/DOI and file-URI checks enabled report only the new-submission note.</li>
 <li>
 <strong>Fact Check</strong>: <code>python3 docs/case-study/fact_check.py</code> validates all <strong>118 empirical claims</strong> across frozen benchmark tables with 100% agreement, 0 broken links, and 1-page PDF constraint compliance.</li>
 <li>
 <strong>Paper &amp; Manuscript Verification</strong>: <code>python3 paper/verify_paper_numbers.py</code> validates <strong>411 synthetic, real-data, clustered, and code/script surface claims</strong> across <code>paper/manuscript.Rmd</code>, <code>paper/manuscript.tex</code>, and <code>paper/paper.md</code> (plus negative control).</li>
 <li>
-<strong>Pre-Submission Validation Harness</strong>: Full 24-gate audit + 5-agent Lean Reader Wave (<code>G5</code> Persona A &amp; B, <code>G12</code>, <code>G13</code>, <code>G18</code>) recorded in <code>paper/VALIDATION_LEDGER_2026-11-06.md</code> (<code>check_gate_basis.py</code> stamped <code>FRESH 7, STALE 0, NO-BASIS 0</code>; <code>check_prose_style_v2.py</code> <code>ALL GREEN</code>; <code>check_citations.py</code> <code>20 OK | 5 REVIEW | 0 FLAG, 0 uncited</code>; <code>scrub_ai_artifacts.py</code> <code>0 hits</code>; <code>check_spelling_us.py</code> <code>0 hits</code>; <code>pdflatex</code> 15 pages, <code>errors=0 undefined=0 overfull=0</code>).</li>
+<strong>Pre-Submission Validation Harness</strong>: Full 24-gate audit + 5-agent Lean Reader Wave (<code>G5</code> Persona A &amp; B, <code>G12</code>, <code>G13</code>, <code>G18</code>) recorded in <code>paper/VALIDATION_LEDGER_2026-11-06.md</code> (<code>check_gate_basis.py</code> stamped <code>FRESH 7, STALE 0, NO-BASIS 0</code>; <code>check_prose_style_v2.py</code> <code>ALL GREEN</code>; <code>check_citations.py</code> <code>21 OK | 4 REVIEW | 0 FLAG, 0 uncited</code> (REVIEW items hand-checked); <code>scrub_ai_artifacts.py</code> <code>0 hits</code>; <code>check_spelling_us.py</code> <code>0 hits</code>; <code>pdflatex</code> 15 pages, <code>errors=0 undefined=0 overfull=0</code>).</li>
 <li>
 <strong>App Validation Harness</strong>: Interactive browser learning pages (<code>docs/learn/index.html</code> and <code>docs/learn/simulator.html</code>) verified across gates <code>A0</code>–<code>A10</code> via <code>web_gate.py --local</code> and stamped <strong><code>OWNER-APPROVED: True</code></strong> against page hashes <code>d94e13a7b66c865e</code> and <code>80cafcd68fec48c7</code>.</li>
 <li>
@@ -121,10 +121,10 @@
 │   ├── paper.md              # JOSS submission manuscript
 │   ├── paper.bib             # CrossRef-verified bibliography (25 entries, 0 flags)
 │   ├── manuscript.Rmd        # Academic LaTeX/PDF/HTML manuscript (JSS/SMMR)
-│   ├── manuscript.pdf        # Rendered academic PDF (10 pages, 0 overfull boxes)
+│   ├── manuscript.pdf        # Rendered academic PDF (15 pages, 0 overfull boxes)
 │   ├── manuscript.html       # Rendered academic HTML
 │   ├── manuscript.tex        # Rendered LaTeX source
-│   ├── verify_paper_numbers.py # Automated G2/G17/G19/G22 verifier (343 checks)
+│   ├── verify_paper_numbers.py # Automated G2/G17/G19/G22 verifier (411 checks)
 │   └── VALIDATION_LEDGER_2026-11-06.md # 24-gate Pre-Submission Validation Harness ledger
 ├── _pkgdown.yml              # Pkgdown documentation website configuration
 └── .github/workflows/
@@ -192,7 +192,7 @@
 <div class="sourceCode" id="cb3"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>I am continuing work on the <span class="in">`catmech`</span> R package (version 1.0.0).</span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>Repository path: <span class="in">`/Users/patrickiben/Documents/catmech`</span></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>Git Remote: <span class="in">`https://github.com/patrickiben/catmech.git`</span> (branch <span class="in">`main`</span>, clean at commit <span class="in">`5e03ced`</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>Git Remote: <span class="in">`https://github.com/patrickiben/catmech.git`</span> (branch <span class="in">`main`</span>)</span>
 <span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>Maintainer: Patrick Iben (<span class="in">`patrickiben@gmail.com`</span>, ORCID: <span class="in">`0009-0005-2443-7973`</span>)</span>
 <span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
 <span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>The package is fully implemented, documented, and QC'd for official release 1.0.0:</span>
