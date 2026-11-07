@@ -115,6 +115,11 @@ The `catmech` package is structured into modular S3 components designed for comp
 | **Model Pooling & Comparison** | `catmech_pool_lm()`, `catmech_pool_glm()`, `catmech_pool_coxph()`, `catmech_compare_strategies()`, `tidy()`, `glance()` | Downstream multi-endpoint pooling with Rubin combining rules, Barnard-Rubin df, cluster-robust sandwich covariance, and side-by-side strategy evaluation. |
 | **Sensitivity & Provenance** | `catmech_sensitivity()`, `catmech_audit_trail()` | Multi-scenario sensitivity envelopes and cryptographic SHA-256 regulatory compliance reporting. |
 
+A central operational requirement of regulatory clinical trials and modern observational research is that multiple imputation cannot remain restricted to continuous linear regression. In confirmatory trials, the primary estimands are predominantly time-to-event endpoints (e.g., overall survival, progression-free survival, major adverse cardiovascular events analyzed via Cox proportional hazards) or binary categorical endpoints (e.g., objective clinical response, 30-day mortality, toxicities analyzed via logistic regression). `catmech` directly integrates audit-adjusted imputation with these core clinical endpoints through `catmech_pool_coxph()` and `catmech_pool_glm()`:
+* **Survival Modeling (`catmech_pool_coxph`)**: Computes pooled log-hazard ratios $\bar{\theta}$ and Lin & Wei (1989) score-residual sandwich covariance [@lin1989robust], defining complete-data degrees of freedom strictly as $\nu_{com} = d - p$ (where $d$ is the observed event count and $p$ is the parameter count). Point estimates and Barnard-Rubin $t$-intervals are exponentiated to yield pooled hazard ratios ($\text{HR}$).
+* **Binary and Generalized Linear Modeling (`catmech_pool_glm`)**: Employs Huber--White--Liang--Zeger cluster-robust sandwich covariance [@liang1986longitudinal], providing robust inference against variance misspecification with exponentiated odds ratios ($\text{OR}$) or incidence rate ratios ($\text{IRR}$).
+* **Unified Model Exploration**: All pooling functions integrate with `broom` methods (`tidy()`, `glance()`) and automated visualization (`catmech_forest_plot()`), allowing clinical study teams to compare naive, complete-case, standard imputation, and mixture strategies across multiple endpoint families simultaneously.
+
 # Synthetic Monte Carlo Simulation Studies
 
 To evaluate the statistical properties of `catmech`, we conducted extensive Monte Carlo simulations across 10 scenario configurations (over 500,000 total requests).
@@ -176,6 +181,23 @@ Based on our empirical and simulation findings, we recommend the following evide
 
 1. **Gross, Separable Contamination**: When recording errors represent distinct corruption events (e.g., decimal transcription slips, sensor failures), the Bayesian contamination mixture model is recommended to prevent severe attenuation bias while maintaining oracle-level precision.
 2. **Subtle, Diffuse Differences**: When errors represent continuous rounding or mild reporting bias, simple linear imputation is recommended as a parsimonious baseline.
+
+# Discussion: The Simulation-to-Practice Divergence and Methodological Implications
+
+A principal methodological contribution of this work is illuminating the divergence between synthetic Monte Carlo simulations and empirical real-world clinical audits, an insight with direct consequences for clinical trial analysis.
+
+In the methodological statistical literature, novel imputation models are almost universally benchmarked against synthetic datasets with clean, gross, and bimodal error structures (e.g., decimal point displacements, transcription slips, or large sensor batch shifts). Under these simulated conditions—such as Scenario 1 of our Monte Carlo benchmarks—the Bayesian contamination mixture model achieves dramatic success: it eliminates the substantial attenuation bias of naive analyses (bias reduced from -0.116 to +0.001) while cutting variance by 44% relative to complete-case analysis and delivering nominal 95.0% coverage.
+
+However, our empirical investigations across large-scale real-world registries without synthetic corruption (the ClinicalTrials.gov registry and the NHANES epidemiological audit) reveal a fundamentally different statistical landscape. Real-world recording discrepancies are rarely gross or neatly separable into discrete contaminated versus pristine sub-populations. Instead, they predominantly manifest as subtle, continuous discrepancies arising from digit preference, cognitive rounding in self-reported measures, differing clinical measurement protocols across sites, or mild procedural divergence.
+
+In these real-world regimes, the empirical results challenge methodological dogma: simple linear imputation (`catmech_reference(use_recorded = TRUE)`) matched or slightly outperformed the mixture model in predictive accuracy (RMSE of 0.0286 vs. 0.0308 on ClinicalTrials.gov) while requiring substantially fewer parametric assumptions and zero MCMC convergence overhead.
+
+This divergence is not a defect of the mixture engine, but a crucial empirical finding: *simulated gross errors favor mixture modeling, but real-world diffuse errors favor linear multiple imputation*. Methodologically, this divergence proves why the decision framework formalized in Section 6 is essential. Rather than assuming that a complex Bayesian mixture model is universally optimal, trialists must treat the choice of imputation model as an empirical question. `catmech` operationalizes this principle by providing:
+1. Exploratory diagnostic screening via `catmech_recording_audit()` to quantify error rate and detect between-stratum heterogeneity before model fitting;
+2. Out-of-sample predictive cross-validation via `catmech_holdout_check()` to guard against overfitted or miscalibrated imputation distributions;
+3. Direct strategy benchmarking via `catmech_compare_strategies()` to evaluate whether data characteristics justify the mixture model's complexity or are robustly served by linear data augmentation.
+
+By bridging prospective two-phase sample size determination, robust multi-endpoint pooling across linear, logistic, and Cox survival models, and cryptographic 21 CFR Part 11 audit trails, `catmech` equips biostatisticians with a defensible, reproducible, and mathematically grounded framework for clinical data verification.
 
 # Regulatory Compliance and Data Governance
 

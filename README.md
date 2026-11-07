@@ -103,25 +103,7 @@ Random 25% audit, 1,000 cohorts of 600 from each evaluation pool. "Reference nor
 
 ## Package overview
 
-catmech does auditable imputation of continuous measurements with quality flags, reference subsets and optional interval categories.
-
-`catmech_model()` masks every flagged measurement and fits a conditional Gaussian
-model using trusted observations. It can ignore categories, treat them as exact,
-or use an externally specified category-error matrix. It preserves original data,
-records assumptions and replacements, checks sampler diagnostics, and supports
-linear-model pooling and comparison of declared sensitivity scenarios.
-`catmech_reference()` uses genuinely measured reference values on an internal
-subset, and `catmech_pmm()` provides an audited standard predictive-matching option.
-`catmech_contamination()` models recording errors using those references, and
-`catmech_recording_audit()` and `catmech_holdout_check()` report what the references
-show on your own data.
-
-The Gaussian model and data augmentation are established methods. The contribution
-is a small, inspectable workflow with explicit failure handling. The earlier
-retain/replace PMM engine remains available for **sensitivity analysis**; its
-arbitrary retention of contaminated values caused severe bias and undercoverage.
-See the [assessment](docs/ASSESSMENT.md), [model assumptions](docs/METHOD.md),
-and [validation record](validation/VALIDATION.md).
+catmech provides an inspectable, auditable workflow for data with recorded measurements and reference subsets. Built on established Bayesian data augmentation, MCMC sampling, and semiparametric two-phase theory, it emphasizes explicit failure handling, prospective audit planning, and multi-endpoint regression pooling. The earlier retain/replace PMM engine remains available for **sensitivity analysis**; arbitrary retention of contaminated values caused severe bias and undercoverage in frozen validation benchmarks. See the [assessment](docs/ASSESSMENT.md), [model assumptions](docs/METHOD.md), and [validation record](validation/VALIDATION.md).
 
 ## Install
 
@@ -221,6 +203,21 @@ such as site or flag, and compares referenced with unreferenced rows.
 ```r
 catmech_recording_audit(dat_with_reference, "lab_value", "reference_value",
                         by = c("outlier_flag", "site"))
+```
+
+The diagnostic printout highlights the error rate and stratum heterogeneity before you fit an imputation model:
+
+```text
+-- Catmech Recording Audit --
+Status:             heterogeneity_detected
+Disagreements:      48 / 60 calibration rows (80.0%)
+Reference subset:   60 / 600 total rows (10.0%)
+Error distribution: mean = 1.9842, SD = 0.8123
+Selection SMD:      0.0412
+Heterogeneity across strata:
+  column level disagreements calibration_rows disagreement_rate lower upper
+ outlier     0             6               40             0.150 0.063 0.284
+ outlier     1            42               20             1.000 0.840 1.000
 ```
 
 When the table points to the contamination model:
@@ -455,6 +452,9 @@ an analysis predictor. See [all results, uncertainty and failed screens](validat
 
 [![Marginal-model calibration, slope prior sensitivity and fit refusals](validation/joint-marginal-figures/joint-marginal-evidence.png)](validation/joint-marginal-figures/joint-marginal-evidence.pdf)
 
+<details>
+<summary><strong>Earlier moment-model evidence and validation history (Click to expand)</strong></summary>
+
 ### Earlier moment-model evidence
 
 The earlier moment model's random-intercept regression is available elsewhere. In a [planned comparison](validation/OUTSIDE_METHODS_SYNTHESIS.md), `mice` with `2l.lmer` under
@@ -482,6 +482,8 @@ together; it does not isolate tail shape or rule out problems from rarity in oth
 its rule. Missing an influential cluster is one possible explanation for failures, rather than a mechanism established by that
 experiment. Results can also turn on one or two clusters: on [another health system](validation/SECOND_SYSTEM_SYNTHESIS.md), one district
 of four clinics reversed the sign of a slope.
+
+</details>
 
 ## Planning an audit: not validated
 
@@ -575,6 +577,9 @@ measurements, and failures under selective or inaccurate references. These are s
 coverage theorem. Nonlinearity, missed contamination, informative selection,
 incompatible analysis models and dependent records remain limitations.
 
+<details>
+<summary><strong>Legacy API: v0.1 PMM sensitivity semantics (Click to expand)</strong></summary>
+
 ## Legacy API
 
 `catmech_spec()` and `catmech_impute()` retain the v0.1 PMM sensitivity semantics.
@@ -584,6 +589,8 @@ posterior corruption estimate. `catmech_pool_lm()` refuses this engine unless
 See the [legacy method](docs/LEGACY_METHOD.md), [example](inst/examples/lab.R),
 and [historical benchmark](validation/benchmark/RESULTS.md). Existing specifications
 are not silently converted to the new model.
+
+</details>
 
 ## Reproduce
 

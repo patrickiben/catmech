@@ -264,11 +264,13 @@ On both real datasets, retaining the recorded values cut RMSE by 43% to 48% comp
 
 In addition, facility-level data verification was benchmarked against the Rwanda Health Management Information System recount audit [@nshimyiryo2020health] across 11 clinical indicators and 148,500 requests, confirming that delete-one-cluster jackknife (CV3) variance estimation achieved nominal 92%–97% coverage across clinical facilities where uncorrected cluster variances suffered undercoverage.
 
-## 3. Methodological Boundary and Practical Guidance
+## 3. The Simulation-to-Practice Divergence and Methodological Guidance
 
-These empirical benchmarks establish a clear decision rule for clinical investigators:
-1. **Gross, Separable Recording Shifts**: When discrepancies represent transcription slips, decimal shifts, or assay calibration jumps, the `catmech` contamination mixture model is recommended to prevent severe attenuation bias while maintaining oracle-level precision.
-2. **Subtle, Diffuse Differences**: When discrepancies arise from continuous self-report rounding or mild measurement noise, `catmech`'s simple linear imputation option (`catmech_pool_lm`) is recommended as the parsimonious baseline.
+A central methodological insight established by these empirical benchmarks is the divergence between synthetic Monte Carlo evaluations and real-world clinical audits:
+* **Synthetic gross errors favor mixture modeling**: When data errors represent discrete, bimodal corruption events (e.g., transcription slips, decimal shifts, or assay calibration jumps), the Bayesian contamination mixture model is essential to eliminate severe attenuation bias and cut variance by 44% over complete-case analysis.
+* **Real-world subtle errors favor linear multiple imputation**: In actual registry audits where discrepancies are diffuse and continuous (e.g., self-report rounding or mild procedural differences), simple linear imputation matches or exceeds mixture modeling in predictive accuracy (RMSE 0.0286 vs. 0.0308 on ClinicalTrials.gov) with fewer parametric assumptions and zero convergence overhead.
+
+This empirical divergence highlights why `catmech` incorporates prospective audit planning (`catmech_audit_power()`), diagnostic discrepancy auditing (`catmech_recording_audit()`), predictive cross-validation (`catmech_holdout_check()`), and automated strategy comparison (`catmech_compare_strategies()`)—ensuring that trialists let empirical data guide the choice of model rather than relying on unverified assumptions.
 
 # Regulatory Compliance and Data Governance
 
