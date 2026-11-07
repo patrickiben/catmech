@@ -75,3 +75,12 @@
 ### G18: JSS / JOSS Associate Editor Surface Review (`1c9f1bd5-3899-4046-be19-54d73387d64d`)
 - **Findings fixed**: Added Section 4 (`Illustrative clinical trial workflow`) and the software comparison table to `paper/manuscript.Rmd`; removed `toc: true` from `pdf_document` in `paper/manuscript.Rmd`; removed the `<!-- gate-basis: ... -->` HTML comment from `paper/paper.md`; cited `@nhanes2018` and `@maassen2020reproducibility` in both papers; and added URLs to `@leeder2008simex`, `@fda2003part11`, and `@ich1998e9` in `paper/paper.bib`.
 - **unchecked_directions**: Live `openjournals/inara` Docker build (not installed locally; Pandoc LaTeX/HTML builds verified).
+
+---
+
+## Companion Interactive Web Surfaces (`App_Validation_Harness`)
+
+- **Harness Specification**: `/Users/patrickiben/Documents/Documents - Patrick’s Mac Studio/App_Validation_Harness/HARNESS.md` (`web_gate.py`, gates `A0`–`A10`)
+- **`catmech_guide` (`docs/learn/index.html`, page hash `d94e13a7b66c865e`)**: All applicable gates (`A0`–`A5`, `A7`–`A10`) **GREEN**; `A0`, `A4`, and `A8` signed off (`approved (2026-11-07)`); **`OWNER-APPROVED: True`**.
+- **`catmech_simulator` (`docs/learn/simulator.html`, page hash `80cafcd68fec48c7`)**: All applicable gates (`A0`–`A5`, `A7`–`A9`) **GREEN**; `A0`, `A4`, and `A8` signed off (`approved (2026-11-07)`); **`OWNER-APPROVED: True`**.
+- **JS-to-R Numerical Cross-Checks**: `node docs/learn/qa/compare.js` (`140` studies + `6` negative controls: **PASS**) and `node docs/audit-planner/qa/check-k-port.js` (`3` browser test vectors + pool $\hat{k}$ to `1e-11`–`1e-15`: **PASS**).
