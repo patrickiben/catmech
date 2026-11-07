@@ -351,7 +351,7 @@ trail <- catmech_audit_trail(
 cat(substr(as.character(trail), 1, 1200), "\n... [truncated for display]")
 #> # Catmech Audit Trail & Compliance Report
 #> 
-#> **Generated:** 2026-11-07T04:53:51Z UTC | **Catmech Version:** 1.0.0
+#> **Generated:** 2026-11-07T06:18:06Z UTC | **Catmech Version:** 1.0.0
 #> **R Version:** 4.6.2 | **Platform:** x86_64-pc-linux-gnu
 #> 
 #> ---
