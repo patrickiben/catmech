@@ -39,7 +39,7 @@
   [`glance()`](https://patrickiben.github.io/catmech/reference/glance.md)
   methods for all pooled regression models (`catmech_pooled_glm`,
   `catmech_pooled_coxph`, `catmech_pooled_lm`).
-- Add regulatory compliance report generator
+- Add audit trail and provenance report generator
   ([`catmech_audit_trail()`](https://patrickiben.github.io/catmech/reference/catmech_audit_trail.md))
   producing tamper-evident SHA-256 data and completion checksums across
   Markdown, JSON, and standalone HTML formats.

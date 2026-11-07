@@ -99,7 +99,7 @@ Generate SHA-256 verified provenance reports and audit trails for
 regulatory filings.
 
 - [`catmech_audit_trail()`](https://patrickiben.github.io/catmech/reference/catmech_audit_trail.md)
-  : Generate an auditable compliance and integrity trail for a catmech
+  : Generate an auditable provenance and integrity trail for a catmech
   analysis
 - [`catmech_hash()`](https://patrickiben.github.io/catmech/reference/catmech_hash.md)
   : Compute a canonical assumption hash

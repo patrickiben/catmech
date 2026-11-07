@@ -1,4 +1,4 @@
-# Generate an auditable compliance and integrity trail for a catmech analysis
+# Generate an auditable provenance and integrity trail for a catmech analysis
 
 Extracts complete provenance, input and completion data hashes, model
 specifications, convergence monitors, imputation statistics, and
@@ -14,7 +14,7 @@ catmech_audit_trail(
   sensitivity = NULL,
   format = c("markdown", "json", "html"),
   path = NULL,
-  title = "Catmech Audit Trail & Compliance Report"
+  title = "Catmech Audit Trail & Provenance Report"
 )
 ```
 
@@ -46,7 +46,7 @@ catmech_audit_trail(
 
 - title:
 
-  Document title (default: \`"Catmech Audit Trail & Compliance
+  Document title (default: \`"Catmech Audit Trail & Provenance
   Report"\`).
 
 ## Value
@@ -70,9 +70,9 @@ res <- catmech_reference(df, value = "lab", reference = "ref",
 pooled <- catmech_pool_lm(res, y ~ lab + age)
 trail <- catmech_audit_trail(res, pooled = pooled)
 print(trail)
-#> # Catmech Audit Trail & Compliance Report
+#> # Catmech Audit Trail & Provenance Report
 #> 
-#> **Generated:** 2026-11-07T20:33:36Z UTC | **Catmech Version:** 1.0.0
+#> **Generated:** 2026-11-07T22:24:48Z UTC | **Catmech Version:** 1.0.0
 #> **R Version:** 4.6.2 | **Platform:** x86_64-pc-linux-gnu
 #> 
 #> ---
@@ -83,8 +83,8 @@ print(trail)
 #> - **Assumption Specification Hash:** `7ba7a2acef9b95325ceacfeaf8413bd993aaeb6afe1e7c9de47e1e0c33f7a75d`
 #> - **Completed Dataset Checksums:**
 #> 
-#>   - Completion `m=1`: `c358ba09aa54862566519c175e62b23aa8b7dab0869965e18c16db1c09c0ab55`
-#>   - Completion `m=2`: `f60a137b3b8115d6ce95a73d58bd55d1091e7b948dbcce82e47f23dc824e843a`
+#>   - Completion `m=1`: `fd9e0211aa706a46d0e63e085181c831144480ec10b12580688cf67fbaa0dfa1`
+#>   - Completion `m=2`: `a833b76a6fae53ebab5588a3691804afd77f7583d7b151fc50167c287e726f42`
 #> 
 #> ## 2. Cohort Specification & Imputation Profile
 #> 
@@ -112,8 +112,8 @@ print(trail)
 #> 
 #> ---
 #> 
-#> ### Regulatory Audit & Compliance Certification
-#> > This document provides an auditable, verifiable record of data imputation and downstream analysis.
-#> > All completions and statistical intervals are cryptographically tied to the recorded input hash and assumption specification.
+#> ### Audit Trail & Provenance Record
+#> > This document provides an auditable provenance record of data imputation and downstream analysis.
+#> > All completions and statistical intervals are tied via SHA-256 checksums to the recorded input hash and assumption specification.
 #>  
 ```

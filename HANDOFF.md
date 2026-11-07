@@ -53,12 +53,12 @@ recording discrepancy audits, and power curves. 6. **Tidyverse / `broom`
 Generics**:
 [`tidy()`](https://patrickiben.github.io/catmech/reference/tidy.md) and
 [`glance()`](https://patrickiben.github.io/catmech/reference/glance.md)
-S3 methods for all pooled regression models. 7. **Tamper-Evident
-Regulatory Compliance Trails**
+S3 methods for all pooled regression models. 7. **Audit Trail &
+Provenance Records**
 ([`catmech_audit_trail()`](https://patrickiben.github.io/catmech/reference/catmech_audit_trail.md)):
-SHA-256 data, specification, and completion checksums designed for FDA
-21 CFR Part 11 and ICH GCP E9 compliance in Markdown, JSON, and
-standalone HTML formats.
+SHA-256 data, specification, and completion checksums supporting
+regulatory documentation (FDA 21 CFR Part 11 and ICH E9) in Markdown,
+JSON, and standalone HTML formats.
 
 ------------------------------------------------------------------------
 
