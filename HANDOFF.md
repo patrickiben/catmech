@@ -3,7 +3,7 @@
 **Date:** November 6, 2026  
 **Repository Path:** `/Users/patrickiben/Documents/catmech`  
 **Git Remote:** `https://github.com/patrickiben/catmech.git` (branch:
-`main`, commit: `2db1467`)  
+`main`, commit: `78fa580`)  
 **Package Version:** `1.0.0`  
 **Maintainer:** Patrick Iben (`patrickiben@gmail.com`, ORCID:
 `0009-0005-2443-7973`)  
@@ -67,7 +67,7 @@ standalone HTML formats.
 The package is **100% audited, verified, and ready for official CRAN
 submission**.
 
-- **Git History**: Clean tree at commit `2db1467` on `main`, pushed to
+- **Git History**: Clean tree at commit `78fa580` on `main`, pushed to
   GitHub.
 - **GitHub Actions CI**: **100% GREEN (`✓`)** on all workflows:
   - `R-CMD-check`: Passed on macOS (arm64), Ubuntu (Linux), and Windows
@@ -94,16 +94,23 @@ submission**.
 
 - **README Streamlining**: Consolidated redundancy in
   `## Package overview`, wrapped technical validation history
-  (`Earlier moment-model evidence`, `Legacy API`) in collapsible
-  `<details>` blocks to prevent user scroll fatigue, and added an
-  annotated diagnostic console output block for
+  (`Mixed recording patterns within sites`,
+  `Marginal coefficients with contextual site effects`,
+  `Earlier moment-model evidence`, `Legacy API`) in collapsible
+  `<details>` blocks to prevent user scroll fatigue, and added an exact
+  S3 diagnostic console output block for
   [`catmech_recording_audit()`](https://patrickiben.github.io/catmech/reference/catmech_recording_audit.md).
-- **Academic Manuscript Discussion Expansion**: In both
+- **Academic Manuscript Discussion & Typesetting**: In both
   `paper/manuscript.Rmd` and `paper/paper.md`, explicitly framed the
   simulation-to-practice divergence (synthetic gross errors favoring
   mixture models vs. real-world subtle discrepancies favoring linear MI)
   as a key methodological insight that justifies the decision framework
-  and empirical strategy comparison.
+  and empirical strategy comparison. Verified all 10 PDF pages visually
+  (`paper/manuscript.pdf`) to ensure crisp LaTeX author headers,
+  properly formatted itemized/enumerated lists, exact S3
+  [`print.catmech_pooled_coxph()`](https://patrickiben.github.io/catmech/reference/print.catmech_pooled_coxph.md)
+  output, and clean institutional BibTeX citations (`fda2003part11`,
+  `ich1998e9`).
 - **Multi-Endpoint Clinical Elevation**: Prominently featured
   `catmech_pool_coxph` (Lin–Wei sandwich standard errors, event-based
   Barnard–Rubin degrees of freedom $\nu_{com} = d - p$) and
@@ -253,7 +260,7 @@ Copy and paste the block below into the first prompt of your new chat:
 I am continuing work on the `catmech` R package (version 1.0.0).
 
 Repository path: `/Users/patrickiben/Documents/catmech`
-Git Remote: `https://github.com/patrickiben/catmech.git` (branch `main`, clean at commit `2db1467`)
+Git Remote: `https://github.com/patrickiben/catmech.git` (branch `main`, clean at commit `78fa580`)
 Maintainer: Patrick Iben (`patrickiben@gmail.com`, ORCID: `0009-0005-2443-7973`)
 
 The package is fully implemented, documented, and QC'd for official release 1.0.0:

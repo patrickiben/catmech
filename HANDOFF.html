@@ -36,7 +36,7 @@
 
 <div id="catmech-v100--chat-handoff--project-context-packet" class="section level1">
 
-<p><strong>Date:</strong> November 6, 2026<br><strong>Repository Path:</strong> <code>/Users/patrickiben/Documents/catmech</code><br><strong>Git Remote:</strong> <code>https://github.com/patrickiben/catmech.git</code> (branch: <code>main</code>, commit: <code>2db1467</code>)<br><strong>Package Version:</strong> <code>1.0.0</code><br><strong>Maintainer:</strong> Patrick Iben (<code>patrickiben@gmail.com</code>, ORCID: <code>0009-0005-2443-7973</code>)<br><strong>License:</strong> MIT</p>
+<p><strong>Date:</strong> November 6, 2026<br><strong>Repository Path:</strong> <code>/Users/patrickiben/Documents/catmech</code><br><strong>Git Remote:</strong> <code>https://github.com/patrickiben/catmech.git</code> (branch: <code>main</code>, commit: <code>78fa580</code>)<br><strong>Package Version:</strong> <code>1.0.0</code><br><strong>Maintainer:</strong> Patrick Iben (<code>patrickiben@gmail.com</code>, ORCID: <code>0009-0005-2443-7973</code>)<br><strong>License:</strong> MIT</p>
 <hr><div class="section level2">
 <h2 id="id_1-executive-summary--purpose">1. Executive Summary &amp; Purpose<a class="anchor" aria-label="anchor" href="#id_1-executive-summary--purpose"></a></h2>
 <p><code>catmech</code> is an R package for auditable multiple imputation, prospective audit planning, measurement error modeling, and downstream regression pooling. It addresses situations where observational cohorts, electronic health record (EHR) registries, or clinical trial data contain continuous measurements subject to recording errors, unit slips, or transcription errors, and where a gold-standard reference measurement has been audited on a subset of records.</p>
@@ -46,7 +46,7 @@
 <h2 id="id_2-current-status--verification-health">2. Current Status &amp; Verification Health<a class="anchor" aria-label="anchor" href="#id_2-current-status--verification-health"></a></h2>
 <p>The package is <strong>100% audited, verified, and ready for official CRAN submission</strong>.</p>
 <ul><li>
-<strong>Git History</strong>: Clean tree at commit <code>2db1467</code> on <code>main</code>, pushed to GitHub.</li>
+<strong>Git History</strong>: Clean tree at commit <code>78fa580</code> on <code>main</code>, pushed to GitHub.</li>
 <li>
 <strong>GitHub Actions CI</strong>: <strong>100% GREEN (<code>✓</code>)</strong> on all workflows:
 <ul><li>
@@ -67,9 +67,9 @@
 </ul><div class="section level3">
 <h3 id="id_21-peer-review-refinements-v100-release-candidate">2.1 Peer Review Refinements (v1.0.0 Release Candidate)<a class="anchor" aria-label="anchor" href="#id_21-peer-review-refinements-v100-release-candidate"></a></h3>
 <ul><li>
-<strong>README Streamlining</strong>: Consolidated redundancy in <code>## Package overview</code>, wrapped technical validation history (<code>Earlier moment-model evidence</code>, <code>Legacy API</code>) in collapsible <code>&lt;details&gt;</code> blocks to prevent user scroll fatigue, and added an annotated diagnostic console output block for <code><a href="reference/catmech_recording_audit.html">catmech_recording_audit()</a></code>.</li>
+<strong>README Streamlining</strong>: Consolidated redundancy in <code>## Package overview</code>, wrapped technical validation history (<code>Mixed recording patterns within sites</code>, <code>Marginal coefficients with contextual site effects</code>, <code>Earlier moment-model evidence</code>, <code>Legacy API</code>) in collapsible <code>&lt;details&gt;</code> blocks to prevent user scroll fatigue, and added an exact S3 diagnostic console output block for <code><a href="reference/catmech_recording_audit.html">catmech_recording_audit()</a></code>.</li>
 <li>
-<strong>Academic Manuscript Discussion Expansion</strong>: In both <code>paper/manuscript.Rmd</code> and <code>paper/paper.md</code>, explicitly framed the simulation-to-practice divergence (synthetic gross errors favoring mixture models vs. real-world subtle discrepancies favoring linear MI) as a key methodological insight that justifies the decision framework and empirical strategy comparison.</li>
+<strong>Academic Manuscript Discussion &amp; Typesetting</strong>: In both <code>paper/manuscript.Rmd</code> and <code>paper/paper.md</code>, explicitly framed the simulation-to-practice divergence (synthetic gross errors favoring mixture models vs. real-world subtle discrepancies favoring linear MI) as a key methodological insight that justifies the decision framework and empirical strategy comparison. Verified all 10 PDF pages visually (<code>paper/manuscript.pdf</code>) to ensure crisp LaTeX author headers, properly formatted itemized/enumerated lists, exact S3 <code><a href="reference/print.catmech_pooled_coxph.html">print.catmech_pooled_coxph()</a></code> output, and clean institutional BibTeX citations (<code>fda2003part11</code>, <code>ich1998e9</code>).</li>
 <li>
 <strong>Multi-Endpoint Clinical Elevation</strong>: Prominently featured <code>catmech_pool_coxph</code> (Lin–Wei sandwich standard errors, event-based Barnard–Rubin degrees of freedom <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ν</mi><mrow><mi>c</mi><mi>o</mi><mi>m</mi></mrow></msub><mo>=</mo><mi>d</mi><mo>−</mo><mi>p</mi></mrow><annotation encoding="application/x-tex">\nu_{com} = d - p</annotation></semantics></math>) and <code>catmech_pool_glm</code> (Huber–White–Liang–Zeger sandwich standard errors) in Section 3 and Table 1 alongside linear models.</li>
 <li>
@@ -183,7 +183,7 @@
 <div class="sourceCode" id="cb3"><pre class="sourceCode markdown"><code class="sourceCode markdown"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>I am continuing work on the <span class="in">`catmech`</span> R package (version 1.0.0).</span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>Repository path: <span class="in">`/Users/patrickiben/Documents/catmech`</span></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>Git Remote: <span class="in">`https://github.com/patrickiben/catmech.git`</span> (branch <span class="in">`main`</span>, clean at commit <span class="in">`2db1467`</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>Git Remote: <span class="in">`https://github.com/patrickiben/catmech.git`</span> (branch <span class="in">`main`</span>, clean at commit <span class="in">`78fa580`</span>)</span>
 <span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>Maintainer: Patrick Iben (<span class="in">`patrickiben@gmail.com`</span>, ORCID: <span class="in">`0009-0005-2443-7973`</span>)</span>
 <span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
 <span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>The package is fully implemented, documented, and QC'd for official release 1.0.0:</span>
