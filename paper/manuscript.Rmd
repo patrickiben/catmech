@@ -1,6 +1,9 @@
 ---
 title: "Statistical Inference and Two-Phase Audit Design for Contaminated Measurements in Clinical Research: The catmech R Package"
-author: "Patrick Iben (Independent Biostatistician; patrickiben@gmail.com; ORCID: 0009-0005-2443-7973)"
+author: |
+  Patrick Iben  
+  Independent Biostatistician  
+  patrickiben@gmail.com | ORCID: 0009-0005-2443-7973
 date: "November 6, 2026"
 output:
   pdf_document:
