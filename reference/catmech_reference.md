@@ -1,0 +1,295 @@
+# Complete a target using an independently measured reference subset
+
+Treats the reference column as the only observed truth for the target.
+Every non-reference target is unavailable, regardless of its recorded
+value or flags. This changes the trust assumption; it does not infer a
+gold standard from a noisy measurement or correct missed errors without
+external information.
+
+## Usage
+
+``` r
+catmech_reference(
+  data,
+  value,
+  reference,
+  predictors,
+  method = c("normal", "pmm", "pmm_abb"),
+  donors = 5L,
+  m = 20L,
+  seed = 1L,
+  use_recorded = FALSE,
+  cluster = NULL,
+  cluster_model = c("moment", "joint", "joint_marginal"),
+  joint_control = list()
+)
+```
+
+## Arguments
+
+- data:
+
+  A data frame; raw target measurements remain in \`original\`.
+
+- value:
+
+  Name of the numeric target to replace in completed datasets.
+
+- reference:
+
+  Name of a numeric gold-standard column, observed only where
+  independently measured. Known reference values are preserved exactly
+  in the completed target, including when they disagree with recorded
+  measurements.
+
+- predictors:
+
+  Explicit complete predictor names, excluding \`value\` and
+  \`reference\`. Include the scientific outcome and relevant design
+  variables. A raw measurement may be used only through a separate
+  explicitly selected, complete auxiliary column. No missing proxy is
+  filled automatically.
+
+- method:
+
+  \`"normal"\` (default) for conditional Gaussian posterior draws,
+  \`"pmm"\` for standard predictive mean matching using reference
+  donors, or \`"pmm_abb"\` for the same matching on a fresh bootstrap of
+  the donors at each imputation. See details.
+
+- donors:
+
+  Nearest-donor count for matching, default five; ignored by the normal
+  method. Fewer reference observations than donors is an error when
+  needed.
+
+- m:
+
+  Number of completions, at least two.
+
+- seed:
+
+  Nonnegative integer seed, with caller RNG restored.
+
+- use_recorded:
+
+  For \`method = "normal"\`, also use the recorded value as a linear
+  predictor. Records with a recorded value are imputed from a model
+  fitted on references that also have one, and records without one from
+  a model on the predictors fitted on all references. It needs rows with
+  both values. If every such row agrees exactly, those records keep
+  their recorded value with no imputation uncertainty, as
+  \`spec\$recorded_fit\` notes and a warning says. Intervals then treat
+  those records as correct, which can be badly wrong when a small audit
+  simply missed the errors.
+
+- cluster:
+
+  With \`use_recorded = TRUE\`, the name of a complete column
+  identifying audit clusters, such as a site or facility. The imputation
+  model then adds a random intercept for the cluster, instead of
+  treating rows as independent. If the audit is stratified, put the
+  strata in \`predictors\`, which needs some stratum with at least two
+  audited clusters. Do not use it when the audited value will be a
+  predictor in the analysis. See details.
+
+- cluster_model:
+
+  \`"moment"\` preserves the existing recorded-value regression.
+  \`"joint"\` explicitly selects a bivariate Gaussian model of the true
+  target and recorded value with one shared two-dimensional site effect.
+  It requires \`method = "normal"\`, \`use_recorded = TRUE\` and
+  \`cluster\`. \`"joint_marginal"\` jointly models the true measurement,
+  recorded value and complete continuous numeric predictors, allowing
+  correlated site effects across all of them. Use
+  \[catmech_marginal_summary()\] for population marginal coefficients
+  from this model; \[catmech_joint_summary()\] applies to \`"joint"\`.
+
+- joint_control:
+
+  Named list for the joint sampler: \`chains = 4\`, \`burnin = 1000\`,
+  \`iterations = 4000\`, \`max_iterations = 32000\`, and \`prior_scale =
+  1\`. Chains must be at least four. Failed diagnostic screens restart
+  the same seeded chains with doubled retained iterations up to the
+  declared maximum, then fail with traces in a
+  \`catmech_convergence_error\`. For \`"joint"\`, each chain uses a
+  fresh R worker to isolate the backend RNG. For \`"joint_marginal"\`, a
+  compiled blocked Gibbs sampler uses independent R RNG streams. Its
+  default maximum is 64000 retained iterations per chain. It also
+  accepts \`regression_scale = 10\`, the conditional matrix-normal prior
+  scale for within- and between-site measurement regressions on the
+  predictors. Its predictor and conditional-measurement covariance
+  blocks have Huang–Wand priors with half-t(2) marginal standard
+  deviations of scale \`sqrt(prior_scale)\` in standardized units. These
+  are distinct from the reconstructed full covariance matrices and from
+  the fixed inverse-Wishart prior in \`"joint"\`.
+
+## Value
+
+A \`catmech_result\`. Its completed target contains exact gold
+references or imputations; the original reference column is unchanged.
+The \`mids\` observed target is the reference values with other rows
+missing. The manifest records \`imputed_rows\` explicitly, including an
+empty vector for full reference.
+
+## Details
+
+Reference selection must be ignorable given the selected observed
+predictors, with adequate support in the reference subset. Reference
+values must measure the same quantity, time point and units, and are
+assumed exact. Unknown reference error, unmeasured selection and
+transport failure are not repaired. This is standard missing-data
+imputation using externally supplied validation information, not
+automatic detection of errors in unvalidated records.
+
+With partial reference data, normal imputation delegates to
+\`catmech_model\` with categories ignored and without a quality-flag
+policy. PMM delegates to the same audited standard matching engine as
+\`catmech_pmm\`. Both require a full-rank reference design with positive
+residual degrees of freedom and variance. Complete reference data need
+no stochastic fit or donor support.
+
+Partial-reference PMM is experimental sensitivity output. A held-out
+package benchmark found substantial interval undercoverage even with a
+randomly selected, accurate reference subset. As a conservative package
+policy, \`catmech_pool_lm\` requires \`allow_sensitivity = TRUE\`
+whenever reference PMM imputes any target cells, and labels its
+calculations \`sensitivity_only\`. This policy is not a general theorem
+about PMM, and the opt-in does not establish inferential validity.
+\`catmech_sensitivity\` already supplies an explicit sensitivity
+context. Complete reference data remain eligible for ordinary
+complete-data pooling because no target cells are imputed.
+
+The likely cause of that undercoverage is that standard matching
+conditions on one fixed set of donor values, which attenuates
+between-imputation variance (Gaffert, Meinfelder and Bosch).
+\`"pmm_abb"\` resamples donors with replacement for each imputation, an
+approximate Bayesian bootstrap (Rubin and Schenker, 1986; Siddique and
+Belin, 2008), before the same delegated type-1 matching. It targets that
+variance and is not gated. It still cannot leave donor support, and it
+does not make matching more precise than the normal method when the
+normal model holds.
+
+With \`use_recorded = TRUE\`, reference selection may depend on the
+recorded value, and linearity in the recorded value becomes an
+assumption. It was best or tied among reference-using methods at 25
+gross errors, which distort a linear fit; \[catmech_contamination()\] is
+the alternative there.
+
+With the default \`cluster_model = "moment"\`, the imputation model is
+the recorded-value regression plus a random intercept for the cluster.
+Its variance components come from moments (Henderson, 1953, method 3) on
+the audited rows and are drawn in each imputation, and coefficients are
+drawn from the generalized least squares fit given them. An unaudited
+cluster gets a new intercept, an audited cluster with unaudited rows
+gets one conditional on its residuals, and every imputed row gets normal
+noise. If the audited rows cannot separate the two variances, as with
+one row per cluster, the intercept variance is zero, with a warning. If
+the predictors absorb every audited cluster, as with one audited cluster
+per stratum, there is no estimate of between-cluster variance for
+unaudited clusters, and the fit is refused. Fewer than five audited
+clusters are refused. Pool with \[catmech_pool_lm()\], which uses a
+cluster-robust variance for such a fit. This is the usual
+random-intercept imputation model (Schafer and Yucel, 2002; Grund and
+colleagues, 2018), with a moment-based draw of the variance components
+in place of a full posterior. That draw is an approximation; balanced
+clusters alone do not make it an exact posterior draw with general
+predictors. Its justification is weaker with one or two large sites. It
+is not a new method. It assumes one normal intercept per cluster, so
+cluster-specific slopes and non-constant variance are not modeled. The
+same model is available in other software, including \`mice\`.
+
+With \`cluster_model = "moment"\`, unaudited rows within a cluster
+cannot require stochastic imputation through both the recorded-present
+and recorded-missing paths: the current separate fits do not provide a
+shared cluster draw across those paths, so that request is refused.
+Different clusters may use different paths. Audited rows and recorded
+values kept deterministically after complete calibration agreement do
+not trigger this refusal. Resolve one pattern with reference
+measurements or explicitly select \`cluster_model = "joint"\`.
+
+The explicit joint option uses \`pan::pan\` to fit \`(T, W) = X B +
+u_site + e\`, with unrestricted bivariate normal site and row covariance
+matrices. Observed gold values and recorded values enter as fixed
+observed components; unobserved components are missing data. Both
+responses are centered and scaled using their observed means and
+standard deviations, and non-intercept design columns are centered and
+scaled. The resolved transforms are recorded. The coefficient prior is
+flat. Each covariance prior is inverse Wishart with four degrees of
+freedom and scale \`0.5 \* prior_scale \* I\`, whose mean is \`0.5 \*
+prior_scale \* I\` in standardized units. These empirically scaled
+covariance priors are proper and substantive; they are not
+noninformative. Vary the declared prior scale.
+
+Joint completions draw a single site vector conditional on the original
+observed components at each selected parameter draw, then draw missing
+targets conditional on the recorded value where available. This supports
+mixed recording patterns within a site and sites with no observations.
+Fully missing rows do not enter the fitting likelihood. The joint model
+has no deterministic agreement shortcut. Full-rank designs separately on
+gold, recorded and paired rows, two paired residual degrees of freedom,
+five observed sites per response, and within- and between-site residual
+information are supported-data requirements. They do not establish model
+adequacy. Joint parameter and conditional-mean traces use the existing
+R-hat and bulk/tail ESS screen. See \`docs/JOINT_CLUSTER_METHOD.md\` for
+assumptions and limits.
+
+The moment-based \`cluster\` option is experimental. Version 0.6.0
+replaced an earlier version that resampled audited clusters, in which
+resampling within strata understated variance. The replacement's planned
+test came out PARTIAL under a rule fixed in advance: on a real facility
+recount at a 25 audit, coverage was within its limits on eight of nine
+items, with 89.0 error on the three rare items ran 4 accuracy conditions
+failed. Treat \`cluster\` as a check, not a default. Read the \`df\`
+column, since very wide intervals remain possible with few audited
+clusters. See \`validation/CLUSTERED_FIX_SYNTHESIS.md\`.
+
+In later simulations where the audited value was a predictor in the
+analysis and errors shifted whole clusters, the moment-based \`cluster\`
+option biased that slope toward zero and covered far less than a fit
+without it. The cause has not been established. \[catmech_pool_lm()\]
+warns about this use. See \`validation/VARIANCE_MI_SYNTHESIS.md\`. With
+\`cluster_model = "joint_marginal"\`, the continuous predictors are
+observed components of the same multivariate Gaussian model as the true
+and recorded measurements. This allows their site effects to be
+correlated and distinguishes marginal from within-site coefficients.
+Independent sites, noninformative site sizes, Gaussian joint
+associations, exact references and ignorable observation patterns remain
+assumptions. Missing, categorical, constant or aliased predictors are
+refused. The marginal model additionally requires at least two residual
+degrees of freedom and two numerically independent paired-measurement
+residual directions after adjusting for predictors and site indicators.
+This conservative support restriction protects the weak covariance prior
+near singular residual directions; it can exclude otherwise identifiable
+sparse paired designs. Population coefficient summaries include
+uncertainty in predictor means and covariances. An all-reference input
+still takes the exact-copy shortcut and does not fit a posterior for
+either joint summary function.
+
+## Examples
+
+``` r
+set.seed(123)
+n <- 40
+df <- data.frame(
+  lab_val = stats::rnorm(n, 10, 2),
+  age = stats::rnorm(n, 50, 10)
+)
+df$lab_ref <- df$lab_val + stats::rnorm(n, 0, 0.2)
+df$lab_ref[11:n] <- NA
+res <- catmech_reference(df, value = "lab_val", reference = "lab_ref",
+                         predictors = "age", use_recorded = TRUE, m = 2, seed = 1)
+summary(res)
+#> <summary.catmech_result: reference_normal_recorded>
+#>   Target value:    lab_val
+#>   Reference:       lab_ref
+#>   Predictors:      age
+#>   Observations:    40
+#>   Completions (m): 2
+#>   Imputed rows:    30
+#>   Convergence:     passed
+#> 
+#> Parameter diagnostics (first 8 monitors):
+#> [1] parameter rhat      ess_bulk  ess_tail 
+#> <0 rows> (or 0-length row.names)
+```

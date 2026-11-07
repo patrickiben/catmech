@@ -1,0 +1,63 @@
+# Summarize the population coefficients of a fitted joint cluster model
+
+Summarizes the true-measurement fixed effects from every retained
+posterior draw, on the original response and predictor scales. These are
+model-based Bayesian credible intervals, conditional on the joint model
+and its priors. They are not cluster-robust confidence intervals or
+summaries of a different downstream analysis.
+
+## Usage
+
+``` r
+catmech_joint_summary(result, level = 0.95)
+```
+
+## Arguments
+
+- result:
+
+  A result from \[catmech_reference()\] with \`cluster_model = "joint"\`
+  and a fitted, converged posterior. The all-reference shortcut has no
+  parameter posterior and is refused without refitting.
+
+- level:
+
+  Central posterior credible interval probability, strictly between zero
+  and one.
+
+## Value
+
+A data frame with one row per original design coefficient: \`term\`,
+posterior mean \`estimate\`, \`posterior_sd\`, \`lower\`, \`upper\`,
+\`level\`, \`rhat\`, \`ess_bulk\`, \`ess_tail\`, \`mcse_mean\`,
+\`mcse_lower\`, \`mcse_upper\`, \`draws\`, \`iterations\`, \`chains\`,
+and \`interpretation\`.
+
+## Details
+
+The estimand is the population fixed-effect vector for the true
+measurement in the original imputation design. Under the model's
+zero-mean random effects independent of the covariates, these
+coefficients describe the marginal mean of the true measurement as well
+as the mean conditional on a zero site effect. They are not the
+least-squares coefficients of the realized completed cohort. The
+function has no formula argument: it cannot change predictors, add an
+offset or interaction, or use the repaired measurement as a predictor.
+
+All retained iterations from all chains are used, independently of the
+number of completed datasets. The mean, sample standard deviation and
+equal-tailed quantiles (R quantile type 7) summarize those draws. There
+is no additional Rubin pooling, cluster sandwich variance, or Student t
+multiplier.
+
+Fixed effects are transformed jointly, including the contribution of
+predictor centering to the original-scale intercept. Rank-normalized
+R-hat and bulk and tail effective sample sizes are recomputed for these
+coefficients. R-hat must be at most 1.05 and both effective sample sizes
+at least \`100 \* chains\`. Failure raises a
+\`catmech_convergence_error\` carrying \`model_diagnostics\` for the
+transformed coefficient draws. The \`posterior\` package supplies Monte
+Carlo errors for the mean and interval endpoints. These quantify
+simulation error, not uncertainty about model adequacy or the population
+coefficient. Passing diagnostics does not establish frequentist interval
+coverage.

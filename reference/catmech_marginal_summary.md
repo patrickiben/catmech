@@ -1,0 +1,109 @@
+# Summarize population marginal coefficients from a joint covariate model
+
+Summarizes the population regression of the true measurement on the
+original continuous predictors from a fitted multivariate Gaussian
+cluster model. Predictor means and covariances are estimated jointly
+with the measurement model, allowing site effects in the measurement and
+predictors to be correlated.
+
+## Usage
+
+``` r
+catmech_marginal_summary(
+  result,
+  level = 0.95,
+  formula = NULL,
+  response = NULL,
+  covariates = NULL
+)
+```
+
+## Arguments
+
+- result:
+
+  A converged result from \[catmech_reference()\] with \`cluster_model =
+  "joint_marginal"\`. An all-reference shortcut contains no fitted
+  parameter posterior and cannot be summarized by this function.
+
+- level:
+
+  Central posterior credible interval probability, strictly between zero
+  and one.
+
+- formula:
+
+  Optional two-sided additive linear formula with an intercept (for
+  example \`outcome ~ recorded + x\`) naming a response and covariates
+  from the audited value (\`spec\$value\`, mapped to the true
+  measurement \`T\`) and the complete numeric predictors in
+  \`spec\$predictors\`. Use this when the audited measurement is an
+  analysis predictor and the scientific outcome was included in
+  \`predictors\` during \[catmech_reference()\]. Cannot be combined with
+  \`response\` or \`covariates\`.
+
+- response:
+
+  Optional name of the population regression response, either
+  \`spec\$value\` or one of \`spec\$predictors\`. Defaults to
+  \`spec\$value\`.
+
+- covariates:
+
+  Optional character vector of population regression covariates chosen
+  from \`c(spec\$value, spec\$predictors)\` excluding \`response\`. When
+  \`response\` is supplied and \`covariates\` is \`NULL\`, all remaining
+  modeled variables in \`c(spec\$value, spec\$predictors)\` are used.
+
+## Value
+
+A data frame with \`term\`, \`estimate\`, \`posterior_sd\`, \`lower\`,
+\`upper\`, \`level\`, \`rhat\`, \`ess_bulk\`, \`ess_tail\`,
+\`mcse_mean\`, \`mcse_lower\`, \`mcse_upper\`, \`draws\`,
+\`iterations\`, \`chains\`, and \`interpretation\`.
+
+## Details
+
+The model is \`(T,W,X) = mu + b_site + e\`, with independent Gaussian
+site and row vectors having unrestricted covariance matrices \`Psi\` and
+\`Sigma\`. For every posterior draw, let \`V = Psi + Sigma\`. By
+default, the marginal slopes are \`solve(V\[X,X\], V\[X,T\])\` and the
+intercept is \`mu\[T\] - mu\[X\]' beta\`, transformed back to the
+original units. When \`formula\`, \`response\` or \`covariates\` selects
+another modeled response \`Y\` and covariate set \`P\` from \`(T, X)\`
+(excluding the noisy proxy \`W\`), the marginal slopes are
+\`solve(V\[P,P\], V\[P,Y\])\` and the intercept is \`mu\[Y\] - mu\[P\]'
+beta\` in original units. This allows the audited measurement \`T\` to
+serve as an analysis predictor (\`Y ~ T + X\`) without the
+unaudited-cluster slope attenuation of the moment model. This is the
+population linear regression for an individual sampled under the model,
+not a within-site coefficient or the OLS slope of the completed cohort.
+Site size must be noninformative. The Gaussian covariate model is an
+additional assumption; categorical, incomplete and deterministically
+related predictors are not supported by this engine.
+
+Each site/row covariance is factored into predictor covariance,
+regression of the two measurements on predictors, and conditional
+measurement covariance. The two covariance blocks have Huang–Wand priors
+with half-t(2) marginal standard deviations and scale
+\`sqrt(joint_control\$prior_scale)\` in empirically standardized units.
+Those properties do not apply to the reconstructed full covariance.
+Regression matrices have proper zero-mean matrix-normal priors, with row
+covariance \`regression_scale^2 \* I\` (default scale ten) and column
+covariance equal to the conditional measurement covariance. The
+population mean prior is flat. Credible intervals remain conditional on
+these distributional and reference-selection assumptions. They are not
+cluster-robust intervals and do not establish robustness to arbitrary
+contextual effects, nonlinear associations or informative cluster sizes.
+
+Every retained draw from every chain is used independently of \`m\`.
+Equal-tailed quantiles use R quantile type 7. Original-unit coefficient
+diagnostics are recomputed: R-hat at most 1.05 and both bulk/tail ESS at
+least \`100 \* chains\`. The reported Monte Carlo errors concern
+simulation error only.
+
+## References
+
+Huang, A. and Wand, M. P. (2013). Simple marginally noninformative prior
+distributions for covariance matrices. Bayesian Analysis, 8, 439–452.
+[doi:10.1214/13-BA815](https://doi.org/10.1214/13-BA815) .
