@@ -21,7 +21,7 @@
 - Add tidyverse and `broom` compatibility generics: `tidy()` and `glance()` methods
   for all pooled regression models (`catmech_pooled_glm`, `catmech_pooled_coxph`,
   `catmech_pooled_lm`).
-- Add regulatory compliance report generator (`catmech_audit_trail()`) producing
+- Add audit trail and provenance report generator (`catmech_audit_trail()`) producing
   tamper-evident SHA-256 data and completion checksums across Markdown, JSON,
   and standalone HTML formats.
 - Add prospective audit power and sample size calculator (`catmech_audit_power()`)

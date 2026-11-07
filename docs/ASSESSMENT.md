@@ -102,13 +102,13 @@ and analysis toolkit:
   pooled regression forest plots, and strategy comparisons.
 - Prospective audit planning: `catmech_audit_power()` computes required audit sample sizes and
   statistical power prospectively or empirically.
-- Regulatory compliance trail: `catmech_audit_trail()` generates SHA-256 verified provenance reports
+- Audit trail & provenance record: `catmech_audit_trail()` generates SHA-256 verified provenance reports
   (Markdown, JSON, HTML) documenting input hashes, model specifications, convergence diagnostics,
   and pooled estimates.
 - Comprehensive clinical vignette: `vignettes/catmech-clinical-audit.Rmd` walks through an end-to-end
   multi-center clinical study.
-- Software maturity: passes all 1,754 testthat unit tests across 20 test files and R CMD check with
-  Status: OK (0 errors, 0 warnings, 0 notes).
+- Software maturity: passes all 1,754 testthat unit tests across 20 test files and R CMD check --as-cran
+  with 0 errors and 0 warnings.
 
 The statistical caveats remain: measurement error cannot be identified without assumptions or
 reference data, and coverage is not guaranteed under unmodeled misspecification. Core functions are

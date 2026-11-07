@@ -11,7 +11,7 @@ test_that("catmech_audit_trail generates auditable reports in markdown, json, an
   trail_md <- catmech_audit_trail(fit, pooled = pooled, format = "markdown")
   expect_s3_class(trail_md, "catmech_audit_trail")
   txt_md <- as.character(trail_md)
-  expect_true(grepl("# Catmech Audit Trail & Compliance Report", txt_md))
+  expect_true(grepl("# Catmech Audit Trail & Provenance Report", txt_md))
   expect_true(grepl("Original Input Data Hash:", txt_md))
   expect_true(grepl("Completion `m=1`:", txt_md))
   expect_true(grepl("Downstream Pooled Inference", txt_md))
@@ -20,7 +20,7 @@ test_that("catmech_audit_trail generates auditable reports in markdown, json, an
   # Test print method
   pr_txt <- utils::capture.output(val <- print(trail_md))
   expect_identical(val, trail_md)
-  expect_true(any(grepl("Regulatory Audit & Compliance Certification", pr_txt)))
+  expect_true(any(grepl("Audit Trail & Provenance Record", pr_txt)))
 
   # JSON format
   trail_json <- catmech_audit_trail(fit, pooled = pooled, format = "json")
@@ -36,7 +36,7 @@ test_that("catmech_audit_trail generates auditable reports in markdown, json, an
   expect_s3_class(trail_html, "catmech_audit_trail")
   txt_html <- as.character(trail_html)
   expect_true(grepl("<!DOCTYPE html>", txt_html))
-  expect_true(grepl("<title>Catmech Audit Trail & Compliance Report</title>", txt_html))
+  expect_true(grepl("<title>Catmech Audit Trail & Provenance Report</title>", txt_html))
 
   # File writing
   tmp_file <- tempfile(fileext = ".md")

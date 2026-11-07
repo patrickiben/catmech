@@ -116,7 +116,7 @@ The `catmech` package is structured into modular S3 components designed for comp
 | **Model pooling** | `catmech_pool_lm()`, `catmech_pool_glm()`, `catmech_pool_coxph()`, `catmech_compare_strategies()` | Multi-endpoint pooling with Rubin rules, Barnard-Rubin df, cluster-robust covariance, and strategy comparison. |
 | **Provenance** | `catmech_sensitivity()`, `catmech_audit_trail()` | Multi-scenario sensitivity envelopes and SHA-256 provenance reports for regulatory documentation. |
 
-While several mature R packages address missing data or measurement error, none combine two-phase audit power planning, reference-calibrated contamination mixture modeling, multi-endpoint pooling with cluster-robust covariance and Barnard-Rubin degrees of freedom, and cryptographic regulatory compliance tracking:
+While several mature R packages address missing data or measurement error, none combine two-phase audit power planning, reference-calibrated contamination mixture modeling, multi-endpoint pooling with cluster-robust covariance and Barnard-Rubin degrees of freedom, and cryptographic provenance tracking:
 
 | Capability | `catmech` | `mice` [@vanbuuren2011mice] | `simex` [@leeder2008simex] | `mecor` [@nab2021mecor] | `Amelia` [@honaker2011amelia] |
 | :------------------------ | :-----------------: | :--------------: | :--------------: | :--------------: | :----------------: |

@@ -1,4 +1,4 @@
-#' Generate an auditable compliance and integrity trail for a catmech analysis
+#' Generate an auditable provenance and integrity trail for a catmech analysis
 #'
 #' Extracts complete provenance, input and completion data hashes, model specifications,
 #' convergence monitors, imputation statistics, and downstream pooled analyses into a
@@ -12,7 +12,7 @@
 #' @param format Output format: `"markdown"` (default), `"json"`, or `"html"`.
 #' @param path Optional file path to write the report to. If `NULL`, the character
 #'   string is returned invisibly.
-#' @param title Document title (default: `"Catmech Audit Trail & Compliance Report"`).
+#' @param title Document title (default: `"Catmech Audit Trail & Provenance Report"`).
 #' @return A character vector of class `c("catmech_audit_trail", "character")` containing
 #'   the generated audit document.
 #' @examples
@@ -33,7 +33,7 @@
 catmech_audit_trail <- function(object, pooled = NULL, sensitivity = NULL,
                                 format = c("markdown", "json", "html"),
                                 path = NULL,
-                                title = "Catmech Audit Trail & Compliance Report") {
+                                title = "Catmech Audit Trail & Provenance Report") {
   format <- match.arg(format)
 
   # Support passing a list of related catmech objects
@@ -260,9 +260,9 @@ render_audit_markdown <- function(d, pooled, sensitivity) {
     "",
     "---",
     "",
-    "### Regulatory Audit & Compliance Certification",
-    "> This document provides an auditable, verifiable record of data imputation and downstream analysis.",
-    "> All completions and statistical intervals are cryptographically tied to the recorded input hash and assumption specification.",
+    "### Audit Trail & Provenance Record",
+    "> This document provides an auditable provenance record of data imputation and downstream analysis.",
+    "> All completions and statistical intervals are tied via SHA-256 checksums to the recorded input hash and assumption specification.",
     ""
   )
 

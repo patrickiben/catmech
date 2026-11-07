@@ -2,7 +2,7 @@
 % Please edit documentation in R/audit-trail.R
 \name{catmech_audit_trail}
 \alias{catmech_audit_trail}
-\title{Generate an auditable compliance and integrity trail for a catmech analysis}
+\title{Generate an auditable provenance and integrity trail for a catmech analysis}
 \usage{
 catmech_audit_trail(
   object,
@@ -10,7 +10,7 @@ catmech_audit_trail(
   sensitivity = NULL,
   format = c("markdown", "json", "html"),
   path = NULL,
-  title = "Catmech Audit Trail & Compliance Report"
+  title = "Catmech Audit Trail & Provenance Report"
 )
 }
 \arguments{
@@ -27,7 +27,7 @@ or `catmech_pooled_coxph`).}
 \item{path}{Optional file path to write the report to. If `NULL`, the character
 string is returned invisibly.}
 
-\item{title}{Document title (default: `"Catmech Audit Trail & Compliance Report"`).}
+\item{title}{Document title (default: `"Catmech Audit Trail & Provenance Report"`).}
 }
 \value{
 A character vector of class `c("catmech_audit_trail", "character")` containing

@@ -20,7 +20,7 @@ Instead of either discarding un-audited records (inflating standard errors) or n
 4. **Side-by-Side Audit Strategy Comparison** (`catmech_compare_strategies()`) evaluating validation subsamples, naive analysis, linear MI, and mixture models with comparative forest plots.
 5. **Native Base R Visualizations**: Forest plots for all pooled models (`plot.catmech_pooled_glm()`, `plot.catmech_pooled_coxph()`, `plot.catmech_pooled_lm()`), strategy comparisons, PIT calibration histograms (`plot.catmech_holdout_check()`), recording discrepancy audits, and power curves.
 6. **Tidyverse / `broom` Generics**: `tidy()` and `glance()` S3 methods for all pooled regression models.
-7. **Tamper-Evident Regulatory Compliance Trails** (`catmech_audit_trail()`): SHA-256 data, specification, and completion checksums designed for FDA 21 CFR Part 11 and ICH GCP E9 compliance in Markdown, JSON, and standalone HTML formats.
+7. **Audit Trail & Provenance Records** (`catmech_audit_trail()`): SHA-256 data, specification, and completion checksums supporting regulatory documentation (FDA 21 CFR Part 11 and ICH E9) in Markdown, JSON, and standalone HTML formats.
 
 ---
 

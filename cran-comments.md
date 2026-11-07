@@ -1,7 +1,9 @@
 ## Test environments
-* macOS 15.0.1 (aarch64-apple-darwin23, Apple Silicon), R 4.6.0
-* Ubuntu Linux (x86_64-pc-linux-gnu), R 4.4.1 / R-devel
-* Windows Server 2022 (x86_64-w64-mingw32), R 4.4.1
+* macOS (aarch64-apple-darwin23.6.0, Apple Silicon), R 4.6.0 (local)
+* macOS 15 (aarch64-apple-darwin23), R 4.6.2 (GitHub Actions)
+* Ubuntu Linux (x86_64-pc-linux-gnu), R 4.6.2 (GitHub Actions)
+* Windows Server (x86_64-w64-mingw32), R 4.6.2 ucrt (GitHub Actions)
+* Windows Server (x86_64-w64-mingw32), R-devel (win-builder.r-project.org)
 
 ## R CMD check results
 

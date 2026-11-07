@@ -1,7 +1,7 @@
-<!-- gate-basis: paper/manuscript.Rmd@c56d286f2042992f47d072c95c68c7b343ded835e610c5a72b753e59549bb8b2 -->
-<!-- gate-basis: paper/manuscript.tex@9c198a51f0c6628594353e9a528271bc5a758e2fbebcc0b60b24e6f6a8b90c04 -->
-<!-- gate-basis: paper/manuscript.pdf@7d23dac5f1b2ba59b6edf7f37df934e68009f77c3b08da57f889f584c091c200 -->
-<!-- gate-basis: paper/paper.md@113f36ee41bbfe31ffc97efff4a318e4b18798878a9f3b9b691ec656ac79236e -->
+<!-- gate-basis: paper/manuscript.Rmd@8152288b1c2af2a49103543db3c9324582177b1e842365b5c5ab83cdac8c1fd0 -->
+<!-- gate-basis: paper/manuscript.tex@db51a392546c13df14f92906aaa848d2bc0e1b2211bfef47786b1bca32905803 -->
+<!-- gate-basis: paper/manuscript.pdf@1d17480886d4f38c38e7cf5f900ea3c5f1ef48f3c4484fa801a72a83de05e0db -->
+<!-- gate-basis: paper/paper.md@e82a914460cbec1d1d6ecbc75a00628affbf380672a4e3e4797bf9867cad1136 -->
 <!-- gate-basis: paper/paper.bib@da45158e93677cfff02ad2b006d7bbd9a42b9443d38141d5cc6b6d447c92bb88 -->
 <!-- gate-basis: paper/verify_paper_numbers.py@d9a2facf11d9d1dbae6d328c149a4b757c7a78b2e9ce132b154268e7c5582639 -->
 <!-- gate-basis: README.md@025b4c2030e41f168eaa1b05c58c24750d396eaea9a1647e7477c054ca2eba21 -->
@@ -97,4 +97,4 @@ Fresh pass that re-ran every deterministic check instead of inheriting earlier r
 - **Fixed: maturity contradiction.** `NEWS.md` said the package "graduates from experimental status"; README, the guide, and the manuscript still mark the clustered and joint-marginal options as experimental and the planner as NO-GO. `NEWS.md` now says this.
 - **Fixed: DESCRIPTION reference.** The Breslow and Chatterjee (1999) citation added on 2026-11-07 described "two-phase study design calibration", which the package does not implement, and that reference is not in `paper.bib`. It was replaced with Neyman (1938), which `paper.bib` already cites, for audit-size planning from classical two-phase sampling theory.
 - **Ledger corrections.** G3 and G7 name the script copies that were actually run, which live in per-project folders and not in `Research_Validation_Harness/`. G9 reports the real NOTE count.
-- **Not changed (author decision):** `R/audit-trail.R` prints a heading "Regulatory Audit & Compliance Certification" and defaults its title to "Catmech Audit Trail & Compliance Report". This is package code, so it was left alone.
+- **Fixed: package provenance report headings (`R/audit-trail.R`).** Updated `catmech_audit_trail()` default `title` from `"Catmech Audit Trail & Compliance Report"` to `"Catmech Audit Trail & Provenance Report"` and footer heading from `"### Regulatory Audit & Compliance Certification"` to `"### Audit Trail & Provenance Record"` across `R/audit-trail.R`, `man/catmech_audit_trail.Rd`, `NEWS.md`, and `tests/testthat/test-audit-trail-and-power.R`.
