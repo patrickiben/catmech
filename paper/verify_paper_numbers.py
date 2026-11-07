@@ -56,14 +56,24 @@ def verify_synthetic_claims(manuscript_rmd: str, manuscript_tex: str, joss_md: s
                     assert val in text, f"{doc_name} missing {scenario}/{method} value {val}"
                     checked += 1
 
-    # Check G17 primary screen honesty disclosure on site_shift_declared
+    # Check G17 primary screen honesty disclosure on site_shift_declared and stress-cell failures
     ssd = lookup[("site_shift_declared", "contamination")]
     assert f"{100 * float(ssd['coverage_conditional']):.1f}" == "93.7"
     assert f"{float(ssd['coverage_wilson_lower']):.4f}" == "0.9202"
     assert f"{float(ssd['coverage_wilson_upper']):.4f}" == "0.9505"
     assert ssd["approximate_nominal_criterion"] == "FALSE"
+    for stress_cell, exp_bias, exp_cov in [
+        ("heavy_tail_target", "+0.0330", "87.3%"),
+        ("nonignorable_missed", "-0.0506", "79.3%"),
+        ("noisy_undeclared", "-0.0261", "88.7%"),
+    ]:
+        srow = lookup[(stress_cell, "contamination")]
+        sb = float(srow["bias"])
+        sb_str = f"{sb:+.4f}" if sb > 0 else f"{sb:.4f}"
+        scov_str = f"{100 * float(srow['coverage_conditional']):.1f}%"
+        assert (sb_str, scov_str) == (exp_bias, exp_cov)
     for doc_name, text in [("manuscript.Rmd", manuscript_rmd), ("paper.md", joss_md)]:
-        for token in ["93.7%", "0.9202", "0.9505", "-0.0085"]:
+        for token in ["93.7%", "0.9202", "0.9505", "-0.0085", "+0.0330", "87.3%", "-0.0506", "79.3%", "-0.0261", "88.7%"]:
             assert token in text, f"{doc_name} missing G17 honesty disclosure token {token}"
             checked += 1
 
@@ -87,7 +97,7 @@ def verify_real_data_claims(manuscript_rmd: str, manuscript_tex: str, joss_md: s
 
     checked = 0
     for family in ["ctgov", "nhanes"]:
-        for method in ["reference_normal", "contamination", "cole_mi", "oracle"]:
+        for method in ["naive_recorded", "reference_normal", "contamination", "cole_mi", "oracle"]:
             row = lookup[(family, "audit_25pct", method)]
             b = float(row["bias"])
             bias_str = f"{b:+.4f}" if b > 0 else f"{b:.4f}"
@@ -98,6 +108,10 @@ def verify_real_data_claims(manuscript_rmd: str, manuscript_tex: str, joss_md: s
                 for val in [bias_str, cov_str, width_str, rmse_str]:
                     assert val in text, f"{doc_name} missing {family}/{method} value {val}"
                     checked += 1
+    for doc_name, text in [("manuscript.Rmd", manuscript_rmd), ("paper.md", joss_md)]:
+        for token in ["45,600", "71.6%", "66.6%", "35.4%", "49.7%", "2.705", "1.578", "0.543", "0.500"]:
+            assert token in text, f"{doc_name} missing real-audit/AUC token {token}"
+            checked += 1
     return checked
 
 
@@ -138,6 +152,9 @@ def verify_code_surface(manuscript_rmd: str, joss_md: str) -> int:
             assert (ROOT / "tools" / name).is_file() or (PAPER / name).is_file(), (
                 f"{doc_name} mentions missing script {name}"
             )
+            checked += 1
+        for pkg in ["Rcpp", "RcppArmadillo", "digest", "jsonlite", "mice", "pan", "posterior", "survival", "truncnorm", "yaml"]:
+            assert pkg in text, f"{doc_name} missing CRAN dependency {pkg}"
             checked += 1
     return checked
 

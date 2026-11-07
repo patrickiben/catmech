@@ -1,18 +1,18 @@
 <!-- gate-basis: README.md@025b4c2030e41f168eaa1b05c58c24750d396eaea9a1647e7477c054ca2eba21 -->
-<!-- gate-basis: paper/verify_paper_numbers.py@4dc3caf4abd3e584190e033e6afcffdd3486e61bbcbf290b54bc5318a14e40f4 -->
-<!-- gate-basis: paper/paper.bib@e4efb6523c93e3ea4ab40847542c68a6cc6b0e8dce0d33ac370f3d2e1b577cad -->
-<!-- gate-basis: paper/paper.md@05b86f68fa8192e5dc33cac32954031ddad3ef99e970cc581b44961303a76deb -->
-<!-- gate-basis: paper/manuscript.pdf@9e55292a53694b361fae5bba088659a67df358e5e88c2c8a89f66b64cb09a289 -->
-<!-- gate-basis: paper/manuscript.tex@4349cd68b70d01a8182f86cfbeb231790f9eabd4cf1f65e535a107fc926c2ca6 -->
-<!-- gate-basis: paper/manuscript.Rmd@e7130db27be8203337a9acd984e5a6744a7dcc743e162d756bb9c61b63a3b1f6 -->
+<!-- gate-basis: paper/verify_paper_numbers.py@d9a2facf11d9d1dbae6d328c149a4b757c7a78b2e9ce132b154268e7c5582639 -->
+<!-- gate-basis: paper/paper.bib@e4e96a0f14c9e127962b2dcbb4b94f8662b8c76f517c6b176d89dfa2966deeb5 -->
+<!-- gate-basis: paper/paper.md@bb679d4cd7b52ce0e8c9ffe09d7cd2f15d9ae29d3015f480704ea36f7cf700f9 -->
+<!-- gate-basis: paper/manuscript.pdf@4973664795f5b2481557d2bab65c70c0351ed0299a09f51d699d777a8c544613 -->
+<!-- gate-basis: paper/manuscript.tex@158e9b51dbdb6d4c95621d2ebbea0a45a901fe0a087c349633eb3c40d13dc7d1 -->
+<!-- gate-basis: paper/manuscript.Rmd@2a94d54b47bf07c03c6ef79d4d5f8d6d16d8d987566d678fe73666880a36ec9f -->
 # Pre-Submission Validation Harness Ledger (`catmech` v1.0.0)
 
-- **Date**: 2026-11-06
+- **Date**: 2026-11-07
 - **Target**: `catmech` v1.0.0 CRAN package & JSS / JOSS manuscripts (`paper/manuscript.Rmd`, `paper/manuscript.tex`, `paper/manuscript.pdf`, `paper/paper.md`, `paper/paper.bib`)
 - **Harness Specification**: `/Users/patrickiben/Documents/Documents - Patrick’s Mac Studio/Research_Validation_Harness/PRE_SUBMISSION_VALIDATION_HARNESS.md`
 - **specification_coverage**: `lines 1-590 (100%)`
 - **Total Gates in Specification**: `24` (`G0`–`G23`, verified via `grep -cE '^## G[0-9]+:' PRE_SUBMISSION_VALIDATION_HARNESS.md`)
-- **Execution Tier**: Inline Deterministic Tier + Self-Audit Pass (multi-agent subagent waves `G5`, `G12`, `G13`, `G18` require separate user cost authorization per harness protocol)
+- **Execution Tier**: Full Deterministic Tier + 5-Agent Isolated Read-Only Lean Reader Wave (`G5` Persona A & B, `G12`, `G13`, `G18`)
 
 ---
 
@@ -20,71 +20,58 @@
 
 | Gate | Title | Status | Tool / Method | Verdict & Evidence |
 | :--- | :--- | :---: | :--- | :--- |
-| **G0** | Format-conversion pre-gate | **RUN** | Pandoc / RMarkdown inspection | **PASS**: Repaired 4 list blocks lacking preceding blank lines and institutional BibTeX braces (`fda2003part11`, `ich1998e9`). |
+| **G0** | Format-conversion pre-gate | **RUN** | Pandoc / RMarkdown inspection | **PASS**: Repaired 4 list blocks lacking preceding blank lines and institutional BibTeX braces (`fda2003part11`, `ich1998e9`, `nhanes2018`). |
 | **G1** | Path, hygiene & repository-surface guard | **RUN** | `check_paths.sh` + `R CMD check` + `verify-release-archive.py` | **PASS**: 0 machine paths in shippable package/paper (`R/`, `src/`, `man/`, `vignettes/`, `inst/`, `tests/`, `tools/`, `paper/`, `README.md`, `DESCRIPTION`, `NAMESPACE`). 2 historical paths in `.Rbuildignore`-excluded `validation/clustered-fix-scratch/` left untouched per Rule 3 (frozen archive). |
-| **G2** | Numeric-claim <-> artifact check | **RUN** | `tools/verify-artifacts.py` + `paper/verify_paper_numbers.py` | **PASS**: Replaced ungrounded synthetic table in `manuscript.Rmd` and `paper.md` with exact frozen numbers from `validation/contamination-study/summary.csv`. 343 claims + negative control verified in `paper/verify_paper_numbers.py`. |
-| **G3** | Citation & bibliography verification | **RUN** | `check_citations.py` on `manuscript.bbl` and `\nocite{*}` (all 25 `.bib` entries) | **PASS (`0 FLAG`)**: Fixed 4 broken/hijacked DOIs/entries (`huang2013simple`, `breslow2003semiparametric`, `neyman1938contribution`, `little2019statistical`, `nab2021mecor`). Final result: `20 OK | 5 REVIEW (books/manuals verified by hand) | 0 FLAG`. |
-| **G4** | Mathematical proof & derivation audit | **RUN** | `tools/check-contamination-oracle.R`, `tools/check-reference-oracle.R`, `tools/check-cluster-algebra.R` + inline audit | **PASS**: Posterior moments, row posteriors, Barnard-Rubin df, CV3 jackknife, Lin-Wei, and Liang-Zeger sandwich formulas match frozen oracle checks (`pass == TRUE`). |
-| **G5** | Adversarial referee panel (3 personas) | **PARTIAL** | Inline Qwen peer-review + deterministic self-audit (3-subagent wave deferred pending user cost approval) | **PASS (Inline)**: Addressed Qwen referee findings (Section 7 simulation-to-practice divergence, Section 3 `catmech_pool_coxph`/`catmech_pool_glm` prominence, collapsible README history, exact S3 print output). |
-| **G6** | Figure, table & layout inspection | **RUN** | `pdflatex` log + visual page-by-page inspection (`read_file` on `manuscript.pdf` pages 1–10) | **PASS**: `errors=0 undefined=0 overfull=0 underfull=2` across all 10 pages. Author header stacked across 3 centered lines; tables and ASCII decision tree fit within margins. |
-| **G7** | AI-artifact & placeholder scrubber | **RUN** | `scrub_ai_artifacts.py` | **PASS**: `0 source hit(s)` across `manuscript.Rmd`, `manuscript.tex`, `paper.md`, `README.md`. |
+| **G2** | Numeric-claim <-> artifact check | **RUN** | `tools/verify-artifacts.py` + `paper/verify_paper_numbers.py` | **PASS**: Grounded all synthetic, real-data, clustered, and real-audit numbers in `manuscript.Rmd` and `paper.md` to frozen CSVs in `validation/`. 411 claims + negative control verified in `paper/verify_paper_numbers.py`. |
+| **G3** | Citation & bibliography verification | **RUN** | `check_citations.py` on `manuscript.bbl` (all 25 `.bib` entries cited) | **PASS (`0 FLAG`, `0 uncited`)**: Fixed 5 broken/hijacked DOIs/entries (`huang2013simple`, `breslow2003semiparametric`, `neyman1938contribution`, `little2019statistical`, `nab2021mecor`), added URLs to `leeder2008simex`, `fda2003part11`, and `ich1998e9`, and cited all 25 entries (`20 OK | 5 REVIEW | 0 FLAG`). |
+| **G4** | Mathematical proof & derivation audit | **RUN** | `tools/check-contamination-oracle.R`, `tools/check-reference-oracle.R`, `tools/check-cluster-algebra.R` + `G5-A` | **PASS**: Fixed convolved variance $\sigma_T^2 + \sigma_e^2$ in $p_i$, collapsed slice-within-Gibbs description, exact $\nu_{com}$ rules ($\nu_{com} = N - p$ unclustered vs. $\nu_{com} = C - 1$ clustered), CR1S finite-sample factor, and tie-randomized rank-PIT formula. |
+| **G5** | Adversarial referee panel (Persona A: Theory & Math; Persona B: Empirical & Biostats) | **RUN** | 2 isolated `research` subagents (`f61a45e3-7738-463d-899e-e68e614db8f7`, `f23db6b4-7a7b-4422-aed7-7dc817b4e7ca`) | **PASS (All 11 MAJOR + 10 MINOR findings resolved)**: Fixed mathematical equations in Section 2 and added complete disclosures of stress-cell failures, `REAL_AUDIT_SYNTHESIS.md` (`INCONCLUSIVE` Rule 2 on Rwanda HMIS, 35.4%–71.6% coverage), per-record AUC (`0.543` / `0.500`), predictor-slope attenuation (`-16.1%`), and holdout alarm power. |
+| **G6** | Figure, table & layout inspection | **RUN** | `pdflatex` log + visual page-by-page inspection (`read_file` on `manuscript.pdf` pages 1–15) | **PASS**: `errors=0 undefined=0 overfull=0` across all 15 pages. Removed `toc: true` from `pdf_document`; author header stacked cleanly; all tables and code blocks fit within margins. |
+| **G7** | AI-artifact & placeholder scrubber | **RUN** | `check_prose_style_v2.py` (`model-artifact`, `placeholder`, `markdown-in-latex`) | **PASS**: `0` hits across `manuscript.Rmd`, `manuscript.tex`, `paper.md`, `README.md`. |
 | **G8** | Anonymization & blind-review check | **NOT RUN** | Target venues (CRAN / JSS / JOSS) are non-blinded | **N/A (Non-blinded venue)**: CRAN, JSS, and JOSS require full author attribution, affiliation, and ORCID. |
 | **G9** | Reproducibility & environment audit | **RUN** | `tools/verify-artifacts.py` + `tools/verify-release-archive.py` + `R CMD check` | **PASS**: All 10 frozen study archives, seed streams, SHA-256 source manifests, and `R CMD check` (`0 errors, 0 warnings, 0 notes`) verified. |
-| **G10** | Prose style, humanness & US spelling | **RUN** | `check_prose_style_v2.py` + `check_spelling_us.py` | **PASS (`ALL GREEN`)**: `0` British spellings; `0` em-dashes; `0` curly quotes; `0` Title-Case headings; all 12 lexical/artifact categories `[ok]`. Replaced "proves" with "demonstrates" in Section 7. |
-| **G11** | Cross-reference, symbol & notation consistency | **RUN** | LaTeX compile (`undefined=0`) + symbol check | **PASS**: Zero undefined references or citations; notation ($T_i, W_i, R_i, \delta_i, \pi_i, \nu_{com}, \nu_{BR}$) consistent across `manuscript.Rmd` and `paper.md`. |
-| **G12** | Span-attributed prose verification | **PARTIAL** | Deterministic claim verification via `paper/verify_paper_numbers.py` (2-subagent wave deferred pending user cost approval) | **PASS (Deterministic)**: All numeric, tabular, and code-surface spans verified against frozen CSVs and `NAMESPACE`. |
-| **G13** | Cold-reader comprehension check | **NOT RUN** | Requires isolated subagent (deferred pending user cost approval) | **DEFERRED**: Available on request via Lean multi-agent wave. |
-| **G14** | Ethical, IRB & data-use compliance | **RUN** | Public dataset manifest & provenance check (`validation/real-data/fetch-manifest.json`, `validation/real-audit/fetch-manifest.json`) | **PASS**: All empirical benchmarks use public, de-identified datasets (ClinicalTrials.gov, CDC NHANES, Dryad/PLOS ONE Rwanda HMIS recount) with frozen SHA-256 manifests. |
-| **G15** | Related-work completeness & fairness | **RUN** | Software comparison table audit (`mice`, `simex`, `mecor`, `Amelia`) | **PASS**: Fairly credits existing CRAN packages and explicitly recommends simple linear MI (`use_recorded = TRUE`) when discrepancies are subtle/diffuse. |
-| **G16** | Limitations & scope honesty | **RUN** | Section 5, Section 7 & `README.md` (`Limits` section) audit | **PASS**: Explicitly discloses where contamination model loses to linear MI (ClinicalTrials.gov, NHANES), where per-record error probabilities have low AUC (`0.543` / `0.500`), and where `catmech_reference(cluster = )` attenuates predictor slopes. |
-| **G17** | Pre-committed analysis-plan honesty | **RUN** | Cross-check against `CONTAMINATION_PLAN.md`, `REAL_DATA_PLAN.md`, `VARIANCE_MI_PLAN.md` | **PASS**: Explicitly discloses in `manuscript.Rmd` and `paper.md` that `catmech_contamination()` passed 3 of 4 primary screen cells and narrowly missed `site_shift_declared` (`93.7%`, Wilson `[0.9202, 0.9505]`). |
-| **G18** | Venue fit & AE-surface check | **RUN** | CRAN policy check + JSS/JOSS structure check | **PASS**: `R CMD check` passes with 0 errors/warnings/notes; `paper/manuscript.pdf` (JSS format) and `paper/paper.md` (JOSS format) include all required sections. |
-| **G19** | Code-surface <-> paper-surface consistency | **RUN** | `verify_code_surface()` in `paper/verify_paper_numbers.py` | **PASS**: Caught and fixed 2 surface mismatches (`catmech_forest_plot()` -> `plot()`, and non-existent `fact_check.py` -> `verify-artifacts.py`, `verify-release-archive.py`, `verify_paper_numbers.py`). All 30 code/script surface references verified. |
-| **G20** | Git & release-tag hygiene | **RUN** | `git status` + `.Rbuildignore` + `.gitignore` check | **PASS**: Clean working tree; build detritus excluded; all frozen archives intact. |
-| **G21** | Supplement <-> main-text parity | **RUN** | Parity check across `manuscript.Rmd`, `paper.md`, `README.md`, and `vignettes/` | **PASS**: Synthetic, real-data, and clustered benchmark numbers match across `manuscript.Rmd`, `paper.md`, and `README.md`. |
+| **G10** | Prose style, humanness & US spelling | **RUN** | `check_prose_style_v2.py` + `check_spelling_us.py` | **PASS (`ALL GREEN`)**: `0` British spellings; `0` em-dashes; `0` curly quotes; `0` Title-Case headings; all 12 lexical/artifact categories `[ok]`. |
+| **G11** | Cross-reference, symbol & notation consistency | **RUN** | LaTeX compile (`undefined=0`) + `G13` symbol audit | **PASS**: Zero undefined references or citations; all symbols ($\phi, \hat{k}, G_i, a_s, n_s, u_i, \nu_{com}, \nu_{BR}$) and strategy/scenario labels defined on first use. |
+| **G12** | Span-attributed prose verification | **RUN** | Isolated `research` subagent (`d62a0643-a25f-4a48-8765-82356471d6b7`) + `paper/verify_paper_numbers.py` | **PASS (All 9 divergences resolved)**: Fixed `catmech_audit_trail()` diagnostics description (`convergence_passed` and `mcmc_iterations`), listed all 10 CRAN `Imports`, corrected `mice`/`simex`/`mecor`/`Amelia` table entries, and clarified `catmech_compare_strategies()` scope. |
+| **G13** | Cold-reader comprehension check | **RUN** | Isolated `research` subagent (`3b976727-7ce6-4239-a0e2-f12e35580fa6`) reading only `manuscript.Rmd` & `paper.md` | **PASS**: Cold reader reconstructed all estimands, sample sizes, decision rules, and screen failures; all symbol, label, table-header (`| Dataset | Metric | ...`), and row-ordering hazards fixed. |
+| **G14** | Ethical, IRB & data-use compliance | **RUN** | Public dataset manifest & provenance check (`validation/real-data/fetch-manifest.json`, `validation/real-audit/fetch-manifest.json`) | **PASS**: All empirical benchmarks use public, de-identified datasets (ClinicalTrials.gov, CDC NHANES, Dryad/PLOS ONE Rwanda HMIS recount, PLOS ONE psychology recounts) with frozen SHA-256 manifests. |
+| **G15** | Related-work completeness & fairness | **RUN** | Software comparison table audit (`mice`, `simex`, `mecor`, `Amelia`) in both papers | **PASS**: Accurately credits `mice` (Barnard-Rubin df), `simex` (SIMEX for LM/GLM), `mecor` (regression calibration for continuous linear models), and `Amelia` (observation priors and `overimpute`). |
+| **G16** | Limitations & scope honesty | **RUN** | Sections 2.3, 5, 6, 8 & `README.md` (`Limits` section) audit | **PASS**: Explicitly discloses `catmech_audit_plan()` `NO-GO` verdict, 3 stress-cell failures, Rwanda HMIS `INCONCLUSIVE` Rule 2 verdict, per-record error probability AUC failure (`0.500`–`0.582`), `catmech_holdout_check()` low power, and `catmech_reference(cluster = )` predictor-slope attenuation. |
+| **G17** | Pre-committed analysis-plan honesty | **RUN** | Cross-check against `CONTAMINATION_PLAN.md`, `REAL_DATA_PLAN.md`, `VARIANCE_MI_PLAN.md`, `REAL_AUDIT_PLAN.md` | **PASS**: Explicitly discloses the `site_shift_declared` Wilson screen miss (`93.7%`, `[0.9202, 0.9505]`), the 3 synthetic stress-cell failures, the `NO-GO` on `catmech_audit_plan()`, the `PARTIAL` accuracy verdict on clustered linear MI, and the `INCONCLUSIVE` Rule 2 verdict on Rwanda HMIS. |
+| **G18** | Venue fit & AE-surface check | **RUN** | Isolated `research` subagent (`1c9f1bd5-3899-4046-be19-54d73387d64d`) | **PASS (All AE-BLOCKER & AE-FRICTION items resolved)**: Added worked 8-stage R workflow and software comparison table to `manuscript.Rmd`, removed `toc: true` from `pdf_document`, removed HTML comment from `paper.md`, and cited all 25 `.bib` entries. |
+| **G19** | Code-surface <-> paper-surface consistency | **RUN** | `verify_code_surface()` in `paper/verify_paper_numbers.py` | **PASS**: All 52 function, script, and CRAN dependency surface checks pass across `manuscript.Rmd` and `paper.md`. |
+| **G20** | Git & release-tag hygiene | **RUN** | `git status` + `.Rbuildignore` + `.gitignore` + `tools/verify-release-archive.py` | **PASS**: Clean working tree; frozen source hashes verified (`source-hashes-before.csv` intact). |
+| **G21** | Supplement <-> main-text parity | **RUN** | Parity check across `manuscript.Rmd`, `paper.md`, `README.md`, and `docs/case-study/fact_check.py` | **PASS**: `118 claims, 118 match` in `docs/case-study/fact_check.py`; `411` checks pass in `paper/verify_paper_numbers.py`. |
 | **G22** | Literature & empirical-calibration sourcing | **RUN** | `paper/verify_paper_numbers.py` + `tools/verify-artifacts.py` | **PASS**: All simulation and empirical numbers trace to frozen CSVs in `validation/`. |
-| **G23** | Final pre-flight sign-off & basis stamping | **RUN** | `check_gate_basis.py --stamp` | **PASS**: Basis hashes stamped below. |
+| **G23** | Final pre-flight sign-off & basis stamping | **RUN** | `check_gate_basis.py --stamp` | **PASS**: Basis hashes stamped on this ledger. |
 
 ---
 
 ## Detailed Gate Audit Notes & `unchecked_directions` (Rule 12b)
 
-### G0: Format-conversion pre-gate
-- **Findings fixed**: Added blank lines before 4 markdown lists in `paper/manuscript.Rmd` so Pandoc emits `\begin{enumerate}` / `\begin{itemize}`; double-braced institutional authors in `paper/paper.bib`.
-- **unchecked_directions**: HTML-to-Word conversion (not targeted; `.pdf`, `.tex`, and `.html` verified).
+### G5: Adversarial Referee Panel (2 Isolated Subagents)
+- **Persona A (`f61a45e3-7738-463d-899e-e68e614db8f7`, Theory & Math Referee)**:
+  - *Resolved MAJOR-1*: Replaced $f_\epsilon(W_i - \hat{T}_i)$ with the exact convolved Gaussian predictive density $\phi(W_i; \, X_i\beta + \mu_e, \, \sigma_T^2 + \sigma_e^2)$ in $p_i$.
+  - *Resolved MAJOR-2*: Clarified that `catmech_contamination()` is implemented in R via a collapsed slice-within-Gibbs sampler under a Jeffreys prior on $(\beta, \sigma_T^2)$, Beta prior on $\pi$, and normal-scaled-inverse-$\chi^2$ prior on $(\mu_e, \sigma_e^2)$, while C++17 `RcppArmadillo` accelerates `catmech_reference()`.
+  - *Resolved MAJOR-3*: Clarified that `catmech_audit_power()` uses log-normal Monte Carlo draws of $\hat{k}$ (`n_sim = 2000`) rather than closed-form non-central approximations, and disclosed the `NO-GO` validation status of `catmech_audit_plan()`.
+  - *Resolved MAJOR-4 & MAJOR-5*: Clarified that `catmech_pool_lm()`, `catmech_pool_glm()`, and `catmech_pool_coxph()` use $\nu_{com} = N - p$ (or $\nu_{com} = d - p$ with model-based inverse Fisher information for unclustered Cox PH) when `cluster = NULL`, and set $\nu_{com} = C - 1$ when `cluster` is specified across $C$ sites (with CV3 jackknife for LM, CR1S finite-sample-corrected Liang-Zeger sandwich for GLM, and cluster-summed Lin-Wei sandwich for Cox PH).
+  - *unchecked_directions*: Did not inspect `R/reference.R` or `src/*.cpp` directly during the isolated G5-A pass (covered by `tools/check-reference-oracle.R`).
+- **Persona B (`f23db6b4-7a7b-4422-aed7-7dc817b4e7ca`, Empirical & Biostats Referee)**:
+  - *Resolved MAJOR-1*: Added Section 6.2 (`Real-audit regression slope recovery benchmarks`) reporting the 45,600-request study (`validation/REAL_AUDIT_SYNTHESIS.md`) on Rwanda HMIS and 498 psychology effect-size recounts (`@maassen2020reproducibility`), including the pre-specified `INCONCLUSIVE` Rule 2 verdict and clustered coverage failures (`71.6%` on `PNC`, `66.6%` on `Syphilis`, `35.4%` on `Iron`, `49.7%` on `ANC 4th visit`).
+  - *Resolved MAJOR-2*: Added explicit disclosure of the three pre-specified stress-cell failures in `validation/CONTAMINATION_SYNTHESIS.md` (`heavy_tail_target`: bias $+0.0330$, coverage $87.3\%$; `nonignorable_missed`: bias $-0.0506$, coverage $79.3\%$; `noisy_undeclared`: bias $-0.0261$, coverage $88.7\%$) plus borderline/refusal cells (`error_bimodal`, `flag_from_recorded`, `reference_05pct`).
+  - *Resolved MAJOR-3 & MAJOR-5*: Disclosed in Section 5.2 that `cv3` restored 100% complete-data recount coverage (`gold_only`) to $92.0\%$–$97.5\%$ and narrowly passed under random-intercept outcome imputation ($9/11$ items $\ge 92\%$), did not rescue unclustered linear MI on Rwanda items ($81.0\%$–$86.1\%$ on worst items), and that `catmech_reference(cluster = )` attenuated predictor slopes by up to $-16.1\%$ ($84.4\%$ coverage at 25% audit).
+  - *Resolved MAJOR-4 & MAJOR-6*: Disclosed that per-record corruption probabilities $p_i$ had near-chance AUC on real data (`0.543` on ClinicalTrials.gov, `0.500` on NHANES, `0.501`–`0.582` on Rwanda HMIS) and that `catmech_holdout_check()` had low alarm power against slope bias ($1/40$ in `heavy_tail_target`, $0/40$ in `nonlinear_target`, $18/40$ in `site_shift_undeclared`).
+  - *Resolved MINOR 1–5*: Added `Naive (Trust Rec.)` (`naive_recorded`) to the Section 6.1 table, explained the 91.2% Oracle coverage on ClinicalTrials.gov, reported the 33,800-request refusal breakdown, and clarified the 14 refusals (12 rank-deficient, 2 zero-residual-variance) in the 148,500-request study.
+  - *unchecked_directions*: Other 6 validation archives (`CLUSTERED_SYNTHESIS.md`, `OUTSIDE_METHODS_SYNTHESIS.md`, etc.) are verified deterministically via `tools/verify-artifacts.py`.
 
-### G1: Path, hygiene & repository-surface guard
-- **Findings**: `check_paths.sh` passed with 0 hits on `R/ src/ man/ vignettes/ inst/ tests/ tools/ paper/ README.md DESCRIPTION NAMESPACE NEWS.md`. Two historical scratch scripts in `validation/clustered-fix-scratch/` contain `/Users/patrickiben/Documents/catmech` and are excluded from the CRAN tarball via `.Rbuildignore` (`^validation$`), preserved untouched per Rule 3.
-- **unchecked_directions**: Windows path separator runtime test (covered via GitHub Actions CI matrix).
+### G12: Span-Attributed Prose Verification (`d62a0643-a25f-4a48-8765-82356471d6b7`)
+- **Findings fixed**: Corrected `catmech_audit_trail()` description to match `R/audit-trail.R` (`convergence_passed` and `mcmc_iterations` on the trail, with $\hat{R}$ and ESS in `result$model_diagnostics`); listed all 10 non-base CRAN `Imports` (`Rcpp`, `RcppArmadillo`, `digest`, `jsonlite`, `mice`, `pan`, `posterior`, `survival`, `truncnorm`, `yaml`); corrected the software comparison table for `mice` (`BR df`), `simex` (`SIMEX` for LM and GLM), `mecor` (`Reg. Cal.` for LM, `No` for GLM), and `Amelia` (`Priors` and `overimpute`); and clarified `catmech_compare_strategies()` scope.
+- **unchecked_directions**: Formal argument defaults of un-audited `R/*.R` files beyond `NAMESPACE` and `R/audit-trail.R` / `R/strategy-compare.R` (verified via `R CMD check`).
 
-### G2 & G22: Numeric-claim <-> artifact check & empirical sourcing
-- **Findings fixed**: Replaced the illustrative synthetic table ($\beta = 0.500, N = 1,000$) in `paper/manuscript.Rmd` (Section 4.1) and `paper/paper.md` (Section "1. Synthetic Monte Carlo studies") with the exact frozen benchmark results from `validation/contamination-study/summary.csv` ($\beta = 0.800, N = 600$, 25% reference audit, $m = 20$, 52,950 planned requests), reporting `missed_flags` ($N_{\text{sim}} = 1,000$) and `error_gross_and_small` ($N_{\text{sim}} = 150$) with exact MCSEs. Created `paper/verify_paper_numbers.py` (343 automated assertions + negative control).
-- **unchecked_directions**: Secondary stress cells in `validation/contamination-study/summary.csv` not tabulated in main text (all 27 scenarios are verified in `tools/verify-artifacts.py`).
+### G13: Blinded Cold-Reader Comprehension Check (`3b976727-7ce6-4239-a0e2-f12e35580fa6`)
+- **Findings fixed**: Defined all strategy codes (`v02_mask_normal`, `gold_only`, `reference_normal`, `cole_mi`, `raking`), scenario codes (`clean`, `flagged_errors`, `missed_flags`, `site_shift_declared`, `error_gross_and_small`), variance codes (`cr1s`, `cr2`, `cv3`), and mathematical symbols on first use; explained the 52,950 request total (183 method-scenario cells); replaced the ambiguous `| Dataset & Metric | Audit 25% |` header with `| Dataset | Metric | Naive (Trust Rec.) | ...`; and harmonized strategy row order across both panels of the synthetic table.
+- **unchecked_directions**: None (strict Rule 12 two-file isolation).
 
-### G3: Citation & bibliography verification
-- **Findings fixed**: Running `check_citations.py` on both `paper/manuscript.bbl` and a full `\nocite{*}` build of `paper/paper.bib` caught 5 defective entries:
-  1. `huang2013simple`: Fixed journal/title/DOI to *Bayesian Analysis* 8(2):439–452 (`10.1214/13-BA815`).
-  2. `breslow2003semiparametric`: Fixed authors/title/journal/DOI to Breslow, McNeney & Wellner (2003), *The Annals of Statistics* 31(4):1110–1139 (`10.1214/aos/1059655907`).
-  3. `neyman1938contribution`: Fixed JASA DOI to `10.1080/01621459.1938.10503378`.
-  4. `little2019statistical`: Fixed Wiley book DOI to `10.1002/9781119482260`.
-  5. `nab2021mecor`: Fixed *Computer Methods and Programs in Biomedicine* page/DOI to `106238` (`10.1016/j.cmpb.2021.106238`).
-- **Result**: `20 OK | 5 REVIEW | 0 FLAG` across all 25 entries in `paper/paper.bib`.
-- **unchecked_directions**: Page-level quotation check inside cited textbooks (`cochran1977sampling`, `rubin1987multiple`).
-
-### G6: Figure, table & layout inspection
-- **Findings fixed**: Stacked the author block across 3 centered lines; adjusted proportional pipe-table column widths in Sections 3, 4.1, and 5; narrowed the ASCII decision tree to 68 columns; achieved `errors=0 undefined=0 overfull=0 underfull=2` in `manuscript.log` and visually verified all 10 pages of `paper/manuscript.pdf`.
-- **unchecked_directions**: Print grayscale contrast of HTML interactive output.
-
-### G7 & G10: AI-artifact scrubber, prose style & US spelling
-- **Findings fixed**: Converted all headings in `paper/manuscript.Rmd` and `paper/paper.md` to sentence case; removed all em-dashes (`—`) from prose; replaced "proves" with "demonstrates" in Section 7.
-- **Result**: `check_prose_style_v2.py paper/manuscript.tex` exits `0` (`within thresholds on every implemented category`, `0` em-dashes, `0` curly quotes, `0` Title-Case headings); `scrub_ai_artifacts.py` exits `0` (`0` hits); `check_spelling_us.py` exits `0` (`0` British spellings).
-- **unchecked_directions**: Wikipedia-specific categories listed as unimplemented by `check_prose_style_v2.py`.
-
-### G17: Pre-committed analysis-plan honesty
-- **Findings fixed**: Added explicit disclosure in Section 4.1 of `paper/manuscript.Rmd` and `paper/paper.md` that across the four primary 1,000-cohort cells (`clean`, `flagged_errors`, `missed_flags`, `site_shift_declared`), `catmech_contamination()` passed the pre-specified `[0.925, 0.975]` Wilson coverage screen in three cells (`96.5%`, `96.3%`, `94.9%`) and narrowly missed in `site_shift_declared` at `93.7%` (`[0.9202, 0.9505]`, bias `-0.0085`, MCSE `0.0016`).
-- **unchecked_directions**: None.
-
-### G19: Code-surface <-> paper-surface consistency
-- **Findings fixed**: Automated check in `paper/verify_paper_numbers.py` caught `catmech_forest_plot()` (not an exported function; forest plots use S3 `plot()`) and `fact_check.py` (temporary script name replaced by committed `verify-artifacts.py`, `verify-release-archive.py`, and `verify_paper_numbers.py`).
-- **unchecked_directions**: Internal non-exported C++ helper names (not referenced in manuscript).
-FAIL: paper/manuscript.tex/paper/manuscript.pdf does not exist
+### G18: JSS / JOSS Associate Editor Surface Review (`1c9f1bd5-3899-4046-be19-54d73387d64d`)
+- **Findings fixed**: Added Section 4 (`Illustrative clinical trial workflow`) and the software comparison table to `paper/manuscript.Rmd`; removed `toc: true` from `pdf_document` in `paper/manuscript.Rmd`; removed the `<!-- gate-basis: ... -->` HTML comment from `paper/paper.md`; cited `@nhanes2018` and `@maassen2020reproducibility` in both papers; and added URLs to `@leeder2008simex`, `@fda2003part11`, and `@ich1998e9` in `paper/paper.bib`.
+- **unchecked_directions**: Live `openjournals/inara` Docker build (not installed locally; Pandoc LaTeX/HTML builds verified).
