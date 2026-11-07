@@ -72,7 +72,7 @@ trail <- catmech_audit_trail(res, pooled = pooled)
 print(trail)
 #> # Catmech Audit Trail & Compliance Report
 #> 
-#> **Generated:** 2026-11-07T06:42:19Z UTC | **Catmech Version:** 1.0.0
+#> **Generated:** 2026-11-07T19:18:40Z UTC | **Catmech Version:** 1.0.0
 #> **R Version:** 4.6.2 | **Platform:** x86_64-pc-linux-gnu
 #> 
 #> ---
