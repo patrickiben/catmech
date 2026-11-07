@@ -1,0 +1,91 @@
+{
+  "claims": [
+    {
+      "grounded": true,
+      "id": "A1",
+      "level": 3,
+      "reaches_l1": true
+    },
+    {
+      "grounded": true,
+      "id": "A2",
+      "level": 3,
+      "reaches_l1": true
+    },
+    {
+      "grounded": true,
+      "id": "D1",
+      "level": 4,
+      "reaches_l1": true
+    },
+    {
+      "grounded": true,
+      "id": "D2",
+      "level": 4,
+      "reaches_l1": true
+    },
+    {
+      "grounded": true,
+      "id": "D3",
+      "level": 4,
+      "reaches_l1": true
+    },
+    {
+      "grounded": true,
+      "id": "E1",
+      "level": 2,
+      "reaches_l1": true
+    },
+    {
+      "grounded": true,
+      "id": "E2",
+      "level": 2,
+      "reaches_l1": true
+    },
+    {
+      "grounded": true,
+      "id": "E3",
+      "level": 2,
+      "reaches_l1": true
+    },
+    {
+      "grounded": true,
+      "id": "F1",
+      "level": 1,
+      "reaches_l1": true
+    },
+    {
+      "grounded": true,
+      "id": "F2",
+      "level": 1,
+      "reaches_l1": true
+    },
+    {
+      "grounded": true,
+      "id": "F3",
+      "level": 1,
+      "reaches_l1": true
+    },
+    {
+      "grounded": true,
+      "id": "H1",
+      "level": 5,
+      "reaches_l1": true
+    },
+    {
+      "grounded": true,
+      "id": "H2",
+      "level": 5,
+      "reaches_l1": true
+    },
+    {
+      "grounded": true,
+      "id": "H3",
+      "level": 5,
+      "reaches_l1": true
+    }
+  ],
+  "generated_from": "/Users/patrickiben/Documents/catmech/education/g9_claims_MAP.json",
+  "schema_version": "g9-claim-inventory/v1",
+  "source_sha256": "644b2f8481a064ee2ed5647a3a6419f76c3384298c03a0c79fdbbdd9ecec34b8"
+}

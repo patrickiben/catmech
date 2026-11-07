@@ -87,6 +87,18 @@
 
 ---
 
+## Multimodal R-Package Educational Companion (`education/`, Gates `G9` / `G14` / `G15`)
+
+- **Manifest & Gate (`education/g14_companion_manifest.json`)**: `schema_version: "g14-companion-manifest/v2"`, `package_claim: "MULTIMODAL"`, `validated_modalities: ["DOCUMENT", "INTERACTIVE", "ONE_PAGER"]`.
+- **`g14_companion_gate.py` Verdict**: **`G14 PASS (exit 0)`** (`entry_count: 30` units `C01`–`C30` covering 100% of `paper/manuscript.Rmd` lines `1..350` with `unaccounted_nonblank_lines: 0`, `declared_overlaps: 0`, `ordinary_language_grade: 6.29`, `ordinary_language_max_sentence_words: 19`, `g9_claims: 14`, `g9_claims_ingested: 14`, `load_bearing_claims: 8`, `assessment_overall: 12/12`, `assessment_boundary: 4/4`, `assessment_transfer: 4/4`).
+- **`check_companion_lock.py` Verdict**: **`PASS: 2 fresh, 0 stale, 0 missing`** (`paper/manuscript.Rmd` and `paper/manuscript.pdf` SHA-256 locks verified).
+- **Executable R Package Labs & Console Tutor**:
+  - `Rscript education/run_companion_labs.R`: **16/16 live R package labs & refusal/warning checks PASS** (including all 4 "When the Package Says No" refusal/warning labs).
+  - `Rscript education/interactive_tutor.R --non-interactive`: **12/12 interactive console lessons & transfer checks PASS**.
+  - `python3 education/verify_educational_companion.py`: **ALL EDUCATIONAL COMPANION VERIFICATION CHECKS PASSED (exit 0)**.
+
+---
+
 ## Independent Re-QC (2026-11-07)
 
 Fresh pass that re-ran every deterministic check instead of inheriting earlier results.

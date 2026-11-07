@@ -18,4 +18,5 @@
 ^HANDOFF\.md$
 ^README\.md$
 ^man/figures$
+^education$
 (^|/)\.DS_Store$

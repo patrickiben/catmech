@@ -1,0 +1,62 @@
+{
+  "canonical_sources": {
+    "manuscript_rmd": {
+      "file": "../paper/manuscript.Rmd",
+      "sha256": "8152288b1c2af2a49103543db3c9324582177b1e842365b5c5ab83cdac8c1fd0",
+      "lines": 350
+    },
+    "manuscript_pdf": {
+      "file": "../paper/manuscript.pdf",
+      "sha256": "1d17480886d4f38c38e7cf5f900ea3c5f1ef48f3c4484fa801a72a83de05e0db",
+      "pages": 15
+    }
+  },
+  "study_guide_markdown": {
+    "file": "STUDY_GUIDE.md",
+    "sha256": "391863b88b069dd128b1c8e6f15393904ff4f98201a0b4e39ad53f1f30e0e59b",
+    "words": 2428
+  },
+  "study_guide_pdf": {
+    "file": "STUDY_GUIDE.pdf",
+    "sha256": "419b8506e6f493d1ba2cba81a12664dafd23b59c7196b4c4393bdc529b01a238",
+    "pages": 8,
+    "source_sha_in_metadata": true
+  },
+  "companion_markdown": {
+    "file": "COMPANION.md",
+    "sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+    "words": 11002
+  },
+  "companion_pdf": {
+    "file": "COMPANION.pdf",
+    "sha256": "fed75cb76904ffde55849a339935f6f8f61d96d826f58b52463498a5563c3067",
+    "pages": 24,
+    "source_sha_in_metadata": true
+  },
+  "one_pager_markdown": {
+    "file": "ONE_PAGER.md",
+    "sha256": "e785fb8ace4e3dd2f973ef1a4cf676e16c23b004c5dd148761076859bc4bf2d7"
+  },
+  "one_pager_pdf": {
+    "file": "ONE_PAGER.pdf",
+    "sha256": "ba90fca373d98c83099d82101adedde4b28587ed6157004c4b0b9ff5d6758a65",
+    "pages": 1,
+    "source_sha_in_metadata": true
+  },
+  "companion_lab_html": {
+    "file": "companion_lab.html",
+    "sha256": "ba66ba9dd385a907274bf7adc61459d04edf8e5981146605146d2a8549b85dd9"
+  },
+  "complete_coverage": {
+    "file": "COMPLETE_COVERAGE.md",
+    "sha256": "471eed5b1c67982ece6023eaebc1ae3b09937c5eee518f17ebf47035f64809bb"
+  },
+  "r_labs_script": {
+    "file": "run_companion_labs.R",
+    "sha256": "425867c153a047ecd53f887a92a3bb8266651f27d0ca35278c731633891b4ded"
+  },
+  "r_interactive_tutor": {
+    "file": "interactive_tutor.R",
+    "sha256": "ac0c32ba076e0bed36980f00548c81723502af5aef3f542dab4de7bcbaf3583d"
+  }
+}

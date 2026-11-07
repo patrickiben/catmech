@@ -1,0 +1,117 @@
+{
+  "nodes": [
+    {
+      "id": "F1",
+      "level": 1,
+      "title": "Collapsed slice-within-Gibbs mixture posteriors and marginalized corruption probability p_i",
+      "links": []
+    },
+    {
+      "id": "F2",
+      "level": 1,
+      "title": "Two-phase semiparametric influence function variance ratio rho(f) = sqrt(1 + k(1-f)/f)",
+      "links": []
+    },
+    {
+      "id": "F3",
+      "level": 1,
+      "title": "Barnard-Rubin small-sample df (nu_BR < nu_com) with CV3, CR1S, and Lin-Wei covariance",
+      "links": []
+    },
+    {
+      "id": "E1",
+      "level": 2,
+      "title": "R/contamination.R & R/reference.R (collapsed Gibbs mixture + C++17 RcppArmadillo reference MI)",
+      "links": [
+        "F1"
+      ]
+    },
+    {
+      "id": "E2",
+      "level": 2,
+      "title": "R/audit-power.R, R/audit-plan.R & R/holdout-check.R (MC power, NO-GO planner, rank-PIT screen)",
+      "links": [
+        "F2"
+      ]
+    },
+    {
+      "id": "E3",
+      "level": 2,
+      "title": "R/pool.R, R/pool-glm.R, R/pool-coxph.R & R/audit-trail.R (multi-endpoint pooling + SHA-256 trail)",
+      "links": [
+        "F3"
+      ]
+    },
+    {
+      "id": "A1",
+      "level": 3,
+      "title": "validation/contamination-study & validation/variance-mi-study (52,950 + 148,500 frozen requests)",
+      "links": [
+        "E1",
+        "E3"
+      ]
+    },
+    {
+      "id": "A2",
+      "level": 3,
+      "title": "validation/real-data-study & validation/real-audit-study (33,800 CT.gov/NHANES + 45,600 Rwanda/psych)",
+      "links": [
+        "E1",
+        "E2",
+        "E3"
+      ]
+    },
+    {
+      "id": "D1",
+      "level": 4,
+      "title": "Synthetic Contamination Study: 44.3% narrower CIs vs gold_only in missed_flags; 3 stress-cell boundaries",
+      "links": [
+        "A1"
+      ]
+    },
+    {
+      "id": "D2",
+      "level": 4,
+      "title": "Clustered Variance & MI Study: CV3 passes 9/11 Rwanda indicators; predictor-slope attenuation warning",
+      "links": [
+        "A1"
+      ]
+    },
+    {
+      "id": "D3",
+      "level": 4,
+      "title": "Real-Data & Real-Audit Studies: 43%-48% RMSE cut from keeping W_i; p_i AUC 0.500-0.582; Rwanda INCONCLUSIVE",
+      "links": [
+        "A2"
+      ]
+    },
+    {
+      "id": "H1",
+      "level": 5,
+      "title": "Headline 1: Retaining recorded measurements cuts RMSE by 43% to 48% on ClinicalTrials.gov and NHANES",
+      "links": [
+        "D3",
+        "A2"
+      ]
+    },
+    {
+      "id": "H2",
+      "level": 5,
+      "title": "Headline 2: Contamination mixture avoids attenuation under gross separable errors but per-row p_i is near chance on diffuse real data",
+      "links": [
+        "D1",
+        "D3"
+      ]
+    },
+    {
+      "id": "H3",
+      "level": 5,
+      "title": "Headline 3: Evidence-based decision protocol pairs Simple Linear MI for diffuse errors with multi-endpoint Barnard-Rubin pooling",
+      "links": [
+        "D1",
+        "D2",
+        "D3"
+      ]
+    }
+  ]
+}

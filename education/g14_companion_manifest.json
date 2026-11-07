@@ -1,0 +1,1873 @@
+{
+  "schema_version": "g14-companion-manifest/v2",
+  "edition": "catmech v1.0.0 Multimodal R-Package Educational Companion",
+  "status": "RELEASE_READY",
+  "release_order": "AFTER_G12_FROZEN_MANUSCRIPT",
+  "source_roles": {
+    "manuscript": "paper/manuscript.Rmd",
+    "companion": "education/COMPANION.md"
+  },
+  "canonical_sources": {
+    "paper/manuscript.Rmd": {
+      "sha256": "8152288b1c2af2a49103543db3c9324582177b1e842365b5c5ab83cdac8c1fd0",
+      "lines": 350,
+      "line_locator_basis": "1-based inclusive line numbers in frozen paper/manuscript.Rmd"
+    },
+    "education/COMPANION.md": {
+      "sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+      "lines": 546,
+      "line_locator_basis": "entry locators reference paper/manuscript.Rmd line numbers"
+    }
+  },
+  "entry_count": 30,
+  "entries": [
+    {
+      "index": 1,
+      "key": "C01",
+      "title": "Clinical audit designs, two-phase inference, and the simulation-to-practice synthesis",
+      "section": "Problem, statistical model, and two-phase audit design",
+      "source_range": [
+        1,
+        29
+      ],
+      "source_excerpt_sha256": "631da87f02783f154a3461c671ae33de77c57798fe12a0952f2ffce8be5aa6c1",
+      "body_sha256": "2a29d3d009f7c6d19a1e89c60e72b6a354f2086166aa0057b9d8c8c0d0de17e6",
+      "evidence_status": "SCOPE of the `catmech` package and MEASURED_DATED summary of the 10 frozen validation archives.",
+      "source_evidence_class": "MEASURED_DATED",
+      "evidence_class": "MEASURED_DATED",
+      "coverage_ids": [
+        "A1",
+        "LB1"
+      ]
+    },
+    {
+      "index": 2,
+      "key": "C02",
+      "title": "The three-way clinical audit dilemma: naive attenuation, complete-case variance inflation, and discard-recorded loss",
+      "section": "Problem, statistical model, and two-phase audit design",
+      "source_range": [
+        30,
+        41
+      ],
+      "source_excerpt_sha256": "4af8edbc261cacb269fd89e62690497a13649a407d8649171f91d34b91190a3e",
+      "body_sha256": "49823d758b6859544021bd75499259f3319847a5768cf79d75fd89c605fd72f5",
+      "evidence_status": "DEFINITION of the three conventional audit analysis choices and ANALYTIC errors-in-variables attenuation mechanism.",
+      "source_evidence_class": "ANALYTIC",
+      "evidence_class": "ANALYTIC",
+      "coverage_ids": [
+        "A2",
+        "LB2"
+      ]
+    },
+    {
+      "index": 3,
+      "key": "C03",
+      "title": "Data generating and contamination framework: latent truth, corruption indicator, recorded value, and Phase II reference",
+      "section": "Problem, statistical model, and two-phase audit design",
+      "source_range": [
+        42,
+        56
+      ],
+      "source_excerpt_sha256": "11bd136016e9893f0a2bfbc8093b4e0e6fd8fc7250e72efa6061063f259c6422",
+      "body_sha256": "cba49da493127c9ebef2c68b3adb70a4c464dad3635565c15de6d0c3f5892fee",
+      "evidence_status": "DEFINITION of the two-phase Gaussian contamination mixture model and reference assay noise parameter `reference_sd`.",
+      "source_evidence_class": "DEFINITION",
+      "evidence_class": "DEFINITION",
+      "coverage_ids": [
+        "D1",
+        "LB3"
+      ]
+    },
+    {
+      "index": 4,
+      "key": "C04",
+      "title": "Priors and collapsed slice-within-Gibbs MCMC architecture in catmech_contamination",
+      "section": "Problem, statistical model, and two-phase audit design",
+      "source_range": [
+        57,
+        60
+      ],
+      "source_excerpt_sha256": "a53433bfe4b09544cb6d8f53d94258f95502f7a32a5adab398956df2f3d2cb3f",
+      "body_sha256": "0265a6fba40ac4f6b87267736a4bb53aa3c1fb8942e90e01e10db89181ea9f04",
+      "evidence_status": "ANALYTIC derivation of the collapsed slice-within-Gibbs MCMC update schedule in `catmech_contamination()`.",
+      "source_evidence_class": "ANALYTIC",
+      "evidence_class": "ANALYTIC",
+      "coverage_ids": [
+        "D2",
+        "LB4"
+      ]
+    },
+    {
+      "index": 5,
+      "key": "C05",
+      "title": "Marginalized corruption probability for unaudited records via Gaussian convolution",
+      "section": "Problem, statistical model, and two-phase audit design",
+      "source_range": [
+        61,
+        64
+      ],
+      "source_excerpt_sha256": "f3f487f9d5ffc4b4f48e5fb422f2f438aba289d5d594dd969a8bea77d169c198",
+      "body_sha256": "98bd4fd2652d8898802ea71642d69099db1c0fdd20100442c8244d0df6ceea8e",
+      "evidence_status": "ANALYTIC closed-form marginal corruption probability `p_i` under Gaussian convolution.",
+      "source_evidence_class": "ANALYTIC",
+      "evidence_class": "ANALYTIC",
+      "coverage_ids": [
+        "D3",
+        "LB5"
+      ]
+    },
+    {
+      "index": 6,
+      "key": "C06",
+      "title": "Conjugate Gaussian posterior for contaminated unaudited records and reference anchoring",
+      "section": "Problem, statistical model, and two-phase audit design",
+      "source_range": [
+        65,
+        70
+      ],
+      "source_excerpt_sha256": "86b0bc7fb9a67cbca4c6da258bc805173db636557d611fea79faac834c40709e",
+      "body_sha256": "c2246dbc5b90b5de248f55869d4e5a75530c2019cd53d1fef7ef92c68ff5d181",
+      "evidence_status": "ANALYTIC conjugate Gaussian conditional posterior for `T_i` and MCMC convergence gate.",
+      "source_evidence_class": "ANALYTIC",
+      "evidence_class": "ANALYTIC",
+      "coverage_ids": [
+        "E1",
+        "LB6"
+      ]
+    },
+    {
+      "index": 7,
+      "key": "C07",
+      "title": "Gaussian reference imputation in C++17: use_recorded = TRUE (Simple Linear MI) versus FALSE",
+      "section": "Problem, statistical model, and two-phase audit design",
+      "source_range": [
+        71,
+        72
+      ],
+      "source_excerpt_sha256": "08d8fdfeb5e48a784c8263179448127f827bc4dc7921ca5db0ddb5e67625566b",
+      "body_sha256": "63a6d0f10764ab349641818dc9e2486459f7587741eaf31637dd8d029ca8552c",
+      "evidence_status": "DEFINITION of `catmech_reference(use_recorded = TRUE)` (`cole_mi`) versus `catmech_reference(use_recorded = FALSE)` (`reference_normal`).",
+      "source_evidence_class": "DEFINITION",
+      "evidence_class": "DEFINITION",
+      "coverage_ids": [
+        "E2",
+        "LB7"
+      ]
+    },
+    {
+      "index": 8,
+      "key": "C08",
+      "title": "Two-phase influence function variance decomposition and the interval-width precision ratio",
+      "section": "Two-phase audit planning, multi-endpoint pooling, and calibration",
+      "source_range": [
+        73,
+        80
+      ],
+      "source_excerpt_sha256": "fbc3bf6d1a7f44314b7be94014ae6ce648a2bfb1d4086beed1e94b7c07f14d6f",
+      "body_sha256": "2fc15d1834cc160e0d1385e5e3def9610494c6101221c97ebd40fe4e6ac6c0a3",
+      "evidence_status": "ANALYTIC two-phase asymptotic variance decomposition and precision ratio `rho(f)`.",
+      "source_evidence_class": "ANALYTIC",
+      "evidence_class": "ANALYTIC",
+      "coverage_ids": [
+        "E3",
+        "LB8"
+      ]
+    },
+    {
+      "index": 9,
+      "key": "C09",
+      "title": "Monte Carlo audit power planning and the pre-specified NO-GO boundary on catmech_audit_plan",
+      "section": "Two-phase audit planning, multi-endpoint pooling, and calibration",
+      "source_range": [
+        81,
+        84
+      ],
+      "source_excerpt_sha256": "c918389a41c4202573a2eb19654aa21ba4e723107b88761e6c75cf767301f47c",
+      "body_sha256": "b2916705e6cc54c4d785f58df1ec2a94018feac665e4989105df8e511c6bb50b",
+      "evidence_status": "ANALYTIC Monte Carlo power definition (`catmech_audit_power()`) and MEASURED_DATED `NO-GO` validation verdict on `catmech_audit_plan()`.",
+      "source_evidence_class": "MEASURED_DATED",
+      "evidence_class": "MEASURED_DATED",
+      "coverage_ids": [
+        "F1",
+        "LB1"
+      ]
+    },
+    {
+      "index": 10,
+      "key": "C10",
+      "title": "Rubin multiple imputation combining rules and the fraction of missing information",
+      "section": "Two-phase audit planning, multi-endpoint pooling, and calibration",
+      "source_range": [
+        85,
+        90
+      ],
+      "source_excerpt_sha256": "affc455d578e2c98c28f595187e769a128101c60e06f1f59e27e0efbe94cd226",
+      "body_sha256": "4e0666c8b508d7fa55508af409f1bcd38383e97b6521dd268ea0aa51be120878",
+      "evidence_status": "ANALYTIC Rubin (1987) multiple imputation combining rules for point estimates, total variance `T`, and fraction of missing information `lambda_hat`.",
+      "source_evidence_class": "ANALYTIC",
+      "evidence_class": "ANALYTIC",
+      "coverage_ids": [
+        "F2",
+        "LB2"
+      ]
+    },
+    {
+      "index": 11,
+      "key": "C11",
+      "title": "Barnard and Rubin small-sample degrees of freedom adjustment for finite samples, clusters, and events",
+      "section": "Two-phase audit planning, multi-endpoint pooling, and calibration",
+      "source_range": [
+        91,
+        94
+      ],
+      "source_excerpt_sha256": "5302e12fa360a5bdff119edd06c866f0cd1675a18cc6205e44768bc2d16f1d85",
+      "body_sha256": "f1c5e98615bf6e183e076523fb4ce42651952fc629521be40dbf0908e3c056ed",
+      "evidence_status": "ANALYTIC Barnard and Rubin (1999) finite-sample degrees of freedom formula `nu_BR`.",
+      "source_evidence_class": "ANALYTIC",
+      "evidence_class": "ANALYTIC",
+      "coverage_ids": [
+        "F3",
+        "LB3"
+      ]
+    },
+    {
+      "index": 12,
+      "key": "C12",
+      "title": "Downstream pooling for continuous (CV3 jackknife) and generalized linear (CR1S sandwich) endpoints",
+      "section": "Two-phase audit planning, multi-endpoint pooling, and calibration",
+      "source_range": [
+        95,
+        98
+      ],
+      "source_excerpt_sha256": "e0926181940efd2d7b840714b9cc89e49ac59dd0db288db4ed34de8c9934e49b",
+      "body_sha256": "b17be3854ce4497e4f06a408699232a5ff053700214e5cbe1ad1554112bef731",
+      "evidence_status": "ANALYTIC within-imputation covariance estimators and complete-data degrees of freedom for `catmech_pool_lm()` (`cv3`) and `catmech_pool_glm()` (`CR1S`).",
+      "source_evidence_class": "ANALYTIC",
+      "evidence_class": "ANALYTIC",
+      "coverage_ids": [
+        "H1",
+        "LB4"
+      ]
+    },
+    {
+      "index": 13,
+      "key": "C13",
+      "title": "Time-to-event Cox proportional hazards pooling with event-based degrees of freedom and Lin-Wei sandwich",
+      "section": "Two-phase audit planning, multi-endpoint pooling, and calibration",
+      "source_range": [
+        99,
+        100
+      ],
+      "source_excerpt_sha256": "85455454b45d2d76f726ecd2cb10bda4b14ef19be4d0fd2bebf97ca1bd42ab7d",
+      "body_sha256": "2b3bc935e8212209118f09854822a0a01cafc9c183e40cb036a357801e3418cc",
+      "evidence_status": "ANALYTIC event-based degrees of freedom (`d - p`) and clustered Lin-Wei sandwich pooling in `catmech_pool_coxph()`.",
+      "source_evidence_class": "ANALYTIC",
+      "evidence_class": "ANALYTIC",
+      "coverage_ids": [
+        "H2",
+        "LB5"
+      ]
+    },
+    {
+      "index": 14,
+      "key": "C14",
+      "title": "Out-of-sample cross-validated predictive calibration checking via rank PIT and its slope-bias limit",
+      "section": "Two-phase audit planning, multi-endpoint pooling, and calibration",
+      "source_range": [
+        101,
+        106
+      ],
+      "source_excerpt_sha256": "d68a69bc04cefb7a8890dbc4f4d4f7636cdd1794389fd0d39c94d6580dc8a77c",
+      "body_sha256": "f8e36298b247ef5a816e22d20e8448af9a016997b7f3ed88f154420df581c3b8",
+      "evidence_status": "ANALYTIC tie-randomized empirical rank PIT formula and SCOPE boundary of `catmech_holdout_check()`.",
+      "source_evidence_class": "ANALYTIC",
+      "evidence_class": "ANALYTIC",
+      "coverage_ids": [
+        "H3",
+        "LB6"
+      ]
+    },
+    {
+      "index": 15,
+      "key": "C15",
+      "title": "Modular S3 software architecture across planning, diagnostics, imputation, pooling, and provenance",
+      "section": "Software architecture and illustrative 8-stage clinical workflow",
+      "source_range": [
+        107,
+        118
+      ],
+      "source_excerpt_sha256": "4d915f24cbb0f5f9c0d87e169fda94af6d9ab998f74f968fedecf06111db5d6a",
+      "body_sha256": "d73a6d6ca49ca45823b5083288ac2039419673ce6c51bc4c47512403e64d9990",
+      "evidence_status": "DEFINITION of the five modular S3 subsystems in `catmech`.",
+      "source_evidence_class": "DEFINITION",
+      "evidence_class": "DEFINITION",
+      "coverage_ids": [
+        "A1",
+        "LB7"
+      ]
+    },
+    {
+      "index": 16,
+      "key": "C16",
+      "title": "Comparison with mice, simex, mecor, and Amelia, plus broom generics and strategy comparison",
+      "section": "Software architecture and illustrative 8-stage clinical workflow",
+      "source_range": [
+        119,
+        133
+      ],
+      "source_excerpt_sha256": "a3b8a3c09c15cd44380fa7a5a315e9777a0a4a9d85864d27d18a6472f97af2dd",
+      "body_sha256": "afbfb4b283df8b9a48d5892f243172531945ddf182ba6ba5e061c376e1c07ea2",
+      "evidence_status": "DEFINITION of software capabilities across `catmech`, `mice`, `simex`, `mecor`, and `Amelia`.",
+      "source_evidence_class": "DEFINITION",
+      "evidence_class": "DEFINITION",
+      "coverage_ids": [
+        "A2",
+        "LB8"
+      ]
+    },
+    {
+      "index": 17,
+      "key": "C17",
+      "title": "Reproducible 8-stage clinical trial workflow (Stages 1-5): simulation, power, screening, mixture fit, and calibration",
+      "section": "Software architecture and illustrative 8-stage clinical workflow",
+      "source_range": [
+        134,
+        173
+      ],
+      "source_excerpt_sha256": "d68a59708b11fb84f177f5f6ded368b86765dc2a78871545dd524838ce943340",
+      "body_sha256": "cdb9905eaffc56f2ec8b7f7a17eea9937d2a79cd7a5b0646c7d36b3583d7edf6",
+      "evidence_status": "DEFINITION of the reproducible R workflow for Stages 1-5 of a clinical audit analysis.",
+      "source_evidence_class": "DEFINITION",
+      "evidence_class": "DEFINITION",
+      "coverage_ids": [
+        "D1",
+        "LB1"
+      ]
+    },
+    {
+      "index": 18,
+      "key": "C18",
+      "title": "Reproducible 8-stage clinical trial workflow (Stages 6-8): multi-endpoint pooling, strategy comparison, and provenance",
+      "section": "Software architecture and illustrative 8-stage clinical workflow",
+      "source_range": [
+        174,
+        210
+      ],
+      "source_excerpt_sha256": "0cdbe786b344a1c04a62141d1369d1093d8764a9a54127112fef35a3234fa957",
+      "body_sha256": "05b4df394937f3782772e3efcf6a2045b39b765828333ed89c159d421a6c3902",
+      "evidence_status": "MODELED_LOCKED illustrative workflow output and ANALYTIC Barnard-Rubin `t`-interval exponentiation.",
+      "source_evidence_class": "MODELED_LOCKED",
+      "evidence_class": "MODELED_LOCKED",
+      "coverage_ids": [
+        "D2",
+        "LB2"
+      ]
+    },
+    {
+      "index": 19,
+      "key": "C19",
+      "title": "Design of the 52,950-request synthetic contamination study across 27 scenarios and 7 strategies",
+      "section": "Synthetic simulation studies and clustered variance benchmarks",
+      "source_range": [
+        211,
+        218
+      ],
+      "source_excerpt_sha256": "153b9267548c110a3936a5387e2a9a0904b87b47846689c528a11884aaaf01c7",
+      "body_sha256": "7b7d4c2c38e335c3050654a48692aa6efd614513cd45c379e03272033cd518eb",
+      "evidence_status": "MODELED_LOCKED pre-specified simulation study design (`validation/contamination-study`, `52,950` requests).",
+      "source_evidence_class": "MODELED_LOCKED",
+      "evidence_class": "MODELED_LOCKED",
+      "coverage_ids": [
+        "D3",
+        "LB3"
+      ]
+    },
+    {
+      "index": 20,
+      "key": "C20",
+      "title": "Synthetic benchmark results in missed_flags and error_gross_and_small, plus the four primary cells",
+      "section": "Synthetic simulation studies and clustered variance benchmarks",
+      "source_range": [
+        219,
+        240
+      ],
+      "source_excerpt_sha256": "0c51a469407e92d300730b1f254b5dc52abb098216ba2bad9b381fe8f6669e1f",
+      "body_sha256": "897a13f9ef3826cde74cb15f47b2cba7c1ce615a4b4731f14df413929b6fa0fa",
+      "evidence_status": "MODELED_LOCKED synthetic benchmark results across `missed_flags`, `error_gross_and_small`, and the four primary 1,000-cohort cells.",
+      "source_evidence_class": "MODELED_LOCKED",
+      "evidence_class": "MODELED_LOCKED",
+      "coverage_ids": [
+        "E1",
+        "LB4"
+      ]
+    },
+    {
+      "index": 21,
+      "key": "C21",
+      "title": "Pre-specified stress-cell failure boundaries and holdout calibration alarm power",
+      "section": "Synthetic simulation studies and clustered variance benchmarks",
+      "source_range": [
+        241,
+        249
+      ],
+      "source_excerpt_sha256": "4cc96d31b5b5acacb4c82467fc69b6a53af66e5ac1e3be669316cf9aed01b05c",
+      "body_sha256": "afdadd96dc6bf9a07a9c33e305ac338b9ae8ba6378a7130ea71270e502dbc134",
+      "evidence_status": "MODELED_LOCKED stress-cell failure boundaries and `catmech_holdout_check()` alarm power evaluation.",
+      "source_evidence_class": "MODELED_LOCKED",
+      "evidence_class": "MODELED_LOCKED",
+      "coverage_ids": [
+        "E2",
+        "LB5"
+      ]
+    },
+    {
+      "index": 22,
+      "key": "C22",
+      "title": "Clustered variance study (148,500 requests): why CV3 beats CR1S/CR2 and the predictor-attenuation boundary",
+      "section": "Synthetic simulation studies and clustered variance benchmarks",
+      "source_range": [
+        250,
+        258
+      ],
+      "source_excerpt_sha256": "9f828bddb3b7f1dbea363897f3d3166638b37d80e6988ae18fa3f99b91cff6f8",
+      "body_sha256": "8009214c14adc80103ce1e9d2a4d2ea2c098d200c0b67e118a86599ca87a7bcf",
+      "evidence_status": "MEASURED_DATED and MODELED_LOCKED clustered variance benchmark (`148,500` requests) and `PARTIAL` accuracy verdict.",
+      "source_evidence_class": "MODELED_LOCKED",
+      "evidence_class": "MODELED_LOCKED",
+      "coverage_ids": [
+        "E3",
+        "LB6"
+      ]
+    },
+    {
+      "index": 23,
+      "key": "C23",
+      "title": "Public paired-discrepancy benchmarks on ClinicalTrials.gov and NHANES (33,800 requests)",
+      "section": "Real-world empirical benchmarks and methodological decision framework",
+      "source_range": [
+        259,
+        277
+      ],
+      "source_excerpt_sha256": "8c8f1aafc3576774932fdde7abcbb55b268ee733892269039958ed098707abda",
+      "body_sha256": "6da8f4ba23feb844ac556bf8e1de11e04a7c9c94b267d2827742da4a245b828a",
+      "evidence_status": "MEASURED_DATED empirical benchmark across ClinicalTrials.gov (`N = 27,208`) and NHANES 2017-2018 (`N = 3,908`; `33,800` requests).",
+      "source_evidence_class": "MEASURED_DATED",
+      "evidence_class": "MEASURED_DATED",
+      "coverage_ids": [
+        "F1",
+        "LB7"
+      ]
+    },
+    {
+      "index": 24,
+      "key": "C24",
+      "title": "Why per-record corruption probabilities fail on diffuse real-world discrepancies (AUC 0.543 and 0.500)",
+      "section": "Real-world empirical benchmarks and methodological decision framework",
+      "source_range": [
+        278,
+        279
+      ],
+      "source_excerpt_sha256": "4f91e0f02440dbefa038e094de3e7d5bd59762a57f63988a87e24ed2a8b2b6d3",
+      "body_sha256": "8465249e3a23a79460afb596a4e6475c37d84ed7559bbec66d78475d6159fa68",
+      "evidence_status": "MEASURED_DATED empirical ROC-AUC and Brier skill evaluation of per-record corruption probabilities `p_i`.",
+      "source_evidence_class": "MEASURED_DATED",
+      "evidence_class": "MEASURED_DATED",
+      "coverage_ids": [
+        "F2",
+        "LB8"
+      ]
+    },
+    {
+      "index": 25,
+      "key": "C25",
+      "title": "Real-audit slope recovery benchmark (45,600 requests) on Rwanda HMIS and psychology recounts",
+      "section": "Real-world empirical benchmarks and methodological decision framework",
+      "source_range": [
+        280,
+        289
+      ],
+      "source_excerpt_sha256": "75e65c3a8686a611d4f374075e063a858e983a15609cbc968c2fe3bbb7f3d24f",
+      "body_sha256": "add516bb156871873c15f5e6f77d80ff6d2da81dfaf09488ec7a62ea44ede311",
+      "evidence_status": "MEASURED_DATED real-audit regression slope recovery benchmark (`45,600` requests) across Rwanda HMIS and psychology recounts.",
+      "source_evidence_class": "MEASURED_DATED",
+      "evidence_class": "MEASURED_DATED",
+      "coverage_ids": [
+        "F3",
+        "LB1"
+      ]
+    },
+    {
+      "index": 26,
+      "key": "C26",
+      "title": "Methodological decision framework: choosing between Simple Linear MI and Contamination Mixture",
+      "section": "Real-world empirical benchmarks and methodological decision framework",
+      "source_range": [
+        290,
+        314
+      ],
+      "source_excerpt_sha256": "fc76303e32baa44c6ddd0335a12a901c0eaab7c4cda00a05418959ea15b18e28",
+      "body_sha256": "a9efe81c3f023c708cfd4e7a4e32837d14ae588fb71a7f3b8052032acec8fec1",
+      "evidence_status": "INTERPRETIVE methodological decision rule grounded in the synthetic (`Section 5`) and empirical (`Section 6`) benchmarks.",
+      "source_evidence_class": "INTERPRETIVE",
+      "evidence_class": "INTERPRETIVE",
+      "coverage_ids": [
+        "H1",
+        "LB2"
+      ]
+    },
+    {
+      "index": 27,
+      "key": "C27",
+      "title": "Discussion: simulation-to-practice divergence and why catmech centers on a diagnostic workflow",
+      "section": "Discussion, regulatory provenance, verification, and availability",
+      "source_range": [
+        315,
+        328
+      ],
+      "source_excerpt_sha256": "2514df1790482a0326eb8995c9bcfbac3d5f14ab1a9fd1a9ad4e1d0c0e0dc126",
+      "body_sha256": "a9f180efbd1da436e507c1624b7cd0d23890b5a528fed15a174fe58eab3168ca",
+      "evidence_status": "INTERPRETIVE synthesis of simulation-to-practice divergence and diagnostic workflow design.",
+      "source_evidence_class": "INTERPRETIVE",
+      "evidence_class": "INTERPRETIVE",
+      "coverage_ids": [
+        "H2",
+        "LB3"
+      ]
+    },
+    {
+      "index": 28,
+      "key": "C28",
+      "title": "Regulatory documentation and data governance: what catmech_audit_trail records and where its scope stops",
+      "section": "Discussion, regulatory provenance, verification, and availability",
+      "source_range": [
+        329,
+        337
+      ],
+      "source_excerpt_sha256": "26ef04acc75191b3a392aca05becaaaa3bd07aafd1c39b6a19cc4281c10e7eb9",
+      "body_sha256": "5092c0b1c225cb40f813efc352c14938b6055bb202e315c40daf61291b7d0b5b",
+      "evidence_status": "DEFINITION and SCOPE of `catmech_audit_trail()` provenance reports.",
+      "source_evidence_class": "DEFINITION",
+      "evidence_class": "DEFINITION",
+      "coverage_ids": [
+        "H3",
+        "LB4"
+      ]
+    },
+    {
+      "index": 29,
+      "key": "C29",
+      "title": "Quality assurance and verification: 1,754 unit tests, R CMD check, and 500,000+ replicate checks",
+      "section": "Discussion, regulatory provenance, verification, and availability",
+      "source_range": [
+        338,
+        345
+      ],
+      "source_excerpt_sha256": "d5aab7bcf79978e8ec1dc142202cb7a2905a88d03bb8c6e25124c94e7ef53c81",
+      "body_sha256": "b0c97e64fba29834db423fa8449478eea6557060819a51431c63482c12692959",
+      "evidence_status": "MEASURED_DATED software quality assurance and artifact verification inventory.",
+      "source_evidence_class": "MEASURED_DATED",
+      "evidence_class": "MEASURED_DATED",
+      "coverage_ids": [
+        "A1",
+        "LB5"
+      ]
+    },
+    {
+      "index": 30,
+      "key": "C30",
+      "title": "Software availability, MIT license, R/C++17 dependencies, and bibliographic references",
+      "section": "Discussion, regulatory provenance, verification, and availability",
+      "source_range": [
+        346,
+        350
+      ],
+      "source_excerpt_sha256": "01a8ac9bfbcc5d11b4aa9fe2a97275adc7dd2182b9bd1614cf7ef812181e9a2f",
+      "body_sha256": "d70e30fca71fc0b7120c05244c6eb6126ffc216a6f69068fa2dff22ff8c9c1fb",
+      "evidence_status": "DEFINITION of software license, CRAN package dependencies, and bibliographic foundation (`paper/paper.bib`).",
+      "source_evidence_class": "DEFINITION",
+      "evidence_class": "DEFINITION",
+      "coverage_ids": [
+        "A2",
+        "LB6"
+      ]
+    }
+  ],
+  "coverage_contract": {
+    "load_bearing_claim_ids": [
+      "LB1",
+      "LB2",
+      "LB3",
+      "LB4",
+      "LB5",
+      "LB6",
+      "LB7",
+      "LB8"
+    ],
+    "structural_exclusions": [],
+    "declared_overlaps": [],
+    "g9_inventory": {
+      "path": "education/g9_claim_inventory.json",
+      "sha256": "95dd45e75a38b1e0ca0f3068c3b8b3aa6a0972733ea8990dbe98552bb217e5e8",
+      "source_sha256": "644b2f8481a064ee2ed5647a3a6419f76c3384298c03a0c79fdbbdd9ecec34b8"
+    }
+  },
+  "claim_contract": {
+    "global_nonclaims": [
+      {
+        "id": "NC-AUDIT-SCOPE-AND-COMPLIANCE",
+        "text": "This educational companion explains the statistical definitions, benchmark archives, and R workflows in the frozen catmech manuscript; it does not establish universal interval coverage under unmodeled misspecification, validate per-record error probabilities for individual patient adjudication on diffuse real-world data, or certify FDA 21 CFR Part 11 or ICH E9 regulatory compliance."
+      }
+    ],
+    "allowed_companion_only_numbers": [
+      {
+        "entry_key": "C01",
+        "token": "0.0286",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C01."
+      },
+      {
+        "entry_key": "C01",
+        "token": "0.0409",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C01."
+      },
+      {
+        "entry_key": "C01",
+        "token": "0.0539",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C01."
+      },
+      {
+        "entry_key": "C01",
+        "token": "0.0785",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C01."
+      },
+      {
+        "entry_key": "C01",
+        "token": "1",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C01."
+      },
+      {
+        "entry_key": "C01",
+        "token": "10%",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C01."
+      },
+      {
+        "entry_key": "C01",
+        "token": "2018",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C01."
+      },
+      {
+        "entry_key": "C01",
+        "token": "25%",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C01."
+      },
+      {
+        "entry_key": "C01",
+        "token": "46.9%",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C01."
+      },
+      {
+        "entry_key": "C01",
+        "token": "47.9%",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C01."
+      },
+      {
+        "entry_key": "C02",
+        "token": "0.80",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C02."
+      },
+      {
+        "entry_key": "C02",
+        "token": "1.0",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C02."
+      },
+      {
+        "entry_key": "C02",
+        "token": "20%",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C02."
+      },
+      {
+        "entry_key": "C02",
+        "token": "4",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C02."
+      },
+      {
+        "entry_key": "C02",
+        "token": "4.0",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C02."
+      },
+      {
+        "entry_key": "C02",
+        "token": "75%",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C02."
+      },
+      {
+        "entry_key": "C02",
+        "token": "90%",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C02."
+      },
+      {
+        "entry_key": "C03",
+        "token": "10.0",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C03."
+      },
+      {
+        "entry_key": "C03",
+        "token": "13.5",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C03."
+      },
+      {
+        "entry_key": "C03",
+        "token": "2.1",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C03."
+      },
+      {
+        "entry_key": "C03",
+        "token": "3.5",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C03."
+      },
+      {
+        "entry_key": "C04",
+        "token": "17",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C04."
+      },
+      {
+        "entry_key": "C04",
+        "token": "2.2",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C04."
+      },
+      {
+        "entry_key": "C04",
+        "token": "4",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C04."
+      },
+      {
+        "entry_key": "C05",
+        "token": "0",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C05."
+      },
+      {
+        "entry_key": "C05",
+        "token": "0.0001338",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C05."
+      },
+      {
+        "entry_key": "C05",
+        "token": "0.19947",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C05."
+      },
+      {
+        "entry_key": "C05",
+        "token": "0.20",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C05."
+      },
+      {
+        "entry_key": "C05",
+        "token": "0.80",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C05."
+      },
+      {
+        "entry_key": "C05",
+        "token": "0.9973",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C05."
+      },
+      {
+        "entry_key": "C05",
+        "token": "1.0",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C05."
+      },
+      {
+        "entry_key": "C05",
+        "token": "10",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C05."
+      },
+      {
+        "entry_key": "C05",
+        "token": "10.0",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C05."
+      },
+      {
+        "entry_key": "C05",
+        "token": "14",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C05."
+      },
+      {
+        "entry_key": "C05",
+        "token": "14.0",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C05."
+      },
+      {
+        "entry_key": "C05",
+        "token": "3.0",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C05."
+      },
+      {
+        "entry_key": "C05",
+        "token": "4",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C05."
+      },
+      {
+        "entry_key": "C05",
+        "token": "4.0",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C05."
+      },
+      {
+        "entry_key": "C06",
+        "token": "0.75",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C06."
+      },
+      {
+        "entry_key": "C06",
+        "token": "1.0",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C06."
+      },
+      {
+        "entry_key": "C06",
+        "token": "10.0",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C06."
+      },
+      {
+        "entry_key": "C06",
+        "token": "14.0",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C06."
+      },
+      {
+        "entry_key": "C06",
+        "token": "3",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C06."
+      },
+      {
+        "entry_key": "C06",
+        "token": "3.0",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C06."
+      },
+      {
+        "entry_key": "C06",
+        "token": "4.0",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C06."
+      },
+      {
+        "entry_key": "C07",
+        "token": "140",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C07."
+      },
+      {
+        "entry_key": "C08",
+        "token": "0.25",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C08."
+      },
+      {
+        "entry_key": "C08",
+        "token": "0.27",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C08."
+      },
+      {
+        "entry_key": "C08",
+        "token": "1.3454",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C08."
+      },
+      {
+        "entry_key": "C08",
+        "token": "1.81",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C08."
+      },
+      {
+        "entry_key": "C08",
+        "token": "100%",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C08."
+      },
+      {
+        "entry_key": "C08",
+        "token": "1938",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C08."
+      },
+      {
+        "entry_key": "C08",
+        "token": "1977",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C08."
+      },
+      {
+        "entry_key": "C08",
+        "token": "2.3",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C08."
+      },
+      {
+        "entry_key": "C08",
+        "token": "2003",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C08."
+      },
+      {
+        "entry_key": "C08",
+        "token": "2023",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C08."
+      },
+      {
+        "entry_key": "C08",
+        "token": "25%",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C08."
+      },
+      {
+        "entry_key": "C08",
+        "token": "3",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C08."
+      },
+      {
+        "entry_key": "C08",
+        "token": "34.54%",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C08."
+      },
+      {
+        "entry_key": "C09",
+        "token": "14400",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C09."
+      },
+      {
+        "entry_key": "C09",
+        "token": "28800",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C09."
+      },
+      {
+        "entry_key": "C10",
+        "token": "0.01",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C10."
+      },
+      {
+        "entry_key": "C10",
+        "token": "0.012",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C10."
+      },
+      {
+        "entry_key": "C10",
+        "token": "0.04",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C10."
+      },
+      {
+        "entry_key": "C10",
+        "token": "0.052",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C10."
+      },
+      {
+        "entry_key": "C10",
+        "token": "0.2308",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C10."
+      },
+      {
+        "entry_key": "C10",
+        "token": "1.2",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C10."
+      },
+      {
+        "entry_key": "C10",
+        "token": "1987",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C10."
+      },
+      {
+        "entry_key": "C10",
+        "token": "2.4",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C10."
+      },
+      {
+        "entry_key": "C10",
+        "token": "5",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C10."
+      },
+      {
+        "entry_key": "C11",
+        "token": "0.2308",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C11."
+      },
+      {
+        "entry_key": "C11",
+        "token": "10",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C11."
+      },
+      {
+        "entry_key": "C11",
+        "token": "12",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C11."
+      },
+      {
+        "entry_key": "C11",
+        "token": "2",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C11."
+      },
+      {
+        "entry_key": "C11",
+        "token": "4",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C11."
+      },
+      {
+        "entry_key": "C11",
+        "token": "5",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C11."
+      },
+      {
+        "entry_key": "C11",
+        "token": "5.3577",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C11."
+      },
+      {
+        "entry_key": "C11",
+        "token": "5.769",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C11."
+      },
+      {
+        "entry_key": "C11",
+        "token": "75.11",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C11."
+      },
+      {
+        "entry_key": "C11",
+        "token": "8",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C11."
+      },
+      {
+        "entry_key": "C11",
+        "token": "9",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C11."
+      },
+      {
+        "entry_key": "C12",
+        "token": "2.4",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C12."
+      },
+      {
+        "entry_key": "C12",
+        "token": "20",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C12."
+      },
+      {
+        "entry_key": "C12",
+        "token": "8",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C12."
+      },
+      {
+        "entry_key": "C13",
+        "token": "1.96",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C13."
+      },
+      {
+        "entry_key": "C13",
+        "token": "1000",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C13."
+      },
+      {
+        "entry_key": "C13",
+        "token": "2.4",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C13."
+      },
+      {
+        "entry_key": "C13",
+        "token": "22",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C13."
+      },
+      {
+        "entry_key": "C13",
+        "token": "25",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C13."
+      },
+      {
+        "entry_key": "C13",
+        "token": "7",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C13."
+      },
+      {
+        "entry_key": "C13",
+        "token": "7.0",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C13."
+      },
+      {
+        "entry_key": "C13",
+        "token": "8",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C13."
+      },
+      {
+        "entry_key": "C13",
+        "token": "997",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C13."
+      },
+      {
+        "entry_key": "C14",
+        "token": "14",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C14."
+      },
+      {
+        "entry_key": "C14",
+        "token": "2.5",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C14."
+      },
+      {
+        "entry_key": "C14",
+        "token": "20",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C14."
+      },
+      {
+        "entry_key": "C14",
+        "token": "21",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C14."
+      },
+      {
+        "entry_key": "C14",
+        "token": "40",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C14."
+      },
+      {
+        "entry_key": "C14",
+        "token": "5.1",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C14."
+      },
+      {
+        "entry_key": "C15",
+        "token": "1",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C15."
+      },
+      {
+        "entry_key": "C15",
+        "token": "2",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C15."
+      },
+      {
+        "entry_key": "C15",
+        "token": "3",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C15."
+      },
+      {
+        "entry_key": "C15",
+        "token": "4",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C15."
+      },
+      {
+        "entry_key": "C15",
+        "token": "5",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C15."
+      },
+      {
+        "entry_key": "C16",
+        "token": "2006",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C16."
+      },
+      {
+        "entry_key": "C16",
+        "token": "2011",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C16."
+      },
+      {
+        "entry_key": "C16",
+        "token": "2021",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C16."
+      },
+      {
+        "entry_key": "C16",
+        "token": "3",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C16."
+      },
+      {
+        "entry_key": "C18",
+        "token": "0.975",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C18."
+      },
+      {
+        "entry_key": "C18",
+        "token": "1.96",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C18."
+      },
+      {
+        "entry_key": "C18",
+        "token": "2.395",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C18."
+      },
+      {
+        "entry_key": "C19",
+        "token": "5",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C19."
+      },
+      {
+        "entry_key": "C19",
+        "token": "50",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C19."
+      },
+      {
+        "entry_key": "C20",
+        "token": "1",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C20."
+      },
+      {
+        "entry_key": "C20",
+        "token": "10",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C20."
+      },
+      {
+        "entry_key": "C20",
+        "token": "44%",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C20."
+      },
+      {
+        "entry_key": "C20",
+        "token": "5.1",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C20."
+      },
+      {
+        "entry_key": "C22",
+        "token": "-16.1%",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C22."
+      },
+      {
+        "entry_key": "C22",
+        "token": "-3.0%",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C22."
+      },
+      {
+        "entry_key": "C22",
+        "token": "5.2",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C22."
+      },
+      {
+        "entry_key": "C23",
+        "token": "2018",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C23."
+      },
+      {
+        "entry_key": "C23",
+        "token": "6.1",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C23."
+      },
+      {
+        "entry_key": "C24",
+        "token": "6.1",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C24."
+      },
+      {
+        "entry_key": "C25",
+        "token": "6.2",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C25."
+      },
+      {
+        "entry_key": "C25",
+        "token": "90%",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C25."
+      },
+      {
+        "entry_key": "C26",
+        "token": "24",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C26."
+      },
+      {
+        "entry_key": "C26",
+        "token": "5",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C26."
+      },
+      {
+        "entry_key": "C26",
+        "token": "6",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C26."
+      },
+      {
+        "entry_key": "C26",
+        "token": "7",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C26."
+      },
+      {
+        "entry_key": "C27",
+        "token": "8",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C27."
+      },
+      {
+        "entry_key": "C28",
+        "token": "9",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C28."
+      },
+      {
+        "entry_key": "C29",
+        "token": "1",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C29."
+      },
+      {
+        "entry_key": "C29",
+        "token": "2",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C29."
+      },
+      {
+        "entry_key": "C29",
+        "token": "20",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C29."
+      },
+      {
+        "entry_key": "C29",
+        "token": "3",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C29."
+      },
+      {
+        "entry_key": "C30",
+        "token": "11",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "12",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "1938",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "1977",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "1984",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "1986",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "1987",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "1989",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "1992",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "1994",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "1996",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "1998",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "1999",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "2003",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "2006",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "2011",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "2013",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "2018",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "2020",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "2021",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "2023",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      },
+      {
+        "entry_key": "C30",
+        "token": "25",
+        "reason": "Pedagogical worked example, cross-section reference, or Lab/PDF locator in C30."
+      }
+    ],
+    "claim_review": {
+      "status": "GREEN",
+      "reviewer_type": "human",
+      "reviewer": "Patrick Iben",
+      "date": "2026-11-07",
+      "evidence_path": "education/G14_HUMAN_SIGNOFF.md",
+      "unrecorded_claims": []
+    }
+  },
+  "upstream_gates": {
+    "g9": {
+      "status": "GREEN",
+      "evidence_path": "paper/VALIDATION_LEDGER_2026-11-06.md"
+    },
+    "g12": {
+      "status": "GREEN",
+      "manuscript_sha256": "8152288b1c2af2a49103543db3c9324582177b1e842365b5c5ab83cdac8c1fd0",
+      "evidence_path": "paper/VALIDATION_LEDGER_2026-11-06.md"
+    }
+  },
+  "education_contract": {
+    "audience": "Biostatisticians, clinical trialists, epidemiologists, and R package users analyzing audited measurements",
+    "plain_language": {
+      "maximum_grade_level": 10,
+      "maximum_sentence_words": 30,
+      "jargon_registry": [
+        {
+          "term": "trusted reference",
+          "introduced_entry_key": "C01",
+          "definition_literal": "Audits check a small slice of records against a trusted reference."
+        },
+        {
+          "term": "hidden true value",
+          "introduced_entry_key": "C03",
+          "definition_literal": "Each row has a hidden true value and a recorded value."
+        },
+        {
+          "term": "Barnard-Rubin formula",
+          "introduced_entry_key": "C11",
+          "definition_literal": "The Barnard-Rubin formula caps degrees of freedom below the complete-data limit."
+        },
+        {
+          "term": "leave-one-site-out jackknife",
+          "introduced_entry_key": "C12",
+          "definition_literal": "Linear models use a leave-one-site-out jackknife variance across clinical sites."
+        }
+      ],
+      "human_review": {
+        "status": "GREEN",
+        "reviewer_type": "human",
+        "reviewer": "Patrick Iben",
+        "date": "2026-11-07",
+        "evidence_path": "education/G14_HUMAN_SIGNOFF.md",
+        "undefined_jargon": []
+      }
+    },
+    "package_claim": "MULTIMODAL",
+    "claimed_modalities": [
+      "DOCUMENT",
+      "ONE_PAGER",
+      "INTERACTIVE"
+    ],
+    "summary_coverage_ids": [
+      "LB1",
+      "LB2",
+      "LB3",
+      "LB4",
+      "LB5",
+      "LB6",
+      "LB7",
+      "LB8"
+    ],
+    "modalities": [
+      {
+        "id": "companion-document",
+        "kind": "DOCUMENT",
+        "artifact_path": "education/COMPANION.pdf",
+        "source_companion_sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+        "coverage_ids": [
+          "LB1",
+          "LB2",
+          "LB3",
+          "LB4",
+          "LB5",
+          "LB6",
+          "LB7",
+          "LB8",
+          "A1",
+          "A2",
+          "D1",
+          "D2",
+          "D3",
+          "E1",
+          "E2",
+          "E3",
+          "F1",
+          "F2",
+          "F3",
+          "H1",
+          "H2",
+          "H3"
+        ],
+        "semantic_equivalence": {
+          "status": "GREEN",
+          "reviewer_type": "human",
+          "reviewer": "Patrick Iben",
+          "date": "2026-11-07",
+          "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
+        }
+      },
+      {
+        "id": "companion-one-pager",
+        "kind": "ONE_PAGER",
+        "artifact_path": "education/ONE_PAGER.pdf",
+        "source_companion_sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+        "coverage_ids": [
+          "LB1",
+          "LB2",
+          "LB3",
+          "LB4",
+          "LB5",
+          "LB6",
+          "LB7",
+          "LB8"
+        ],
+        "semantic_equivalence": {
+          "status": "GREEN",
+          "reviewer_type": "human",
+          "reviewer": "Patrick Iben",
+          "date": "2026-11-07",
+          "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
+        }
+      },
+      {
+        "id": "companion-interactive-lab",
+        "kind": "INTERACTIVE",
+        "artifact_path": "education/companion_lab.html",
+        "source_companion_sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+        "coverage_ids": [
+          "LB1",
+          "LB2",
+          "LB3",
+          "LB4",
+          "LB5",
+          "LB6",
+          "LB7",
+          "LB8",
+          "A1",
+          "A2",
+          "D1",
+          "D2",
+          "D3",
+          "E1",
+          "E2",
+          "E3",
+          "F1",
+          "F2",
+          "F3",
+          "H1",
+          "H2",
+          "H3"
+        ],
+        "semantic_equivalence": {
+          "status": "GREEN",
+          "reviewer_type": "human",
+          "reviewer": "Patrick Iben",
+          "date": "2026-11-07",
+          "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
+        },
+        "practice_feedback": {
+          "records_attempt": true,
+          "reports_correctness": true,
+          "explains_answer": true,
+          "supports_retry": true,
+          "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
+        }
+      }
+    ]
+  },
+  "transfer_assessment": {
+    "assessment_version": "catmech-g14-v2",
+    "assessment_sha256": "6ed39436c9055653b7b7cafbc6cba212ea40a61d8dc34d8b79600f878b10b041",
+    "items": [
+      {
+        "id": "T01",
+        "kind": "CORE",
+        "prompt": "Why does discarding unaudited recorded values W_i and applying standard MAR multiple imputation (reference_normal) lose precision compared with catmech_reference(use_recorded = TRUE)?",
+        "answer_key": "Because most unaudited recorded values W_i contain substantial valid signal about T_i; retaining W_i as a calibration predictor cuts RMSE by 43% to 48% on ClinicalTrials.gov and NHANES.",
+        "coverage_ids": [
+          "LB1",
+          "H1"
+        ]
+      },
+      {
+        "id": "T02",
+        "kind": "CORE",
+        "prompt": "In catmech_contamination(), how is the latent true value T_i updated on an unaudited row when delta_i = 0 versus delta_i = 1?",
+        "answer_key": "When delta_i = 0 (uncorrupted), T_i = W_i deterministically; when delta_i = 1 (corrupted), T_i is drawn from the precision-weighted conjugate Gaussian posterior combining X_i beta and W_i - mu_e.",
+        "coverage_ids": [
+          "LB2",
+          "F1"
+        ]
+      },
+      {
+        "id": "T03",
+        "kind": "CORE",
+        "prompt": "How does catmech prevent anti-conservative confidence intervals when pooling across m imputations in studies with few clinical sites C or few survival events d?",
+        "answer_key": "It applies the Barnard-Rubin (1999) finite-sample adjustment nu_BR with nu_com = C - 1 for clustered models (using CV3, CR1S, or Lin-Wei covariance) and nu_com = d - p for unclustered Cox PH models.",
+        "coverage_ids": [
+          "LB3",
+          "F3"
+        ]
+      },
+      {
+        "id": "T04",
+        "kind": "CORE",
+        "prompt": "Why did Simple Linear MI (cole_mi) break down in the synthetic error_gross_and_small stress scenario while catmech_contamination() maintained 94.0% coverage?",
+        "answer_key": "Gross 10x transcription outliers severely attenuated the linear calibration slope gamma_W (bias -0.2354, 64.7% coverage), whereas the contamination mixture isolated gross outliers via delta_i = 1.",
+        "coverage_ids": [
+          "LB4",
+          "D1"
+        ]
+      },
+      {
+        "id": "T05",
+        "kind": "BOUNDARY",
+        "prompt": "Does a passing result (miscalibration_detected = FALSE) from catmech_holdout_check() prove that downstream regression slopes are unbiased?",
+        "answer_key": "No; held-out row checks test observation-level prediction and had low power against regression slope bias (0/40 alarms in nonlinear_target and 1/40 in heavy_tail_target).",
+        "coverage_ids": [
+          "LB5",
+          "E2"
+        ]
+      },
+      {
+        "id": "T06",
+        "kind": "BOUNDARY",
+        "prompt": "Can per-record posterior corruption probabilities p_i from catmech_contamination() be used to flag or adjudicate individual patient rows in diffuse real-world audits?",
+        "answer_key": "No; when discrepancies are diffuse relative to T_i | X_i, per-record p_i has near-chance discrimination (AUC = 0.543 on ClinicalTrials.gov, 0.500 on NHANES, and 0.501-0.582 on Rwanda HMIS).",
+        "coverage_ids": [
+          "LB6",
+          "H2"
+        ]
+      },
+      {
+        "id": "T07",
+        "kind": "BOUNDARY",
+        "prompt": "What is the validation status of catmech_audit_plan(), and why?",
+        "answer_key": "It carries a pre-specified NO-GO validation status (exploratory only) because its median error in predicting interval width at a 5% audit fraction was 11.3% to 16.8%, exceeding the 10% tolerance.",
+        "coverage_ids": [
+          "LB7",
+          "F2"
+        ]
+      },
+      {
+        "id": "T08",
+        "kind": "BOUNDARY",
+        "prompt": "Does generating a report with catmech_audit_trail() certify that an analysis is compliant with FDA 21 CFR Part 11 and ICH E9?",
+        "answer_key": "No; SHA-256 provenance records support reproducibility and regulatory documentation, but compliance depends on the surrounding validated system, access controls, and standard operating procedures.",
+        "coverage_ids": [
+          "LB8",
+          "E3"
+        ]
+      },
+      {
+        "id": "T09",
+        "kind": "TRANSFER",
+        "prompt": "A multicenter trial has C = 12 sites and audits a continuous biomarker T_i on 25% of patients to estimate a linear regression Y ~ T + age + sex. Should the analyst fit catmech_reference(cluster = 'site')?",
+        "answer_key": "No; because the audited variable T_i is a predictor rather than the outcome, clustered random-intercept MI attenuates the slope (up to -16.1%). Fit catmech_reference(use_recorded = TRUE) without cluster and pool with catmech_pool_lm(cluster = 'site').",
+        "coverage_ids": [
+          "LB3",
+          "D2"
+        ]
+      },
+      {
+        "id": "T10",
+        "kind": "TRANSFER",
+        "prompt": "In a biomarker audit where the true physiological distribution T_i is known to have heavy Student-t_4 tails and discrepancies are moderate, which catmech engine should be chosen?",
+        "answer_key": "Choose catmech_reference(use_recorded = TRUE) (Simple Linear MI, 92.0% coverage in heavy_tail_target) rather than catmech_contamination(), which misclassifies genuine tail extremes as recording errors (87.3% coverage).",
+        "coverage_ids": [
+          "LB4",
+          "H3"
+        ]
+      },
+      {
+        "id": "T11",
+        "kind": "TRANSFER",
+        "prompt": "When auditing a noisy reference assay where gold-standard measurements R_i have known analytical standard deviation sigma_ref = 0.35, what happens if reference_sd is left at 0 versus set to 0.35?",
+        "answer_key": "Leaving reference_sd = 0 triggers a universal-disagreement warning and undercoverage (88.7% in noisy_undeclared); setting reference_sd = 0.35 (noisy_declared) restores bias (-0.0071) and coverage (91.8%).",
+        "coverage_ids": [
+          "LB2",
+          "E1"
+        ]
+      },
+      {
+        "id": "T12",
+        "kind": "TRANSFER",
+        "prompt": "An unclustered oncology survival study has N = 800 patients, d = 30 observed deaths, and p = 4 covariates in catmech_pool_coxph(). What is the upper bound on the Barnard-Rubin degrees of freedom nu_BR?",
+        "answer_key": "Because unclustered Cox PH pooling defines complete-data degrees of freedom strictly from observed failure events as nu_com = d - p = 30 - 4 = 26, nu_BR is strictly less than 26.",
+        "coverage_ids": [
+          "LB3",
+          "F3"
+        ]
+      }
+    ],
+    "thresholds": {
+      "overall": {
+        "minimum": 10,
+        "possible": 12
+      },
+      "boundary": {
+        "minimum": 4,
+        "possible": 4
+      },
+      "transfer": {
+        "minimum": 3,
+        "possible": 4
+      },
+      "one_sentence": {
+        "minimum": 4,
+        "possible": 4
+      }
+    },
+    "one_sentence_rubric": [
+      {
+        "id": "CLAIM",
+        "criterion": "States that catmech uses two-phase audited reference measurements to calibrate contaminated or incomplete recorded values and pool downstream regressions"
+      },
+      {
+        "id": "EVIDENCE",
+        "criterion": "Distinguishes analytical posteriors/variance formulas from synthetic simulations (52,950 requests) and empirical benchmarks (CT.gov, NHANES, Rwanda HMIS)"
+      },
+      {
+        "id": "BOUNDARY",
+        "criterion": "Preserves the non-claims that per-row p_i is near chance on diffuse real data, catmech_audit_plan() is NO-GO, and catmech_audit_trail() does not certify Part 11 compliance"
+      },
+      {
+        "id": "TRANSFER",
+        "criterion": "Selects Simple Linear MI vs Contamination Mixture and appropriate cluster pooling (CV3/CR1S/Lin-Wei) for a new clinical audit scenario"
+      }
+    ],
+    "results": {
+      "item_scores": {
+        "T01": 1,
+        "T02": 1,
+        "T03": 1,
+        "T04": 1,
+        "T05": 1,
+        "T06": 1,
+        "T07": 1,
+        "T08": 1,
+        "T09": 1,
+        "T10": 1,
+        "T11": 1,
+        "T12": 1
+      },
+      "one_sentence_scores": {
+        "CLAIM": 1,
+        "EVIDENCE": 1,
+        "BOUNDARY": 1,
+        "TRANSFER": 1
+      }
+    },
+    "human_verdict": {
+      "status": "GREEN",
+      "reviewer_type": "human",
+      "reviewer": "Patrick Iben",
+      "date": "2026-11-07",
+      "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
+    }
+  },
+  "shipping": {
+    "status": "SHIPPED",
+    "artifacts": [
+      {
+        "path": "education/COMPANION.md",
+        "kind": "MARKDOWN",
+        "sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+        "generated_from_companion_sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+        "text_qa": {
+          "status": "GREEN",
+          "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
+        },
+        "render_qa": {
+          "status": "NOT_APPLICABLE",
+          "reason": "Markdown source file; rendered PDF is checked below."
+        },
+        "accessibility_qa": {
+          "status": "NOT_APPLICABLE",
+          "reason": "Plain UTF-8 Markdown with structured headings."
+        }
+      },
+      {
+        "path": "education/COMPANION.pdf",
+        "kind": "PDF",
+        "sha256": "fed75cb76904ffde55849a339935f6f8f61d96d826f58b52463498a5563c3067",
+        "generated_from_companion_sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+        "text_qa": {
+          "status": "GREEN",
+          "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
+        },
+        "render_qa": {
+          "status": "GREEN",
+          "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
+        },
+        "accessibility_qa": {
+          "status": "GREEN",
+          "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
+        }
+      },
+      {
+        "path": "education/STUDY_GUIDE.pdf",
+        "kind": "PDF",
+        "sha256": "419b8506e6f493d1ba2cba81a12664dafd23b59c7196b4c4393bdc529b01a238",
+        "generated_from_companion_sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+        "text_qa": {
+          "status": "GREEN",
+          "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
+        },
+        "render_qa": {
+          "status": "GREEN",
+          "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
+        },
+        "accessibility_qa": {
+          "status": "GREEN",
+          "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
+        }
+      },
+      {
+        "path": "education/ONE_PAGER.pdf",
+        "kind": "PDF",
+        "sha256": "ba90fca373d98c83099d82101adedde4b28587ed6157004c4b0b9ff5d6758a65",
+        "generated_from_companion_sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+        "text_qa": {
+          "status": "GREEN",
+          "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
+        },
+        "render_qa": {
+          "status": "GREEN",
+          "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
+        },
+        "accessibility_qa": {
+          "status": "GREEN",
+          "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
+        }
+      },
+      {
+        "path": "education/companion_lab.html",
+        "kind": "HTML",
+        "sha256": "ba66ba9dd385a907274bf7adc61459d04edf8e5981146605146d2a8549b85dd9",
+        "generated_from_companion_sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+        "text_qa": {
+          "status": "GREEN",
+          "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
+        },
+        "render_qa": {
+          "status": "GREEN",
+          "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
+        },
+        "accessibility_qa": {
+          "status": "GREEN",
+          "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
+        }
+      }
+    ]
+  }
+}

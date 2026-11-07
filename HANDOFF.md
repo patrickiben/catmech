@@ -38,6 +38,7 @@ The package is **100% audited, verified, and ready for official CRAN submission*
 * **Paper & Manuscript Verification**: `python3 paper/verify_paper_numbers.py` validates **411 synthetic, real-data, clustered, and code/script surface claims** across `paper/manuscript.Rmd`, `paper/manuscript.tex`, and `paper/paper.md` (plus negative control).
 * **Pre-Submission Validation Harness**: Full 24-gate audit + 5-agent Lean Reader Wave (`G5` Persona A & B, `G12`, `G13`, `G18`) recorded in `paper/VALIDATION_LEDGER_2026-11-06.md` (`check_gate_basis.py` stamped `FRESH 7, STALE 0, NO-BASIS 0`; `check_prose_style_v2.py` `ALL GREEN`; `check_citations.py` `21 OK | 4 REVIEW | 0 FLAG, 0 uncited` (REVIEW items hand-checked); `scrub_ai_artifacts.py` `0 hits`; `check_spelling_us.py` `0 hits`; `pdflatex` 15 pages, `errors=0 undefined=0 overfull=0`).
 * **App Validation Harness**: Interactive browser learning pages (`docs/learn/index.html` and `docs/learn/simulator.html`) verified across gates `A0`–`A10` via `web_gate.py --local` and stamped **`OWNER-APPROVED: True`** against page hashes `d94e13a7b66c865e` and `80cafcd68fec48c7`.
+* **Multimodal R-Package Educational Companion (`education/`)**: Schema-v2 `MULTIMODAL` (`DOCUMENT`, `ONE_PAGER`, `INTERACTIVE`) educational companion passing `g14_companion_gate.py` (`PASS`, exit 0; 30 passage units `C01`–`C30` covering 100% of `paper/manuscript.Rmd` lines `1..350`, 12 lessons `S1`–`S12`, 12 transfer items `T01`–`T12`, FK grade `6.29`), `check_companion_lock.py` (`PASS: 2 fresh, 0 stale, 0 missing`), `Rscript education/run_companion_labs.R` (`16/16` live R labs & refusal checks), `Rscript education/interactive_tutor.R --non-interactive` (`12/12` interactive R console tutor prompts), and `python3 education/verify_educational_companion.py` (`exit 0`).
 * **Artifact Verification**: `python3 tools/verify-artifacts.py` passes all 10 simulation benchmark studies, oracle checks, and learning pages.
 * **Documentation**: Fast, self-contained `@examples` for all 26 exported functions, all lines formatted < 85 characters. Built-in vignette (`vignettes/catmech-clinical-audit.Rmd`) builds cleanly.
 
@@ -95,6 +96,15 @@ catmech/
 │   ├── manuscript.tex        # Rendered LaTeX source
 │   ├── verify_paper_numbers.py # Automated G2/G17/G19/G22 verifier (411 checks)
 │   └── VALIDATION_LEDGER_2026-11-06.md # 24-gate Pre-Submission Validation Harness ledger
+├── education/                # Multimodal G14 R-Package Educational Companion
+│   ├── COMPANION.md / .pdf   # 30-unit source-locked companion (24 pages)
+│   ├── STUDY_GUIDE.md / .pdf # 12-lesson concise study guide (8 pages)
+│   ├── ONE_PAGER.md / .pdf   # 1-page clinical audit decision & boundary card
+│   ├── companion_lab.html    # Interactive HTML5 Companion Studio & 12-item Practice Lab
+│   ├── run_companion_labs.R  # 16 executable R package labs & 4 refusal/warning labs
+│   ├── interactive_tutor.R   # Interactive R console tutor (`catmech_tutor()`)
+│   ├── g14_companion_manifest.json # Schema-v2 MULTIMODAL G14 manifest
+│   └── verify_educational_companion.py # End-to-end Educational Companion verifier
 ├── _pkgdown.yml              # Pkgdown documentation website configuration
 └── .github/workflows/
     └── pkgdown.yaml          # GitHub Actions workflow for automated pkgdown build
