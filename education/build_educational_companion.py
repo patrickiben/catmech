@@ -17,6 +17,8 @@ import re
 import subprocess
 import sys
 import tempfile
+
+sys.dont_write_bytecode = True
 import zipfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -987,12 +989,16 @@ def build_g9_inventory() -> tuple[Path, Path]:
         [
             sys.executable,
             str(HARNESS_DIR / "grounding_check.py"),
-            str(g9_map_path),
+            "education/g9_claims_MAP.json",
             "--emit-inventory",
-            str(g9_inv_path),
+            "education/g9_claim_inventory.json",
         ],
+        cwd=str(ROOT),
         check=True,
     )
+    inv_data = json.loads(g9_inv_path.read_text(encoding="utf-8"))
+    inv_data["generated_from"] = "education/g9_claims_MAP.json"
+    g9_inv_path.write_text(json.dumps(inv_data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return g9_map_path, g9_inv_path
 
 

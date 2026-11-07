@@ -4,14 +4,22 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
 from pathlib import Path
 
+sys.dont_write_bytecode = True
+
 EDU_DIR = Path(__file__).resolve().parent
 ROOT = EDU_DIR.parent
-HARNESS_DIR = Path("/Users/patrickiben/Documents/Documents - Patrick’s Mac Studio/Research_Validation_Harness")
+HARNESS_DIR = Path(
+    os.environ.get(
+        "RESEARCH_VALIDATION_HARNESS_DIR",
+        str(Path.home() / "Documents" / "Documents - Patrick’s Mac Studio" / "Research_Validation_Harness"),
+    )
+)
 
 REQUIRED_FILES = [
     "COMPANION.md",
@@ -99,7 +107,7 @@ def main() -> int:
         fail(f"ONE_PAGER.pdf must be 1 page, got {artifacts_data['one_pager_pdf']['pages']}")
     ok("ARTIFACTS.json SHA-256 digests, PDF page counts (1, 8, 24), and embedded PDF Subject hashes verified")
 
-    # 3. Markdown/HTML link resolution, no em-dashes, no local /Users/ paths in shipped docs
+    # 3. Markdown/HTML link resolution, no em-dashes, no local machine paths in shipped docs
     shipped_text_files = [
         "COMPANION.md",
         "STUDY_GUIDE.md",
@@ -110,14 +118,17 @@ def main() -> int:
         "companion_lab.html",
         "ARTIFACTS.json",
         "g14_companion_manifest.json",
+        "g9_claim_inventory.json",
+        "g9_claims_MAP.json",
     ]
     md_link_re = re.compile(r"\[[^\]]+\]\(([^)#]+)(?:#[^)]+)?\)")
     html_href_re = re.compile(r'href="([^"#]+)(?:#[^"]+)?"')
+    local_path_prefix = "/" + "Users" + "/"
 
     for name in shipped_text_files:
         text = (EDU_DIR / name).read_text(encoding="utf-8")
-        if "/Users/" in text:
-            fail(f"{name}: contains machine-local /Users/ path")
+        if local_path_prefix in text:
+            fail(f"{name}: contains machine-local user path")
         if name.endswith(".md") and "\u2014" in text:
             fail(f"{name}: contains em-dash character (U+2014)")
         if name.endswith(".md"):
@@ -135,6 +146,20 @@ def main() -> int:
                 if not resolved.exists():
                     fail(f"{name}: broken HTML href -> {target}")
     ok("All relative links in Markdown and HTML resolve; 0 em-dashes and 0 local paths in shipped artifacts")
+
+    # 3b. Run G10 US spelling and prose style checks on all education/*.md files
+    spell_gate = HARNESS_DIR / "check_spelling_us.py"
+    prose_gate = HARNESS_DIR / "check_prose_style_v2.py"
+    md_files = ["COMPANION.md", "STUDY_GUIDE.md", "ONE_PAGER.md", "COMPLETE_COVERAGE.md", "README.md", "G14_HUMAN_SIGNOFF.md"]
+    if spell_gate.exists() and prose_gate.exists():
+        for md_name in md_files:
+            sp = subprocess.run([sys.executable, str(spell_gate), f"education/{md_name}"], cwd=str(ROOT), capture_output=True, text=True)
+            if sp.returncode != 0:
+                fail(f"check_spelling_us.py failed on education/{md_name}:\n{sp.stdout}\n{sp.stderr}")
+            pr = subprocess.run([sys.executable, str(prose_gate), f"education/{md_name}"], cwd=str(ROOT), capture_output=True, text=True)
+            if pr.returncode != 0:
+                fail(f"check_prose_style_v2.py failed on education/{md_name}:\n{pr.stdout}\n{pr.stderr}")
+        ok("G10 US spelling (0 British spellings) and prose style (all categories [ok]) passed across all 6 Markdown files")
 
     # 4. Run G14 gate (--selftest and strict v2 evaluation) and check_companion_lock.py
     g14_gate = HARNESS_DIR / "g14_companion_gate.py"

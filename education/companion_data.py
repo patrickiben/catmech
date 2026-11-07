@@ -520,7 +520,7 @@ UNITS = [
         "MODELED_LOCKED",
         "Section 5 opening and Section 5.1 introduction",
         (
-            "Section 5 introduces the pre-specified Monte Carlo validation programme spanning 10 frozen archives and over "
+            "Section 5 introduces the pre-specified Monte Carlo validation program spanning 10 frozen archives and over "
             "500,000 replicate requests. The primary reference-calibrated contamination study (`validation/contamination-study`) "
             "executed `52,950` planned requests across `183` method-scenario cells: `4` primary cells (`clean`, `flagged_errors`, "
             "`missed_flags`, `site_shift_declared`, `1,000` cohorts each) and `23` stress cells (`150` cohorts each), with "

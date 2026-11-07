@@ -85,7 +85,7 @@
       "reaches_l1": true
     }
   ],
-  "generated_from": "/Users/patrickiben/Documents/catmech/education/g9_claims_MAP.json",
+  "generated_from": "education/g9_claims_MAP.json",
   "schema_version": "g9-claim-inventory/v1",
   "source_sha256": "644b2f8481a064ee2ed5647a3a6419f76c3384298c03a0c79fdbbdd9ecec34b8"
 }

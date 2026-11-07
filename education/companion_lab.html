@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>catmech v1.0.0: Interactive Educational Companion Studio &amp; Practice Lab</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="companion-source-sha256" content="0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850">
+<meta name="companion-source-sha256" content="c47cb3847813a7c1cf88ec930026c53c8c5b0ee50fdb756cc234a03b596d5985">
 <meta name="manuscript-source-sha256" content="8152288b1c2af2a49103543db3c9324582177b1e842365b5c5ab83cdac8c1fd0">
 <style>
 :root {
@@ -50,7 +50,7 @@ code { font-family: var(--mono); font-size: 0.9em; background: var(--surface-2);
 <header>
   <div class="wrap">
     <div><strong>catmech v1.0.0</strong>: Interactive Educational Companion Studio &amp; Practice Lab</div>
-    <div style="font-size:13px;color:var(--muted);">Companion SHA-256: <code>0afd89f1a002</code> | Manuscript SHA-256: <code>8152288b1c2a</code></div>
+    <div style="font-size:13px;color:var(--muted);">Companion SHA-256: <code>c47cb3847813</code> | Manuscript SHA-256: <code>8152288b1c2a</code></div>
   </div>
 </header>
 <main class="wrap">
@@ -493,7 +493,7 @@ Worked reasoning and R connection: Verify that `exp(0.1632) = 1.1773` and that w
                 <summary>Read full explanation, R lab connection &amp; boundary check</summary>
                 <div class="details-body">
                   <p><strong>Where we are:</strong> manuscript lines 211-218 (Section 5 opening and Section 5.1 introduction; PDF page 8-9).</p>
-                  <p><strong>What the passage is doing:</strong> Section 5 introduces the pre-specified Monte Carlo validation programme spanning 10 frozen archives and over 500,000 replicate requests. The primary reference-calibrated contamination study (`validation/contamination-study`) executed `52,950` planned requests across `183` method-scenario cells: `4` primary cells (`clean`, `flagged_errors`, `missed_flags`, `site_shift_declared`, `1,000` cohorts each) and `23` stress cells (`150` cohorts each), with cohort size `N = 600`, true linear regression slope `beta = 0.800` on `T_i`, a 25% reference audit (`n_audit = 150`), and `m = 20` imputations. Across all `52,950` requests, `52,900` intervals were returned alongside `16` expected sparse-stratum design refusals (`14` in `reference_05pct`, `2` in `reference_10pct`), `33` MCMC convergence refusals, and `1` singular raking fit.
+                  <p><strong>What the passage is doing:</strong> Section 5 introduces the pre-specified Monte Carlo validation program spanning 10 frozen archives and over 500,000 replicate requests. The primary reference-calibrated contamination study (`validation/contamination-study`) executed `52,950` planned requests across `183` method-scenario cells: `4` primary cells (`clean`, `flagged_errors`, `missed_flags`, `site_shift_declared`, `1,000` cohorts each) and `23` stress cells (`150` cohorts each), with cohort size `N = 600`, true linear regression slope `beta = 0.800` on `T_i`, a 25% reference audit (`n_audit = 150`), and `m = 20` imputations. Across all `52,950` requests, `52,900` intervals were returned alongside `16` expected sparse-stratum design refusals (`14` in `reference_05pct`, `2` in `reference_10pct`), `33` MCMC convergence refusals, and `1` singular raking fit.
 
 Worked reasoning and R connection: Every single one of those `52,950` requests (`52,900 + 16 + 33 + 1 = 52,950`) is accounted for and independently re-verified by `python3 tools/verify-artifacts.py` and `python3 paper/verify_paper_numbers.py`.</p>
                   <p><strong>Evidence status:</strong> MODELED_LOCKED pre-specified simulation study design (`validation/contamination-study`, `52,950` requests).</p>

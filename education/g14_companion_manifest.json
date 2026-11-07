@@ -14,7 +14,7 @@
       "line_locator_basis": "1-based inclusive line numbers in frozen paper/manuscript.Rmd"
     },
     "education/COMPANION.md": {
-      "sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+      "sha256": "c47cb3847813a7c1cf88ec930026c53c8c5b0ee50fdb756cc234a03b596d5985",
       "lines": 546,
       "line_locator_basis": "entry locators reference paper/manuscript.Rmd line numbers"
     }
@@ -373,7 +373,7 @@
         218
       ],
       "source_excerpt_sha256": "153b9267548c110a3936a5387e2a9a0904b87b47846689c528a11884aaaf01c7",
-      "body_sha256": "7b7d4c2c38e335c3050654a48692aa6efd614513cd45c379e03272033cd518eb",
+      "body_sha256": "e73c4065f7e539a1609b80d47dba509866579a37dc620cffa97b46bfedbbeeda",
       "evidence_status": "MODELED_LOCKED pre-specified simulation study design (`validation/contamination-study`, `52,950` requests).",
       "source_evidence_class": "MODELED_LOCKED",
       "evidence_class": "MODELED_LOCKED",
@@ -607,7 +607,7 @@
     "declared_overlaps": [],
     "g9_inventory": {
       "path": "education/g9_claim_inventory.json",
-      "sha256": "95dd45e75a38b1e0ca0f3068c3b8b3aa6a0972733ea8990dbe98552bb217e5e8",
+      "sha256": "9b80c17b080b1a5a2f7f2f4bf17d9dbd80ef25a8dbc5f071e752d7c8f28fc8a8",
       "source_sha256": "644b2f8481a064ee2ed5647a3a6419f76c3384298c03a0c79fdbbdd9ecec34b8"
     }
   },
@@ -1482,7 +1482,7 @@
         "id": "companion-document",
         "kind": "DOCUMENT",
         "artifact_path": "education/COMPANION.pdf",
-        "source_companion_sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+        "source_companion_sha256": "c47cb3847813a7c1cf88ec930026c53c8c5b0ee50fdb756cc234a03b596d5985",
         "coverage_ids": [
           "LB1",
           "LB2",
@@ -1519,7 +1519,7 @@
         "id": "companion-one-pager",
         "kind": "ONE_PAGER",
         "artifact_path": "education/ONE_PAGER.pdf",
-        "source_companion_sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+        "source_companion_sha256": "c47cb3847813a7c1cf88ec930026c53c8c5b0ee50fdb756cc234a03b596d5985",
         "coverage_ids": [
           "LB1",
           "LB2",
@@ -1542,7 +1542,7 @@
         "id": "companion-interactive-lab",
         "kind": "INTERACTIVE",
         "artifact_path": "education/companion_lab.html",
-        "source_companion_sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+        "source_companion_sha256": "c47cb3847813a7c1cf88ec930026c53c8c5b0ee50fdb756cc234a03b596d5985",
         "coverage_ids": [
           "LB1",
           "LB2",
@@ -1781,8 +1781,8 @@
       {
         "path": "education/COMPANION.md",
         "kind": "MARKDOWN",
-        "sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
-        "generated_from_companion_sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+        "sha256": "c47cb3847813a7c1cf88ec930026c53c8c5b0ee50fdb756cc234a03b596d5985",
+        "generated_from_companion_sha256": "c47cb3847813a7c1cf88ec930026c53c8c5b0ee50fdb756cc234a03b596d5985",
         "text_qa": {
           "status": "GREEN",
           "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
@@ -1799,8 +1799,8 @@
       {
         "path": "education/COMPANION.pdf",
         "kind": "PDF",
-        "sha256": "fed75cb76904ffde55849a339935f6f8f61d96d826f58b52463498a5563c3067",
-        "generated_from_companion_sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+        "sha256": "71004c5bbcb2bc82e0b601351971fe6a38aec8f17e5420a5d86d6b84d0a52ad6",
+        "generated_from_companion_sha256": "c47cb3847813a7c1cf88ec930026c53c8c5b0ee50fdb756cc234a03b596d5985",
         "text_qa": {
           "status": "GREEN",
           "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
@@ -1817,8 +1817,8 @@
       {
         "path": "education/STUDY_GUIDE.pdf",
         "kind": "PDF",
-        "sha256": "419b8506e6f493d1ba2cba81a12664dafd23b59c7196b4c4393bdc529b01a238",
-        "generated_from_companion_sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+        "sha256": "ac710f0869d20220f265702ecd45cdbdf6fd80a8e3f38a1e622b521ed56ddacd",
+        "generated_from_companion_sha256": "c47cb3847813a7c1cf88ec930026c53c8c5b0ee50fdb756cc234a03b596d5985",
         "text_qa": {
           "status": "GREEN",
           "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
@@ -1835,8 +1835,8 @@
       {
         "path": "education/ONE_PAGER.pdf",
         "kind": "PDF",
-        "sha256": "ba90fca373d98c83099d82101adedde4b28587ed6157004c4b0b9ff5d6758a65",
-        "generated_from_companion_sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+        "sha256": "4d52de16ff96f338bb873d0127c06e2518d598156392e2c96b439e39911a8a05",
+        "generated_from_companion_sha256": "c47cb3847813a7c1cf88ec930026c53c8c5b0ee50fdb756cc234a03b596d5985",
         "text_qa": {
           "status": "GREEN",
           "evidence_path": "education/G14_HUMAN_SIGNOFF.md"
@@ -1853,8 +1853,8 @@
       {
         "path": "education/companion_lab.html",
         "kind": "HTML",
-        "sha256": "ba66ba9dd385a907274bf7adc61459d04edf8e5981146605146d2a8549b85dd9",
-        "generated_from_companion_sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+        "sha256": "a75197e2d93f69713b141f594fd300ed10f17954ea195bb9992bb0866d0c2bab",
+        "generated_from_companion_sha256": "c47cb3847813a7c1cf88ec930026c53c8c5b0ee50fdb756cc234a03b596d5985",
         "text_qa": {
           "status": "GREEN",
           "evidence_path": "education/G14_HUMAN_SIGNOFF.md"

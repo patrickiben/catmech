@@ -18,18 +18,18 @@
   },
   "study_guide_pdf": {
     "file": "STUDY_GUIDE.pdf",
-    "sha256": "419b8506e6f493d1ba2cba81a12664dafd23b59c7196b4c4393bdc529b01a238",
+    "sha256": "ac710f0869d20220f265702ecd45cdbdf6fd80a8e3f38a1e622b521ed56ddacd",
     "pages": 8,
     "source_sha_in_metadata": true
   },
   "companion_markdown": {
     "file": "COMPANION.md",
-    "sha256": "0afd89f1a002bea33cacad2621fb640c532892b868c18ec55bbd463637dc8850",
+    "sha256": "c47cb3847813a7c1cf88ec930026c53c8c5b0ee50fdb756cc234a03b596d5985",
     "words": 11002
   },
   "companion_pdf": {
     "file": "COMPANION.pdf",
-    "sha256": "fed75cb76904ffde55849a339935f6f8f61d96d826f58b52463498a5563c3067",
+    "sha256": "71004c5bbcb2bc82e0b601351971fe6a38aec8f17e5420a5d86d6b84d0a52ad6",
     "pages": 24,
     "source_sha_in_metadata": true
   },
@@ -39,13 +39,13 @@
   },
   "one_pager_pdf": {
     "file": "ONE_PAGER.pdf",
-    "sha256": "ba90fca373d98c83099d82101adedde4b28587ed6157004c4b0b9ff5d6758a65",
+    "sha256": "4d52de16ff96f338bb873d0127c06e2518d598156392e2c96b439e39911a8a05",
     "pages": 1,
     "source_sha_in_metadata": true
   },
   "companion_lab_html": {
     "file": "companion_lab.html",
-    "sha256": "ba66ba9dd385a907274bf7adc61459d04edf8e5981146605146d2a8549b85dd9"
+    "sha256": "a75197e2d93f69713b141f594fd300ed10f17954ea195bb9992bb0866d0c2bab"
   },
   "complete_coverage": {
     "file": "COMPLETE_COVERAGE.md",
