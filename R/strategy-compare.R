@@ -76,6 +76,7 @@ catmech_compare_strategies <- function(data, value, reference, formula,
     all_vars <- all.vars(formula)
     response_var <- all_vars[1L]
     cand_preds <- setdiff(all_vars, c(response_var, value, reference))
+    if (length(cand_preds) == 0L) cand_preds <- setdiff(response_var, c(value, reference))
     cand_preds <- intersect(cand_preds, names(data))
     predictors <- if (length(cand_preds) > 0L) cand_preds else NULL
   }
@@ -108,9 +109,9 @@ catmech_compare_strategies <- function(data, value, reference, formula,
   # Strategy 2: Naive analysis (trust recorded values)
   d_naive <- data
   fit_naive <- if (is_gaussian) {
-    stats::lm(formula, data = d_naive, na.action = stats::na.fail)
+    stats::lm(formula, data = d_naive, na.action = stats::na.omit)
   } else {
-    stats::glm(formula, data = d_naive, family = family, na.action = stats::na.fail)
+    stats::glm(formula, data = d_naive, family = family, na.action = stats::na.omit)
   }
   cf_naive <- stats::coef(summary(fit_naive))
   terms_naive <- rownames(cf_naive)
@@ -151,26 +152,39 @@ catmech_compare_strategies <- function(data, value, reference, formula,
   results[["linear_mi_recorded"]] <- linear_df
 
   # Strategy 4: Contamination model
-  res_contam <- catmech_contamination(
-    data = data, value = value, reference = reference,
-    predictors = predictors, m = m, seed = seed,
-    agreement_tol = agreement_tol
-  )
-  pooled_contam <- if (is_gaussian) {
-    catmech_pool_lm(res_contam, formula, conf_level = conf_level, cluster = cluster)
-  } else {
-    catmech_pool_glm(res_contam, formula, family = family, conf_level = conf_level, cluster = cluster)
-  }
-  contam_df <- data.frame(
-    strategy = "contamination_model",
-    term = pooled_contam$term,
-    estimate = pooled_contam$estimate,
-    std.error = pooled_contam$std.error,
-    df = pooled_contam$df,
-    lower = pooled_contam$lower,
-    upper = pooled_contam$upper,
-    stringsAsFactors = FALSE
-  )
+  contam_df <- tryCatch({
+    res_contam <- catmech_contamination(
+      data = data, value = value, reference = reference,
+      predictors = predictors, m = m, seed = seed,
+      agreement_tol = agreement_tol
+    )
+    pooled_contam <- if (is_gaussian) {
+      catmech_pool_lm(res_contam, formula, conf_level = conf_level, cluster = cluster)
+    } else {
+      catmech_pool_glm(res_contam, formula, family = family, conf_level = conf_level, cluster = cluster)
+    }
+    data.frame(
+      strategy = "contamination_model",
+      term = pooled_contam$term,
+      estimate = pooled_contam$estimate,
+      std.error = pooled_contam$std.error,
+      df = pooled_contam$df,
+      lower = pooled_contam$lower,
+      upper = pooled_contam$upper,
+      stringsAsFactors = FALSE
+    )
+  }, error = function(e) {
+    data.frame(
+      strategy = "contamination_model",
+      term = terms_sub,
+      estimate = rep(NA_real_, length(terms_sub)),
+      std.error = rep(NA_real_, length(terms_sub)),
+      df = rep(NA_real_, length(terms_sub)),
+      lower = rep(NA_real_, length(terms_sub)),
+      upper = rep(NA_real_, length(terms_sub)),
+      stringsAsFactors = FALSE
+    )
+  })
   results[["contamination_model"]] <- contam_df
 
   # Combine and calculate efficiency
@@ -303,17 +317,23 @@ plot.catmech_strategy_comparison <- function(x, term = NULL,
   graphics::abline(v = 0, lty = 2, col = "gray50", lwd = 1.2)
 
   for (i in seq_len(k)) {
-    col_i <- strat_cols[i]
-    graphics::segments(tbl_sub$lower[i], y_pos[i], tbl_sub$upper[i], y_pos[i], col = col_i, lwd = lwd)
-    tick_h <- 0.12
-    graphics::segments(tbl_sub$lower[i], y_pos[i] - tick_h, tbl_sub$lower[i], y_pos[i] + tick_h, col = col_i, lwd = lwd)
-    graphics::segments(tbl_sub$upper[i], y_pos[i] - tick_h, tbl_sub$upper[i], y_pos[i] + tick_h, col = col_i, lwd = lwd)
+    if (is.finite(tbl_sub$lower[i]) && is.finite(tbl_sub$upper[i])) {
+      col_i <- strat_cols[i]
+      graphics::segments(tbl_sub$lower[i], y_pos[i], tbl_sub$upper[i], y_pos[i], col = col_i, lwd = lwd)
+      tick_h <- 0.12
+      graphics::segments(tbl_sub$lower[i], y_pos[i] - tick_h, tbl_sub$lower[i], y_pos[i] + tick_h, col = col_i, lwd = lwd)
+      graphics::segments(tbl_sub$upper[i], y_pos[i] - tick_h, tbl_sub$upper[i], y_pos[i] + tick_h, col = col_i, lwd = lwd)
+    }
   }
 
   graphics::points(tbl_sub$estimate, y_pos, pch = pch, col = strat_cols, cex = cex)
   graphics::axis(2, at = y_pos, labels = display_names, las = 1, cex.axis = 0.8)
 
-  annot <- sprintf("%.3f [%.3f, %.3f]", tbl_sub$estimate, tbl_sub$lower, tbl_sub$upper)
+  annot <- ifelse(
+    is.finite(tbl_sub$estimate),
+    sprintf("%.3f [%.3f, %.3f]", tbl_sub$estimate, tbl_sub$lower, tbl_sub$upper),
+    "NA [NA, NA]"
+  )
   graphics::mtext(annot, side = 4, at = y_pos, las = 1, line = 0.5, cex = 0.8, col = "gray30")
 
   invisible(x)

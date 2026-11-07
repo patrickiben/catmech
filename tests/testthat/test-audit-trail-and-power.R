@@ -50,6 +50,11 @@ test_that("catmech_audit_trail generates auditable reports in markdown, json, an
   sens <- catmech_sensitivity(list(default = fit), formula = f, term = "lab_value")
   trail_sens <- catmech_audit_trail(fit, pooled = pooled, sensitivity = sens, format = "markdown")
   expect_true(grepl("## 4. Sensitivity Envelope", as.character(trail_sens)))
+
+  # Non-MCMC fit (model_diagnostics is NULL -> Convergence Status is Not Applicable)
+  fit_pmm <- catmech_pmm(d, "lab_value", c("age", "sex", "outcome"), flag = "outlier_flag", m = 2, seed = 12)
+  trail_pmm <- catmech_audit_trail(fit_pmm, format = "markdown")
+  expect_true(grepl("Convergence Status \\| Not Applicable", as.character(trail_pmm)))
 })
 
 test_that("catmech_audit_power computes prospective and plan-based power and plots curve", {
@@ -99,6 +104,26 @@ test_that("catmech_audit_power computes prospective and plan-based power and plo
   expect_s3_class(pwr_plan, "catmech_audit_power")
   expect_identical(pwr_plan$N, 500L)
   expect_identical(pwr_plan$k_summary$source, "empirical_plan")
+
+  # Calculation from a real catmech_audit_plan object
+  set.seed(77)
+  n_real <- 100
+  df_plan <- data.frame(
+    lab = rnorm(n_real, 10, 2),
+    age = rnorm(n_real, 50, 10),
+    y = rnorm(n_real, 5, 1)
+  )
+  df_plan$ref <- df_plan$lab + rnorm(n_real, 0, 0.4)
+  df_plan$ref[36:n_real] <- NA_real_
+  real_plan <- suppressWarnings(catmech_audit_plan(
+    df_plan, value = "lab", reference = "ref",
+    predictors = c("age", "y"), formula = y ~ lab + age,
+    term = "lab", bootstrap = 100L, seed = 1L
+  ))
+  pwr_real_plan <- catmech_audit_power(plan = real_plan, target_ratio = 1.25, power_target = 0.80, seed = 2L)
+  expect_s3_class(pwr_real_plan, "catmech_audit_power")
+  expect_identical(pwr_real_plan$N, as.integer(n_real))
+  expect_identical(pwr_real_plan$k_summary$source, "empirical_plan")
 
   # Error handling
   expect_error(catmech_audit_power(target_ratio = 0.9), "target_ratio must be a single number strictly greater than 1")

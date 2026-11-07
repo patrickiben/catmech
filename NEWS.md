@@ -28,7 +28,7 @@
   demonstrating simulation, holdout calibration, audit planning, strategy comparisons,
   and LM/GLM/Cox pooling.
 - Formalize S3 console output with dedicated `print()` and `summary()` methods.
-- Pass all 1,748 testthat unit tests and R CMD check with Status: OK (0 errors,
+- Pass all 1,754 testthat unit tests and R CMD check with Status: OK (0 errors,
   0 warnings, 0 notes).
 
 # catmech 0.10.1

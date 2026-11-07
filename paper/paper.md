@@ -112,89 +112,101 @@ The following complete workflow illustrates the `catmech` pipeline on a simulate
 library(catmech)
 library(survival)
 
-# 1. Simulate a multicenter cohort with 20% biomarker recording contamination
+# 1. Simulate a multicenter cohort with recording contamination and 25% reference audit
 set.seed(42)
-cohort <- catmech_simulate(
-  n = 1000,
-  n_sites = 10,
-  contamination_prob = 0.20,
-  contamination_mean = 2.0,
-  contamination_sd = 0.8,
-  reference_fraction = 0.25
-)
+cohort <- simulate_catmech_lab(n = 1000, seed = 42)
+cohort$site <- rep(seq_len(10), length.out = nrow(cohort))
+audited <- sample.int(nrow(cohort), size = 250)
+cohort$lab_ref <- ifelse(seq_len(nrow(cohort)) %in% audited, cohort$lab_true, NA_real_)
+cohort$adverse_event <- as.integer(cohort$outcome > median(cohort$outcome))
+cohort$time <- rexp(nrow(cohort), rate = exp(0.25 * (cohort$lab_true - 6)))
+cohort$event <- rbinom(nrow(cohort), 1, 0.75)
 
 # 2. Prospective audit sample size and statistical power planning
 power_plan <- catmech_audit_power(
-  n_total = 1000,
-  n_audit = seq(100, 500, by = 50),
-  k = 1.75,
+  N = 1000,
   target_ratio = 1.25,
-  alpha = 0.05
+  power_target = 0.80,
+  error_rate = 0.20,
+  correlation = 0.85,
+  fractions = seq(0.10, 0.50, by = 0.05)
 )
 plot(power_plan)
 
 # 3. Discrepancy screening across clinical sites
 audit_screen <- catmech_recording_audit(
-  recorded = cohort$W,
-  reference = cohort$R,
-  strata = cohort$site,
-  threshold = 0.5
+  data = cohort,
+  value = "lab_value",
+  reference = "lab_ref",
+  by = "site",
+  agreement_tol = 0.5
 )
 plot(audit_screen)
 
-# 4. Out-of-sample predictive calibration verification
-calib_check <- catmech_holdout_check(
-  formula = R ~ X1 + X2,
-  data = cohort[!is.na(cohort$R), ],
-  n_folds = 5,
-  seed = 123
-)
-plot(calib_check)
-
-# 5. Reference-calibrated Gibbs contamination model
-fit <- catmech_contamination_model(
-  formula = W ~ X1 + X2,
-  reference = "R",
-  strata = "site",
+# 4. Reference-calibrated Gibbs contamination model
+fit <- catmech_contamination(
   data = cohort,
-  n_imputations = 10,
-  mcmc_iterations = 2000,
-  burnin = 500,
+  value = "lab_value",
+  reference = "lab_ref",
+  predictors = c("age", "sex", "inflammation", "outcome"),
+  corruption_strata = "outlier_flag",
+  m = 10,
   seed = 2026
 )
 
-# 6. Multi-endpoint downstream regression pooling
+# 5. Out-of-sample predictive calibration verification
+calib_check <- catmech_holdout_check(
+  fit = fit,
+  folds = 5L,
+  m = 20L,
+  seed = 123L
+)
+plot(calib_check)
+
+# 6. Multi-endpoint downstream regression pooling and forest plots
 # Continuous linear model
 pool_continuous <- catmech_pool_lm(
-  formula = outcome_continuous ~ T_imputed + X1 + X2,
-  imputations = fit$completed_datasets,
+  result = fit,
+  formula = outcome ~ lab_value + age + sex,
   cluster = "site"
 )
 
 # Binary logistic GLM (Odds Ratios)
 pool_binary <- catmech_pool_glm(
-  formula = adverse_event ~ T_imputed + X1 + X2,
+  result = fit,
+  formula = adverse_event ~ lab_value + age + sex,
   family = binomial(link = "logit"),
-  imputations = fit$completed_datasets,
   cluster = "site",
   exponentiate = TRUE
 )
+plot(pool_binary, exponentiate = TRUE)
 
 # Survival Cox proportional hazards (Hazard Ratios)
 pool_survival <- catmech_pool_coxph(
-  formula = Surv(time, event) ~ T_imputed + X1 + X2,
-  imputations = fit$completed_datasets,
+  result = fit,
+  formula = Surv(time, event) ~ lab_value + age + sex,
   cluster = "site",
   exponentiate = TRUE
 )
+plot(pool_survival, exponentiate = TRUE)
 
-# 7. Regulatory compliance audit report (FDA 21 CFR Part 11)
+# 7. Side-by-side comparison of all four audit strategies
+comp <- catmech_compare_strategies(
+  data = cohort,
+  value = "lab_value",
+  reference = "lab_ref",
+  formula = outcome ~ lab_value + age + sex,
+  m = 10,
+  seed = 2026
+)
+plot(comp, term = "lab_value")
+
+# 8. Regulatory compliance audit report (FDA 21 CFR Part 11)
 report <- catmech_audit_trail(
-  original_data = cohort,
-  completed_datasets = fit$completed_datasets,
-  model_spec = fit$spec,
+  object = fit,
+  pooled = pool_survival,
   format = "markdown",
-  output_file = "audit_trail.md"
+  path = "audit_trail.md"
 )
 ```
 
@@ -269,9 +281,9 @@ Regulatory submissions in biopharmaceutical and medical device clinical trials (
 # Quality Assurance and Verification
 
 `catmech` has been developed under an automated software verification harness:
-* **Unit Tests**: 1,717 unit tests executed via `testthat`, achieving 0 failures, 0 warnings, and 0 skips.
+* **Unit Tests**: 1,754 unit tests executed via `testthat`, achieving 0 failures, 0 warnings, and 0 skips.
 * **CRAN Conformance**: Fully compliant with CRAN package policies, passing `R CMD check --no-manual` with `Status: OK` (0 errors, 0 warnings, 0 notes).
-* **Independent Artifact Verification**: Verified against an independent Python verification suite (`verify-artifacts.py` and `fact_check.py`) confirming exact correspondence across 120 claims, 10 distinct simulation benchmark studies, and hundreds of thousands of historical requests.
+* **Independent Artifact Verification**: Verified against an independent Python verification suite (`verify-artifacts.py` and `fact_check.py`) confirming exact correspondence across 118 claims, 10 distinct simulation benchmark studies, and hundreds of thousands of historical requests.
 
 # Availability and Dependencies
 

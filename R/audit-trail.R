@@ -51,7 +51,7 @@ catmech_audit_trail <- function(object, pooled = NULL, sensitivity = NULL,
   timestamp <- format(as.POSIXlt(Sys.time(), tz = "UTC"), "%Y-%m-%dT%H:%M:%SZ")
   r_ver <- paste(R.version$major, R.version$minor, sep = ".")
   platform <- R.version$platform
-  pkg_ver <- tryCatch(as.character(utils::packageVersion("catmech")), error = function(e) "0.10.1")
+  pkg_ver <- tryCatch(as.character(utils::packageVersion("catmech")), error = function(e) "1.0.0")
 
   # Cryptographic hashes
   orig_data <- res$original
@@ -78,8 +78,20 @@ catmech_audit_trail <- function(object, pooled = NULL, sensitivity = NULL,
 
   # Diagnostics
   diag <- res$model_diagnostics
-  conv_pass <- if (!is.null(diag$convergence_pass)) isTRUE(diag$convergence_pass) else NA
-  mcmc_iters <- if (!is.null(diag$iterations_used)) diag$iterations_used else NA_integer_
+  conv_pass <- if (!is.null(diag$convergence_pass) && !identical(diag$status, "not_applicable")) {
+    isTRUE(diag$convergence_pass)
+  } else {
+    NA
+  }
+  mcmc_iters <- if (!is.null(diag$iterations_used)) {
+    diag$iterations_used
+  } else if (!is.null(res$manifest$iterations_used)) {
+    res$manifest$iterations_used
+  } else if (!is.null(res$spec$iterations)) {
+    res$spec$iterations
+  } else {
+    NA_integer_
+  }
 
   # Build structured audit record
   trail_data <- list(
@@ -194,7 +206,7 @@ render_audit_markdown <- function(d, pooled, sensitivity) {
     paste("| Total Observations | ", d$specification$observations, " |", sep = ""),
     paste("| Completions (m) | ", d$specification$completions_m, " |", sep = ""),
     paste("| Imputed Records | ", d$specification$imputed_records, " (", d$specification$imputed_percentage, "%) |", sep = ""),
-    paste("| Convergence Status | ", if (isTRUE(d$diagnostics$convergence_passed)) "Passed" else "Failed", " |", sep = "")
+    paste("| Convergence Status | ", if (is.na(d$diagnostics$convergence_passed)) "Not Applicable" else if (isTRUE(d$diagnostics$convergence_passed)) "Passed" else "Failed", " |", sep = "")
   )
 
   if (!is.na(d$diagnostics$mcmc_iterations)) {

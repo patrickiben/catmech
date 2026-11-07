@@ -41,6 +41,21 @@ test_that("catmech_compare_strategies works across all 4 strategies and plots", 
   grDevices::dev.off()
   unlink(tmp)
 
+  # Single-predictor formula (outcome ~ lab_value) with missing un-audited lab_value
+  d_single <- d
+  un_aud <- which(is.na(d_single$lab_ref))[1L]
+  d_single$lab_value[un_aud] <- NA_real_
+  comp_single <- catmech_compare_strategies(
+    data = d_single,
+    value = "lab_value",
+    reference = "lab_ref",
+    formula = outcome ~ lab_value,
+    m = 2L,
+    seed = 456L
+  )
+  expect_s3_class(comp_single, "catmech_strategy_comparison")
+  expect_true(all(expected_strats %in% comp_single$strategy))
+
   # Error handling: insufficient audits
   d_tiny <- d
   d_tiny$lab_ref[!is.na(d_tiny$lab_ref)][1:10] <- NA_real_ # only 2 audits left

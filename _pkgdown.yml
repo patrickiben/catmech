@@ -47,6 +47,7 @@ reference:
       - read_catmech_spec
       - write_catmech
       - catmech_derive_category
+      - mice.impute.catmech_threshold_corruption
 
   - title: "Downstream Regression Pooling"
     desc: "Rubin pooling for linear, generalized linear (GLM), and Cox proportional hazards survival models."
@@ -85,3 +86,10 @@ reference:
     desc: "Generate synthetic multi-center laboratory and trial datasets."
     contents:
       - simulate_catmech_lab
+
+  - title: "S3 Print, Summary & Package Overview"
+    desc: "Package overview and S3 formatting methods."
+    contents:
+      - catmech-package
+      - starts_with("print.")
+      - starts_with("summary.")

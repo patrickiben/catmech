@@ -8,7 +8,7 @@
 0 errors | 0 warnings | 1 note
 
 * This is an official new release submission of package 'catmech' (version 1.0.0).
-* All 1,748 unit tests pass with 0 failures, 0 warnings, and 0 skips.
+* All 1,754 unit tests pass with 0 failures, 0 warnings, and 0 skips.
 * All C++ code complies with the C++17 standard and uses Rcpp and RcppArmadillo.
 * Built-in vignette 'catmech-clinical-audit' compiles cleanly without errors.
 

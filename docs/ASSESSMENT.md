@@ -95,9 +95,11 @@ Version 1.0.0 freezes the core software interface and completes the clinical dat
 and analysis toolkit:
 - Downstream multi-endpoint regression: `catmech_pool_glm()` extends pooling to generalized linear
   models (logistic, Poisson) with Barnard-Rubin degrees of freedom, and `catmech_pool_coxph()`
-  provides time-to-event survival pooling using event-based degrees of freedom.
-- Diagnostic visualization: base R `plot()` methods provide visual checks for holdout predictive
-  calibration, recording audits, audit planning curves, and prior sensitivity grids.
+  provides time-to-event survival pooling using event-based degrees of freedom, accompanied by
+  `tidy()` and `glance()` S3 generics and `catmech_compare_strategies()`.
+- Diagnostic and pooled visualization: base R `plot()` methods provide visual checks for holdout
+  predictive calibration, recording audits, audit planning curves, prior sensitivity grids,
+  pooled regression forest plots, and strategy comparisons.
 - Prospective audit planning: `catmech_audit_power()` computes required audit sample sizes and
   statistical power prospectively or empirically.
 - Regulatory compliance trail: `catmech_audit_trail()` generates SHA-256 verified provenance reports
@@ -105,8 +107,8 @@ and analysis toolkit:
   and pooled estimates.
 - Comprehensive clinical vignette: `vignettes/catmech-clinical-audit.Rmd` walks through an end-to-end
   multi-center clinical study.
-- Software maturity: passes all 1,717 testthat unit tests and R CMD check with Status: OK (0 errors,
-  0 warnings, 0 notes).
+- Software maturity: passes all 1,754 testthat unit tests across 20 test files and R CMD check with
+  Status: OK (0 errors, 0 warnings, 0 notes).
 
 The statistical caveats remain: measurement error cannot be identified without assumptions or
 reference data, and coverage is not guaranteed under unmodeled misspecification. Core functions are

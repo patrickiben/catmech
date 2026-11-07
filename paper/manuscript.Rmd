@@ -3,7 +3,7 @@ title: "Statistical Inference and Two-Phase Audit Design for Contaminated Measur
 author:
   - name: Patrick Iben
     affiliation: Independent Biostatistician
-    email: 295464172+patrickiben@users.noreply.github.com
+    email: patrickiben@gmail.com
     orcid: 0009-0005-2443-7973
 date: "November 6, 2026"
 output:
@@ -111,8 +111,8 @@ The `catmech` package is structured into modular S3 components designed for comp
 | :--- | :--- | :--- |
 | **Audit Planning** | `catmech_audit_plan()`, `catmech_audit_power()` | Prospective sample size determination and power curves using two-phase influence function theory. |
 | **Data Diagnostics** | `catmech_recording_audit()`, `catmech_holdout_check()` | Stratum-specific discrepancy auditing (Jeffreys beta intervals) and out-of-sample PIT calibration checks. |
-| **Mixture Engine** | `catmech_contamination_model()`, `catmech_fit()` | Reference-calibrated conjugate Gibbs sampler written in C++17 via `RcppArmadillo`. |
-| **Model Pooling** | `catmech_pool_lm()`, `catmech_pool_glm()`, `catmech_pool_coxph()` | Downstream multi-endpoint pooling with Rubin combining rules, Barnard-Rubin df, and cluster-robust sandwich covariance. |
+| **Mixture & Reference Engines** | `catmech_contamination()`, `catmech_reference()` | Reference-calibrated Gibbs contamination model and multilevel/marginal Gaussian imputation engines (`RcppArmadillo`). |
+| **Model Pooling & Comparison** | `catmech_pool_lm()`, `catmech_pool_glm()`, `catmech_pool_coxph()`, `catmech_compare_strategies()`, `tidy()`, `glance()` | Downstream multi-endpoint pooling with Rubin combining rules, Barnard-Rubin df, cluster-robust sandwich covariance, and side-by-side strategy evaluation. |
 | **Sensitivity & Provenance** | `catmech_sensitivity()`, `catmech_audit_trail()` | Multi-scenario sensitivity envelopes and cryptographic SHA-256 regulatory compliance reporting. |
 
 # Synthetic Monte Carlo Simulation Studies
@@ -171,7 +171,7 @@ Based on our empirical and simulation findings, we recommend the following evide
                              YES            NO (mild rounding, diffuse noise)
                              /               \
               [ Use Contamination Model ]    [ Use Simple Linear MI ]
-               catmech_contamination_model()  catmech_pool_lm(imputations)
+               catmech_contamination()        catmech_reference(use_recorded = TRUE)
 ```
 
 1. **Gross, Separable Contamination**: When recording errors represent distinct corruption events (e.g., decimal transcription slips, sensor failures), the Bayesian contamination mixture model is recommended to prevent severe attenuation bias while maintaining oracle-level precision.
@@ -188,9 +188,9 @@ Regulatory submissions in biopharmaceutical and medical device trials (FDA 21 CF
 # Quality Assurance and Verification
 
 `catmech` has been developed under an automated software verification harness:
-* **Unit Tests**: 1,717 unit tests executed via `testthat`, achieving 0 failures, 0 warnings, and 0 skips.
+* **Unit Tests**: 1,754 unit tests executed via `testthat`, achieving 0 failures, 0 warnings, and 0 skips.
 * **CRAN Conformance**: Fully compliant with CRAN package policies, passing `R CMD check --no-manual` with `Status: OK` (0 errors, 0 warnings, 0 notes).
-* **Automated Fact Checking**: Verified against an independent Python verification suite (`verify-artifacts.py` and `fact_check.py`) confirming exact correspondence across 120 claims, 10 distinct simulation benchmark studies, and hundreds of thousands of historical requests.
+* **Automated Fact Checking**: Verified against an independent Python verification suite (`verify-artifacts.py` and `fact_check.py`) confirming exact correspondence across 118 claims, 10 distinct simulation benchmark studies, and hundreds of thousands of historical requests.
 
 # Availability and Software Details
 

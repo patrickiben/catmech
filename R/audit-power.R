@@ -66,12 +66,25 @@ catmech_audit_power <- function(plan = NULL, N = NULL, target_ratio = 1.25,
   if (!is.null(plan)) {
     if (!inherits(plan, "catmech_audit_plan"))
       stop("plan must be a catmech_audit_plan object.", call. = FALSE)
-    k_row <- plan$k[plan$k$strategy == "recorded", , drop = FALSE]
+    col_key <- if ("approach" %in% names(plan$k)) "approach" else "strategy"
+    k_row <- if (col_key %in% names(plan$k)) {
+      plan$k[plan$k[[col_key]] == "recorded", , drop = FALSE]
+    } else {
+      plan$k[1L, , drop = FALSE]
+    }
     if (nrow(k_row) == 0L) k_row <- plan$k[1L, , drop = FALSE]
     k_est <- k_row$estimate[1L]
     k_lo <- max(1e-6, k_row$lower[1L])
     k_hi <- max(k_lo * 1.01, k_row$upper[1L])
-    N <- nrow(plan$pilot$fit$original)
+    N <- if (is.data.frame(plan$pilot) && "records" %in% names(plan$pilot)) {
+      as.integer(plan$pilot$records[1L])
+    } else if (is.list(plan$pilot) && !is.null(plan$pilot$fit$original)) {
+      nrow(plan$pilot$fit$original)
+    } else if (!is.null(N)) {
+      as.integer(N)
+    } else {
+      stop("Unable to determine cohort size N from plan.", call. = FALSE)
+    }
     log_se <- (log(k_hi) - log(k_lo)) / (2 * 1.96)
     k_draws <- stats::rlnorm(n_sim, meanlog = log(k_est), sdlog = max(0.05, log_se))
     k_summary <- list(estimate = k_est, lower = k_lo, upper = k_hi, source = "empirical_plan")
@@ -188,6 +201,12 @@ print.catmech_audit_power <- function(x, digits = 3L, ...) {
 #' plot(pwr)
 #' @export
 plot.catmech_audit_power <- function(x, col = "#1f77b4", lwd = 2, ...) {
+  old_mar <- graphics::par("mar")
+  on.exit(graphics::par(mar = old_mar))
+  new_mar <- old_mar
+  new_mar[4L] <- max(new_mar[4L], 4.5)
+  graphics::par(mar = new_mar)
+
   tbl <- x$table
   graphics::plot(
     tbl$n_audit, tbl$power,

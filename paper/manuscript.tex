@@ -370,13 +370,16 @@ and power curves using two-phase influence function theory. \\
 \texttt{catmech\_holdout\_check()} & Stratum-specific discrepancy
 auditing (Jeffreys beta intervals) and out-of-sample PIT calibration
 checks. \\
-\textbf{Mixture Engine} & \texttt{catmech\_contamination\_model()},
-\texttt{catmech\_fit()} & Reference-calibrated conjugate Gibbs sampler
-written in C++17 via \texttt{RcppArmadillo}. \\
-\textbf{Model Pooling} & \texttt{catmech\_pool\_lm()},
-\texttt{catmech\_pool\_glm()}, \texttt{catmech\_pool\_coxph()} &
-Downstream multi-endpoint pooling with Rubin combining rules,
-Barnard-Rubin df, and cluster-robust sandwich covariance. \\
+\textbf{Mixture \& Reference Engines} &
+\texttt{catmech\_contamination()}, \texttt{catmech\_reference()} &
+Reference-calibrated Gibbs contamination model and multilevel/marginal
+Gaussian imputation engines (\texttt{RcppArmadillo}). \\
+\textbf{Model Pooling \& Comparison} & \texttt{catmech\_pool\_lm()},
+\texttt{catmech\_pool\_glm()}, \texttt{catmech\_pool\_coxph()},
+\texttt{catmech\_compare\_strategies()}, \texttt{tidy()},
+\texttt{glance()} & Downstream multi-endpoint pooling with Rubin
+combining rules, Barnard-Rubin df, cluster-robust sandwich covariance,
+and side-by-side strategy evaluation. \\
 \textbf{Sensitivity \& Provenance} & \texttt{catmech\_sensitivity()},
 \texttt{catmech\_audit\_trail()} & Multi-scenario sensitivity envelopes
 and cryptographic SHA-256 regulatory compliance reporting. \\
@@ -546,7 +549,7 @@ following evidence-based protocol for clinical data audits:
                              YES            NO (mild rounding, diffuse noise)
                              /               \
               [ Use Contamination Model ]    [ Use Simple Linear MI ]
-               catmech_contamination_model()  catmech_pool_lm(imputations)
+               catmech_contamination()        catmech_reference(use_recorded = TRUE)
 \end{verbatim}
 
 \begin{enumerate}
@@ -584,14 +587,14 @@ envelopes.
 Verification}\label{quality-assurance-and-verification}
 
 \texttt{catmech} has been developed under an automated software
-verification harness: * \textbf{Unit Tests}: 1,717 unit tests executed
+verification harness: * \textbf{Unit Tests}: 1,754 unit tests executed
 via \texttt{testthat}, achieving 0 failures, 0 warnings, and 0 skips. *
 \textbf{CRAN Conformance}: Fully compliant with CRAN package policies,
 passing \texttt{R\ CMD\ check\ -\/-no-manual} with \texttt{Status:\ OK}
 (0 errors, 0 warnings, 0 notes). * \textbf{Automated Fact Checking}:
 Verified against an independent Python verification suite
 (\texttt{verify-artifacts.py} and \texttt{fact\_check.py}) confirming
-exact correspondence across 120 claims, 10 distinct simulation benchmark
+exact correspondence across 118 claims, 10 distinct simulation benchmark
 studies, and hundreds of thousands of historical requests.
 
 \section{Availability and Software

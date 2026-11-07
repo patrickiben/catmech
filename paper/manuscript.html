@@ -1622,7 +1622,7 @@ Package</h1>
 <h4 class="author">Patrick Iben</h4>
 <address class="author_afil">
 Independent
-Biostatistician<br><a class="author_email" href="mailto:#"><a href="mailto:295464172+patrickiben@users.noreply.github.com" class="email">295464172+patrickiben@users.noreply.github.com</a></a>
+Biostatistician<br><a class="author_email" href="mailto:#"><a href="mailto:patrickiben@gmail.com" class="email">patrickiben@gmail.com</a></a>
 </address>
 <h4 class="date">November 6, 2026</h4>
 <div class="abstract">
@@ -1912,18 +1912,22 @@ using two-phase influence function theory.</td>
 intervals) and out-of-sample PIT calibration checks.</td>
 </tr>
 <tr class="odd">
-<td align="left"><strong>Mixture Engine</strong></td>
-<td align="left"><code>catmech_contamination_model()</code>,
-<code>catmech_fit()</code></td>
-<td align="left">Reference-calibrated conjugate Gibbs sampler written in
-C++17 via <code>RcppArmadillo</code>.</td>
+<td align="left"><strong>Mixture &amp; Reference Engines</strong></td>
+<td align="left"><code>catmech_contamination()</code>,
+<code>catmech_reference()</code></td>
+<td align="left">Reference-calibrated Gibbs contamination model and
+multilevel/marginal Gaussian imputation engines
+(<code>RcppArmadillo</code>).</td>
 </tr>
 <tr class="even">
-<td align="left"><strong>Model Pooling</strong></td>
+<td align="left"><strong>Model Pooling &amp; Comparison</strong></td>
 <td align="left"><code>catmech_pool_lm()</code>,
-<code>catmech_pool_glm()</code>, <code>catmech_pool_coxph()</code></td>
+<code>catmech_pool_glm()</code>, <code>catmech_pool_coxph()</code>,
+<code>catmech_compare_strategies()</code>, <code>tidy()</code>,
+<code>glance()</code></td>
 <td align="left">Downstream multi-endpoint pooling with Rubin combining
-rules, Barnard-Rubin df, and cluster-robust sandwich covariance.</td>
+rules, Barnard-Rubin df, cluster-robust sandwich covariance, and
+side-by-side strategy evaluation.</td>
 </tr>
 <tr class="odd">
 <td align="left"><strong>Sensitivity &amp; Provenance</strong></td>
@@ -2183,7 +2187,7 @@ following evidence-based protocol for clinical data audits:</p>
                              YES            NO (mild rounding, diffuse noise)
                              /               \
               [ Use Contamination Model ]    [ Use Simple Linear MI ]
-               catmech_contamination_model()  catmech_pool_lm(imputations)</code></pre>
+               catmech_contamination()        catmech_reference(use_recorded = TRUE)</code></pre>
 <ol style="list-style-type: decimal">
 <li><strong>Gross, Separable Contamination</strong>: When recording
 errors represent distinct corruption events (e.g., decimal transcription
@@ -2216,7 +2220,7 @@ envelopes.</p>
 <h1><span class="header-section-number">8</span> Quality Assurance and
 Verification</h1>
 <p><code>catmech</code> has been developed under an automated software
-verification harness: * <strong>Unit Tests</strong>: 1,717 unit tests
+verification harness: * <strong>Unit Tests</strong>: 1,754 unit tests
 executed via <code>testthat</code>, achieving 0 failures, 0 warnings,
 and 0 skips. * <strong>CRAN Conformance</strong>: Fully compliant with
 CRAN package policies, passing <code>R CMD check --no-manual</code> with
@@ -2224,7 +2228,7 @@ CRAN package policies, passing <code>R CMD check --no-manual</code> with
 <strong>Automated Fact Checking</strong>: Verified against an
 independent Python verification suite (<code>verify-artifacts.py</code>
 and <code>fact_check.py</code>) confirming exact correspondence across
-120 claims, 10 distinct simulation benchmark studies, and hundreds of
+118 claims, 10 distinct simulation benchmark studies, and hundreds of
 thousands of historical requests.</p>
 </div>
 <div id="availability-and-software-details" class="section level1" number="9">

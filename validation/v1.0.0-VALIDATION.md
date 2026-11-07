@@ -8,11 +8,11 @@ remain permanently frozen.
 ## Capabilities and interface freeze in v1.0.0
 
 Version 1.0.0 expands downstream modeling, audit design, and regulatory compliance verification:
-- **Multi-endpoint pooling**: `catmech_pool_glm()` implements Barnard-Rubin pooling for generalized
+- **Multi-endpoint pooling & tidygenerics**: `catmech_pool_glm()` implements Barnard-Rubin pooling for generalized
   linear models (logistic, Poisson), and `catmech_pool_coxph()` supports time-to-event survival pooling
-  using event-based residual degrees of freedom.
-- **Diagnostic visualization**: base R S3 `plot()` methods provide visual inspection for holdout predictive
-  calibration, recording audits, audit planning curves, and prior sensitivity grids.
+  using event-based residual degrees of freedom, with `tidy()`, `glance()`, and `catmech_compare_strategies()`.
+- **Diagnostic & forest visualization**: base R S3 `plot()` methods provide visual inspection for holdout predictive
+  calibration, recording audits, audit planning curves, prior sensitivity grids, pooled forest plots, and strategy comparisons.
 - **Prospective audit planning**: `catmech_audit_power()` computes required audit sample sizes and statistical
   power empirically or under prospective assumptions.
 - **Regulatory compliance trail**: `catmech_audit_trail()` generates SHA-256 verified provenance reports
@@ -22,7 +22,7 @@ Version 1.0.0 expands downstream modeling, audit design, and regulatory complian
 ## Verification suite
 
 The release was subjected to complete verification:
-- **Unit test suite**: 1,717 testthat unit tests across 18 test files pass with 0 errors and 0 failures.
+- **Unit test suite**: 1,754 testthat unit tests across 20 test files pass with 0 errors and 0 failures.
 - **R CMD check**: Passes `R CMD check --no-manual catmech_1.0.0.tar.gz` with `Status: OK` (0 errors, 0 warnings, 0 notes).
 - **Benchmark artifacts**: `tools/verify-artifacts.py` passes all 10 benchmark studies (synthetic contamination,
   real-data ClinicalTrials.gov and NHANES, Rwanda HMIS facility audit, clustered audits, variance checks,
