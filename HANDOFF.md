@@ -3,7 +3,7 @@
 **Date:** November 6, 2026  
 **Repository Path:** `/Users/patrickiben/Documents/catmech`  
 **Git Remote:** `https://github.com/patrickiben/catmech.git` (branch:
-`main`, commit: `78fa580`)  
+`main`, commit: `5e03ced`)  
 **Package Version:** `1.0.0`  
 **Maintainer:** Patrick Iben (`patrickiben@gmail.com`, ORCID:
 `0009-0005-2443-7973`)  
@@ -67,7 +67,7 @@ standalone HTML formats.
 The package is **100% audited, verified, and ready for official CRAN
 submission**.
 
-- **Git History**: Clean tree at commit `78fa580` on `main`, pushed to
+- **Git History**: Clean tree at commit `5e03ced` on `main`, pushed to
   GitHub.
 - **GitHub Actions CI**: **100% GREEN (`✓`)** on all workflows:
   - `R-CMD-check`: Passed on macOS (arm64), Ubuntu (Linux), and Windows
@@ -260,7 +260,7 @@ Copy and paste the block below into the first prompt of your new chat:
 I am continuing work on the `catmech` R package (version 1.0.0).
 
 Repository path: `/Users/patrickiben/Documents/catmech`
-Git Remote: `https://github.com/patrickiben/catmech.git` (branch `main`, clean at commit `78fa580`)
+Git Remote: `https://github.com/patrickiben/catmech.git` (branch `main`, clean at commit `5e03ced`)
 Maintainer: Patrick Iben (`patrickiben@gmail.com`, ORCID: `0009-0005-2443-7973`)
 
 The package is fully implemented, documented, and QC'd for official release 1.0.0:
