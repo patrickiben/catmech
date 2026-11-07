@@ -14,4 +14,5 @@
 ^cran-comments\.md$
 ^paper$
 ^_pkgdown\.yml$
+^HANDOFF\.md$
 (^|/)\.DS_Store$
