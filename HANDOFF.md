@@ -35,6 +35,8 @@ The package is **100% audited, verified, and ready for official CRAN submission*
 * **Test Suite**: **1,754 unit tests** passing with **0 failures, 0 warnings, 0 skips** (`testthat::test_local()`).
 * **R CMD check**: Passes `R CMD check --as-cran catmech_1.0.0.tar.gz` with **0 errors, 0 warnings** (only 2 standard environment notes regarding local HTML tidy and .DS_Store).
 * **Fact Check**: `python3 docs/case-study/fact_check.py` validates all **118 empirical claims** across frozen benchmark tables with 100% agreement, 0 broken links, and 1-page PDF constraint compliance.
+* **Paper & Manuscript Verification**: `python3 paper/verify_paper_numbers.py` validates **343 synthetic, real-data, clustered, and code/script surface claims** across `paper/manuscript.Rmd`, `paper/manuscript.tex`, and `paper/paper.md` (plus negative control).
+* **Pre-Submission Validation Harness**: Full 24-gate audit recorded in `paper/VALIDATION_LEDGER_2026-11-06.md` (`check_gate_basis.py` stamped `FRESH 8, STALE 0, NO-BASIS 0`; `check_prose_style_v2.py` `ALL GREEN`; `check_citations.py` `20 OK | 5 REVIEW | 0 FLAG`; `scrub_ai_artifacts.py` `0 hits`; `check_spelling_us.py` `0 hits`; `pdflatex` `errors=0 undefined=0 overfull=0`).
 * **Artifact Verification**: `python3 tools/verify-artifacts.py` passes all 10 simulation benchmark studies, oracle checks, and learning pages.
 * **Documentation**: Fast, self-contained `@examples` for all 26 exported functions, all lines formatted < 85 characters. Built-in vignette (`vignettes/catmech-clinical-audit.Rmd`) builds cleanly.
 
@@ -85,10 +87,13 @@ catmech/
 │   └── ...                   # Frozen benchmark CSVs and synthesis reports
 ├── paper/
 │   ├── paper.md              # JOSS submission manuscript
-│   ├── paper.bib             # Bibliography
-│   ├── manuscript.Rmd        # Academic LaTeX/PDF/HTML manuscript
-│   ├── manuscript.pdf        # Rendered academic PDF
-│   └── manuscript.html       # Rendered academic HTML
+│   ├── paper.bib             # CrossRef-verified bibliography (25 entries, 0 flags)
+│   ├── manuscript.Rmd        # Academic LaTeX/PDF/HTML manuscript (JSS/SMMR)
+│   ├── manuscript.pdf        # Rendered academic PDF (10 pages, 0 overfull boxes)
+│   ├── manuscript.html       # Rendered academic HTML
+│   ├── manuscript.tex        # Rendered LaTeX source
+│   ├── verify_paper_numbers.py # Automated G2/G17/G19/G22 verifier (343 checks)
+│   └── VALIDATION_LEDGER_2026-11-06.md # 24-gate Pre-Submission Validation Harness ledger
 ├── _pkgdown.yml              # Pkgdown documentation website configuration
 └── .github/workflows/
     └── pkgdown.yaml          # GitHub Actions workflow for automated pkgdown build

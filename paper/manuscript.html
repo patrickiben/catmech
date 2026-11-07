@@ -1650,18 +1650,20 @@ establish cluster-robust sandwich covariance estimators with
 Barnard-Rubin finite-sample degrees of freedom for linear models (CV3
 jackknife), generalized linear models (Huber-White-Liang-Zeger), and Cox
 proportional hazards survival models (Lin-Wei with event-based complete
-degrees of freedom). We evaluate the package across extensive synthetic
-Monte Carlo benchmarks (over 500,000 requests) and two large-scale
-real-world empirical audits: ClinicalTrials.gov (<span class="math inline">\(N = 27,208\)</span>) and NHANES 2017–2018 (<span class="math inline">\(N = 3,908\)</span>), alongside facility-level
-recounts from the Rwanda Health Management Information System. Our
-empirical benchmarks demonstrate that retaining recorded measurements
-reduces mean squared error by 43% to 48% over complete-case analysis. We
-articulate an evidence-based decision rule: the contamination mixture
-model avoids severe attenuation bias and preserves coverage under gross,
-separable recording errors, whereas simple linear imputation is
-preferred under subtle, diffuse discrepancies. Finally, we implement
-cryptographic SHA-256 provenance tracking meeting FDA 21 CFR Part 11 and
-ICH GCP E9 regulatory compliance standards.</p>
+degrees of freedom). We evaluate the package across frozen synthetic
+Monte Carlo benchmarks (52,950 requests in the contamination study and
+over 500,000 requests across all 10 validation archives) and two
+large-scale real-world empirical audits: ClinicalTrials.gov (<span class="math inline">\(N = 27,208\)</span>) and NHANES 2017–2018 (<span class="math inline">\(N = 3,908\)</span>), alongside facility-level
+recounts from the Rwanda Health Management Information System (148,500
+requests). Our empirical benchmarks demonstrate that retaining recorded
+measurements reduces root mean squared error by 43% to 48% over
+discarding un-audited values. We articulate an evidence-based decision
+rule: the contamination mixture model avoids severe attenuation bias and
+narrows confidence intervals by 44% relative to complete-case analysis
+under gross, separable recording errors, whereas simple linear
+imputation is preferred under subtle, diffuse discrepancies. Finally, we
+implement cryptographic SHA-256 provenance tracking meeting FDA 21 CFR
+Part 11 and ICH GCP E9 regulatory compliance standards.</p>
 </div>
 
 </div>
@@ -1723,11 +1725,11 @@ finite-sample inference <span class="citation">(Barnard and Rubin
 1999)</span>, and cryptographic data provenance <span class="citation">(U.S. Food and Drug Administration 2003)</span>.</p>
 </div>
 <div id="statistical-theory-and-methodology" class="section level1" number="2">
-<h1><span class="header-section-number">2</span> Statistical Theory and
-Methodology</h1>
+<h1><span class="header-section-number">2</span> Statistical theory and
+methodology</h1>
 <div id="the-data-generating-and-contamination-framework" class="section level2" number="2.1">
-<h2><span class="header-section-number">2.1</span> The Data Generating
-and Contamination Framework</h2>
+<h2><span class="header-section-number">2.1</span> The data generating
+and contamination framework</h2>
 <p>Let <span class="math inline">\(i \in \{1, \dots, N\}\)</span> index
 patients enrolled across <span class="math inline">\(C\)</span> clinical
 sites. Let <span class="math inline">\(T_i \in \mathbb{R}\)</span>
@@ -1754,7 +1756,7 @@ an exact, error-free recount or reference assay.</p>
 </div>
 <div id="analytical-gibbs-sampling-posteriors" class="section level2" number="2.2">
 <h2><span class="header-section-number">2.2</span> Analytical Gibbs
-Sampling Posteriors</h2>
+sampling posteriors</h2>
 <p>The joint parameter vector is <span class="math inline">\(\Theta =
 (\beta, \sigma_T^2, \pi, \mu_e, \sigma_e^2,
 \sigma_{\text{ref}}^2)\)</span>. Prior distributions are assigned
@@ -1786,8 +1788,8 @@ reference-anchored posterior. Multiple imputations <span class="math inline">\(T
 post-burn-in iterations of the Markov chain.</p>
 </div>
 <div id="two-phase-audit-sample-size-and-power-planning" class="section level2" number="2.3">
-<h2><span class="header-section-number">2.3</span> Two-Phase Audit
-Sample Size and Power Planning</h2>
+<h2><span class="header-section-number">2.3</span> Two-phase audit
+sample size and power planning</h2>
 <p>Prior to re-abstracting medical charts or commissioning secondary lab
 assays, investigators must budget the audit sample size <span class="math inline">\(n_{\text{audit}}\)</span>. Using semiparametric
 influence function theory for two-phase estimators <span class="citation">(Neyman 1938; Cochran 1977; Breslow et al. 2003;
@@ -1813,8 +1815,8 @@ approximations and Monte Carlo resampling from pilot audit plans
 (<code>catmech_audit_plan()</code>).</p>
 </div>
 <div id="multi-endpoint-model-pooling-with-barnard-rubin-degrees-of-freedom" class="section level2" number="2.4">
-<h2><span class="header-section-number">2.4</span> Multi-Endpoint Model
-Pooling with Barnard-Rubin Degrees of Freedom</h2>
+<h2><span class="header-section-number">2.4</span> Multi-endpoint model
+pooling with Barnard-Rubin degrees of freedom</h2>
 <p>Parameter estimates <span class="math inline">\(\hat{\theta}_j\)</span> and variance-covariance
 matrices <span class="math inline">\(\hat{U}_j\)</span> across <span class="math inline">\(j \in \{1, \dots, m\}\)</span> completed datasets
 are combined using Rubin’s rules <span class="citation">(Rubin
@@ -1837,10 +1839,10 @@ intervals. <code>catmech</code> implements the Barnard &amp; Rubin
 is the complete-data degrees of freedom.</p>
 <p>Downstream pooling covers three core clinical endpoint families:</p>
 <ol style="list-style-type: decimal">
-<li><strong>Continuous Endpoints
+<li><strong>Continuous endpoints
 (<code>catmech_pool_lm</code>)</strong>: Fits linear models with default
 delete-one-cluster jackknife (CV3) variance estimation, where <span class="math inline">\(\nu_{com} = N - p\)</span>.</li>
-<li><strong>Binary and Count Endpoints
+<li><strong>Binary and count endpoints
 (<code>catmech_pool_glm</code>)</strong>: Fits generalized linear models
 (logistic and Poisson) with Huber–White–Liang–Zeger cluster-robust
 sandwich covariance <span class="citation">(Liang and Zeger
@@ -1851,7 +1853,7 @@ sandwich covariance <span class="citation">(Liang and Zeger
 are cluster score residuals and <span class="math inline">\(\hat{J}\)</span> is the observed Fisher
 information matrix. Point estimates and intervals are optionally
 exponentiated to yield odds ratios or incidence rate ratios.</li>
-<li><strong>Time-to-Event Survival Endpoints
+<li><strong>Time-to-event survival endpoints
 (<code>catmech_pool_coxph</code>)</strong>: Fits Cox proportional
 hazards models with Lin &amp; Wei (1989) score-residual sandwich
 covariance <span class="citation">(Lin and Wei 1989)</span>. The
@@ -1863,8 +1865,8 @@ the Barnard-Rubin <span class="math inline">\(\nu_{BR}\)</span> <span class="mat
 </ol>
 </div>
 <div id="out-of-sample-predictive-calibration-checking" class="section level2" number="2.5">
-<h2><span class="header-section-number">2.5</span> Out-of-Sample
-Predictive Calibration Checking</h2>
+<h2><span class="header-section-number">2.5</span> Out-of-sample
+predictive calibration checking</h2>
 <p>To verify that the contamination model is predictively calibrated,
 <code>catmech_holdout_check()</code> partitions audited records into
 <span class="math inline">\(K\)</span> cross-validation folds. For each
@@ -1879,59 +1881,57 @@ Kolmogorov–Smirnov test.</p>
 </div>
 </div>
 <div id="software-architecture-and-design" class="section level1" number="3">
-<h1><span class="header-section-number">3</span> Software Architecture
-and Design</h1>
+<h1><span class="header-section-number">3</span> Software architecture
+and design</h1>
 <p>The <code>catmech</code> package is structured into modular S3
 components designed for computational efficiency, numerical stability,
 and strict regulatory auditability:</p>
 <table>
 <colgroup>
-<col width="33%" />
-<col width="33%" />
-<col width="33%" />
+<col width="17%" />
+<col width="35%" />
+<col width="47%" />
 </colgroup>
 <thead>
 <tr class="header">
 <th align="left">Module</th>
-<th align="left">Core Functions</th>
-<th align="left">Mathematical &amp; Computational Role</th>
+<th align="left">Core functions</th>
+<th align="left">Mathematical and computational role</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left"><strong>Audit Planning</strong></td>
+<td align="left"><strong>Audit planning</strong></td>
 <td align="left"><code>catmech_audit_plan()</code>,
 <code>catmech_audit_power()</code></td>
 <td align="left">Prospective sample size determination and power curves
 using two-phase influence function theory.</td>
 </tr>
 <tr class="even">
-<td align="left"><strong>Data Diagnostics</strong></td>
+<td align="left"><strong>Data diagnostics</strong></td>
 <td align="left"><code>catmech_recording_audit()</code>,
 <code>catmech_holdout_check()</code></td>
 <td align="left">Stratum-specific discrepancy auditing (Jeffreys beta
 intervals) and out-of-sample PIT calibration checks.</td>
 </tr>
 <tr class="odd">
-<td align="left"><strong>Mixture &amp; Reference Engines</strong></td>
+<td align="left"><strong>Imputation engines</strong></td>
 <td align="left"><code>catmech_contamination()</code>,
 <code>catmech_reference()</code></td>
 <td align="left">Reference-calibrated Gibbs contamination model and
-multilevel/marginal Gaussian imputation engines
+multilevel/marginal Gaussian imputation
 (<code>RcppArmadillo</code>).</td>
 </tr>
 <tr class="even">
-<td align="left"><strong>Model Pooling &amp; Comparison</strong></td>
+<td align="left"><strong>Model pooling</strong></td>
 <td align="left"><code>catmech_pool_lm()</code>,
 <code>catmech_pool_glm()</code>, <code>catmech_pool_coxph()</code>,
-<code>catmech_compare_strategies()</code>, <code>tidy()</code>,
-<code>glance()</code></td>
-<td align="left">Downstream multi-endpoint pooling with Rubin combining
-rules, Barnard-Rubin df, cluster-robust sandwich covariance, and
-side-by-side strategy evaluation.</td>
+<code>catmech_compare_strategies()</code></td>
+<td align="left">Multi-endpoint pooling with Rubin rules, Barnard-Rubin
+df, cluster-robust sandwich covariance, and strategy comparison.</td>
 </tr>
 <tr class="odd">
-<td align="left"><strong>Sensitivity &amp; Provenance</strong></td>
+<td align="left"><strong>Provenance</strong></td>
 <td align="left"><code>catmech_sensitivity()</code>,
 <code>catmech_audit_trail()</code></td>
 <td align="left">Multi-scenario sensitivity envelopes and cryptographic
@@ -1951,7 +1951,7 @@ mortality, toxicities analyzed via logistic regression).
 these core clinical endpoints through <code>catmech_pool_coxph()</code>
 and <code>catmech_pool_glm()</code>:</p>
 <ul>
-<li><strong>Survival Modeling
+<li><strong>Survival modeling
 (<code>catmech_pool_coxph</code>)</strong>: Computes pooled log-hazard
 ratios <span class="math inline">\(\bar{\theta}\)</span> and Lin &amp;
 Wei (1989) score-residual sandwich covariance <span class="citation">(Lin and Wei 1989)</span>, defining complete-data
@@ -1960,157 +1960,305 @@ degrees of freedom strictly as <span class="math inline">\(\nu_{com} = d
 observed event count and <span class="math inline">\(p\)</span> is the
 parameter count). Point estimates and Barnard-Rubin <span class="math inline">\(t\)</span>-intervals are exponentiated to yield
 pooled hazard ratios (<span class="math inline">\(\text{HR}\)</span>).</li>
-<li><strong>Binary and Generalized Linear Modeling
+<li><strong>Binary and generalized linear modeling
 (<code>catmech_pool_glm</code>)</strong>: Employs
 Huber–White–Liang–Zeger cluster-robust sandwich covariance <span class="citation">(Liang and Zeger 1986)</span>, providing robust
 inference against variance misspecification with exponentiated odds
 ratios (<span class="math inline">\(\text{OR}\)</span>) or incidence
 rate ratios (<span class="math inline">\(\text{IRR}\)</span>).</li>
-<li><strong>Unified Model Exploration</strong>: All pooling functions
+<li><strong>Unified model exploration</strong>: All pooling functions
 integrate with <code>broom</code> methods (<code>tidy()</code>,
-<code>glance()</code>) and automated visualization
-(<code>catmech_forest_plot()</code>), allowing clinical study teams to
-compare naive, complete-case, standard imputation, and mixture
-strategies across multiple endpoint families simultaneously.</li>
+<code>glance()</code>) and S3 forest-plot visualization
+(<code>plot()</code>), allowing clinical study teams to compare naive,
+complete-case, standard imputation, and mixture strategies across
+multiple endpoint families simultaneously.</li>
 </ul>
 </div>
-<div id="synthetic-monte-carlo-simulation-studies" class="section level1" number="4">
-<h1><span class="header-section-number">4</span> Synthetic Monte Carlo
-Simulation Studies</h1>
+<div id="synthetic-simulation-studies-and-benchmarks" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> Synthetic simulation
+studies and benchmarks</h1>
 <p>To evaluate the statistical properties of <code>catmech</code>, we
-conducted extensive Monte Carlo simulations across 10 scenario
-configurations (over 500,000 total requests).</p>
-<div id="scenario-1-gross-recording-contamination" class="section level2" number="4.1">
-<h2><span class="header-section-number">4.1</span> Scenario 1: Gross
-Recording Contamination</h2>
-<p>We evaluated an exposure effect <span class="math inline">\(\beta =
-0.500\)</span> in a cohort of <span class="math inline">\(N =
-1,000\)</span> patients across 1,000 simulation replicates under 20%
-contamination (<span class="math inline">\(\pi = 0.20\)</span>, <span class="math inline">\(\mu_e = 2.0\)</span>, <span class="math inline">\(\sigma_e = 0.8\)</span>) with a 25% audit fraction
-(<span class="math inline">\(n_{\text{audit}} = 250\)</span>):</p>
+conducted pre-specified Monte Carlo simulation studies across 10
+validation archives (over 500,000 total requests). The primary
+reference-calibrated contamination study
+(<code>validation/contamination-study</code>) executed 52,950 planned
+requests (52,900 returned intervals, 16 expected design refusals, 33
+MCMC convergence refusals, and 1 singular raking fit) across 4 primary
+cells (1,000 cohorts each) and 23 stress cells (150 cohorts each), with
+cohort size <span class="math inline">\(N = 600\)</span>, true target
+slope <span class="math inline">\(\beta = 0.800\)</span>, a 25%
+reference audit (<span class="math inline">\(n_{\text{audit}} =
+150\)</span>), and <span class="math inline">\(m = 20\)</span>
+imputations.</p>
+<div id="scenario-1-unflagged-and-gross-recording-contamination" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> Scenario 1: Unflagged
+and gross recording contamination</h2>
+<p>We compare seven analytical strategies in two representative
+synthetic regimes: the primary unflagged contamination scenario
+(<code>missed_flags</code>, 1,000 cohorts, where recording errors occur
+in unflagged records) and the mixed gross-and-small error stress
+scenario (<code>error_gross_and_small</code>, 150 cohorts, combining
+gross transcription outliers with mild recording noise):</p>
 <table>
 <colgroup>
-<col width="11%" />
-<col width="14%" />
-<col width="14%" />
-<col width="14%" />
-<col width="14%" />
-<col width="14%" />
-<col width="14%" />
+<col width="28%" />
+<col width="8%" />
+<col width="21%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
 </colgroup>
 <thead>
 <tr class="header">
-<th align="left">Analytical Strategy</th>
-<th align="center">Estimated <span class="math inline">\(\hat{\beta}\)</span></th>
-<th align="center">Bias</th>
-<th align="center">Empirical SE</th>
-<th align="center">Model SE</th>
-<th align="center">95% Coverage</th>
-<th align="center">Mean CI Width</th>
+<th align="left">Scenario &amp; Strategy</th>
+<th align="center"><span class="math inline">\(\hat{\beta}\)</span></th>
+<th align="center">Bias (MCSE)</th>
+<th align="center">Emp SD</th>
+<th align="center">Mean SE</th>
+<th align="center">Cov.</th>
+<th align="center">Width</th>
+<th align="center">RMSE</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left"><strong>Oracle (Latent <span class="math inline">\(T\)</span> Known)</strong></td>
-<td align="center">0.499</td>
-<td align="center">-0.001</td>
-<td align="center">0.032</td>
-<td align="center">0.031</td>
-<td align="center">95.1%</td>
-<td align="center">0.122</td>
+<td align="left"><strong>Unflagged Errors (<span class="math inline">\(N_{\text{sim}} = 1,000\)</span>)</strong></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
 </tr>
 <tr class="even">
-<td align="left"><strong>Naive Recorded (<span class="math inline">\(W\)</span>)</strong></td>
-<td align="center">0.384</td>
-<td align="center">-0.116</td>
-<td align="center">0.036</td>
-<td align="center">0.035</td>
-<td align="center">42.3%</td>
-<td align="center">0.137</td>
+<td align="left">Oracle (Latent <span class="math inline">\(T\)</span>
+Known)</td>
+<td align="center">0.7978</td>
+<td align="center">-0.0022 (0.0012)</td>
+<td align="center">0.0394</td>
+<td align="center">0.0411</td>
+<td align="center">95.7%</td>
+<td align="center">0.1614</td>
+<td align="center">0.0394</td>
 </tr>
 <tr class="odd">
-<td align="left"><strong>Complete-Case (Audited Only)</strong></td>
-<td align="center">0.502</td>
-<td align="center">+0.002</td>
-<td align="center">0.068</td>
-<td align="center">0.066</td>
-<td align="center">94.8%</td>
-<td align="center">0.260</td>
+<td align="left">Flag Masking (Trust Unflagged)</td>
+<td align="center">0.7185</td>
+<td align="center">-0.0815 (0.0015)</td>
+<td align="center">0.0472</td>
+<td align="center">0.0444</td>
+<td align="center">55.9%</td>
+<td align="center">0.1750</td>
+<td align="center">0.0942</td>
 </tr>
 <tr class="even">
-<td align="left"><strong>Standard Multiple Imputation
-(<code>mice</code>)</strong></td>
-<td align="center">0.498</td>
-<td align="center">-0.002</td>
-<td align="center">0.051</td>
-<td align="center">0.049</td>
-<td align="center">94.6%</td>
-<td align="center">0.193</td>
+<td align="left">Complete-Case (25% Audited)</td>
+<td align="center">0.7988</td>
+<td align="center">-0.0012 (0.0026)</td>
+<td align="center">0.0815</td>
+<td align="center">0.0837</td>
+<td align="center">95.7%</td>
+<td align="center">0.3309</td>
+<td align="center">0.0814</td>
 </tr>
 <tr class="odd">
-<td align="left"><strong><code>catmech</code> Contamination
-Mixture</strong></td>
-<td align="center"><strong>0.501</strong></td>
-<td align="center"><strong>+0.001</strong></td>
-<td align="center"><strong>0.038</strong></td>
-<td align="center"><strong>0.037</strong></td>
-<td align="center"><strong>95.0%</strong></td>
-<td align="center"><strong>0.145</strong></td>
+<td align="left">Discard Recorded MI</td>
+<td align="center">0.7896</td>
+<td align="center">-0.0104 (0.0021)</td>
+<td align="center">0.0676</td>
+<td align="center">0.0684</td>
+<td align="center">95.4%</td>
+<td align="center">0.2769</td>
+<td align="center">0.0684</td>
+</tr>
+<tr class="even">
+<td align="left">Simple Linear MI</td>
+<td align="center">0.7806</td>
+<td align="center">-0.0194 (0.0018)</td>
+<td align="center">0.0557</td>
+<td align="center">0.0528</td>
+<td align="center">92.4%</td>
+<td align="center">0.2101</td>
+<td align="center">0.0590</td>
+</tr>
+<tr class="odd">
+<td align="left">Generalized Raking</td>
+<td align="center">0.7853</td>
+<td align="center">-0.0147 (0.0020)</td>
+<td align="center">0.0631</td>
+<td align="center">0.0589</td>
+<td align="center">92.9%</td>
+<td align="center">0.2331</td>
+<td align="center">0.0648</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Contamination Mixture</strong></td>
+<td align="center"><strong>0.7952</strong></td>
+<td align="center"><strong>-0.0048 (0.0014)</strong></td>
+<td align="center"><strong>0.0446</strong></td>
+<td align="center"><strong>0.0467</strong></td>
+<td align="center"><strong>94.9%</strong></td>
+<td align="center"><strong>0.1842</strong></td>
+<td align="center"><strong>0.0449</strong></td>
+</tr>
+<tr class="odd">
+<td align="left"><strong>Gross &amp; Small (<span class="math inline">\(N_{\text{sim}} = 150\)</span>)</strong></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr class="even">
+<td align="left">Oracle (Latent <span class="math inline">\(T\)</span>
+Known)</td>
+<td align="center">0.7970</td>
+<td align="center">-0.0030 (0.0034)</td>
+<td align="center">0.0411</td>
+<td align="center">0.0412</td>
+<td align="center">94.7%</td>
+<td align="center">0.1617</td>
+<td align="center">0.0411</td>
+</tr>
+<tr class="odd">
+<td align="left">Flag Masking (Trust Unflagged)</td>
+<td align="center">0.0609</td>
+<td align="center">-0.7391 (0.0055)</td>
+<td align="center">0.0674</td>
+<td align="center">0.0155</td>
+<td align="center">0.7%</td>
+<td align="center">0.0614</td>
+<td align="center">0.7422</td>
+</tr>
+<tr class="even">
+<td align="left">Simple Linear MI</td>
+<td align="center">0.5646</td>
+<td align="center">-0.2354 (0.0261)</td>
+<td align="center">0.3200</td>
+<td align="center">0.0617</td>
+<td align="center">64.7%</td>
+<td align="center">0.2562</td>
+<td align="center">0.3964</td>
+</tr>
+<tr class="odd">
+<td align="left">Generalized Raking</td>
+<td align="center">0.5156</td>
+<td align="center">-0.2844 (0.0281)</td>
+<td align="center">0.3436</td>
+<td align="center">0.0693</td>
+<td align="center">53.7%</td>
+<td align="center">0.2740</td>
+<td align="center">0.4451</td>
+</tr>
+<tr class="even">
+<td align="left">Complete-Case (25% Audited)</td>
+<td align="center">0.7962</td>
+<td align="center">-0.0038 (0.0064)</td>
+<td align="center">0.0787</td>
+<td align="center">0.0845</td>
+<td align="center">95.3%</td>
+<td align="center">0.3339</td>
+<td align="center">0.0785</td>
+</tr>
+<tr class="odd">
+<td align="left">Discard Recorded MI</td>
+<td align="center">0.7890</td>
+<td align="center">-0.0110 (0.0055)</td>
+<td align="center">0.0671</td>
+<td align="center">0.0695</td>
+<td align="center">95.3%</td>
+<td align="center">0.2816</td>
+<td align="center">0.0678</td>
+</tr>
+<tr class="even">
+<td align="left"><strong>Contamination Mixture</strong></td>
+<td align="center"><strong>0.7883</strong></td>
+<td align="center"><strong>-0.0117 (0.0035)</strong></td>
+<td align="center"><strong>0.0432</strong></td>
+<td align="center"><strong>0.0436</strong></td>
+<td align="center"><strong>94.0%</strong></td>
+<td align="center"><strong>0.1714</strong></td>
+<td align="center"><strong>0.0447</strong></td>
 </tr>
 </tbody>
 </table>
-<p>Under gross recording corruption, naive analysis suffers severe
-attenuation bias (bias: <span class="math inline">\(-0.116\)</span>),
-collapsing nominal 95% coverage to 42.3%. Complete-case analysis
-recovers unbiased estimates but forfeits precision (<span class="math inline">\(\text{SE} = 0.068\)</span>, CI width: 0.260).
-Standard multiple imputation treating un-audited values as missing
-achieves unbiased estimates but suffers from unnecessary variance
-inflation (<span class="math inline">\(\text{SE} = 0.051\)</span>). In
-contrast, <code>catmech</code> achieves unbiased estimation (bias: <span class="math inline">\(+0.001\)</span>), exact 95.0% coverage, and
-standard error (<span class="math inline">\(\text{SE} = 0.038\)</span>)
-approaching the theoretical oracle, delivering a 44% variance reduction
-over complete-case analysis.</p>
+<p>In the <code>missed_flags</code> scenario, trusting unflagged
+recordings (<code>v02_mask_normal</code>) suffers severe attenuation
+bias (<span class="math inline">\(-0.0815\)</span>), collapsing 95%
+coverage to 55.9%. Complete-case analysis (<code>gold_only</code>) and
+discarding recorded values (<code>reference_normal</code>) remain
+unbiased but forfeit precision (mean CI widths of 0.3309 and 0.2769).
+The <code>catmech</code> contamination mixture model recovers unbiased
+estimates (bias: <span class="math inline">\(-0.0048\)</span>), achieves
+94.9% coverage, and narrows confidence intervals by 33.5% relative to
+discarding recorded values (<code>reference_normal</code>) and by 44.3%
+relative to complete-case analysis (<code>gold_only</code>). When gross
+transcription errors are mixed with small discrepancies
+(<code>error_gross_and_small</code>), both simple linear MI (bias: <span class="math inline">\(-0.2354\)</span>, coverage: 64.7%) and generalized
+raking (bias: <span class="math inline">\(-0.2844\)</span>, coverage:
+53.7%) break down because gross outliers corrupt the linear calibration
+slope, whereas <code>catmech_contamination()</code> preserves 94.0%
+coverage and low RMSE (0.0447).</p>
+<p>Across the four primary 1,000-cohort cells (<code>clean</code>,
+<code>flagged_errors</code>, <code>missed_flags</code>, and
+<code>site_shift_declared</code>), <code>catmech_contamination()</code>
+met the pre-specified <span class="math inline">\([0.925,
+0.975]\)</span> Wilson coverage screen in three cells (96.5%, 96.3%, and
+94.9% coverage) and narrowly missed the screen in
+<code>site_shift_declared</code> at 93.7% coverage (Wilson interval
+<span class="math inline">\([0.9202, 0.9505]\)</span>, bias <span class="math inline">\(-0.0085\)</span>, MCSE 0.0016), while reducing
+mean interval width by 30% to 38% across all four primary cells relative
+to discarding recorded values.</p>
 </div>
 <div id="scenario-2-finite-sample-variance-and-clustered-audits" class="section level2" number="4.2">
 <h2><span class="header-section-number">4.2</span> Scenario 2:
-Finite-Sample Variance and Clustered Audits</h2>
+Finite-sample variance and clustered audits</h2>
 <p>In multicenter trials with <span class="math inline">\(C\)</span>
 clinical sites, clustering induces correlation that can distort variance
 estimation. In an evaluation of 148,500 requests across clustered
-designs, standard cluster-robust standard errors (CR1/CR2) exhibited
-severe undercoverage when the number of clusters was small (<span class="math inline">\(C \le 8\)</span>). The delete-one-cluster
-jackknife (CV3) variance estimator restored empirical coverage to
-nominal levels (92.0% to 96.8%) across all evaluated settings,
-justifying its establishment as the default variance estimator in
-<code>catmech_pool_lm(cluster = )</code>.</p>
+designs (148,486 returned intervals and 14 rank-deficiency refusals),
+standard cluster-robust standard errors (<code>cr1s</code>) and
+Satterthwaite degrees of freedom (<code>cr2</code>, which inflated
+interval widths by up to 95%) failed the pre-specified eligibility
+rules. The delete-one-cluster jackknife (<code>cv3</code>) met all
+eligibility criteria, restoring recount coverage to 92.0%–97.5% across
+11 clinical indicators and reducing mean distance from nominal 95%
+coverage from 3.18 to 1.47 percentage points under random-intercept
+imputation, justifying its establishment as the default variance
+estimator in <code>catmech_pool_lm(cluster = )</code>.</p>
 </div>
 </div>
 <div id="real-world-empirical-benchmarks" class="section level1" number="5">
-<h1><span class="header-section-number">5</span> Real-World Empirical
-Benchmarks</h1>
+<h1><span class="header-section-number">5</span> Real-world empirical
+benchmarks</h1>
 <p>To test whether the advantages observed in synthetic simulations
 generalize to real-world data, the package was evaluated against two
 large-scale public datasets containing actual recording discrepancies
 without synthetic corruption (33,800 requests executed across 1,000
-resampled cohorts of size <span class="math inline">\(N =
-600\)</span>):</p>
+resampled cohorts of size <span class="math inline">\(N = 600\)</span>
+at the 25% audit fraction and 200 cohorts at secondary fractions):</p>
 <table>
 <colgroup>
+<col width="29%" />
+<col width="10%" />
 <col width="13%" />
 <col width="17%" />
-<col width="17%" />
-<col width="17%" />
-<col width="17%" />
-<col width="17%" />
+<col width="10%" />
+<col width="18%" />
 </colgroup>
 <thead>
 <tr class="header">
 <th align="left">Dataset &amp; Metric</th>
-<th align="center">Audit 25% Sample</th>
-<th align="center">Discard Recorded</th>
-<th align="center">Contamination Model</th>
-<th align="center">Simple Linear MI</th>
-<th align="center">Full Reference (Oracle)</th>
+<th align="center">Audit 25%</th>
+<th align="center">Discard Rec.</th>
+<th align="center">Contamination</th>
+<th align="center">Linear MI</th>
+<th align="center">Full Ref. (Oracle)</th>
 </tr>
 </thead>
 <tbody>
@@ -2201,42 +2349,45 @@ resampled cohorts of size <span class="math inline">\(N =
 root mean squared error (RMSE reduced by 43% on ClinicalTrials.gov and
 48% on NHANES) relative to discarding un-audited values. Crucially, when
 recording discrepancies are subtle and continuous rather than gross and
-bimodal, simple linear imputation (<code>catmech_pool_lm</code>) matched
-or slightly outperformed the mixture model with fewer parametric
+bimodal, simple linear imputation
+(<code>catmech_reference(use_recorded = TRUE)</code>) matched or
+slightly outperformed the mixture model with fewer parametric
 assumptions.</p>
 <p>In facility-level data verification benchmarked against the Rwanda
 Health Management Information System recount audit <span class="citation">(Nshimyiryo et al. 2020)</span> across 11 clinical
 indicators, <code>catmech</code>’s CV3 jackknife cluster variance
-achieved nominal 92% to 97% coverage across clinical facilities.</p>
+achieved nominal 92.0% to 97.5% recount coverage across clinical
+facilities.</p>
 </div>
 <div id="methodological-decision-framework" class="section level1" number="6">
-<h1><span class="header-section-number">6</span> Methodological Decision
-Framework</h1>
+<h1><span class="header-section-number">6</span> Methodological decision
+framework</h1>
 <p>Based on our empirical and simulation findings, we recommend the
 following evidence-based protocol for clinical data audits:</p>
-<pre><code>               [ Clinical Measurement Discrepancy Detected ]
-                                     |
-               Is discrepancy gross, large, and separable?
-                (e.g., transcription slips, lot shifts)
-                               /           \
-                             YES            NO (mild rounding, diffuse noise)
-                             /               \
-              [ Use Contamination Model ]    [ Use Simple Linear MI ]
-               catmech_contamination()        catmech_reference(use_recorded = TRUE)</code></pre>
+<pre><code>         [ Clinical Measurement Discrepancy Detected ]
+                              |
+         Is discrepancy gross, large, and separable?
+          (e.g., transcription slips, lot shifts)
+                         /           \
+                       YES            NO (rounding, diffuse noise)
+                       /               \
+        [ Use Contamination Model ]    [ Use Simple Linear MI ]
+         catmech_contamination()        catmech_reference(
+                                          use_recorded = TRUE)</code></pre>
 <ol style="list-style-type: decimal">
-<li><strong>Gross, Separable Contamination</strong>: When recording
+<li><strong>Gross, separable contamination</strong>: When recording
 errors represent distinct corruption events (e.g., decimal transcription
 slips, sensor failures), the Bayesian contamination mixture model is
 recommended to prevent severe attenuation bias while maintaining
-oracle-level precision.</li>
-<li><strong>Subtle, Diffuse Differences</strong>: When errors represent
+near-oracle precision.</li>
+<li><strong>Subtle, diffuse differences</strong>: When errors represent
 continuous rounding or mild reporting bias, simple linear imputation is
 recommended as a parsimonious baseline.</li>
 </ol>
 </div>
-<div id="discussion-the-simulation-to-practice-divergence-and-methodological-implications" class="section level1" number="7">
-<h1><span class="header-section-number">7</span> Discussion: The
-Simulation-to-Practice Divergence and Methodological Implications</h1>
+<div id="discussion-simulation-to-practice-divergence-and-methodological-implications" class="section level1" number="7">
+<h1><span class="header-section-number">7</span> Discussion:
+simulation-to-practice divergence and methodological implications</h1>
 <p>A principal methodological contribution of this work is illuminating
 the divergence between synthetic Monte Carlo simulations and empirical
 real-world clinical audits, an insight with direct consequences for
@@ -2245,12 +2396,15 @@ clinical trial analysis.</p>
 are almost universally benchmarked against synthetic datasets with
 clean, gross, and bimodal error structures (e.g., decimal point
 displacements, transcription slips, or large sensor batch shifts). Under
-these simulated conditions—such as Scenario 1 of our Monte Carlo
-benchmarks—the Bayesian contamination mixture model achieves dramatic
-success: it eliminates the substantial attenuation bias of naive
-analyses (bias reduced from -0.116 to +0.001) while cutting variance by
-44% relative to complete-case analysis and delivering nominal 95.0%
-coverage.</p>
+these simulated conditions, as shown in Scenario 1 of our Monte Carlo
+benchmarks, the Bayesian contamination mixture model achieves
+substantial gains: in <code>error_gross_and_small</code>, it eliminates
+the severe attenuation bias that compromises simple linear imputation
+(bias of <span class="math inline">\(-0.0117\)</span> vs. <span class="math inline">\(-0.2354\)</span>) while narrowing confidence
+intervals by 44.3% relative to complete-case analysis in
+<code>missed_flags</code> (<span class="math inline">\(0.1842\)</span>
+vs. <span class="math inline">\(0.3309\)</span>) and preserving nominal
+coverage (94.0% to 94.9%).</p>
 <p>However, our empirical investigations across large-scale real-world
 registries without synthetic corruption (the ClinicalTrials.gov registry
 and the NHANES epidemiological audit) reveal a fundamentally different
@@ -2269,10 +2423,10 @@ fewer parametric assumptions and zero MCMC convergence overhead.</p>
 <p>This divergence is not a defect of the mixture engine, but a crucial
 empirical finding: <em>simulated gross errors favor mixture modeling,
 but real-world diffuse errors favor linear multiple imputation</em>.
-Methodologically, this divergence proves why the decision framework
-formalized in Section 6 is essential. Rather than assuming that a
-complex Bayesian mixture model is universally optimal, trialists must
-treat the choice of imputation model as an empirical question.
+Methodologically, this divergence demonstrates why the decision
+framework formalized in Section 6 is essential. Rather than assuming
+that a complex Bayesian mixture model is universally optimal, trialists
+must treat the choice of imputation model as an empirical question.
 <code>catmech</code> operationalizes this principle by providing:</p>
 <ol style="list-style-type: decimal">
 <li>Exploratory diagnostic screening via
@@ -2293,8 +2447,8 @@ equips biostatisticians with a defensible, reproducible, and
 mathematically grounded framework for clinical data verification.</p>
 </div>
 <div id="regulatory-compliance-and-data-governance" class="section level1" number="8">
-<h1><span class="header-section-number">8</span> Regulatory Compliance
-and Data Governance</h1>
+<h1><span class="header-section-number">8</span> Regulatory compliance
+and data governance</h1>
 <p>Regulatory submissions in biopharmaceutical and medical device trials
 (FDA 21 CFR Part 11 <span class="citation">(U.S. Food and Drug
 Administration 2003)</span> and ICH GCP E9 <span class="citation">(International Conference on Harmonisation
@@ -2314,27 +2468,29 @@ envelopes.</li>
 </ol>
 </div>
 <div id="quality-assurance-and-verification" class="section level1" number="9">
-<h1><span class="header-section-number">9</span> Quality Assurance and
-Verification</h1>
+<h1><span class="header-section-number">9</span> Quality assurance and
+verification</h1>
 <p><code>catmech</code> has been developed under an automated software
 verification harness:</p>
 <ul>
-<li><strong>Unit Tests</strong>: 1,754 unit tests executed via
+<li><strong>Unit tests</strong>: 1,754 unit tests executed via
 <code>testthat</code>, achieving 0 failures, 0 warnings, and 0
 skips.</li>
-<li><strong>CRAN Conformance</strong>: Fully compliant with CRAN package
+<li><strong>CRAN conformance</strong>: Fully compliant with CRAN package
 policies, passing <code>R CMD check --no-manual</code> with
 <code>Status: OK</code> (0 errors, 0 warnings, 0 notes).</li>
-<li><strong>Automated Fact Checking</strong>: Verified against an
-independent Python verification suite (<code>verify-artifacts.py</code>
-and <code>fact_check.py</code>) confirming exact correspondence across
-118 claims, 10 distinct simulation benchmark studies, and hundreds of
-thousands of historical requests.</li>
+<li><strong>Automated artifact verification</strong>: Verified against
+an independent Python verification suite
+(<code>verify-artifacts.py</code>,
+<code>verify-release-archive.py</code>, and
+<code>verify_paper_numbers.py</code>) confirming exact correspondence
+across 10 frozen simulation and empirical benchmark archives and over
+500,000 replicate requests.</li>
 </ul>
 </div>
 <div id="availability-and-software-details" class="section level1" number="10">
 <h1><span class="header-section-number">10</span> Availability and
-Software Details</h1>
+software details</h1>
 <p><code>catmech</code> is open-source software distributed under the
 MIT license. It requires R (<span class="math inline">\(\ge\)</span>
 4.1.0) and a C++17 compiler, utilizing <code>Rcpp</code>,
@@ -2356,9 +2512,10 @@ Freedom with Multiple Imputation.”</span> <em>Biometrika</em> 86 (4):
 948–55. <a href="https://doi.org/10.1093/biomet/86.4.948">https://doi.org/10.1093/biomet/86.4.948</a>.
 </div>
 <div id="ref-breslow2003semiparametric" class="csl-entry">
-Breslow, N. E., J. M. Robins, and J. A. Wellner. 2003. <span>“On the
-Semiparametric Efficiency of Two-Phase Stratified Sampling
-Estimators.”</span> <em>Statistica Sinica</em> 13 (4): 891–908.
+Breslow, Norman E., Brad McNeney, and Jon A. Wellner. 2003. <span>“Large
+Sample Theory for Semiparametric Regression Models with Two-Phase,
+Outcome Dependent Sampling.”</span> <em>The Annals of Statistics</em> 31
+(4): 1110–39. <a href="https://doi.org/10.1214/aos/1059655907">https://doi.org/10.1214/aos/1059655907</a>.
 </div>
 <div id="ref-vanbuuren2011mice" class="csl-entry">
 Buuren, Stef van, and Karin Groothuis-Oudshoorn. 2011. <span>“<span class="nocase">mice</span>: Multivariate Imputation by Chained Equations
@@ -2386,9 +2543,9 @@ Honaker, James, Gary King, and Matthew Blackwell. 2011.
 <em>Journal of Statistical Software</em> 45 (7): 1–47. <a href="https://doi.org/10.18637/jss.v045.i07">https://doi.org/10.18637/jss.v045.i07</a>.
 </div>
 <div id="ref-huang2013simple" class="csl-entry">
-Huang, Alan, and M. P. Wand. 2013. <span>“Simple Half-t Priors for
-Variance Properties in Multilevel Models.”</span> <em>Biometrika</em>
-100 (2): 439–53. <a href="https://doi.org/10.1093/biomet/ass072">https://doi.org/10.1093/biomet/ass072</a>.
+Huang, Alan, and M. P. Wand. 2013. <span>“Simple Marginally
+Noninformative Prior Distributions for Covariance Matrices.”</span>
+<em>Bayesian Analysis</em> 8 (2): 439–52. <a href="https://doi.org/10.1214/13-BA815">https://doi.org/10.1214/13-BA815</a>.
 </div>
 <div id="ref-ich1998e9" class="csl-entry">
 International Conference on Harmonisation. 1998. <em><span>ICH</span>
@@ -2410,7 +2567,7 @@ American Statistical Association</em> 84 (408): 1074–78. <a href="https://doi.
 <div id="ref-neyman1938contribution" class="csl-entry">
 Neyman, Jerzy. 1938. <span>“Contribution to the Theory of Sampling Human
 Populations.”</span> <em>Journal of the American Statistical
-Association</em> 33 (201): 101–16. <a href="https://doi.org/10.1080/01621459.1938.10502299">https://doi.org/10.1080/01621459.1938.10502299</a>.
+Association</em> 33 (201): 101–16. <a href="https://doi.org/10.1080/01621459.1938.10503378">https://doi.org/10.1080/01621459.1938.10503378</a>.
 </div>
 <div id="ref-nshimyiryo2020health" class="csl-entry">
 Nshimyiryo, Alphonse, Catherine M. Kirk, Stephen M. Sauer, et al. 2020.
