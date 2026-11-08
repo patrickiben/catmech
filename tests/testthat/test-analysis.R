@@ -150,7 +150,13 @@ test_that("S3 print and summary methods provide clean, informative console outpu
   expect_true(any(grepl("default", sens_txt)))
 })
 
-test_that("catmech_pool_glm pools logistic and Poisson models with Rubin's rules", {
+# The GLM and Cox tests below add outcomes to the completed data after imputation, to test
+# the pooling arithmetic, so the outcome-role warning is expected there and muffled;
+# test-review-fixes.R tests the warning itself. Other warnings still surface.
+muffle_outcome_role <- function(expr) withCallingHandlers(expr, warning = function(w)
+  if (grepl("was not an imputation predictor", conditionMessage(w), fixed = TRUE)) invokeRestart("muffleWarning"))
+
+test_that("catmech_pool_glm pools logistic and Poisson models with Rubin's rules", muffle_outcome_role({
   fit <- analysis_fixture()
   for (j in seq_along(fit$completed)) {
     fit$completed[[j]]$y_bin <- as.numeric(fit$completed[[j]]$outcome > stats::median(fit$completed[[j]]$outcome))
@@ -187,9 +193,9 @@ test_that("catmech_pool_glm pools logistic and Poisson models with Rubin's rules
   expect_s3_class(sens_glm, "catmech_sensitivity")
   expect_identical(sens_glm$table$status[1L], "ok")
   expect_true(is.finite(sens_glm$table$estimate[1L]))
-})
+}))
 
-test_that("catmech_pool_coxph pools Cox proportional hazards models with Rubin's rules", {
+test_that("catmech_pool_coxph pools Cox proportional hazards models with Rubin's rules", muffle_outcome_role({
   fit <- analysis_fixture()
   set.seed(123)
   n <- nrow(fit$completed[[1L]])
@@ -240,4 +246,4 @@ test_that("catmech_pool_coxph pools Cox proportional hazards models with Rubin's
   # Negative control: missing cluster column
   expect_error(catmech_pool_coxph(fit, f_cox, cluster = "nonexistent_col"),
                "cluster must name a column")
-})
+}))

@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use this software, cite this repository version and the underlying imputation literature."
 type: software
 title: "catmech: Auditable Model-Based Imputation and Category Sensitivity"
-version: 1.0.0
-date-released: 2026-11-05
+version: 1.0.1
+date-released: 2026-11-07
 authors:
   - family-names: Iben
     given-names: Patrick

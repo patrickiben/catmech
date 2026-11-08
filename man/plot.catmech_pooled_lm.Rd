@@ -64,7 +64,7 @@ df <- data.frame(
 df$lab_ref <- df$lab
 df$lab_ref[11:n] <- NA
 res <- catmech_reference(df, value = "lab", reference = "lab_ref",
-                         predictors = "age", m = 2, seed = 1)
+                         predictors = c("age", "y"), m = 2, seed = 1)
 pooled <- catmech_pool_lm(res, y ~ lab + age)
 plot(pooled)
 }

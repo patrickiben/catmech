@@ -33,7 +33,10 @@ ratios (for logistic regression) or incidence rate ratios (for Poisson regressio
 
 \item{allow_sensitivity}{Explicitly allow pooled calculations for sensitivity output.}
 
-\item{cluster}{Optional name of a column identifying clusters for cluster-robust inference.}
+\item{cluster}{Optional name of a column identifying clusters for cluster-robust inference.
+Each completed analysis then uses the CR1S sandwich, factor (G / (G - 1)) ((n - 1) / (n - p)),
+built from the unscaled inverse information so that it does not depend on an estimated
+dispersion, and pooling uses complete-data degrees of freedom of clusters minus one.}
 
 \item{...}{Additional arguments passed to [stats::glm()] (e.g. `control = list(maxit = 50)`).}
 }
@@ -56,6 +59,13 @@ Fits a generalized linear model ([stats::glm()]) across each completed dataset
 and pools parameter estimates and standard errors using Rubin's rules with
 Barnard & Rubin (1999) small-sample degrees of freedom.
 }
+\details{
+When the audited value is an analysis predictor, include the analysis outcome
+  among the imputation `predictors`. Imputing a predictor without the outcome biases its
+  coefficient toward zero; a warning says so. In a check recorded in
+  `validation/REVIEW_FIXES_2026-11-07.md`, a logistic log odds ratio of 0.80 came out at
+  0.61, with 65\% coverage of nominal 95\% intervals, when the outcome was left out.
+}
 \examples{
 set.seed(123)
 n <- 50
@@ -66,8 +76,9 @@ df <- data.frame(
 )
 df$lab_ref <- df$lab
 df$lab_ref[11:n] <- NA
+# lab is a predictor below, so the outcome y joins the imputation model.
 res <- catmech_reference(df, value = "lab", reference = "lab_ref",
-                         predictors = "age", m = 2, seed = 1)
+                         predictors = c("age", "y"), m = 2, seed = 1)
 pooled_glm <- catmech_pool_glm(res, y ~ lab + age, family = stats::binomial(),
                                exponentiate = TRUE)
 print(pooled_glm)

@@ -14,15 +14,24 @@
 #' @param reference Character string naming the audit reference column (with `NA` for un-audited rows).
 #' @param formula Model formula for the downstream analysis (e.g. `outcome ~ lab_value + age`).
 #' @param predictors Character vector of predictor column names to include in the imputation models.
-#'   If `NULL`, non-target predictors from `formula` present in `data` are automatically detected.
+#'   If `NULL`, every variable in `formula` other than `value` and `reference` is used, including
+#'   the outcome. When the audited value is an analysis predictor, leaving the outcome out of the
+#'   imputation model biases its coefficient toward zero; a supplied vector without the outcome
+#'   draws a warning from the pooling step.
 #' @param family Error distribution and link function for GLM (default [stats::gaussian()] for linear models;
 #'   use [stats::binomial()] for logistic regression).
 #' @param m Number of completed datasets to impute (default 10L).
 #' @param seed Random seed for reproducible imputation (default 123L).
 #' @param conf_level Confidence level (default 0.95).
 #' @param agreement_tol Tolerance for agreement audit in contamination model (default 1.0).
-#' @param cluster Optional cluster column name for cluster-robust pooling.
-#' @param ... Additional arguments passed to model estimation.
+#' @param cluster Optional complete cluster column. Every strategy then uses a cluster-robust
+#'   variance with complete-data degrees of freedom of clusters minus one: the delete-one-cluster
+#'   jackknife for linear models, as in [catmech_pool_lm()], and the CR1S sandwich for other
+#'   families, as in [catmech_pool_glm()]. It is not passed to `catmech_reference(cluster = )`,
+#'   whose clustered imputation biased slopes toward zero in simulations when the audited value
+#'   was a predictor (`validation/VARIANCE_MI_SYNTHESIS.md`); a formula term naming the same
+#'   column is still used as an ordinary predictor.
+#' @param ... Currently unused.
 #' @return An object of class `c("catmech_strategy_comparison", "data.frame")` containing:
 #'   \item{strategy}{Strategy label (`validation_subsample`, `naive_trust_recorded`, `linear_mi_recorded`, `contamination_model`).}
 #'   \item{term}{Model coefficient term.}
@@ -33,6 +42,8 @@
 #'   \item{ci_width}{Confidence interval width (upper - lower).}
 #'   \item{rel_efficiency}{Relative precision (inverse variance ratio) relative to the validation subsample.}
 #'   \item{n_total, n_audited}{Total observations and audited records count.}
+#'   The imputation predictors used are stored in the `imputation_predictors` attribute.
+#'   If the contamination model fails, its rows are `NA` and a warning gives the reason.
 #' @examples
 #' set.seed(123)
 #' n <- 50
@@ -71,14 +82,47 @@ catmech_compare_strategies <- function(data, value, reference, formula,
   if (n_audited < 5L)
     stop("At least 5 audited records are required to compare strategies.", call. = FALSE)
 
-  # Detect imputation predictors if not supplied
+  # Detect imputation predictors if not supplied. The outcome stays in: when the audited
+  # value is an analysis predictor, imputing it without the outcome attenuates its slope.
   if (is.null(predictors)) {
-    all_vars <- all.vars(formula)
-    response_var <- all_vars[1L]
-    cand_preds <- setdiff(all_vars, c(response_var, value, reference))
-    if (length(cand_preds) == 0L) cand_preds <- setdiff(response_var, c(value, reference))
-    cand_preds <- intersect(cand_preds, names(data))
+    rhs_vars <- all.vars(stats::delete.response(stats::terms(formula, data = data)))
+    lhs_vars <- if (length(formula) == 3L) all.vars(formula[[2L]]) else character()
+    cand_preds <- intersect(setdiff(unique(c(lhs_vars, rhs_vars)), c(value, reference)), names(data))
     predictors <- if (length(cand_preds) > 0L) cand_preds else NULL
+  }
+
+  ids <- NULL
+  if (!is.null(cluster)) {
+    if (!is.character(cluster) || length(cluster) != 1L || is.na(cluster) || !cluster %in% names(data))
+      stop("cluster must name a column in data.", call. = FALSE)
+    ids <- data[[cluster]]
+    if (anyNA(ids) || any(!nzchar(trimws(as.character(ids)))))
+      stop("cluster must not contain missing or blank values.", call. = FALSE)
+  }
+  # Complete-data rows: a cluster-robust variance on the same footing as the pooled strategies.
+  direct_rows <- function(fit, rows, label) {
+    cf <- stats::coef(summary(fit))
+    se <- cf[, 2L]
+    df <- if (is_gaussian) fit$df.residual else Inf
+    if (!is.null(ids)) {
+      used <- if (is.null(fit$na.action)) rows else rows[-as.integer(fit$na.action)]
+      g <- ids[used]
+      if (length(unique(g)) < 2L)
+        stop("A cluster-robust variance needs at least two clusters in every strategy.", call. = FALSE)
+      v <- if (is_gaussian) catmech_cluster_jackknife(fit, g) else catmech_glm_cluster_vcov(fit, g)
+      se <- sqrt(diag(v))[rownames(cf)]
+      df <- length(unique(g)) - 1
+      if (is_gaussian) {
+        alone <- catmech_cluster_alone(fit, g)
+        if (length(alone))
+          warning("In the ", label, " strategy a single cluster determines these coefficients, so their cluster-robust intervals can be far too narrow: ",
+                  paste(alone, collapse = ", "), ".", call. = FALSE)
+      }
+    }
+    critical <- if (is.finite(df)) stats::qt((1 + conf_level) / 2, df) else stats::qnorm((1 + conf_level) / 2)
+    data.frame(strategy = label, term = rownames(cf), estimate = cf[, 1L], std.error = se,
+      df = df, lower = cf[, 1L] - critical * se, upper = cf[, 1L] + critical * se,
+      stringsAsFactors = FALSE)
   }
 
   results <- list()
@@ -91,19 +135,8 @@ catmech_compare_strategies <- function(data, value, reference, formula,
   } else {
     stats::glm(formula, data = d_sub, family = family, na.action = stats::na.fail)
   }
-  cf_sub <- stats::coef(summary(fit_sub))
-  terms_sub <- rownames(cf_sub)
-  crit_sub <- if (is_gaussian) stats::qt((1 + conf_level) / 2, fit_sub$df.residual) else stats::qnorm((1 + conf_level) / 2)
-  sub_df <- data.frame(
-    strategy = "validation_subsample",
-    term = terms_sub,
-    estimate = cf_sub[, 1L],
-    std.error = cf_sub[, 2L],
-    df = if (is_gaussian) fit_sub$df.residual else Inf,
-    lower = cf_sub[, 1L] - crit_sub * cf_sub[, 2L],
-    upper = cf_sub[, 1L] + crit_sub * cf_sub[, 2L],
-    stringsAsFactors = FALSE
-  )
+  sub_df <- direct_rows(fit_sub, audited_idx, "validation_subsample")
+  terms_sub <- sub_df$term
   results[["validation_subsample"]] <- sub_df
 
   # Strategy 2: Naive analysis (trust recorded values)
@@ -113,26 +146,13 @@ catmech_compare_strategies <- function(data, value, reference, formula,
   } else {
     stats::glm(formula, data = d_naive, family = family, na.action = stats::na.omit)
   }
-  cf_naive <- stats::coef(summary(fit_naive))
-  terms_naive <- rownames(cf_naive)
-  crit_naive <- if (is_gaussian) stats::qt((1 + conf_level) / 2, fit_naive$df.residual) else stats::qnorm((1 + conf_level) / 2)
-  naive_df <- data.frame(
-    strategy = "naive_trust_recorded",
-    term = terms_naive,
-    estimate = cf_naive[, 1L],
-    std.error = cf_naive[, 2L],
-    df = if (is_gaussian) fit_naive$df.residual else Inf,
-    lower = cf_naive[, 1L] - crit_naive * cf_naive[, 2L],
-    upper = cf_naive[, 1L] + crit_naive * cf_naive[, 2L],
-    stringsAsFactors = FALSE
-  )
-  results[["naive_trust_recorded"]] <- naive_df
+  results[["naive_trust_recorded"]] <- direct_rows(fit_naive, seq_len(n_total), "naive_trust_recorded")
 
   # Strategy 3: Linear MI given recorded value
   res_linear <- catmech_reference(
     data = data, value = value, reference = reference,
     predictors = predictors, use_recorded = TRUE,
-    m = m, seed = seed, cluster = cluster
+    m = m, seed = seed
   )
   pooled_linear <- if (is_gaussian) {
     catmech_pool_lm(res_linear, formula, conf_level = conf_level, cluster = cluster)
@@ -174,6 +194,7 @@ catmech_compare_strategies <- function(data, value, reference, formula,
       stringsAsFactors = FALSE
     )
   }, error = function(e) {
+    warning("The contamination model failed, so its rows are NA: ", conditionMessage(e), call. = FALSE)
     data.frame(
       strategy = "contamination_model",
       term = terms_sub,
@@ -199,7 +220,9 @@ catmech_compare_strategies <- function(data, value, reference, formula,
   comb$rel_efficiency <- (se_sub_map[comb$term] / comb$std.error)^2
 
   rownames(comb) <- NULL
-  structure(comb, class = c("catmech_strategy_comparison", "data.frame"))
+  structure(comb, class = c("catmech_strategy_comparison", "data.frame"),
+            imputation_predictors = if (is.null(predictors)) character() else predictors,
+            cluster = cluster)
 }
 
 #' Print strategy comparison results
@@ -213,8 +236,14 @@ print.catmech_strategy_comparison <- function(x, digits = 4L, ...) {
   n_tot <- if (!is.null(x$n_total[1L])) x$n_total[1L] else NA_integer_
   n_aud <- if (!is.null(x$n_audited[1L])) x$n_audited[1L] else NA_integer_
   cat("-- Catmech Audit Strategy Comparison --\n")
-  cat(sprintf("Cohort Size (N): %d | Audited Records (n): %d (%.1f%% audit fraction)\n\n",
+  cat(sprintf("Cohort Size (N): %d | Audited Records (n): %d (%.1f%% audit fraction)\n",
               n_tot, n_aud, 100 * n_aud / n_tot))
+  preds <- attr(x, "imputation_predictors")
+  if (!is.null(preds))
+    cat("Imputation predictors: ", if (length(preds)) paste(preds, collapse = ", ") else "none", "\n", sep = "")
+  if (!is.null(attr(x, "cluster")))
+    cat("Cluster-robust variances by: ", attr(x, "cluster"), "\n", sep = "")
+  cat("\n")
 
   tbl <- as.data.frame(x)
   num_cols <- c("estimate", "std.error", "df", "lower", "upper", "ci_width", "rel_efficiency")

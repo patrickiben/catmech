@@ -1,9 +1,9 @@
-# catmech v1.0.0 — Chat Handoff & Project Context Packet
+# catmech v1.0.1 — Chat Handoff & Project Context Packet
 
 **Date:** November 6, 2026  
-**Repository Path:** `/Users/patrickiben/Documents/catmech`  
+**Repository Path:** your local clone of this repository  
 **Git Remote:** `https://github.com/patrickiben/catmech.git` (branch: `main`; run `git log -1` for the current commit)  
-**Package Version:** `1.0.0`  
+**Package Version:** `1.0.1` (review fixes of 2026-11-07; 1.0.0 described below where noted)  
 **Maintainer:** Patrick Iben (`patrickiben@gmail.com`, ORCID: `0009-0005-2443-7973`)  
 **License:** MIT  
 
@@ -20,18 +20,18 @@ Instead of either discarding un-audited records (inflating standard errors) or n
 4. **Side-by-Side Audit Strategy Comparison** (`catmech_compare_strategies()`) evaluating validation subsamples, naive analysis, linear MI, and mixture models with comparative forest plots.
 5. **Native Base R Visualizations**: Forest plots for all pooled models (`plot.catmech_pooled_glm()`, `plot.catmech_pooled_coxph()`, `plot.catmech_pooled_lm()`), strategy comparisons, PIT calibration histograms (`plot.catmech_holdout_check()`), recording discrepancy audits, and power curves.
 6. **Tidyverse / `broom` Generics**: `tidy()` and `glance()` S3 methods for all pooled regression models.
-7. **Audit Trail & Provenance Records** (`catmech_audit_trail()`): SHA-256 data, specification, and completion checksums supporting regulatory documentation (FDA 21 CFR Part 11 and ICH E9) in Markdown, JSON, and standalone HTML formats.
+7. **Audit Trail & Provenance Records** (`catmech_audit_trail()`): SHA-256 hashes of the input data and completions (serialized R data frames) and of the specification's canonical JSON text, in Markdown, JSON, and standalone HTML formats. They can support documentation, but do not make the record tamper-evident or establish FDA 21 CFR Part 11 or ICH E9 compliance.
 
 ---
 
 ## 2. Current Status & Verification Health
 
-The package is **100% audited, verified, and ready for official CRAN submission**.
+**Review of 2026-11-07:** three confirmed bugs and several overclaims were fixed in 1.0.1 (see `NEWS.md` and `validation/REVIEW_FIXES_2026-11-07.md`): `catmech_compare_strategies()` dropped the outcome from imputation, the GLM and Cox examples left the outcome out of the imputation model, and the clustered GLM variance was scaled by the estimated dispersion (too wide above 1, too narrow below 1, as in most Gamma fits). `catmech_audit_power()` is now labeled unvalidated. The package has not been submitted to CRAN and has had no outside peer review or clinical validation. The status lines below describe 1.0.0 before that review.
 
 * **Git History**: Clean tree on `main`, pushed to GitHub.
 * **GitHub Actions CI**: **100% GREEN (`✓`)** on all workflows:
   * `R-CMD-check`: Passed on macOS (arm64), Ubuntu (Linux), and Windows Server (`✓`).
-  * `pkgdown`: Passed and deployed to GitHub Pages (`gh-pages` branch) (`✓`).
+  * `pkgdown`: Passed and pushed the `gh-pages` branch (`✓`). GitHub Pages is not enabled for the repository, so the site is not served yet.
 * **Test Suite**: **1,754 unit tests** passing with **0 failures, 0 warnings, 0 skips** (`testthat::test_local()`).
 * **R CMD check**: Passes `R CMD check --as-cran catmech_1.0.0.tar.gz` with **0 errors, 0 warnings** (3 notes: new submission, plus local HTML Tidy and .DS_Store environment notes). CRAN incoming checks with remote URL/DOI and file-URI checks enabled report only the new-submission note.
 * **Fact Check**: `python3 docs/case-study/fact_check.py` validates all **118 empirical claims** across frozen benchmark tables with 100% agreement, 0 broken links, and 1-page PDF constraint compliance.
@@ -55,7 +55,7 @@ The package is **100% audited, verified, and ready for official CRAN submission*
 
 ```
 catmech/
-├── DESCRIPTION               # Package metadata: version 1.0.0, email, ORCID, URLs, deps
+├── DESCRIPTION               # Package metadata: version 1.0.1, email, ORCID, URLs, deps
 ├── NAMESPACE                 # Exports: 26 functions/generics, S3 methods, Rcpp dynlib
 ├── .Rbuildignore             # Ignores docs, validation, tools, pkgdown, paper, etc.
 ├── cran-comments.md          # CRAN submission cover comments
@@ -64,7 +64,7 @@ catmech/
 ├── R/
 │   ├── analysis.R            # Downstream pooling (LM, GLM, Cox), tidy(), glance(), forest plots
 │   ├── audit-plan.R          # Empirical pilot-based audit sample size planning
-│   ├── audit-power.R         # Prospective statistical power curves and plot() method
+│   ├── audit-power.R         # Rough, unvalidated audit-size planning aid and plot() method
 │   ├── audit-trail.R         # SHA-256 provenance reports (Markdown, JSON, HTML)
 │   ├── contamination.R       # Bayesian contamination mixture model & recording audit
 │   ├── marginal-analysis.R   # Joint marginal population regression summaries
@@ -125,7 +125,7 @@ catmech/
 
 ## 5. Verification Commands
 
-Run these from `/Users/patrickiben/Documents/catmech`:
+Run these from the repository root:
 
 ```bash
 # 1. Unit Tests
@@ -141,8 +141,8 @@ python3 tools/verify-artifacts.py
 printf "FLIBS = -L/opt/homebrew/lib/gcc/current -lgfortran -lquadmath\n" > /tmp/catmech_makevars
 export R_MAKEVARS_USER=/tmp/catmech_makevars
 _R_CHECK_CRAN_INCOMING_REMOTE_=false _R_CHECK_SYSTEM_CLOCK_=0 R CMD build .
-_R_CHECK_CRAN_INCOMING_REMOTE_=false _R_CHECK_SYSTEM_CLOCK_=0 R CMD check --as-cran catmech_1.0.0.tar.gz
-rm -rf catmech.Rcheck catmech_1.0.0.tar.gz /tmp/catmech_makevars
+_R_CHECK_CRAN_INCOMING_REMOTE_=false _R_CHECK_SYSTEM_CLOCK_=0 R CMD check --as-cran catmech_1.0.1.tar.gz
+rm -rf catmech.Rcheck catmech_1.0.1.tar.gz /tmp/catmech_makevars
 
 # 5. Render Academic Manuscript
 Rscript -e "rmarkdown::render('paper/manuscript.Rmd', output_format = 'all', quiet = TRUE)"
@@ -153,9 +153,9 @@ Rscript -e "rmarkdown::render('paper/manuscript.Rmd', output_format = 'all', qui
 ## 6. Suggested Next Steps
 
 1. **CRAN Submission**:
-   - Submit `catmech_1.0.0.tar.gz` to the CRAN submission web form: `https://cran.r-project.org/submit.html` or via `devtools::submit_cran()`.
+   - Run win-builder (R-devel) on 1.0.1 and update `cran-comments.md`, then submit `catmech_1.0.1.tar.gz` to the CRAN submission web form: `https://cran.r-project.org/submit.html` or via `devtools::submit_cran()`.
 2. **GitHub Release**:
-   - Create a release tag `v1.0.0` on `https://github.com/patrickiben/catmech`.
+   - Create a release tag `v1.0.1` on `https://github.com/patrickiben/catmech`.
 3. **Deploy Pkgdown Site**:
    - Enable GitHub Pages in repository settings pointing to `gh-pages` branch, or run `pkgdown::build_site()`.
 4. **Journal Submission**:
@@ -168,14 +168,14 @@ Rscript -e "rmarkdown::render('paper/manuscript.Rmd', output_format = 'all', qui
 Copy and paste the block below into the first prompt of your new chat:
 
 ```markdown
-I am continuing work on the `catmech` R package (version 1.0.0).
+I am continuing work on the `catmech` R package (version 1.0.1).
 
-Repository path: `/Users/patrickiben/Documents/catmech`
+Repository path: my local clone of `patrickiben/catmech`
 Git Remote: `https://github.com/patrickiben/catmech.git` (branch `main`)
 Maintainer: Patrick Iben (`patrickiben@gmail.com`, ORCID: `0009-0005-2443-7973`)
 
-The package is fully implemented, documented, and QC'd for official release 1.0.0:
-- All 1,754 unit tests pass with 0 failures and 0 warnings (`testthat::test_local()`).
+The package is implemented and documented as release 1.0.1, which fixes three bugs a review of 1.0.0 found on 2026-11-07 (see `NEWS.md`); it has had no outside peer review:
+- At 1.0.0, all 1,754 test expectations passed; after the review fixes, 1,812 pass with 0 failures and 0 warnings (`testthat::test_local()`).
 - `R CMD check --as-cran` passes with 0 errors and 0 warnings.
 - `python3 docs/case-study/fact_check.py` validates all 118 claims against frozen benchmarks (100% match, 0 broken links, 1-page PDF compliance).
 - `python3 tools/verify-artifacts.py` passes all 10 historical benchmark studies.

@@ -29,7 +29,10 @@ catmech_compare_strategies(
 \item{formula}{Model formula for the downstream analysis (e.g. `outcome ~ lab_value + age`).}
 
 \item{predictors}{Character vector of predictor column names to include in the imputation models.
-If `NULL`, non-target predictors from `formula` present in `data` are automatically detected.}
+If `NULL`, every variable in `formula` other than `value` and `reference` is used, including
+the outcome. When the audited value is an analysis predictor, leaving the outcome out of the
+imputation model biases its coefficient toward zero; a supplied vector without the outcome
+draws a warning from the pooling step.}
 
 \item{family}{Error distribution and link function for GLM (default [stats::gaussian()] for linear models;
 use [stats::binomial()] for logistic regression).}
@@ -42,9 +45,15 @@ use [stats::binomial()] for logistic regression).}
 
 \item{agreement_tol}{Tolerance for agreement audit in contamination model (default 1.0).}
 
-\item{cluster}{Optional cluster column name for cluster-robust pooling.}
+\item{cluster}{Optional complete cluster column. Every strategy then uses a cluster-robust
+variance with complete-data degrees of freedom of clusters minus one: the delete-one-cluster
+jackknife for linear models, as in [catmech_pool_lm()], and the CR1S sandwich for other
+families, as in [catmech_pool_glm()]. It is not passed to `catmech_reference(cluster = )`,
+whose clustered imputation biased slopes toward zero in simulations when the audited value
+was a predictor (`validation/VARIANCE_MI_SYNTHESIS.md`); a formula term naming the same
+column is still used as an ordinary predictor.}
 
-\item{...}{Additional arguments passed to model estimation.}
+\item{...}{Currently unused.}
 }
 \value{
 An object of class `c("catmech_strategy_comparison", "data.frame")` containing:
@@ -57,6 +66,8 @@ An object of class `c("catmech_strategy_comparison", "data.frame")` containing:
   \item{ci_width}{Confidence interval width (upper - lower).}
   \item{rel_efficiency}{Relative precision (inverse variance ratio) relative to the validation subsample.}
   \item{n_total, n_audited}{Total observations and audited records count.}
+  The imputation predictors used are stored in the `imputation_predictors` attribute.
+  If the contamination model fails, its rows are `NA` and a warning gives the reason.
 }
 \description{
 Fits a user-specified regression model across multiple audit analysis strategies

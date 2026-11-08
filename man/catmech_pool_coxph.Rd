@@ -49,6 +49,14 @@ Fits a Cox proportional hazards model ([survival::coxph()]) across each complete
 and pools parameter estimates and standard errors using Rubin's rules with
 Barnard & Rubin (1999) small-sample degrees of freedom based on event counts.
 }
+\details{
+When the audited value is an analysis predictor, the imputation model needs the
+  outcome: include the event indicator and the Nelson-Aalen cumulative hazard, which
+  [mice::nelsonaalen()] computes, among the imputation `predictors` (White and Royston,
+  2009, <doi:10.1002/sim.3618>). A warning is given when the event indicator is missing.
+  The complete-data degrees of freedom are events minus coefficients, the same default
+  that `mice::pool()` uses for Cox fits.
+}
 \examples{
 set.seed(123)
 n <- 50
@@ -60,8 +68,11 @@ df <- data.frame(
 )
 df$lab_ref <- df$lab
 df$lab_ref[11:n] <- NA
+# lab is a predictor below, so the event indicator and the Nelson-Aalen
+# cumulative hazard join the imputation model.
+df$hazard <- mice::nelsonaalen(df, time, status)
 res <- catmech_reference(df, value = "lab", reference = "lab_ref",
-                         predictors = "age", m = 2, seed = 1)
+                         predictors = c("age", "status", "hazard"), m = 2, seed = 1)
 pooled_cox <- catmech_pool_coxph(res, survival::Surv(time, status) ~ lab + age,
                                  exponentiate = TRUE)
 print(pooled_cox)

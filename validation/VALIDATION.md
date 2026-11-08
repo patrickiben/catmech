@@ -1,5 +1,12 @@
 # Validation record: catmech 1.0.0
 
+> **Correction, 2026-11-07.** This record overstates the release. catmech has had no outside
+> peer review or clinical validation, so it is not "production-ready" or a "clinical toolkit",
+> and `catmech_audit_trail()` records provenance that can support documentation without
+> verifying regulatory compliance. `catmech_audit_power()` gives rough, unvalidated audit
+> sizes, not statistical power. A review that day found three bugs in 1.0.0 additions; see
+> [REVIEW_FIXES_2026-11-07.md](REVIEW_FIXES_2026-11-07.md). The record below is kept as written.
+
 Date: 2026-11-05. Official production release graduating catmech from experimental
 status to a frozen, auditable research and clinical toolkit. The [v0.10.1 record](v0.10.1-VALIDATION.md)
 preserves the numerical convergence extension; all earlier version records (v0.1.0 through v0.10.0)

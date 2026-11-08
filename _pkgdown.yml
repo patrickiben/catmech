@@ -29,7 +29,7 @@ navbar:
 
 reference:
   - title: "Audit Planning & Sample Size"
-    desc: "Calculate required audit sample sizes and prospective statistical power."
+    desc: "Rough, unvalidated audit-size planning aids."
     contents:
       - catmech_audit_power
       - catmech_audit_plan

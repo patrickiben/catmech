@@ -1,6 +1,6 @@
 # catmech <img src="man/figures/logo.png" align="right" width="160" alt="catmech logo: a neon cat piloting a mech suit">
 
-**An auditable R package for regression using error-prone recorded measurements and an independently checked reference subset. Version 1.0.0.**
+**An auditable R package for regression using error-prone recorded measurements and an independently checked reference subset. Version 1.0.1.**
 
 **Contextual site effects:** the explicit `joint_marginal` model estimates measurement and predictor variation together. Use `catmech_marginal_summary()` for population marginal coefficients; see the [model and assumptions](docs/JOINT_MARGINAL_METHOD.md) and [confirmation findings](validation/JOINT_MARGINAL_SYNTHESIS.md).
 
@@ -109,7 +109,7 @@ catmech provides an inspectable, auditable workflow for data with recorded measu
 
 The [commands above](#try-it) install the dependencies and then the package. Run the second
 command from the repository directory, or build the source archive with `R CMD build .` and
-install it with `R CMD INSTALL catmech_1.0.0.tar.gz`. R 4.1 or later is required, although only R 4.6
+install it with `R CMD INSTALL catmech_1.0.1.tar.gz`. R 4.1 or later is required, although only R 4.6
 has been tested locally. Building from source also requires a C++17 compiler and the
 platform toolchain for R packages. GitHub Actions checks Linux, macOS and Windows. See the
 [validation record](validation/VALIDATION.md) and [source-build guide](docs/BUILDING.md).
@@ -250,7 +250,7 @@ and [example](inst/examples/contamination.R).
 
 ## Compare audit strategies side by side
 
-To see how much precision is recovered and whether point estimates shift across different ways of handling un-audited records, compare all four core strategies directly on your data:
+To see how much precision is recovered and whether point estimates shift across different ways of handling un-audited records, compare all four core strategies directly on your data. By default the imputation uses every variable in the formula, outcome included, and `cluster =` gives every strategy the same cluster-robust variance:
 
 ```r
 comp <- catmech_compare_strategies(
@@ -283,10 +283,17 @@ Measurement Error Pattern
   ├── Gross or separable outliers (10x decimal slips, unit errors)
   │     └── catmech_contamination()                 [Mixture error model]
   ├── Clustered multi-center data
-  │     └── catmech_reference(cluster_model = "joint") + cluster = "site"
+  │     └── catmech_reference(use_recorded = TRUE) + catmech_pool_lm(cluster = "site")
+  │           [catmech_reference(cluster = ) only as an experimental check,
+  │            and only when the audited value is the outcome]
   └── Sensitivity check across all methods
         └── catmech_compare_strategies()            [Side-by-side comparison]
 ```
+
+Whichever method you pick, when the audited value is a predictor in your analysis, put the
+analysis outcome in `predictors` (for a Cox model, the event indicator and the Nelson-Aalen
+cumulative hazard from `mice::nelsonaalen()`). Leaving it out biases the value's
+coefficient toward zero, and the pooling functions warn when they see it.
 
 ## Clustered audits: experimental
 
@@ -611,7 +618,7 @@ are not silently converted to the new model.
 Rscript -e 'install.packages(c("testthat", "pkgload", "roxygen2"))'
 Rscript -e 'testthat::test_local()'
 R CMD build .
-R CMD check --no-manual catmech_1.0.0.tar.gz
+R CMD check --no-manual catmech_1.0.1.tar.gz
 Rscript tools/check-v072-unchanged.R validation/my-v072-comparison.txt
 Rscript validation/run-joint-marginal.R confirmation validation/my-joint-marginal
 python3 -I tools/verify-joint-marginal.py validation/my-joint-marginal --tamper-tests

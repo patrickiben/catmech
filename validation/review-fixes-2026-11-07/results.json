@@ -1,0 +1,83 @@
+{
+  "script": "tools/review-fixes-2026-11-07.R",
+  "source_tree": "8d721268f90e",
+  "catmech_version": "1.0.0",
+  "r_version": "4.6.0",
+  "glm_outcome_in_imputation": {
+    "true_log_odds_ratio": 0.8,
+    "data_sets": 200,
+    "n": 600,
+    "audit": 0.4,
+    "m": 10,
+    "mean": {
+      "gold": 0.807875,
+      "naive": 0.497392,
+      "without_outcome": 0.610888,
+      "with_outcome": 0.818819,
+      "covered_without": 0.65,
+      "covered_with": 0.95
+    },
+    "mcse": {
+      "gold": 0.008148,
+      "naive": 0.005557,
+      "without_outcome": 0.006559,
+      "with_outcome": 0.010563,
+      "covered_without": 0.033811,
+      "covered_with": 0.01545
+    }
+  },
+  "compare_strategies_default": {
+    "true_slope": 0.8,
+    "data_sets": 100,
+    "n": 600,
+    "audit": 0.4,
+    "m": 10,
+    "mean": {
+      "validation_subsample": 0.798428,
+      "naive_trust_recorded": 0.520402,
+      "linear_mi_old_default": 0.632856,
+      "linear_mi_new_default": 0.799732,
+      "contamination_old_default": 0.616743,
+      "contamination_new_default": 0.693612
+    },
+    "mcse": {
+      "validation_subsample": 0.007834,
+      "naive_trust_recorded": 0.004239,
+      "linear_mi_old_default": 0.00458,
+      "linear_mi_new_default": 0.005737,
+      "contamination_old_default": 0.004352,
+      "contamination_new_default": 0.005044
+    },
+    "note": "The contamination model assumes some records are exactly right; here every record has error, so its remaining bias is expected misspecification."
+  },
+  "glm_cluster_dispersion": {
+    "poisson": {
+      "dispersion": 1,
+      "se_1_0_0": 0.032509,
+      "se_fixed": 0.032509
+    },
+    "quasipoisson": {
+      "dispersion": 3.055207,
+      "se_1_0_0": 0.09932,
+      "se_fixed": 0.032509
+    },
+    "gamma_log": {
+      "dispersion": 0.405585,
+      "se_1_0_0": 0.008295,
+      "se_fixed": 0.020453
+    }
+  },
+  "audit_power_defaults": {
+    "recommended_fraction": 0.08,
+    "expected_ratio": 1.175611,
+    "k_default": 0.030012,
+    "k_linear": 0.19425,
+    "linear_ratio_at_recommended": 1.798298,
+    "linear_fraction_for_1_25": 0.25669
+  },
+  "pooling_vs_mice": {
+    "glm_max_abs_diff": 0,
+    "coxph_max_abs_diff": 0,
+    "mice_version": "3.19.0"
+  }
+}

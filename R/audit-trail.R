@@ -1,8 +1,19 @@
-#' Generate an auditable provenance and integrity trail for a catmech analysis
+#' Generate a provenance record for a catmech analysis
 #'
-#' Extracts complete provenance, input and completion data hashes, model specifications,
-#' convergence monitors, imputation statistics, and downstream pooled analyses into a
-#' tamper-evident audit document. Supports Markdown, JSON, and standalone HTML formats.
+#' Collects the R and package versions, SHA-256 hashes of the input data, the assumption
+#' specification and each completed dataset, the imputation settings, the convergence
+#' status and any pooled or sensitivity results into one document, in Markdown, JSON or
+#' standalone HTML.
+#'
+#' The input-data and completion hashes are taken by [digest::digest()] over the serialized R
+#' data frames, so they can be recomputed only in R, not with a file checksum tool. The
+#' specification hash is of its canonical JSON text, which [write_catmech()] saves as
+#' `assumptions.canonical.json`. The hashes let a rerun be compared with the record; they do
+#' not make the document tamper-evident, because anyone who edits the data can also
+#' regenerate the record. The record can support
+#' documentation, for example under FDA 21 CFR Part 11 or ICH E9, but compliance is a
+#' property of the validated system, access controls and procedures around it, not of this
+#' function.
 #'
 #' @param object A `catmech_result` object, or a list containing a `result` and optional
 #'   downstream objects (`pooled`, `sensitivity`, `audit_plan`, `holdout_check`).
@@ -25,7 +36,7 @@
 #' df$ref <- df$lab
 #' df$ref[11:30] <- NA
 #' res <- catmech_reference(df, value = "lab", reference = "ref",
-#'                          predictors = "age", m = 2, seed = 1)
+#'                          predictors = c("age", "y"), m = 2, seed = 1)
 #' pooled <- catmech_pool_lm(res, y ~ lab + age)
 #' trail <- catmech_audit_trail(res, pooled = pooled)
 #' print(trail)
@@ -51,9 +62,9 @@ catmech_audit_trail <- function(object, pooled = NULL, sensitivity = NULL,
   timestamp <- format(as.POSIXlt(Sys.time(), tz = "UTC"), "%Y-%m-%dT%H:%M:%SZ")
   r_ver <- paste(R.version$major, R.version$minor, sep = ".")
   platform <- R.version$platform
-  pkg_ver <- tryCatch(as.character(utils::packageVersion("catmech")), error = function(e) "1.0.0")
+  pkg_ver <- tryCatch(as.character(utils::packageVersion("catmech")), error = function(e) "unknown")
 
-  # Cryptographic hashes
+  # SHA-256 hashes: serialized R data frames, and the specification's canonical JSON
   orig_data <- res$original
   orig_hash <- if (is.data.frame(orig_data)) digest::digest(orig_data, algo = "sha256") else "not_available"
   spec_hash <- if (!is.null(res$manifest$assumption_hash)) res$manifest$assumption_hash else
@@ -179,7 +190,7 @@ render_audit_markdown <- function(d, pooled, sensitivity) {
     "",
     "---",
     "",
-    "## 1. Cryptographic Data & Specification Integrity (SHA-256)",
+    "## 1. Data and Specification Hashes (SHA-256)",
     "",
     paste("- **Original Input Data Hash:** `", d$integrity$original_data_sha256, "`", sep = ""),
     paste("- **Assumption Specification Hash:** `", d$integrity$assumption_specification_sha256, "`", sep = ""),
@@ -261,8 +272,8 @@ render_audit_markdown <- function(d, pooled, sensitivity) {
     "---",
     "",
     "### Audit Trail & Provenance Record",
-    "> This document provides an auditable provenance record of data imputation and downstream analysis.",
-    "> All completions and statistical intervals are tied via SHA-256 checksums to the recorded input hash and assumption specification.",
+    "> This document records the data, settings and results of one imputation and analysis run.",
+    "> The data and completion hashes are of the serialized R data frames, and the specification hash is of its canonical JSON text. A rerun can be compared with them. They do not cover the pooled results, and they do not make this document tamper-evident.",
     ""
   )
 
@@ -277,7 +288,7 @@ render_audit_html <- function(d, pooled, sensitivity) {
     "<html>",
     "<head>",
     "<meta charset='utf-8'>",
-    paste0("<title>", d$title, "</title>"),
+    paste0("<title>", html_escape(d$title), "</title>"),
     "<style>",
     "body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 860px; margin: 40px auto; padding: 0 20px; color: #24292e; }",
     "h1, h2, h3 { color: #1a1f2c; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }",

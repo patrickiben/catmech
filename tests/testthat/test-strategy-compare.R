@@ -12,8 +12,20 @@ test_that("catmech_compare_strategies works across all 4 strategies and plots", 
   audited <- sample.int(n, 12)
   d$lab_ref[-audited] <- NA_real_
 
+  # A contamination fit that fails must say why: its rows are NA exactly when it warned.
+  compare_with_warnings <- function(...) {
+    reasons <- character()
+    out <- withCallingHandlers(catmech_compare_strategies(...), warning = function(w) {
+      reasons <<- c(reasons, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    })
+    contamination <- out$estimate[out$strategy == "contamination_model"]
+    expect_identical(all(is.na(contamination)), any(grepl("contamination model failed", reasons)))
+    out
+  }
+
   # Strategy comparison for linear model
-  comp <- catmech_compare_strategies(
+  comp <- compare_with_warnings(
     data = d,
     value = "lab_value",
     reference = "lab_ref",
@@ -45,7 +57,7 @@ test_that("catmech_compare_strategies works across all 4 strategies and plots", 
   d_single <- d
   un_aud <- which(is.na(d_single$lab_ref))[1L]
   d_single$lab_value[un_aud] <- NA_real_
-  comp_single <- catmech_compare_strategies(
+  comp_single <- compare_with_warnings(
     data = d_single,
     value = "lab_value",
     reference = "lab_ref",

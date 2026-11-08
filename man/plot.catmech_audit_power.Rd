@@ -19,7 +19,8 @@
 `x`, invisibly.
 }
 \description{
-Displays statistical power versus audit sample size with reference threshold lines.
+Displays, against audit size, the share of plausible \eqn{k} values whose width ratio meets
+the target, with reference lines. Not validated; see [catmech_audit_power()].
 }
 \examples{
 pwr <- catmech_audit_power(N = 500, target_ratio = 1.3, n_sim = 200, seed = 1)

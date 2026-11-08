@@ -1,5 +1,12 @@
 # Assessment and release decision
 
+> **Correction, 2026-11-07.** "Official production release" and "production-ready" below
+> overstate 1.0.0: it has had no outside peer review or clinical validation, and
+> `catmech_audit_power()` gives rough, unvalidated audit sizes, not statistical power. A
+> review that day found three bugs in 1.0.0 additions; see
+> [REVIEW_FIXES_2026-11-07.md](../validation/REVIEW_FIXES_2026-11-07.md). The assessment below
+> is kept as written.
+
 Assessed 2026-11-05. Version 1.0.0 graduates to an official production release as an **auditable toolkit for data with recorded values and a
 reference subset**, built from established methods. Real-data testing narrowed its recommended use. It does not support a novel-method
 or clinical-validity claim. Earlier assessments are preserved for [v0.1](ASSESSMENT_V0.1.md), [v0.2](ASSESSMENT_V0.2.md) and [v0.3](ASSESSMENT_V0.3.md).

@@ -36,7 +36,7 @@ test_that("catmech_audit_trail generates auditable reports in markdown, json, an
   expect_s3_class(trail_html, "catmech_audit_trail")
   txt_html <- as.character(trail_html)
   expect_true(grepl("<!DOCTYPE html>", txt_html))
-  expect_true(grepl("<title>Catmech Audit Trail & Provenance Report</title>", txt_html))
+  expect_true(grepl("<title>Catmech Audit Trail &amp; Provenance Report</title>", txt_html, fixed = TRUE))
 
   # File writing
   tmp_file <- tempfile(fileext = ".md")
@@ -79,7 +79,9 @@ test_that("catmech_audit_power computes prospective and plan-based power and plo
   # Test print method
   pwr_txt <- utils::capture.output(val_pwr <- print(pwr_prosp))
   expect_identical(val_pwr, pwr_prosp)
-  expect_true(any(grepl("Catmech Audit Power & Sample Size Calculator", pwr_txt)))
+  expect_true(any(grepl("Audit-Size Planning Aid (not validated)", pwr_txt, fixed = TRUE)))
+  expect_true(any(grepl("Linear imputation (double-sampling regression", pwr_txt, fixed = TRUE)))
+  expect_true(any(grepl("not the power of a test", pwr_txt, fixed = TRUE)))
   expect_true(any(grepl("Recommended Audit Size:", pwr_txt)))
 
   # Test plot method
