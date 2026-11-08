@@ -18,7 +18,7 @@
   },
   "study_guide_pdf": {
     "file": "STUDY_GUIDE.pdf",
-    "sha256": "dc6945a8dc5310adc342fc43d41561fb444bcb74184bde879a44a5200162525c",
+    "sha256": "66ee0c26d8f1a320b47abd592632af53473d595e586214cefec7670b776d0fbb",
     "pages": 9,
     "source_sha_in_metadata": true
   },
@@ -29,7 +29,7 @@
   },
   "companion_pdf": {
     "file": "COMPANION.pdf",
-    "sha256": "d7a996bc23cce5c9752357be85db561c9ed6a7284e66865090b73b3e690099a9",
+    "sha256": "f62d043de0b1d65f2f015d0b24236b08e523b472209a8f92c0d0341ad3c561e7",
     "pages": 25,
     "source_sha_in_metadata": true
   },
@@ -39,7 +39,7 @@
   },
   "one_pager_pdf": {
     "file": "ONE_PAGER.pdf",
-    "sha256": "cdad85f32396fc55abecf231f542b5e7eaafc7291279d92ee12efcf08ec436b0",
+    "sha256": "eae6d246893f43edad25d3c4c777fca5015d38263379d54b33e21933cd1963cd",
     "pages": 1,
     "source_sha_in_metadata": true
   },

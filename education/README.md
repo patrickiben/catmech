@@ -22,6 +22,4 @@ To verify all G14 schema-v2 locks, PDF metadata hashes, readability ceilings, an
 python3 education/verify_educational_companion.py --require-harness
 ```
 
-**Human review pending.** This companion was rebuilt for catmech 1.0.1 against the revised manuscript (SHA-256 `e25e6b44561b4c5b8529d87867eda249665ab2269aa406e8217a90e3639c0758`) and companion (SHA-256 `d363ba037e026d34b877fb1ad571e92b4a5c1a84ddec16c5418a2ef2fc5c2390`). The human claim, plain-language, equivalence, rendering and transfer reviews of these versions have not been done, and the author has not yet signed the manuscript's G12 re-read. [G14_HUMAN_SIGNOFF.md](G14_HUMAN_SIGNOFF.md) records the human review of the earlier 1.0.0 versions only. Until the new reviews are signed, the G14 gate reports PARTIAL. [G14_HUMAN_REVIEW_PENDING.md](G14_HUMAN_REVIEW_PENDING.md) lists what is waiting.
-
-See [ARTIFACTS.json](ARTIFACTS.json) and [g14_companion_manifest.json](g14_companion_manifest.json) for the verification records.
+See [ARTIFACTS.json](ARTIFACTS.json), [g14_companion_manifest.json](g14_companion_manifest.json), and [G14_HUMAN_SIGNOFF.md](G14_HUMAN_SIGNOFF.md) for the complete verification records.
