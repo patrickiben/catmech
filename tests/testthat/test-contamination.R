@@ -142,6 +142,7 @@ test_that("corruption probabilities separate real errors and use the flag", {
 })
 
 test_that("clean recordings stay almost untouched without a positive error signal", {
+  skip_on_cran() # slow; GitHub Actions runs it with NOT_CRAN=true
   d <- simulate_catmech_lab(240L, seed = 91, flag_rate = 0, corruption_probability = 0)
   d$gold <- NA_real_
   d$gold[seq(1L, 240L, 3L)] <- d$lab_true[seq(1L, 240L, 3L)]
@@ -211,6 +212,7 @@ test_that("failed convergence refuses after the declared restarts", {
 })
 
 test_that("agreement tolerance separates rounding from recording errors", {
+  skip_on_cran() # slow; GitHub Actions runs it with NOT_CRAN=true
   d <- simulate_catmech_lab(240L, seed = 33, flag_rate = 0, corruption_probability = 0)
   d$gold <- NA_real_
   d$gold[seq(1L, 240L, 3L)] <- d$lab_true[seq(1L, 240L, 3L)]
@@ -323,6 +325,7 @@ test_that("the hold-out check scores unseen references and restores RNG", {
 })
 
 test_that("the hold-out check reports folds that lose support", {
+  skip_on_cran() # slow; GitHub Actions runs it with NOT_CRAN=true
   f <- contamination_fixture(n = 150L)
   d <- f$data
   # One flagged reference row: hiding it leaves the flagged stratum unsupported.
@@ -365,6 +368,7 @@ test_that("bootstrap matching draws from references and adds between-imputation 
 })
 
 test_that("the hold-out check says when a model shows no skill", {
+  skip_on_cran() # slow; GitHub Actions runs it with NOT_CRAN=true
   # Recorded values are exact, so nothing can beat them.
   d <- simulate_catmech_lab(240L, seed = 91, flag_rate = 0, corruption_probability = 0)
   d$gold <- NA_real_

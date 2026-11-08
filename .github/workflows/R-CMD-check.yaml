@@ -8,6 +8,10 @@ jobs:
   check:
     runs-on: ${{ matrix.config.os }}
     name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+    env:
+      # testthat::skip_on_cran() skips the slowest tests unless NOT_CRAN is true. Every
+      # job runs the full suite except Windows R-devel, which checks as CRAN does.
+      NOT_CRAN: ${{ matrix.config.not-cran || 'true' }}
     strategy:
       fail-fast: false
       matrix:
@@ -16,7 +20,7 @@ jobs:
         config:
           - {os: macos-15, r: 'release'}
           - {os: windows-latest, r: 'release'}
-          - {os: windows-latest, r: 'devel'}
+          - {os: windows-latest, r: 'devel', not-cran: 'false'}
           - {os: ubuntu-latest, r: 'devel', http-user-agent: 'release'}
           - {os: ubuntu-latest, r: 'release'}
           - {os: ubuntu-latest, r: 'oldrel-1'}
