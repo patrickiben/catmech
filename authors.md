@@ -2,7 +2,7 @@
 
 ## Authors
 
-- **Patrick Iben**. Author, maintainer.
+- **Patrick Iben**. Author, maintainer, copyright holder.
   [](https://orcid.org/0009-0005-2443-7973)
 
 ## Citation

@@ -13,8 +13,8 @@ following Rubin (1987)
 [doi:10.1002/9780470316696](https://doi.org/10.1002/9780470316696) and
 Barnard and Rubin (1999)
 [doi:10.1093/biomet/86.4.948](https://doi.org/10.1093/biomet/86.4.948) ,
-and an unvalidated audit-size planning aid based on two-phase sampling
-theory (Neyman 1938)
+and an unvalidated audit-size planning aid based on the two-phase
+sampling theory of Neyman (1938)
 [doi:10.1080/01621459.1938.10503378](https://doi.org/10.1080/01621459.1938.10503378)
 . Does not identify measurement error without assumptions or reference
 information, or guarantee coverage under misspecification.
@@ -30,9 +30,9 @@ Useful links:
 ## Author
 
 **Maintainer**: Patrick Iben <patrickiben@gmail.com>
-([ORCID](https://orcid.org/0009-0005-2443-7973))
+([ORCID](https://orcid.org/0009-0005-2443-7973)) \[copyright holder\]
 
 Authors:
 
 - Patrick Iben <patrickiben@gmail.com>
-  ([ORCID](https://orcid.org/0009-0005-2443-7973))
+  ([ORCID](https://orcid.org/0009-0005-2443-7973)) \[copyright holder\]
