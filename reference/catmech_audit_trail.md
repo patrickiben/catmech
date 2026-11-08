@@ -85,7 +85,7 @@ trail <- catmech_audit_trail(res, pooled = pooled)
 print(trail)
 #> # Catmech Audit Trail & Provenance Report
 #> 
-#> **Generated:** 2026-11-08T20:06:35Z UTC | **Catmech Version:** 1.0.1
+#> **Generated:** 2026-11-08T22:27:25Z UTC | **Catmech Version:** 1.0.1
 #> **R Version:** 4.6.2 | **Platform:** x86_64-pc-linux-gnu
 #> 
 #> ---
