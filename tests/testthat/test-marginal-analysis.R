@@ -102,6 +102,7 @@ test_that("marginal public input restrictions and all-reference shortcut are exp
 })
 
 test_that("marginal refits preserve posterior traces across m and restore caller RNG", {
+  skip_on_cran() # slow; GitHub Actions runs it with NOT_CRAN=true
   fixture <- marginal_public_fixture()
   fit8 <- fixture$fit
   set.seed(822315L)
@@ -330,6 +331,7 @@ test_that("marginal summary supports predictor-role formulas and rejects malform
 })
 
 test_that("adaptive chain continuation matches a single run of the same total length", {
+  skip_on_cran() # slow; GitHub Actions runs it with NOT_CRAN=true
   d <- marginal_public_fixture()$data
   doubled <- catmech_reference(d, "recorded", "reference", "x", m = 5L,
     seed = 822302L, use_recorded = TRUE, cluster = "site",
@@ -404,6 +406,12 @@ test_that("catmech_marginal_sensitivity_grid computes 2-axis statistics and form
   expect_true(any(grepl("Primary sensitivity statistic", printed)))
   expect_true(any(grepl("complete: TRUE", printed)))
 
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off(), add = TRUE)
+  expect_silent(plot(list_grid))
+
+  # The refitting grid below is slow; GitHub Actions runs it with NOT_CRAN=true.
+  skip_on_cran()
   # Grid with refitting on small grid
   grid_refit <- catmech_marginal_sensitivity_grid(
     fit = fit1, term = "x",

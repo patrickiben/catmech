@@ -23,6 +23,7 @@ collect_warnings <- function(expr) {
 }
 
 test_that("compare_strategies keeps the outcome among detected imputation predictors", {
+  skip_on_cran() # slow; GitHub Actions runs it with NOT_CRAN=true
   d <- review_measurement_data(1500L, 4101L)
   run <- collect_warnings(catmech_compare_strategies(d, "lab", "ref", y ~ lab + x, m = 5L, seed = 7L))
   comp <- run$value
@@ -159,6 +160,7 @@ test_that("the provenance record makes no tamper-evidence claim and escapes its 
 })
 
 test_that("cluster variances in compare_strategies drop coefficients the audited rows cannot estimate", {
+  skip_on_cran() # slow; GitHub Actions runs it with NOT_CRAN=true
   set.seed(4108L)
   n <- 360L
   d <- data.frame(site = rep(sprintf("s%02d", seq_len(12L)), length.out = n), inpatient = stats::rbinom(n, 1, 0.5))
@@ -206,6 +208,7 @@ test_that("a working contamination fit gets the same cluster-robust variance as 
 })
 
 test_that("compare_strategies with a binomial family uses the CR1S variance with clusters minus one df", {
+  skip_on_cran() # slow; GitHub Actions runs it with NOT_CRAN=true
   d <- review_measurement_data(360L, 4110L, binary = TRUE)
   cmp <- collect_warnings(catmech_compare_strategies(d, "lab", "ref", y ~ lab + x, family = stats::binomial(),
                                                      m = 2L, seed = 6L, cluster = "site"))$value

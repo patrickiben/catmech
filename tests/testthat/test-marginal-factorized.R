@@ -152,6 +152,7 @@ test_that("the covariance factorization Jacobian equals determinant(S) squared",
 })
 
 test_that("factorized-prior posterior is unchanged by interweaving", {
+  skip_on_cran() # slow; GitHub Actions runs it with NOT_CRAN=true
   set.seed(171040L)
   group <- rep(seq_len(24L), each = 8L)
   sigma <- matrix(c(.99, 1.285, .7, 1.285, 1.9025, 1.05, .7, 1.05, 1), 3L)

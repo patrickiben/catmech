@@ -355,6 +355,7 @@ test_that("multiple-predictor marginal summaries recover known affine coefficien
 })
 
 test_that("marginal summaries with the audited value as a predictor match exact covariance solves", {
+  skip_on_cran() # slow; GitHub Actions runs it with NOT_CRAN=true
   f <- marginal_affine_oracle()
   prepared <- marginal_affine_result(f)
   size <- ncol(f$mu)

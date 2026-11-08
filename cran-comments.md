@@ -6,18 +6,21 @@
   R 4.5.3 (GitHub Actions)
 * Windows Server (x86_64-w64-mingw32), R-devel (2026-11-07 r90850 ucrt) and
   R 4.6.2 ucrt (GitHub Actions)
+* Windows Server 2022 (x86_64-w64-mingw32), R-devel (2026-11-07 r90850 ucrt)
+  (win-builder)
 
 ## R CMD check results
 
 0 errors | 0 warnings | 1 note
 
 * This is a new submission.
-* Words in DESCRIPTION that may be reported as possibly misspelled are the
-  surnames of cited authors (Barnard, Neyman, Rubin) or correctly spelled terms
-  (auditable, misspecification, unvalidated).
+* Possibly misspelled words in DESCRIPTION: Neyman is the surname of a cited
+  author, and misspecification and unvalidated are spelled correctly.
 
 ## Notes for the reviewer
 
+* Check time: the slowest tests skip on CRAN with `testthat::skip_on_cran()`;
+  GitHub Actions runs the full suite.
 * Seeds: ten exported functions take a `seed` argument with a fixed default
   (1, 42 or 123), so that an audit record can be reproduced without extra
   arguments. Each saves the user's random-number state on entry and restores it
