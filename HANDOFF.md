@@ -1,9 +1,9 @@
-# catmech v1.0.0 — Chat Handoff & Project Context Packet
+# catmech v1.0.1 — Chat Handoff & Project Context Packet
 
 **Date:** November 6, 2026  
 **Repository Path:** your local clone of this repository  
 **Git Remote:** `https://github.com/patrickiben/catmech.git` (branch: `main`; run `git log -1` for the current commit)  
-**Package Version:** `1.0.0`  
+**Package Version:** `1.0.1` (review fixes of 2026-11-07; 1.0.0 described below where noted)  
 **Maintainer:** Patrick Iben (`patrickiben@gmail.com`, ORCID: `0009-0005-2443-7973`)  
 **License:** MIT  
 
@@ -26,7 +26,7 @@ Instead of either discarding un-audited records (inflating standard errors) or n
 
 ## 2. Current Status & Verification Health
 
-**Review of 2026-11-07:** three confirmed bugs and several overclaims were fixed in the development version (see `NEWS.md` and `validation/REVIEW_FIXES_2026-11-07.md`): `catmech_compare_strategies()` dropped the outcome from imputation, the GLM and Cox examples left the outcome out of the imputation model, and the clustered GLM variance was scaled by the estimated dispersion (too wide above 1, too narrow below 1, as in most Gamma fits). `catmech_audit_power()` is now labeled unvalidated. The package has not been submitted to CRAN and has had no outside peer review or clinical validation. The status lines below describe 1.0.0 before that review.
+**Review of 2026-11-07:** three confirmed bugs and several overclaims were fixed in 1.0.1 (see `NEWS.md` and `validation/REVIEW_FIXES_2026-11-07.md`): `catmech_compare_strategies()` dropped the outcome from imputation, the GLM and Cox examples left the outcome out of the imputation model, and the clustered GLM variance was scaled by the estimated dispersion (too wide above 1, too narrow below 1, as in most Gamma fits). `catmech_audit_power()` is now labeled unvalidated. The package has not been submitted to CRAN and has had no outside peer review or clinical validation. The status lines below describe 1.0.0 before that review.
 
 * **Git History**: Clean tree on `main`, pushed to GitHub.
 * **GitHub Actions CI**: **100% GREEN (`✓`)** on all workflows:
@@ -55,7 +55,7 @@ Instead of either discarding un-audited records (inflating standard errors) or n
 
 ```
 catmech/
-├── DESCRIPTION               # Package metadata: version 1.0.0, email, ORCID, URLs, deps
+├── DESCRIPTION               # Package metadata: version 1.0.1, email, ORCID, URLs, deps
 ├── NAMESPACE                 # Exports: 26 functions/generics, S3 methods, Rcpp dynlib
 ├── .Rbuildignore             # Ignores docs, validation, tools, pkgdown, paper, etc.
 ├── cran-comments.md          # CRAN submission cover comments
@@ -141,8 +141,8 @@ python3 tools/verify-artifacts.py
 printf "FLIBS = -L/opt/homebrew/lib/gcc/current -lgfortran -lquadmath\n" > /tmp/catmech_makevars
 export R_MAKEVARS_USER=/tmp/catmech_makevars
 _R_CHECK_CRAN_INCOMING_REMOTE_=false _R_CHECK_SYSTEM_CLOCK_=0 R CMD build .
-_R_CHECK_CRAN_INCOMING_REMOTE_=false _R_CHECK_SYSTEM_CLOCK_=0 R CMD check --as-cran catmech_1.0.0.tar.gz
-rm -rf catmech.Rcheck catmech_1.0.0.tar.gz /tmp/catmech_makevars
+_R_CHECK_CRAN_INCOMING_REMOTE_=false _R_CHECK_SYSTEM_CLOCK_=0 R CMD check --as-cran catmech_1.0.1.tar.gz
+rm -rf catmech.Rcheck catmech_1.0.1.tar.gz /tmp/catmech_makevars
 
 # 5. Render Academic Manuscript
 Rscript -e "rmarkdown::render('paper/manuscript.Rmd', output_format = 'all', quiet = TRUE)"
@@ -153,9 +153,9 @@ Rscript -e "rmarkdown::render('paper/manuscript.Rmd', output_format = 'all', qui
 ## 6. Suggested Next Steps
 
 1. **CRAN Submission**:
-   - Submit `catmech_1.0.0.tar.gz` to the CRAN submission web form: `https://cran.r-project.org/submit.html` or via `devtools::submit_cran()`.
+   - Run win-builder (R-devel) on 1.0.1 and update `cran-comments.md`, then submit `catmech_1.0.1.tar.gz` to the CRAN submission web form: `https://cran.r-project.org/submit.html` or via `devtools::submit_cran()`.
 2. **GitHub Release**:
-   - Create a release tag `v1.0.0` on `https://github.com/patrickiben/catmech`.
+   - Create a release tag `v1.0.1` on `https://github.com/patrickiben/catmech`.
 3. **Deploy Pkgdown Site**:
    - Enable GitHub Pages in repository settings pointing to `gh-pages` branch, or run `pkgdown::build_site()`.
 4. **Journal Submission**:
@@ -168,13 +168,13 @@ Rscript -e "rmarkdown::render('paper/manuscript.Rmd', output_format = 'all', qui
 Copy and paste the block below into the first prompt of your new chat:
 
 ```markdown
-I am continuing work on the `catmech` R package (version 1.0.0).
+I am continuing work on the `catmech` R package (version 1.0.1).
 
 Repository path: my local clone of `patrickiben/catmech`
 Git Remote: `https://github.com/patrickiben/catmech.git` (branch `main`)
 Maintainer: Patrick Iben (`patrickiben@gmail.com`, ORCID: `0009-0005-2443-7973`)
 
-The package is implemented and documented as release 1.0.0; a review on 2026-11-07 fixed three bugs (see `NEWS.md`), and it has had no outside peer review:
+The package is implemented and documented as release 1.0.1, which fixes three bugs a review of 1.0.0 found on 2026-11-07 (see `NEWS.md`); it has had no outside peer review:
 - At 1.0.0, all 1,754 test expectations passed; after the review fixes, 1,812 pass with 0 failures and 0 warnings (`testthat::test_local()`).
 - `R CMD check --as-cran` passes with 0 errors and 0 warnings.
 - `python3 docs/case-study/fact_check.py` validates all 118 claims against frozen benchmarks (100% match, 0 broken links, 1-page PDF compliance).

@@ -1,6 +1,6 @@
 # catmech <img src="man/figures/logo.png" align="right" width="160" alt="catmech logo: a neon cat piloting a mech suit">
 
-**An auditable R package for regression using error-prone recorded measurements and an independently checked reference subset. Version 1.0.0.**
+**An auditable R package for regression using error-prone recorded measurements and an independently checked reference subset. Version 1.0.1.**
 
 **Contextual site effects:** the explicit `joint_marginal` model estimates measurement and predictor variation together. Use `catmech_marginal_summary()` for population marginal coefficients; see the [model and assumptions](docs/JOINT_MARGINAL_METHOD.md) and [confirmation findings](validation/JOINT_MARGINAL_SYNTHESIS.md).
 
@@ -109,7 +109,7 @@ catmech provides an inspectable, auditable workflow for data with recorded measu
 
 The [commands above](#try-it) install the dependencies and then the package. Run the second
 command from the repository directory, or build the source archive with `R CMD build .` and
-install it with `R CMD INSTALL catmech_1.0.0.tar.gz`. R 4.1 or later is required, although only R 4.6
+install it with `R CMD INSTALL catmech_1.0.1.tar.gz`. R 4.1 or later is required, although only R 4.6
 has been tested locally. Building from source also requires a C++17 compiler and the
 platform toolchain for R packages. GitHub Actions checks Linux, macOS and Windows. See the
 [validation record](validation/VALIDATION.md) and [source-build guide](docs/BUILDING.md).
@@ -618,7 +618,7 @@ are not silently converted to the new model.
 Rscript -e 'install.packages(c("testthat", "pkgload", "roxygen2"))'
 Rscript -e 'testthat::test_local()'
 R CMD build .
-R CMD check --no-manual catmech_1.0.0.tar.gz
+R CMD check --no-manual catmech_1.0.1.tar.gz
 Rscript tools/check-v072-unchanged.R validation/my-v072-comparison.txt
 Rscript validation/run-joint-marginal.R confirmation validation/my-joint-marginal
 python3 -I tools/verify-joint-marginal.py validation/my-joint-marginal --tamper-tests

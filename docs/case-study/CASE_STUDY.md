@@ -1,6 +1,6 @@
 # catmech: when the favored model did not win
 
-**A case study in testing an idea until the evidence said no.** Patrick Iben, independent biostatistician. Status on November 5, 2026: R package, version 1.0.0, with no outside users, peer review or clinical validation.
+**A case study in testing an idea until the evidence said no.** Patrick Iben, independent biostatistician. Status on November 7, 2026: R package, version 1.0.1, with no outside users, peer review or clinical validation.
 
 | Test | Result | What the numbers said |
 |---|---|---|

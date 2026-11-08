@@ -1,9 +1,7 @@
-# catmech (development version)
+# catmech 1.0.1
 
 Fixes from a review of 1.0.0 on 2026-11-07; evidence and the scripts that reproduce
-it are in `validation/REVIEW_FIXES_2026-11-07.md`. The version number is still 1.0.0,
-so until it is bumped a build with these fixes reports the same version as the 1.0.0
-on GitHub main.
+it are in `validation/REVIEW_FIXES_2026-11-07.md`. Not submitted to CRAN.
 
 - `catmech_compare_strategies()` now keeps the analysis outcome among the imputation
   predictors it detects. It used to drop it, which biased the linear-imputation and
@@ -48,8 +46,7 @@ on GitHub main.
 
 # catmech 1.0.0
 
-Some descriptions in this entry were corrected on 2026-11-07; see the development
-version above.
+Some descriptions in this entry were corrected on 2026-11-07; see 1.0.1 above.
 
 - First 1.0 release (not submitted to CRAN). The public API is stable and backward-compatible across
   model fitting, diagnostics, and downstream inference. The clustered imputation

@@ -140,7 +140,7 @@ still has not been validated.
 Three AI reviewers, each with one lens (statistics and code, documentation and claims, tests
 and reproducibility), read the changes and ran their own checks against builds of 0.10.1,
 1.0.0 and the fixes. They raised 26 points. All were checked, and all except the version
-number (left to the maintainer, below) were fixed before commit. The ones that changed
+number were fixed before commit; the version was then bumped to 1.0.1 (below). The ones that changed
 results or claims:
 
 - With `cluster =`, a validation-subsample fit with a coefficient the audited rows cannot
@@ -170,8 +170,7 @@ results or claims:
   C18 (they still pass). The manuscript also describes `catmech_audit_power()` as computing
   statistical power and the hashes as cryptographic checksums, and
   `paper/VALIDATION_LEDGER_2026-11-06.md` still contains local paths.
-- The version number stays 1.0.0, and NEWS lists the changes under the development version.
-  Until it is bumped, a build with these fixes reports the same version as the 1.0.0 on
-  GitHub main, so provenance records cannot tell them apart. Bumping it means updating the
-  README front page and the case study, which `docs/case-study/fact_check.py` checks against
-  `DESCRIPTION`.
+- The fixes are released as version 1.0.1, so provenance records can tell a fixed build from
+  1.0.0; the README front page, the case study and the citation files were updated to match.
+  `results.json` records 1.0.0 because it was generated before the version change, from the
+  commit it names; the code it ran is the same.

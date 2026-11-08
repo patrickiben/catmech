@@ -6,10 +6,10 @@ bibentry(
   author = person("Patrick", "Iben", email = "patrickiben@gmail.com",
                   comment = c(ORCID = "0009-0005-2443-7973")),
   year = "2026",
-  note = "R package version 1.0.0",
+  note = "R package version 1.0.1",
   url = "https://github.com/patrickiben/catmech",
   textVersion = paste(
     "Patrick Iben (2026). catmech: Auditable Model-Based Imputation and Category Sensitivity.",
-    "R package version 1.0.0. URL: https://github.com/patrickiben/catmech"
+    "R package version 1.0.1. URL: https://github.com/patrickiben/catmech"
   )
 )
