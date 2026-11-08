@@ -381,7 +381,7 @@ trail <- catmech_audit_trail(
 cat(substr(as.character(trail), 1, 1200), "\n... [truncated for display]")
 #> # Catmech Audit Trail & Provenance Report
 #> 
-#> **Generated:** 2026-11-08T22:42:14Z UTC | **Catmech Version:** 1.0.1
+#> **Generated:** 2026-11-08T22:53:13Z UTC | **Catmech Version:** 1.0.1
 #> **R Version:** 4.6.2 | **Platform:** x86_64-pc-linux-gnu
 #> 
 #> ---
@@ -392,10 +392,10 @@ cat(substr(as.character(trail), 1, 1200), "\n... [truncated for display]")
 #> - **Assumption Specification Hash:** `67a39bb736d40bf6fbf1d0840fe417ba43247a444c6bf36b44dd1b3036019ce3`
 #> - **Completed Dataset Checksums:**
 #> 
-#>   - Completion `m=1`: `903e83fe60adcfbf37a2840bd6295217ee0036dc9127d9817ebf8a0ab8370215`
-#>   - Completion `m=2`: `89e1023d89b468818f78de32d42109e106d39ca141f19425f523822126d18662`
-#>   - Completion `m=3`: `786bc9c718e22db04a06174df041f19f620e0e0e9e89c702fba3fe6d9338a437`
-#>   - Completion `m=4`: `a166b5cfe3341f52803ba689e9876f09a3c690c77163bb517c5a99589ad19356`
+#>   - Completion `m=1`: `cc84765505f9b1b3550973ba9fe392eb1b80bc623aaa095e6802dca20ae8d5a7`
+#>   - Completion `m=2`: `51ba3565b86d4619a0ccae7bf978f3748b2c80ec23a72bc00563c26f26fc22ad`
+#>   - Completion `m=3`: `3313ab9c8b71581798aad4e0988ba367e48a9cce93aa1e2369d7a67e465f6807`
+#>   - Completion `m=4`: `fc964c70c9afb108b094f5dadd34cf9c248a6747deeef550682b3e668b7ee4ba`
 #> 
 #> ## 2. Cohort Specification & Imputation Profile
 #> 
