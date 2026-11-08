@@ -1,6 +1,6 @@
-# catmech v1.0.0: One-Page Clinical Audit Decision & Boundary Card
+# catmech 1.0.1: One-Page Clinical Audit Decision & Boundary Card
 
-**Canonical Manuscript:** `paper/manuscript.Rmd` (`SHA-256: 8152288b1c2af2a4...`) | **Companion Visual Case Study:** `docs/case-study/catmech-case-study.pdf`
+**Canonical Manuscript:** `paper/manuscript.Rmd` (`SHA-256: e25e6b44561b4c5b...`) | **Companion Visual Case Study:** `docs/case-study/catmech-case-study.pdf`
 
 This educational companion explains the statistical definitions, benchmark archives, and R workflows in the frozen catmech manuscript; it does not establish universal interval coverage under unmodeled misspecification, validate per-record error probabilities for individual patient adjudication on diffuse real-world data, or certify FDA 21 CFR Part 11 or ICH E9 regulatory compliance.
 
@@ -19,4 +19,5 @@ This educational companion explains the statistical definitions, benchmark archi
 2. **Select Imputation & Pooling Engine:**
    - **Default (Subtle, diffuse, or moderate real-world discrepancies, or heavy-tailed target):** `fit <- catmech_reference(data, value, reference, predictors, use_recorded = TRUE, m = 20)`
    - **Gross, separable outliers only (with Gaussian target & ignorable audit selection):** `fit <- catmech_contamination(...)`, verifying `>= 90%` return rate and positive holdout Brier/RMSE skill in `catmech_holdout_check(fit)`.
-   - **Pool with Barnard-Rubin df (`nu_BR < nu_com`) & Provenance:** `catmech_pool_lm(fit, formula, cluster)` (`cv3`), `catmech_pool_glm(...)` (`CR1S`), `catmech_pool_coxph(...)` (`d - p` or `Lin-Wei`), and `catmech_audit_trail(fit, pooled)`.
+   - **Put every analysis outcome in `predictors`** (for Cox models, the event indicator and the Nelson-Aalen hazard); pooling warns if one is missing.
+   - **Pool with Barnard-Rubin df (`nu_BR < nu_com`) & Provenance:** `catmech_pool_lm(fit, formula, cluster)` (`cv3`), `catmech_pool_glm(...)` (`CR1S`), `catmech_pool_coxph(...)` (`d - p` or `Lin-Wei`), and `catmech_audit_trail(fit, pooled)` (hashes for rerun comparison; not tamper-evident, not compliance).

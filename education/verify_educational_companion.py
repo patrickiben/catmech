@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""End-to-end verification suite for the catmech v1.0.0 Multimodal R-Package Educational Companion."""
+"""End-to-end verification suite for the catmech 1.0.1 Multimodal R-Package Educational Companion."""
 from __future__ import annotations
 
 import hashlib
@@ -85,7 +85,7 @@ def main() -> int:
             return None
         return gate
 
-    print("=== catmech v1.0.0 Multimodal Educational Companion Verifier ===")
+    print("=== catmech 1.0.1 Multimodal Educational Companion Verifier ===")
 
     # 1. File existence
     for rel in REQUIRED_FILES:
@@ -124,7 +124,10 @@ def main() -> int:
                 fail(f"{meta['file']}: missing source sha256 ({src_sha[:16]}...) in PDF Subject metadata")
     if artifacts_data["one_pager_pdf"]["pages"] != 1:
         fail(f"ONE_PAGER.pdf must be 1 page, got {artifacts_data['one_pager_pdf']['pages']}")
-    ok("ARTIFACTS.json SHA-256 digests, PDF page counts (1, 8, 24), and embedded PDF Subject hashes verified")
+    page_counts = ", ".join(
+        f"{meta['file']} {meta['pages']}" for key, meta in artifacts_data.items() if key.endswith("_pdf")
+    )
+    ok(f"ARTIFACTS.json SHA-256 digests, PDF page counts ({page_counts}), and embedded PDF Subject hashes verified")
 
     # 3. Markdown/HTML link resolution, no em-dashes, no local machine paths in shipped docs
     shipped_text_files = [
@@ -140,6 +143,9 @@ def main() -> int:
         "g9_claim_inventory.json",
         "g9_claims_MAP.json",
     ]
+    # Written while the human review of a rebuilt companion is pending; removed once it is signed.
+    if (EDU_DIR / "G14_HUMAN_REVIEW_PENDING.md").exists():
+        shipped_text_files.append("G14_HUMAN_REVIEW_PENDING.md")
     md_link_re = re.compile(r"\[[^\]]+\]\(([^)#]+)(?:#[^)]+)?\)")
     html_href_re = re.compile(r'href="([^"#]+)(?:#[^"]+)?"')
     local_path_prefix = "/" + "Users" + "/"
@@ -170,6 +176,8 @@ def main() -> int:
     spell_gate = harness_gate("check_spelling_us.py")
     prose_gate = harness_gate("check_prose_style_v2.py")
     md_files = ["COMPANION.md", "STUDY_GUIDE.md", "ONE_PAGER.md", "COMPLETE_COVERAGE.md", "README.md", "G14_HUMAN_SIGNOFF.md"]
+    if (EDU_DIR / "G14_HUMAN_REVIEW_PENDING.md").exists():
+        md_files.append("G14_HUMAN_REVIEW_PENDING.md")
     if spell_gate is not None and prose_gate is not None:
         for md_name in md_files:
             sp = subprocess.run([sys.executable, str(spell_gate), f"education/{md_name}"], cwd=str(ROOT), capture_output=True, text=True)
@@ -178,7 +186,7 @@ def main() -> int:
             pr = subprocess.run([sys.executable, str(prose_gate), f"education/{md_name}"], cwd=str(ROOT), capture_output=True, text=True)
             if pr.returncode != 0:
                 fail(f"check_prose_style_v2.py failed on education/{md_name}:\n{pr.stdout}\n{pr.stderr}")
-        ok("G10 US spelling (0 British spellings) and prose style (all categories [ok]) passed across all 6 Markdown files")
+        ok(f"G10 US spelling (0 British spellings) and prose style (all categories [ok]) passed across all {len(md_files)} Markdown files")
 
     # 4. Run G14 gate (--selftest and strict v2 evaluation) and check_companion_lock.py
     g14_gate = harness_gate("g14_companion_gate.py")
@@ -207,7 +215,13 @@ def main() -> int:
             capture_output=True,
             text=True,
         )
-        if ev.returncode != 0:
+        if ev.returncode == 2:
+            fail(
+                "g14_companion_gate.py returned PARTIAL (exit 2): the automated checks found no error, "
+                "but human or upstream review rows are not GREEN. This is not release permission.\n"
+                f"{ev.stdout}\n{ev.stderr}"
+            )
+        elif ev.returncode != 0:
             fail(f"g14_companion_gate.py failed:\n{ev.stdout}\n{ev.stderr}")
         else:
             ok("g14_companion_gate.py (schema-v2 MULTIMODAL: DOCUMENT, ONE_PAGER, INTERACTIVE) passed")

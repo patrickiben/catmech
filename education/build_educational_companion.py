@@ -1,11 +1,20 @@
 #!/usr/bin/env python3
-"""Build the complete catmech v1.0.0 R-Package Educational Companion in education/:
+"""Build the complete catmech 1.0.1 R-Package Educational Companion in education/:
 - COMPANION.md & COMPANION.pdf (30 units C01..C30 locked to paper/manuscript.Rmd lines 1..350)
 - STUDY_GUIDE.md & STUDY_GUIDE.pdf (12 concise lessons S1..S12)
 - ONE_PAGER.md & ONE_PAGER.pdf (1-page visual decision & boundary sheet)
 - companion_lab.html (Interactive HTML5 Companion Studio, R Lab Explorer & 12-Item Practice Quiz)
-- COMPLETE_COVERAGE.md, README.md, .gitattributes, ARTIFACTS.json, G14_HUMAN_SIGNOFF.md
+- COMPLETE_COVERAGE.md, README.md, .gitattributes, ARTIFACTS.json
 - g9_claims_MAP.json, g9_claim_inventory.json, and schema-v2 g14_companion_manifest.json
+
+The build never writes G14_HUMAN_SIGNOFF.md. That file is the human reviewer's own record. The
+build reads it, and marks the human review rows GREEN only when the manuscript and companion
+SHA-256 values it records match the files just built; otherwise those rows are PENDING and
+G14_HUMAN_REVIEW_PENDING.md says what is waiting. The same holds for the G12 re-sign record in
+paper/: upstream G12 is GREEN only when a signed record names the current manuscript SHA-256.
+
+Needs RESEARCH_VALIDATION_HARNESS_DIR (the folder holding g14_companion_gate.py and
+grounding_check.py), pandoc, LibreOffice's soffice and pdfinfo.
 """
 from __future__ import annotations
 
@@ -14,6 +23,7 @@ import html
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -28,16 +38,79 @@ EDU = ROOT / "education"
 MS_PATH = ROOT / "paper" / "manuscript.Rmd"
 MS_PDF_PATH = ROOT / "paper" / "manuscript.pdf"
 
-_STUDIO_DIR = next((Path.home() / "Documents").glob("Documents - *"), Path.home() / "Documents")
-HARNESS_DIR = Path(os.environ.get("RESEARCH_HARNESS_DIR", str(_STUDIO_DIR / "Research_Validation_Harness")))
+# The validation harness is not part of this repository. Its location comes only from the
+# environment (the same variable the verifier reads; RESEARCH_HARNESS_DIR is accepted for older
+# setups), never from a guessed private folder.
+_HARNESS_ENV = (os.environ.get("RESEARCH_VALIDATION_HARNESS_DIR") or os.environ.get("RESEARCH_HARNESS_DIR") or "").strip()
+if not _HARNESS_ENV or not (Path(_HARNESS_ENV) / "g14_companion_gate.py").is_file():
+    sys.exit("Set RESEARCH_VALIDATION_HARNESS_DIR to the folder holding g14_companion_gate.py and grounding_check.py.")
+HARNESS_DIR = Path(_HARNESS_ENV)
 
 sys.path.insert(0, str(EDU))
 sys.path.insert(0, str(HARNESS_DIR))
 import companion_data as cdata  # noqa: E402
 import g14_companion_gate as g14  # noqa: E402
 
-PANDOC = Path("/opt/homebrew/bin/pandoc")
-SOFFICE = Path("/opt/homebrew/bin/soffice")
+
+def _tool(name: str, env_var: str) -> Path:
+    found = os.environ.get(env_var) or shutil.which(name)
+    if not found:
+        sys.exit(f"{name} not found on PATH; set {env_var} to its location.")
+    return Path(found)
+
+
+PANDOC = _tool("pandoc", "PANDOC")
+SOFFICE = _tool("soffice", "SOFFICE")
+
+SIGNOFF_PATH = EDU / "G14_HUMAN_SIGNOFF.md"
+PENDING_PATH = EDU / "G14_HUMAN_REVIEW_PENDING.md"
+PENDING_REL = "education/G14_HUMAN_REVIEW_PENDING.md"
+SIGNOFF_REL = "education/G14_HUMAN_SIGNOFF.md"
+
+
+def ms_pdf_pages() -> int:
+    info = subprocess.check_output(["pdfinfo", str(MS_PDF_PATH)], text=True)
+    return int(re.search(r"^Pages:\s+(\d+)", info, re.M).group(1))
+
+
+def read_human_signoff() -> dict | None:
+    """Parse the reviewer's G14 sign-off. Returns None if the file is missing or unreadable."""
+    if not SIGNOFF_PATH.is_file():
+        return None
+    text = SIGNOFF_PATH.read_text(encoding="utf-8")
+    fields = {
+        "manuscript_sha256": r"Manuscript SHA-256 \(`paper/manuscript\.Rmd`\):\*\*\s*`([0-9a-f]{64})`",
+        "companion_sha256": r"Companion SHA-256 \(`education/COMPANION\.md`\):\*\*\s*`([0-9a-f]{64})`",
+        "reviewer": r"\*\*Reviewer:\*\*\s*([^(`\n]+?)\s*\(`reviewer_type: human`\)",
+        "date": r"\*\*Date:\*\*\s*`(\d{4}-\d{2}-\d{2})`",
+    }
+    out = {}
+    for key, pattern in fields.items():
+        match = re.search(pattern, text)
+        if not match:
+            return None
+        out[key] = match.group(1).strip()
+    # The transfer result as the reviewer recorded it: all twelve items and the 4/4 rubric.
+    out["all_items_passed"] = bool(re.search(r"->\s*`12/12`", text)) and bool(re.search(r"rubric \(`4/4`\)", text))
+    return out
+
+
+def read_g12_resign(ms_sha: str) -> tuple[str, dict | None]:
+    """Find the G12 re-sign record in paper/ that names this manuscript SHA-256.
+
+    Returns (evidence path, signature) where signature is None until the record says
+    'Status: SIGNED' with the author's name and date."""
+    for path in sorted((ROOT / "paper").glob("G12_RESIGN_*.md"), reverse=True):
+        text = path.read_text(encoding="utf-8")
+        if ms_sha not in text:
+            continue
+        rel = path.relative_to(ROOT).as_posix()
+        status = re.search(r"\*\*Status:\*\*\s*([A-Z]+)", text)
+        signer = re.search(r"\*\*Author signature:\*\*\s*([^,\n]+),\s*(\d{4}-\d{2}-\d{2})", text)
+        if status and status.group(1) == "SIGNED" and signer:
+            return rel, {"reviewer": signer.group(1).strip(), "date": signer.group(2)}
+        return rel, None
+    sys.exit(f"No paper/G12_RESIGN_*.md record names the manuscript SHA-256 {ms_sha}; write one before building.")
 
 W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 DC_NS = "http://purl.org/dc/elements/1.1/"
@@ -65,7 +138,7 @@ def build_companion_md(ms_sha: str, ms_pdf_sha: str) -> str:
         "",
         "## How to use this R-package companion",
         "",
-        f"This companion follows Patrick Iben's *Statistical Inference and Two-Phase Audit Design for Contaminated Measurements in Clinical Research: The catmech R Package*, canonical manuscript [paper/manuscript.Rmd](../paper/manuscript.Rmd) (`350` lines, SHA-256 `{ms_sha}`) and compiled 15-page PDF [paper/manuscript.pdf](../paper/manuscript.pdf) (SHA-256 `{ms_pdf_sha}`).",
+        f"This companion follows Patrick Iben's *Statistical Inference and Two-Phase Audit Design for Contaminated Measurements in Clinical Research: The catmech R Package*, canonical manuscript [paper/manuscript.Rmd](../paper/manuscript.Rmd) (`350` lines, SHA-256 `{ms_sha}`) and compiled {ms_pdf_pages()}-page PDF [paper/manuscript.pdf](../paper/manuscript.pdf) (SHA-256 `{ms_pdf_sha}`).",
         "",
         cdata.GLOBAL_NONCLAIM_TEXT,
         "",
@@ -174,7 +247,7 @@ def build_study_guide_md(ms_sha: str, ms_pdf_sha: str) -> str:
         (
             "S3",
             "Gaussian reference imputation in C++17: use_recorded = TRUE versus FALSE",
-            "Section 2.2, manuscript lines 71-72 (PDF pages 3-4).",
+            "Section 2.2, manuscript lines 71-72 (PDF page 3).",
             "`catmech_reference()` implements fast conjugate Gaussian reference imputation in C++17 (`RcppArmadillo`). With `use_recorded = TRUE` (Simple Linear MI, `cole_mi`), `W_i` enters directly as a continuous linear calibration predictor alongside `X_i` (`T_i | W_i, X_i`). With `use_recorded = FALSE` (`reference_normal`), unaudited `W_i` values are discarded.",
             "When errors are small and spread out, a fast linear regression on the audited rows calibrates the unchecked numbers without needing a mixture model.",
             "DEFINITION of `catmech_reference(use_recorded = TRUE)` versus `use_recorded = FALSE`.",
@@ -183,18 +256,18 @@ def build_study_guide_md(ms_sha: str, ms_pdf_sha: str) -> str:
         ),
         (
             "S4",
-            "Prospective two-phase audit power planning and the NO-GO planner boundary",
-            "Section 2.3, manuscript lines 73-84 (PDF page 4).",
-            "At audit fraction `f = n_audit / N`, the confidence interval width ratio relative to a 100% census audit is `rho(f) = sqrt(1 + k (1 - f) / f)`. `catmech_audit_power()` simulates `2,000` log-normal draws of `k_hat` to compute the power to achieve `rho <= rho_target`. In pre-specified validation (`validation/audit-plan-study`), `catmech_audit_plan()` received a `NO-GO` verdict (`11.3%-16.8%` median width error at `f = 5%`) and is documented as exploratory.",
-            "The power calculator sizes an audit by simulating uncertainty in the two-phase noise factor. The empirical pilot planner missed its 10% accuracy target and stays exploratory.",
+            "Rough two-phase audit-size planning and the NO-GO planner boundary",
+            "Section 2.3, manuscript lines 73-84 (PDF pages 3-4).",
+            "At audit fraction `f = n_audit / N`, the confidence interval width ratio relative to a 100% census audit is `rho(f) = sqrt(1 + k (1 - f) / f)`. `catmech_audit_power()` is a rough, unvalidated planning aid: across `2,000` log-normal draws of `k_hat` it reports the share of plausible `k` values that meet `rho <= rho_target`. The output calls that share `power`, but it is not the power of a hypothesis test. Without a pilot plan its default `k` is optimistic, so it also reports the audit size that linear imputation needs at the same correlation, often several times larger. In pre-specified validation (`validation/audit-plan-study`), `catmech_audit_plan()` received a `NO-GO` verdict (`11.3%-16.8%` median width error at `f = 5%`) and is documented as exploratory.",
+            "The audit-size tool makes a rough guess from assumed error rates, and nobody has checked its answers. The empirical pilot planner missed its 10% accuracy target and stays exploratory.",
             "ANALYTIC influence-function ratio and MEASURED_DATED `NO-GO` boundary on `catmech_audit_plan()`.",
-            "Do not treat `catmech_audit_plan()` as a validated regulatory sample-size guarantee; its pre-specified status is `NO-GO`.",
+            "Do not read the `power` column of `catmech_audit_power()` as the power of a test, and do not treat `catmech_audit_plan()` as a validated regulatory sample-size guarantee; its pre-specified status is `NO-GO`.",
             "Compute `rho(0.25) = sqrt(1 + 0.27 * (1 - 0.25) / 0.25)` in R (`round(sqrt(1 + 0.27 * 3), 4)`). **Answer:** `1.3454`.",
         ),
         (
             "S5",
             "Rubin combining rules and Barnard-Rubin finite-sample degrees of freedom",
-            "Section 2.4, manuscript lines 85-94 (PDF pages 4-5).",
+            "Section 2.4, manuscript lines 85-94 (PDF page 4).",
             "Across `m` completions, total variance is `T = U_bar + (1 + 1/m) B` and the fraction of missing information is `lambda_hat = (1 + 1/m) diag(B) / diag(T)`. To prevent anti-conservative intervals when sample size `N`, site count `C`, or event count `d` is small, `catmech` computes Barnard-Rubin (1999) degrees of freedom `nu_BR = (nu_m * nu_obs) / (nu_m + nu_obs) < nu_com`.",
             "Old imputation formulas can claim more degrees of freedom than the study has sites or events. The Barnard-Rubin formula caps degrees of freedom below the complete-data limit.",
             "ANALYTIC Rubin (1987) and Barnard-Rubin (1999) pooling formulas.",
@@ -204,7 +277,7 @@ def build_study_guide_md(ms_sha: str, ms_pdf_sha: str) -> str:
         (
             "S6",
             "Multi-endpoint pooling across linear (CV3), GLM (CR1S), and Cox PH (Lin-Wei) models",
-            "Section 2.4, manuscript lines 95-100 (PDF pages 5-6).",
+            "Section 2.4, manuscript lines 95-100 (PDF pages 4-5).",
             "`catmech_pool_lm()` uses the delete-one-cluster jackknife (`cv3`) with `nu_com = C - 1` when clustered; `catmech_pool_glm()` uses the CR1S Huber-White-Liang-Zeger sandwich with `nu_com = C - 1`; and `catmech_pool_coxph()` uses event-based `nu_com = d - p` when unclustered or the Lin-Wei score-residual sandwich with `nu_com = C - 1` when clustered.",
             "Linear models use a leave-one-site-out jackknife variance, logistic and count models use a small-sample sandwich, and survival models count observed events.",
             "ANALYTIC multi-endpoint covariance and degrees-of-freedom specifications.",
@@ -214,7 +287,7 @@ def build_study_guide_md(ms_sha: str, ms_pdf_sha: str) -> str:
         (
             "S7",
             "Out-of-sample rank-PIT calibration checking and its slope-bias blind spot",
-            "Section 2.5, manuscript lines 101-106 (PDF page 6).",
+            "Section 2.5, manuscript lines 101-106 (PDF page 5).",
             "`catmech_holdout_check()` runs K-fold cross-validation on audited rows and computes tie-randomized rank PIT values `u_i` against `Uniform(0, 1)`. While false alarms were `0/40` under the true model, alarm power against structural misspecification was low (`0/40` in `nonlinear_target`, `1/40` in `heavy_tail_target`) because held-out rows test observation-level prediction rather than regression slope bias.",
             "Holdout checking hides part of the audit and tests if row predictions match the hidden truth. Passing this screen does not guarantee an unbiased regression slope.",
             "ANALYTIC rank-PIT formula and MEASURED_DATED diagnostic power boundary.",
@@ -224,7 +297,7 @@ def build_study_guide_md(ms_sha: str, ms_pdf_sha: str) -> str:
         (
             "S8",
             "Synthetic contamination benchmarks (52,950 requests) and three stress-cell failures",
-            "Sections 3-5.1, manuscript lines 107-249 (PDF pages 6-10).",
+            "Sections 3-5.1, manuscript lines 107-249 (PDF pages 5-10).",
             "Across `52,950` synthetic requests, `catmech_contamination()` narrowed CIs by `44.3%` over complete-case analysis in `missed_flags` (`0.1842` vs `0.3309`) and prevented the `-0.2354` linear-MI bias under gross 10x outliers (`error_gross_and_small`, `94.0%` vs `64.7%` coverage). However, it failed in three stress cells: `heavy_tail_target` (`87.3%` coverage), `nonignorable_missed` (`79.3%` coverage), and `noisy_undeclared` (`88.7%` coverage, restored to `91.8%` when `reference_sd` is declared).",
             "Under synthetic gross or unflagged errors, the mixture model stays unbiased and cuts interval width by 44%. It fails under heavy tails, non-ignorable selection, or undeclared reference noise.",
             "MODELED_LOCKED synthetic benchmark results across 27 scenarios.",
@@ -234,7 +307,7 @@ def build_study_guide_md(ms_sha: str, ms_pdf_sha: str) -> str:
         (
             "S9",
             "Clustered variance (148,500 requests): CV3 jackknife and predictor-slope attenuation",
-            "Section 5.2, manuscript lines 250-258 (PDF pages 10-11).",
+            "Section 5.2, manuscript lines 250-258 (PDF page 10).",
             "Across `148,500` clustered requests on simulated cohorts and 11 Rwanda HMIS indicators, `cv3` beat `cr1s` and `cr2` (which inflated widths up to `95%`). However, when the audited variable `T_i` was a **predictor** (`Y ~ T + x + stratum`), clustered random-intercept imputation (`catmech_reference(cluster = )`) attenuated slopes by up to `-16.1%` (`84.4%` coverage), whereas fitting `catmech_reference(use_recorded = TRUE)` without `cluster` and pooling with `catmech_pool_lm(cluster = )` achieved `-3.0%` bias and `95.4%` coverage.",
             "Across clinical sites, the leave-one-site-out jackknife gives the best interval coverage. However, random-intercept imputation shrinks slopes when the audited variable is a predictor.",
             "MEASURED_DATED and MODELED_LOCKED clustered variance and multilevel MI evaluation.",
@@ -244,7 +317,7 @@ def build_study_guide_md(ms_sha: str, ms_pdf_sha: str) -> str:
         (
             "S10",
             "Public paired-discrepancy benchmarks (33,800 requests) and near-chance row error AUCs",
-            "Section 6.1, manuscript lines 259-279 (PDF pages 11-12).",
+            "Section 6.1, manuscript lines 259-279 (PDF page 11).",
             "On ClinicalTrials.gov (`N = 27,208`) and NHANES 2017-2018 (`N = 3,908`), retaining recorded values reduced RMSE by `43%` to `48%` over discarding unaudited values. However, because real-world discrepancies were small relative to `T_i | X_i`, per-record corruption probabilities `p_i` had near-chance discrimination (`AUC = 0.543` on ClinicalTrials.gov and `0.500` on NHANES, versus `0.962` in synthetic `missed_flags`).",
             "On real data with diffuse errors, keeping recorded numbers cuts slope error nearly in half, but per-row error probabilities score no better than a coin flip.",
             "MEASURED_DATED empirical benchmark across ClinicalTrials.gov and NHANES.",
@@ -264,11 +337,11 @@ def build_study_guide_md(ms_sha: str, ms_pdf_sha: str) -> str:
         (
             "S12",
             "Provenance reporting (catmech_audit_trail), software QA, and regulatory boundaries",
-            "Sections 9-12, manuscript lines 329-350 (PDF pages 14-15).",
-            "`catmech_audit_trail()` outputs a provenance record (Markdown, JSON, or HTML) recording R/OS metadata, SHA-256 hashes of the input data, assumption specification, and all `m` completed datasets, MCMC convergence status, and pooled tables. This supports documentation under FDA 21 CFR Part 11 and ICH E9 without certifying compliance. The package is MIT-licensed and verified by `1,754` unit tests (`0` failures/warnings/skips), `R CMD check --as-cran` (`0` errors/warnings), and `500,000+` replicate checks.",
-            "The audit trail function writes a report with SHA-256 data hashes, model settings, and convergence status. It supports documentation but does not certify legal compliance.",
+            "Sections 9-12, manuscript lines 329-350 (PDF pages 14-16).",
+            "`catmech_audit_trail()` outputs a provenance record (Markdown, JSON, or HTML) recording R/OS metadata; SHA-256 hashes of the input data and all `m` completed datasets, computed over the serialized R data frames, and of the assumption specification as canonical JSON text; MCMC convergence status; and pooled tables. A rerun can be compared with the hashes, but they do not cover the pooled results or make the record tamper-evident. This supports documentation under FDA 21 CFR Part 11 and ICH E9 without certifying compliance. The package is MIT-licensed and verified by `199` `testthat` tests with `1,812` expectations (`0` failures/warnings/skips), `R CMD check --as-cran` (`0` errors/warnings), and `500,000+` replicate checks.",
+            "The audit trail function writes a report with SHA-256 data hashes, model settings, and convergence status. A rerun can be compared with it, but it does not prove the data were untouched or certify legal compliance.",
             "DEFINITION, SCOPE, and MEASURED_DATED software verification summary.",
-            "Do not represent `catmech_audit_trail()` as a legal compliance certification; regulatory compliance depends on the surrounding validated system, access controls, and procedures.",
+            "Do not represent `catmech_audit_trail()` as a legal compliance certification or a tamper-evident record; regulatory compliance depends on the surrounding validated system, access controls, and procedures, and anyone who edits the data can regenerate the record.",
             "Run `Lab C28` in `education/run_companion_labs.R`. What default title and footer heading does `catmech_audit_trail()` print? **Answer:** Default title `Catmech Audit Trail & Provenance Report` and footer heading `### Audit Trail & Provenance Record`.",
         ),
     ]
@@ -276,7 +349,7 @@ def build_study_guide_md(ms_sha: str, ms_pdf_sha: str) -> str:
     lines = [
         "# Clinical Measurement Audits and Two-Phase Imputation: Concise Study Guide",
         "",
-        f"A twelve-lesson study guide to Patrick Iben's *Statistical Inference and Two-Phase Audit Design for Contaminated Measurements in Clinical Research: The catmech R Package*, canonical manuscript [paper/manuscript.Rmd](../paper/manuscript.Rmd) (`350` lines, SHA-256 `{ms_sha}`) and compiled 15-page PDF [paper/manuscript.pdf](../paper/manuscript.pdf) (SHA-256 `{ms_pdf_sha}`).",
+        f"A twelve-lesson study guide to Patrick Iben's *Statistical Inference and Two-Phase Audit Design for Contaminated Measurements in Clinical Research: The catmech R Package*, canonical manuscript [paper/manuscript.Rmd](../paper/manuscript.Rmd) (`350` lines, SHA-256 `{ms_sha}`) and compiled {ms_pdf_pages()}-page PDF [paper/manuscript.pdf](../paper/manuscript.pdf) (SHA-256 `{ms_pdf_sha}`).",
         "",
         cdata.GLOBAL_NONCLAIM_TEXT,
         "",
@@ -324,7 +397,7 @@ def build_study_guide_md(ms_sha: str, ms_pdf_sha: str) -> str:
 def build_one_pager_md(ms_sha: str) -> str:
     return "\n".join(
         [
-            "# catmech v1.0.0: One-Page Clinical Audit Decision & Boundary Card",
+            "# catmech 1.0.1: One-Page Clinical Audit Decision & Boundary Card",
             "",
             f"**Canonical Manuscript:** `paper/manuscript.Rmd` (`SHA-256: {ms_sha[:16]}...`) | **Companion Visual Case Study:** `docs/case-study/catmech-case-study.pdf`",
             "",
@@ -345,7 +418,8 @@ def build_one_pager_md(ms_sha: str) -> str:
             "2. **Select Imputation & Pooling Engine:**",
             "   - **Default (Subtle, diffuse, or moderate real-world discrepancies, or heavy-tailed target):** `fit <- catmech_reference(data, value, reference, predictors, use_recorded = TRUE, m = 20)`",
             "   - **Gross, separable outliers only (with Gaussian target & ignorable audit selection):** `fit <- catmech_contamination(...)`, verifying `>= 90%` return rate and positive holdout Brier/RMSE skill in `catmech_holdout_check(fit)`.",
-            "   - **Pool with Barnard-Rubin df (`nu_BR < nu_com`) & Provenance:** `catmech_pool_lm(fit, formula, cluster)` (`cv3`), `catmech_pool_glm(...)` (`CR1S`), `catmech_pool_coxph(...)` (`d - p` or `Lin-Wei`), and `catmech_audit_trail(fit, pooled)`.",
+            "   - **Put every analysis outcome in `predictors`** (for Cox models, the event indicator and the Nelson-Aalen hazard); pooling warns if one is missing.",
+            "   - **Pool with Barnard-Rubin df (`nu_BR < nu_com`) & Provenance:** `catmech_pool_lm(fit, formula, cluster)` (`cv3`), `catmech_pool_glm(...)` (`CR1S`), `catmech_pool_coxph(...)` (`d - p` or `Lin-Wei`), and `catmech_audit_trail(fit, pooled)` (hashes for rerun comparison; not tamper-evident, not compliance).",
             "",
         ]
     )
@@ -355,7 +429,7 @@ def build_complete_coverage_md(ms_sha: str, ms_pdf_sha: str) -> str:
     lines = [
         "# Complete-Companion Coverage Map",
         "",
-        f"Basis: Patrick Iben, *Statistical Inference and Two-Phase Audit Design for Contaminated Measurements in Clinical Research: The catmech R Package*, canonical manuscript [paper/manuscript.Rmd](../paper/manuscript.Rmd) (`350` lines, SHA-256 `{ms_sha}`) and 15-page compiled PDF [paper/manuscript.pdf](../paper/manuscript.pdf) (SHA-256 `{ms_pdf_sha}`). Unit IDs refer to [COMPANION.md](COMPANION.md) ([PDF](COMPANION.pdf)). The [concise study guide](STUDY_GUIDE.md) ([PDF](STUDY_GUIDE.pdf)) provides a twelve-lesson route (`S1`-`S12`).",
+        f"Basis: Patrick Iben, *Statistical Inference and Two-Phase Audit Design for Contaminated Measurements in Clinical Research: The catmech R Package*, canonical manuscript [paper/manuscript.Rmd](../paper/manuscript.Rmd) (`350` lines, SHA-256 `{ms_sha}`) and {ms_pdf_pages()}-page compiled PDF [paper/manuscript.pdf](../paper/manuscript.pdf) (SHA-256 `{ms_pdf_sha}`). Unit IDs refer to [COMPANION.md](COMPANION.md) ([PDF](COMPANION.pdf)). The [concise study guide](STUDY_GUIDE.md) ([PDF](STUDY_GUIDE.pdf)) provides a twelve-lesson route (`S1`-`S12`).",
         "",
         "Every single line (`1-350`) of `paper/manuscript.Rmd` is mapped to a unique unit below with zero gaps and zero overlaps, alongside its paired executable R check in [run_companion_labs.R](run_companion_labs.R) and interactive web surface.",
         "",
@@ -391,15 +465,25 @@ def build_complete_coverage_md(ms_sha: str, ms_pdf_sha: str) -> str:
     return "\n".join(lines)
 
 
-def build_readme_md(ms_sha: str, ms_pdf_sha: str) -> str:
+def build_readme_md(ms_sha: str, ms_pdf_sha: str, comp_sha: str, human_signed: bool) -> str:
+    if human_signed:
+        review_lines = [
+            "See [ARTIFACTS.json](ARTIFACTS.json), [g14_companion_manifest.json](g14_companion_manifest.json), and [G14_HUMAN_SIGNOFF.md](G14_HUMAN_SIGNOFF.md) for the complete verification records.",
+        ]
+    else:
+        review_lines = [
+            "**Human review pending.** This companion was rebuilt for catmech 1.0.1 against the revised manuscript (SHA-256 `" + ms_sha + "`) and companion (SHA-256 `" + comp_sha + "`). The human claim, plain-language, equivalence, rendering and transfer reviews of these versions have not been done, and the author has not yet signed the manuscript's G12 re-read. [G14_HUMAN_SIGNOFF.md](G14_HUMAN_SIGNOFF.md) records the human review of the earlier 1.0.0 versions only. Until the new reviews are signed, the G14 gate reports PARTIAL. [G14_HUMAN_REVIEW_PENDING.md](G14_HUMAN_REVIEW_PENDING.md) lists what is waiting.",
+            "",
+            "See [ARTIFACTS.json](ARTIFACTS.json) and [g14_companion_manifest.json](g14_companion_manifest.json) for the verification records.",
+        ]
     return "\n".join(
         [
-            "# catmech v1.0.0: Multimodal R-Package Educational Companion",
+            "# catmech 1.0.1: Multimodal R-Package Educational Companion",
             "",
             "Choose the learning modality and depth that fit your workflow:",
             "",
             "1. **Concise 12-Lesson Study Guide (`DOCUMENT`):** [Read Markdown](STUDY_GUIDE.md) or [Download PDF](STUDY_GUIDE.pdf). Covers the clinical audit dilemma, two-phase contamination and linear reference MI models, Barnard-Rubin small-sample pooling across linear/GLM/Cox endpoints, synthetic vs real-world audit benchmarks, and regulatory provenance boundaries.",
-            "2. **Complete 30-Unit Reading Companion (`DOCUMENT`):** [Read Markdown](COMPANION.md) or [Download PDF](COMPANION.pdf). Covers 100% of [paper/manuscript.Rmd](../paper/manuscript.Rmd) (`lines 1-350`, SHA-256 `" + ms_sha + "`) and [paper/manuscript.pdf](../paper/manuscript.pdf) (`15` pages, SHA-256 `" + ms_pdf_sha + "`), with worked numerical reasoning, R one-liners, glossary, and a locked 12-item transfer assessment. See [COMPLETE_COVERAGE.md](COMPLETE_COVERAGE.md) for the line-by-line map.",
+            "2. **Complete 30-Unit Reading Companion (`DOCUMENT`):** [Read Markdown](COMPANION.md) or [Download PDF](COMPANION.pdf). Covers 100% of [paper/manuscript.Rmd](../paper/manuscript.Rmd) (`lines 1-350`, SHA-256 `" + ms_sha + "`) and [paper/manuscript.pdf](../paper/manuscript.pdf) (`" + str(ms_pdf_pages()) + "` pages, SHA-256 `" + ms_pdf_sha + "`), with worked numerical reasoning, R one-liners, glossary, and a locked 12-item transfer assessment. See [COMPLETE_COVERAGE.md](COMPLETE_COVERAGE.md) for the line-by-line map.",
             "3. **Interactive HTML5 Companion Studio & Browser Simulators (`INTERACTIVE`):**",
             "   - [Interactive Companion Studio & 12-Item Practice Lab](companion_lab.html): Browse all 30 units (`C01`-`C30`), copy executable R snippets, and take the interactive 12-item Transfer & Boundary Practice Quiz with immediate attempt tracking, correctness feedback, answer explanations, and retry support.",
             "   - [catmech Field Guide & 24-Scenario Method Picker](../docs/learn/index.html): Interactive decision tree generating verified R code snippets.",
@@ -412,13 +496,13 @@ def build_readme_md(ms_sha: str, ms_pdf_sha: str) -> str:
             "",
             cdata.GLOBAL_NONCLAIM_TEXT,
             "",
-            "To verify all G14 schema-v2 locks, PDF metadata hashes, readability ceilings, and live R labs:",
+            "To verify all G14 schema-v2 locks, PDF metadata hashes, readability ceilings, and live R labs (the harness gates run only when `RESEARCH_VALIDATION_HARNESS_DIR` points at the separate validation harness, and `--require-harness` fails if they cannot run):",
             "",
             "```sh",
-            "python3 education/verify_educational_companion.py",
+            "python3 education/verify_educational_companion.py --require-harness",
             "```",
             "",
-            "See [ARTIFACTS.json](ARTIFACTS.json), [g14_companion_manifest.json](g14_companion_manifest.json), and [G14_HUMAN_SIGNOFF.md](G14_HUMAN_SIGNOFF.md) for the complete verification records.",
+            *review_lines,
             "",
         ]
     )
@@ -616,7 +700,7 @@ def build_companion_lab_html(comp_sha: str, ms_sha: str) -> str:
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>catmech v1.0.0: Interactive Educational Companion Studio &amp; Practice Lab</title>
+<title>catmech 1.0.1: Interactive Educational Companion Studio &amp; Practice Lab</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="companion-source-sha256" content="{comp_sha}">
 <meta name="manuscript-source-sha256" content="{ms_sha}">
@@ -663,7 +747,7 @@ code {{ font-family: var(--mono); font-size: 0.9em; background: var(--surface-2)
 <body>
 <header>
   <div class="wrap">
-    <div><strong>catmech v1.0.0</strong>: Interactive Educational Companion Studio &amp; Practice Lab</div>
+    <div><strong>catmech 1.0.1</strong>: Interactive Educational Companion Studio &amp; Practice Lab</div>
     <div style="font-size:13px;color:var(--muted);">Companion SHA-256: <code>{comp_sha[:12]}</code> | Manuscript SHA-256: <code>{ms_sha[:12]}</code></div>
   </div>
 </header>
@@ -973,7 +1057,7 @@ def build_g9_inventory() -> tuple[Path, Path]:
         {"id": "F2", "level": 1, "title": "Two-phase semiparametric influence function variance ratio rho(f) = sqrt(1 + k(1-f)/f)", "links": []},
         {"id": "F3", "level": 1, "title": "Barnard-Rubin small-sample df (nu_BR < nu_com) with CV3, CR1S, and Lin-Wei covariance", "links": []},
         {"id": "E1", "level": 2, "title": "R/contamination.R & R/reference.R (collapsed Gibbs mixture + C++17 RcppArmadillo reference MI)", "links": ["F1"]},
-        {"id": "E2", "level": 2, "title": "R/audit-power.R, R/audit-plan.R & R/holdout-check.R (MC power, NO-GO planner, rank-PIT screen)", "links": ["F2"]},
+        {"id": "E2", "level": 2, "title": "R/audit-power.R, R/audit-plan.R & R/holdout-check.R (rough unvalidated audit-size aid, NO-GO planner, rank-PIT screen)", "links": ["F2"]},
         {"id": "E3", "level": 2, "title": "R/pool.R, R/pool-glm.R, R/pool-coxph.R & R/audit-trail.R (multi-endpoint pooling + SHA-256 trail)", "links": ["F3"]},
         {"id": "A1", "level": 3, "title": "validation/contamination-study & validation/variance-mi-study (52,950 + 148,500 frozen requests)", "links": ["E1", "E3"]},
         {"id": "A2", "level": 3, "title": "validation/real-data-study & validation/real-audit-study (33,800 CT.gov/NHANES + 45,600 Rwanda/psych)", "links": ["E1", "E2", "E3"]},
@@ -1022,6 +1106,21 @@ def main() -> None:
     comp_md_path.write_text(comp_text, encoding="utf-8")
     comp_sha = sha_file(comp_md_path)
 
+    # Human review state. The sign-off counts only for the exact files it names.
+    signoff = read_human_signoff()
+    human_signed = bool(
+        signoff and signoff["manuscript_sha256"] == ms_sha and signoff["companion_sha256"] == comp_sha
+    )
+    g12_evidence, g12_signature = read_g12_resign(ms_sha)
+    pending_opened = None
+    if not human_signed:
+        if not PENDING_PATH.is_file():
+            sys.exit("Human review is pending for these files; write education/G14_HUMAN_REVIEW_PENDING.md first.")
+        opened = re.search(r"\*\*Opened:\*\*\s*`(\d{4}-\d{2}-\d{2})`", PENDING_PATH.read_text(encoding="utf-8"))
+        if not opened:
+            sys.exit("education/G14_HUMAN_REVIEW_PENDING.md needs an '**Opened:** `YYYY-MM-DD`' line.")
+        pending_opened = opened.group(1)
+
     study_text = build_study_guide_md(ms_sha, ms_pdf_sha)
     study_md_path.write_text(study_text, encoding="utf-8")
 
@@ -1031,7 +1130,7 @@ def main() -> None:
     cov_text = build_complete_coverage_md(ms_sha, ms_pdf_sha)
     cov_md_path.write_text(cov_text, encoding="utf-8")
 
-    readme_text = build_readme_md(ms_sha, ms_pdf_sha)
+    readme_text = build_readme_md(ms_sha, ms_pdf_sha, comp_sha, human_signed)
     readme_md_path.write_text(readme_text, encoding="utf-8")
 
     lab_html_text = build_companion_lab_html(comp_sha, ms_sha)
@@ -1051,7 +1150,7 @@ def main() -> None:
     op_pdf_res = render_markdown_to_pdf(
         one_pager_md_path,
         EDU / "ONE_PAGER.pdf",
-        "catmech v1.0.0: One-Page Clinical Audit Decision & Boundary Card",
+        "catmech 1.0.1: One-Page Clinical Audit Decision & Boundary Card",
         source_sha_override=comp_sha,
         compact=True,
     )
@@ -1069,7 +1168,7 @@ def main() -> None:
         ("LB5", "catmech_holdout_check() screens observation-level calibration via tie-randomized rank PIT but has low power against regression slope bias."),
         ("LB6", "On diffuse real-world discrepancies (ClinicalTrials.gov, NHANES, Rwanda HMIS), per-record corruption probabilities p_i have near-chance AUC (0.500-0.582) and must not adjudicate individual patient rows."),
         ("LB7", "catmech_audit_plan() carries a pre-specified NO-GO validation status (11.3%-16.8% median width error at f=5%) and is documented as exploratory."),
-        ("LB8", "catmech_audit_trail() emits SHA-256 provenance records supporting FDA 21 CFR Part 11 and ICH E9 documentation without certifying compliance."),
+        ("LB8", "catmech_audit_trail() emits SHA-256 provenance records (serialized R data frames; canonical JSON specification) that let a rerun be compared and support FDA 21 CFR Part 11 and ICH E9 documentation, without making the record tamper-evident or certifying compliance."),
     ]
     lb_ids = [k for k, _ in load_bearing]
     all_coverage_ids = lb_ids + g9_ids
@@ -1128,24 +1227,48 @@ def main() -> None:
                 }
             )
 
-    signoff_path = EDU / "G14_HUMAN_SIGNOFF.md"
-    signoff_path.write_text(
-        "# G14 Human Review, Multimodal QA & Transfer Assessment Sign-Off (`catmech` v1.0.0)\n\n"
-        "- **Reviewer:** Patrick Iben (`reviewer_type: human`)\n"
-        "- **Date:** `2026-11-07`\n"
-        f"- **Manuscript SHA-256 (`paper/manuscript.Rmd`):** `{ms_sha}` (`350` lines)\n"
-        f"- **Companion SHA-256 (`education/COMPANION.md`):** `{comp_sha}` (`30` units, `350/350` lines covered)\n"
-        "- **Claim Review (`GREEN`):** Verified that all 30 units preserve the manuscript's evidence classes without promotion and introduce zero unrecorded scientific claims (`unrecorded_claims: []`).\n"
-        "- **Plain-Language & Jargon Review (`GREEN`):** Verified that all 30 `In ordinary language` fields satisfy the schema-v2 readability ceiling (`grade_level <= 10.0`, `max_sentence_words <= 30`) and define all registered terms clearly (`undefined_jargon: []`).\n"
-        "- **Multimodal Semantic Equivalence & Interactive Practice Feedback QA (`GREEN`):** Verified semantic equivalence and practice feedback (`records_attempt`, `reports_correctness`, `explains_answer`, `supports_retry`) across `education/COMPANION.pdf` (`DOCUMENT`), `education/ONE_PAGER.pdf` (`ONE_PAGER`), and `education/companion_lab.html` (`INTERACTIVE`), plus live R execution via `education/run_companion_labs.R` (`16/16 PASS`) and `education/interactive_tutor.R` (`12/12 PASS`).\n"
-        "- **Transfer Assessment Verdict (`GREEN`):** All 12 locked assessment items (`4 CORE`, `4 BOUNDARY`, `4 TRANSFER` -> `12/12`) and the 4-part one-sentence rubric (`4/4`) pass.\n",
-        encoding="utf-8",
-    )
+    # Human review records. G14_HUMAN_SIGNOFF.md is the reviewer's own file and is never written
+    # here; a row is GREEN only when that file names the manuscript and companion just built.
+    if human_signed:
+        human = {
+            "status": "GREEN",
+            "reviewer_type": "human",
+            "reviewer": signoff["reviewer"],
+            "date": signoff["date"],
+            "evidence_path": SIGNOFF_REL,
+        }
+    else:
+        human = {
+            "status": "PENDING",
+            "reviewer_type": "human",
+            "reviewer": (signoff["reviewer"] if signoff else "maintainer") + " (review pending)",
+            "date": pending_opened,
+            "evidence_path": PENDING_REL,
+        }
+
+    def qa_record() -> dict:
+        return {"status": human["status"], "evidence_path": human["evidence_path"]}
+
+    if g12_signature:
+        g12_record = {"status": "GREEN", "manuscript_sha256": ms_sha, "evidence_path": g12_evidence, **g12_signature}
+    else:
+        g12_record = {"status": "PENDING", "manuscript_sha256": ms_sha, "evidence_path": g12_evidence}
+
+    # Scores are recorded only from a sign-off that covers these files and states 12/12 and 4/4.
+    if human_signed and signoff["all_items_passed"]:
+        assessment_results = {
+            "item_scores": {item["id"]: 1 for item in cdata.ASSESSMENT_ITEMS},
+            "one_sentence_scores": {"CLAIM": 1, "EVIDENCE": 1, "BOUNDARY": 1, "TRANSFER": 1},
+        }
+    else:
+        assessment_results = None
+    if human_signed:
+        PENDING_PATH.unlink(missing_ok=True)
 
     artifacts_json = {
         "canonical_sources": {
             "manuscript_rmd": {"file": "../paper/manuscript.Rmd", "sha256": ms_sha, "lines": len(ms_lines)},
-            "manuscript_pdf": {"file": "../paper/manuscript.pdf", "sha256": ms_pdf_sha, "pages": 15},
+            "manuscript_pdf": {"file": "../paper/manuscript.pdf", "sha256": ms_pdf_sha, "pages": ms_pdf_pages()},
         },
         "study_guide_markdown": {
             "file": "STUDY_GUIDE.md",
@@ -1185,8 +1308,8 @@ def main() -> None:
 
     manifest = {
         "schema_version": "g14-companion-manifest/v2",
-        "edition": "catmech v1.0.0 Multimodal R-Package Educational Companion",
-        "status": "RELEASE_READY",
+        "edition": "catmech 1.0.1 Multimodal R-Package Educational Companion",
+        "status": "RELEASE_READY" if (human_signed and g12_signature) else "PENDING_HUMAN_REVIEW",
         "release_order": "AFTER_G12_FROZEN_MANUSCRIPT",
         "source_roles": {
             "manuscript": "paper/manuscript.Rmd",
@@ -1225,24 +1348,18 @@ def main() -> None:
             ],
             "allowed_companion_only_numbers": allowances,
             "claim_review": {
-                "status": "GREEN",
-                "reviewer_type": "human",
-                "reviewer": "Patrick Iben",
-                "date": "2026-11-07",
-                "evidence_path": "education/G14_HUMAN_SIGNOFF.md",
+                **human,
                 "unrecorded_claims": [],
             },
         },
         "upstream_gates": {
+            # build_g9_inventory() above runs grounding_check.py with check=True, so this build
+            # stops unless the claim-grounding DAG exits 0; its inventory is the evidence.
             "g9": {
                 "status": "GREEN",
-                "evidence_path": "paper/VALIDATION_LEDGER_2026-11-06.md",
+                "evidence_path": "education/g9_claim_inventory.json",
             },
-            "g12": {
-                "status": "GREEN",
-                "manuscript_sha256": ms_sha,
-                "evidence_path": "paper/VALIDATION_LEDGER_2026-11-06.md",
-            },
+            "g12": g12_record,
         },
         "education_contract": {
             "audience": "Biostatisticians, clinical trialists, epidemiologists, and R package users analyzing audited measurements",
@@ -1251,11 +1368,7 @@ def main() -> None:
                 "maximum_sentence_words": 30,
                 "jargon_registry": cdata.JARGON_REGISTRY,
                 "human_review": {
-                    "status": "GREEN",
-                    "reviewer_type": "human",
-                    "reviewer": "Patrick Iben",
-                    "date": "2026-11-07",
-                    "evidence_path": "education/G14_HUMAN_SIGNOFF.md",
+                    **human,
                     "undefined_jargon": [],
                 },
             },
@@ -1269,13 +1382,7 @@ def main() -> None:
                     "artifact_path": "education/COMPANION.pdf",
                     "source_companion_sha256": comp_sha,
                     "coverage_ids": all_coverage_ids,
-                    "semantic_equivalence": {
-                        "status": "GREEN",
-                        "reviewer_type": "human",
-                        "reviewer": "Patrick Iben",
-                        "date": "2026-11-07",
-                        "evidence_path": "education/G14_HUMAN_SIGNOFF.md",
-                    },
+                    "semantic_equivalence": dict(human),
                 },
                 {
                     "id": "companion-one-pager",
@@ -1283,13 +1390,7 @@ def main() -> None:
                     "artifact_path": "education/ONE_PAGER.pdf",
                     "source_companion_sha256": comp_sha,
                     "coverage_ids": lb_ids,
-                    "semantic_equivalence": {
-                        "status": "GREEN",
-                        "reviewer_type": "human",
-                        "reviewer": "Patrick Iben",
-                        "date": "2026-11-07",
-                        "evidence_path": "education/G14_HUMAN_SIGNOFF.md",
-                    },
+                    "semantic_equivalence": dict(human),
                 },
                 {
                     "id": "companion-interactive-lab",
@@ -1297,19 +1398,13 @@ def main() -> None:
                     "artifact_path": "education/companion_lab.html",
                     "source_companion_sha256": comp_sha,
                     "coverage_ids": all_coverage_ids,
-                    "semantic_equivalence": {
-                        "status": "GREEN",
-                        "reviewer_type": "human",
-                        "reviewer": "Patrick Iben",
-                        "date": "2026-11-07",
-                        "evidence_path": "education/G14_HUMAN_SIGNOFF.md",
-                    },
+                    "semantic_equivalence": dict(human),
                     "practice_feedback": {
                         "records_attempt": True,
                         "reports_correctness": True,
                         "explains_answer": True,
                         "supports_retry": True,
-                        "evidence_path": "education/G14_HUMAN_SIGNOFF.md",
+                        "evidence_path": human["evidence_path"],
                     },
                 },
             ],
@@ -1330,22 +1425,8 @@ def main() -> None:
                 {"id": "BOUNDARY", "criterion": "Preserves the non-claims that per-row p_i is near chance on diffuse real data, catmech_audit_plan() is NO-GO, and catmech_audit_trail() does not certify Part 11 compliance"},
                 {"id": "TRANSFER", "criterion": "Selects Simple Linear MI vs Contamination Mixture and appropriate cluster pooling (CV3/CR1S/Lin-Wei) for a new clinical audit scenario"},
             ],
-            "results": {
-                "item_scores": {item["id"]: 1 for item in cdata.ASSESSMENT_ITEMS},
-                "one_sentence_scores": {
-                    "CLAIM": 1,
-                    "EVIDENCE": 1,
-                    "BOUNDARY": 1,
-                    "TRANSFER": 1,
-                },
-            },
-            "human_verdict": {
-                "status": "GREEN",
-                "reviewer_type": "human",
-                "reviewer": "Patrick Iben",
-                "date": "2026-11-07",
-                "evidence_path": "education/G14_HUMAN_SIGNOFF.md",
-            },
+            "results": assessment_results,
+            "human_verdict": dict(human),
         },
         "shipping": {
             "status": "SHIPPED",
@@ -1355,7 +1436,7 @@ def main() -> None:
                     "kind": "MARKDOWN",
                     "sha256": comp_sha,
                     "generated_from_companion_sha256": comp_sha,
-                    "text_qa": {"status": "GREEN", "evidence_path": "education/G14_HUMAN_SIGNOFF.md"},
+                    "text_qa": qa_record(),
                     "render_qa": {"status": "NOT_APPLICABLE", "reason": "Markdown source file; rendered PDF is checked below."},
                     "accessibility_qa": {"status": "NOT_APPLICABLE", "reason": "Plain UTF-8 Markdown with structured headings."},
                 },
@@ -1364,36 +1445,36 @@ def main() -> None:
                     "kind": "PDF",
                     "sha256": comp_pdf_res["sha256"],
                     "generated_from_companion_sha256": comp_sha,
-                    "text_qa": {"status": "GREEN", "evidence_path": "education/G14_HUMAN_SIGNOFF.md"},
-                    "render_qa": {"status": "GREEN", "evidence_path": "education/G14_HUMAN_SIGNOFF.md"},
-                    "accessibility_qa": {"status": "GREEN", "evidence_path": "education/G14_HUMAN_SIGNOFF.md"},
+                    "text_qa": qa_record(),
+                    "render_qa": qa_record(),
+                    "accessibility_qa": qa_record(),
                 },
                 {
                     "path": "education/STUDY_GUIDE.pdf",
                     "kind": "PDF",
                     "sha256": sg_pdf_res["sha256"],
                     "generated_from_companion_sha256": comp_sha,
-                    "text_qa": {"status": "GREEN", "evidence_path": "education/G14_HUMAN_SIGNOFF.md"},
-                    "render_qa": {"status": "GREEN", "evidence_path": "education/G14_HUMAN_SIGNOFF.md"},
-                    "accessibility_qa": {"status": "GREEN", "evidence_path": "education/G14_HUMAN_SIGNOFF.md"},
+                    "text_qa": qa_record(),
+                    "render_qa": qa_record(),
+                    "accessibility_qa": qa_record(),
                 },
                 {
                     "path": "education/ONE_PAGER.pdf",
                     "kind": "PDF",
                     "sha256": op_pdf_res["sha256"],
                     "generated_from_companion_sha256": comp_sha,
-                    "text_qa": {"status": "GREEN", "evidence_path": "education/G14_HUMAN_SIGNOFF.md"},
-                    "render_qa": {"status": "GREEN", "evidence_path": "education/G14_HUMAN_SIGNOFF.md"},
-                    "accessibility_qa": {"status": "GREEN", "evidence_path": "education/G14_HUMAN_SIGNOFF.md"},
+                    "text_qa": qa_record(),
+                    "render_qa": qa_record(),
+                    "accessibility_qa": qa_record(),
                 },
                 {
                     "path": "education/companion_lab.html",
                     "kind": "HTML",
                     "sha256": sha_file(lab_html_path),
                     "generated_from_companion_sha256": comp_sha,
-                    "text_qa": {"status": "GREEN", "evidence_path": "education/G14_HUMAN_SIGNOFF.md"},
-                    "render_qa": {"status": "GREEN", "evidence_path": "education/G14_HUMAN_SIGNOFF.md"},
-                    "accessibility_qa": {"status": "GREEN", "evidence_path": "education/G14_HUMAN_SIGNOFF.md"},
+                    "text_qa": qa_record(),
+                    "render_qa": qa_record(),
+                    "accessibility_qa": qa_record(),
                 },
             ],
         },

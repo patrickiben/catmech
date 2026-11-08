@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Data definitions for the catmech v1.0.0 R-Package Educational Companion:
+"""Data definitions for the catmech 1.0.1 R-Package Educational Companion:
 30 source-locked passage units (C01..C30) covering lines 1..350 of paper/manuscript.Rmd,
 12 concise study guide lessons (S1..S12), glossary, and 12 transfer assessment items.
 """
@@ -33,7 +33,7 @@ UNITS = [
             "continuous measurements are present on nearly all rows but subject to transcription mistakes, unit slips, "
             "and assay shifts, while an expensive gold-standard reference measurement is audited on only a fraction "
             "of rows (typically 10% to 25%). The abstract summarizes the mathematical contributions (collapsed "
-            "slice-within-Gibbs mixture posteriors, two-phase influence function power planning, and Barnard-Rubin "
+            "slice-within-Gibbs mixture posteriors, a rough, unvalidated two-phase audit-size calculation, and Barnard-Rubin "
             "small-sample degrees of freedom with CV3, CR1S, and Lin-Wei cluster-robust covariance), the 10 frozen "
             "validation archives (over 500,000 requests), the 43% to 48% root mean squared error (RMSE) reduction "
             "from retaining recorded values on ClinicalTrials.gov (`N = 27,208`) and NHANES 2017-2018 (`N = 3,908`), "
@@ -46,7 +46,7 @@ UNITS = [
         ),
         "Audits check a small slice of records against a trusted reference. Keeping recorded numbers cuts error in half compared with throwing unchecked numbers away.",
         "SCOPE of the `catmech` package and MEASURED_DATED summary of the 10 frozen validation archives.",
-        "Do not conclude that `catmech_audit_trail()` makes an analysis system legally compliant with FDA 21 CFR Part 11 or ICH E9 by itself, or that the contamination mixture model beats simple linear imputation on all real-world datasets.",
+        "Do not conclude that `catmech_audit_trail()` makes an analysis system legally compliant with FDA 21 CFR Part 11 or ICH E9 by itself or that its hashes make the record tamper-evident, or that the contamination mixture model beats simple linear imputation on all real-world datasets.",
         "On NHANES at a 25% audit, discarding unaudited recorded values gives `RMSE = 0.0785` and Simple Linear MI gives `RMSE = 0.0409`. Verify the percentage RMSE reduction in R with `round(100 * (1 - 0.0409 / 0.0785), 1)`. **Answer:** `47.9%` (matching the abstract's 43% to 48% range across ClinicalTrials.gov and NHANES).",
     ),
     (
@@ -111,7 +111,7 @@ UNITS = [
         "Problem, statistical model, and two-phase audit design",
         57,
         60,
-        "2-3",
+        "3",
         "ANALYTIC",
         "Section 2.2 opening paragraph",
         (
@@ -194,7 +194,7 @@ UNITS = [
         "Problem, statistical model, and two-phase audit design",
         71,
         72,
-        "3-4",
+        "3",
         "DEFINITION",
         "Section 2.2 closing paragraph",
         (
@@ -221,7 +221,7 @@ UNITS = [
         "Two-phase audit planning, multi-endpoint pooling, and calibration",
         73,
         80,
-        "4",
+        "3-4",
         "ANALYTIC",
         "Section 2.3, Equations (7)-(8)",
         (
@@ -245,7 +245,7 @@ UNITS = [
     ),
     (
         "C09",
-        "Monte Carlo audit power planning and the pre-specified NO-GO boundary on catmech_audit_plan",
+        "Rough, unvalidated audit-size planning (catmech_audit_power) and the pre-specified NO-GO boundary on catmech_audit_plan",
         "Two-phase audit planning, multi-endpoint pooling, and calibration",
         81,
         84,
@@ -253,22 +253,30 @@ UNITS = [
         "MEASURED_DATED",
         "Section 2.3, Equation (9) and validation disclosure",
         (
-            "Because the noise parameter `k` is estimated with uncertainty, `catmech_audit_power()` computes the probability "
-            "(statistical power) that the realized precision ratio at audit size `n_audit` meets a target threshold "
-            "`P(sqrt(1 + k_hat (1 - f) / f) <= rho_target)` across `n_sim = 2000` log-normal Monte Carlo draws of `k_hat`. "
-            "These draws can be parameterized prospectively (via expected `error_rate` and `correlation`) or calibrated "
-            "from the bias-corrected and accelerated (BCa) bootstrap bounds of an empirical pilot (`catmech_audit_plan()`). "
-            "Crucially, the manuscript discloses that in pre-specified validation testing (`validation/audit-plan-study`, "
-            "14,400 target fits and 28,800 plan rows), `catmech_audit_plan()` received a `NO-GO` verdict because its median "
-            "error in predicting interval width at a 5% audit fraction was 11.3% to 16.8% (exceeding the 10% tolerance).\n\n"
-            "Worked reasoning and R connection: Rather than hiding a failed pre-registered threshold, `catmech` retains "
-            "`catmech_audit_plan()` with explicit documentation that it is an exploratory calculation rather than a "
-            "validated sample-size guarantee (`Lab C09`)."
+            "Because the noise parameter `k` is estimated with uncertainty, `catmech_audit_power()` is a rough, unvalidated "
+            "planning aid. For each candidate audit fraction it reports the share of plausible `k` values whose precision "
+            "ratio meets a target, `Share(n_audit) = P(sqrt(1 + k_hat (1 - f) / f) <= rho_target)`, across `n_sim = 2000` "
+            "log-normal Monte Carlo draws of `k_hat`. The draws come from assumed `error_rate` and `correlation` values or "
+            "from the bias-corrected and accelerated (BCa) bootstrap bounds of a pilot fitted with `catmech_audit_plan()`. "
+            "The output labels this share `power`, but it describes uncertainty about `k`; it is not the power of a "
+            "hypothesis test. Without a pilot plan, the default `k` assumes the unexplained variation sits in erroneous "
+            "records that the analysis can identify, which is optimistic, so the function also reports the audit size that "
+            "linear imputation needs to meet the target under the double-sampling regression estimator (Cochran 1977) at "
+            "the same correlation. No study has checked these recommendations. The manuscript also discloses that in "
+            "pre-specified validation testing (`validation/audit-plan-study`, 14,400 target fits and 7,200 plans), "
+            "`catmech_audit_plan()` received a `NO-GO` verdict because its median error in predicting interval width at a "
+            "5% audit fraction was 11.3% to 16.8% (exceeding the 10% tolerance).\n\n"
+            "Worked reasoning and R connection: With the manuscript's workflow settings (`N = 1000`, `error_rate = 0.20`, "
+            "`correlation = 0.85`, and the default `r_squared = 0.30`), the default `k` is about `0.040` and the function "
+            "recommends a `10%` audit (`n = 100`). Linear imputation at the same correlation has "
+            "`k = (1 - 0.85^2) * (1 - 0.30) = 0.194` and needs about `25.7%` (`n = 257`) to reach a width ratio of `1.25`, "
+            "roughly two and a half times as many records (`Lab C09`). `catmech_audit_plan()` stays an exploratory "
+            "calculation rather than a validated sample-size guarantee."
         ),
-        "The power tool tests noise across sample sizes. The pilot size planner missed its ten percent goal and stays for rough checks only.",
-        "ANALYTIC Monte Carlo power definition (`catmech_audit_power()`) and MEASURED_DATED `NO-GO` validation verdict on `catmech_audit_plan()`.",
-        "Do not conclude that `catmech_audit_plan()` is a certified regulatory sample-size calculator; its pre-specified validation verdict is `NO-GO` (`11.3%` to `16.8%` median width error at `f = 5%`).",
-        "Why did `catmech_audit_plan()` receive a pre-specified `NO-GO` validation verdict in `validation/audit-plan-study`? **Answer:** Its median error in predicting confidence interval width at a 5% audit fraction was `11.3%` to `16.8%`, exceeding the pre-specified `10%` tolerance.",
+        "The audit-size tool makes a rough guess from assumed error rates, and nobody has checked its answers. The pilot planner also missed its ten percent goal.",
+        "ANALYTIC definition of the rough audit-size share (`catmech_audit_power()`, not validated) and MEASURED_DATED `NO-GO` validation verdict on `catmech_audit_plan()`.",
+        "Do not read the `power` column of `catmech_audit_power()` as the power of a hypothesis test or its recommendation as a validated audit size, and do not treat `catmech_audit_plan()` as a certified sample-size calculator; its pre-specified validation verdict is `NO-GO` (`11.3%` to `16.8%` median width error at `f = 5%`).",
+        "Run `catmech_audit_power(N = 1000, target_ratio = 1.25, power_target = 0.80, error_rate = 0.20, correlation = 0.85, fractions = seq(0.10, 0.50, by = 0.05))` and compare its recommendation with the linear-imputation line of the printout (`Lab C09`). **Answer:** It recommends `n = 100` records (`10%`), while linear imputation at the same correlation needs about `n = 257` (`25.7%`, `k = 0.194`); both are rough guides that no study has checked.",
     ),
     (
         "C10",
@@ -276,7 +284,7 @@ UNITS = [
         "Two-phase audit planning, multi-endpoint pooling, and calibration",
         85,
         90,
-        "4-5",
+        "4",
         "ANALYTIC",
         "Section 2.4, Equations (10)-(11)",
         (
@@ -301,7 +309,7 @@ UNITS = [
         "Two-phase audit planning, multi-endpoint pooling, and calibration",
         91,
         94,
-        "5",
+        "4",
         "ANALYTIC",
         "Section 2.4, Equation (12)",
         (
@@ -327,7 +335,7 @@ UNITS = [
         "Two-phase audit planning, multi-endpoint pooling, and calibration",
         95,
         98,
-        "5",
+        "4-5",
         "ANALYTIC",
         "Section 2.4, Endpoint items 1 and 2, Equation (13)",
         (
@@ -355,7 +363,7 @@ UNITS = [
         "Two-phase audit planning, multi-endpoint pooling, and calibration",
         99,
         100,
-        "5-6",
+        "5",
         "ANALYTIC",
         "Section 2.4, Endpoint item 3",
         (
@@ -382,7 +390,7 @@ UNITS = [
         "Two-phase audit planning, multi-endpoint pooling, and calibration",
         101,
         106,
-        "6",
+        "5",
         "ANALYTIC",
         "Section 2.5, Equation (14)",
         (
@@ -410,12 +418,12 @@ UNITS = [
         "Software architecture and illustrative 8-stage clinical workflow",
         107,
         118,
-        "6",
+        "5-6",
         "DEFINITION",
         "Section 3 opening and module table",
         (
             "Section 3 maps the `catmech` package into five functional S3 modules: (1) **Audit planning** (`catmech_audit_plan()`, "
-            "`catmech_audit_power()`), (2) **Data diagnostics** (`catmech_recording_audit()`, `catmech_holdout_check()`), "
+            "exploratory, and `catmech_audit_power()`, a rough, unvalidated aid), (2) **Data diagnostics** (`catmech_recording_audit()`, `catmech_holdout_check()`), "
             "(3) **Imputation engines** (`catmech_contamination()`, `catmech_reference()`), (4) **Model pooling** "
             "(`catmech_pool_lm()`, `catmech_pool_glm()`, `catmech_pool_coxph()`, `catmech_compare_strategies()`), and "
             "(5) **Provenance** (`catmech_sensitivity()`, `catmech_audit_trail()`).\n\n"
@@ -436,14 +444,14 @@ UNITS = [
         "Software architecture and illustrative 8-stage clinical workflow",
         119,
         133,
-        "6-7",
+        "6",
         "DEFINITION",
         "Section 3 capability comparison table and closing paragraph",
         (
             "Section 3 compares `catmech` against four established CRAN packages: `mice` (van Buuren and Groothuis-Oudshoorn 2011), "
             "`simex` (Lederer and Kuchenhoff 2006), `mecor` (Nab et al. 2021), and `Amelia` (Honaker et al. 2011). While `mice` "
             "and `Amelia` provide general-purpose MAR multiple imputation and `mecor` provides linear regression calibration, "
-            "none combine two-phase audit power planning, reference-calibrated contamination mixture modeling, multi-endpoint "
+            "none combine two-phase audit-size planning (rough and unvalidated in `catmech`), reference-calibrated contamination mixture modeling, multi-endpoint "
             "pooling (linear with CV3, GLM with CR1S sandwich, and Cox PH with event-based `d - p` df and Lin-Wei sandwich), "
             "rank-PIT holdout screening, and SHA-256 provenance trails. Section 3 also highlights `tidy()` and `glance()` "
             "S3 generics for tidyverse workflows and `catmech_compare_strategies()` for side-by-side comparison of "
@@ -459,29 +467,33 @@ UNITS = [
     ),
     (
         "C17",
-        "Reproducible 8-stage clinical trial workflow (Stages 1-5): simulation, power, screening, mixture fit, and calibration",
+        "Reproducible 8-stage clinical trial workflow (Stages 1-5): simulation, audit sizing, screening, mixture fit, and calibration",
         "Software architecture and illustrative 8-stage clinical workflow",
         134,
         173,
-        "7-8",
+        "6-7",
         "DEFINITION",
         "Section 4 code chunk (Stages 1-5)",
         (
             "Section 4 demonstrates the first five stages of a reproducible 10-site clinical trial workflow (`N = 1,000`, "
             "25% reference audit `n_audit = 250`): (1) simulating the cohort via `simulate_catmech_lab(n = 1000, seed = 42)` "
-            "with site IDs, binary adverse events, and right-censored survival times; (2) prospective audit power calculation "
+            "with site IDs, binary adverse events, right-censored survival times, and the Nelson-Aalen cumulative hazard "
+            "from `mice::nelsonaalen(cohort, time, event)`; (2) a rough, unvalidated audit-size calculation "
             "via `catmech_audit_power(N = 1000, target_ratio = 1.25, power_target = 0.80, error_rate = 0.20, correlation = 0.85)`; "
             "(3) site-stratified discrepancy screening via `catmech_recording_audit(..., by = 'site', agreement_tol = 0.5)`; "
-            "(4) reference-calibrated contamination mixture imputation via `catmech_contamination(..., predictors = c('age', 'sex', 'inflammation', 'outcome'), corruption_strata = 'outlier_flag', m = 10)`; "
+            "(4) reference-calibrated contamination mixture imputation via `catmech_contamination(..., predictors = c('age', 'sex', 'inflammation', 'outcome', 'adverse_event', 'event', 'hazard'), corruption_strata = 'outlier_flag', m = 10)`; "
             "and (5) 5-fold out-of-sample predictive calibration checking via `catmech_holdout_check(fit = fit, folds = 5L, m = 20L)`.\n\n"
-            "Worked reasoning and R connection: Notice that `predictors` in Stage 4 includes the downstream analysis outcome "
-            "(`outcome`) alongside covariates (`age`, `sex`, `inflammation`). Omitting the outcome from the imputation model "
-            "would bias the imputed covariate-outcome slope toward zero!"
+            "Worked reasoning and R connection: The lab value is a predictor in all three Stage 6 analyses, so `predictors` "
+            "in Stage 4 includes every analysis outcome: `outcome` for the linear model, `adverse_event` for the logistic "
+            "model, and, for the Cox model, the event indicator `event` and the Nelson-Aalen cumulative hazard `hazard` "
+            "(White and Royston 2009). Leaving an outcome out biases the lab value's coefficient toward zero. Under "
+            "`catmech` 1.0.1, `catmech_pool_glm()` and `catmech_pool_coxph()` warn when the outcome or event indicator is "
+            "missing from the imputation model; with all four included, the workflow runs without warnings (`Lab C17-C18`)."
         ),
-        "Steps one to five build a ten-site study, size the audit, and check site error rates. Then they fit the mixture model and test held-out rows.",
+        "Steps one to five build a ten-site study and make a rough guess at audit size. Then they check site error rates, fit the model with every outcome included, and test held-out rows.",
         "DEFINITION of the reproducible R workflow for Stages 1-5 of a clinical audit analysis.",
-        "Do not omit the downstream analysis outcome from `predictors` when calling `catmech_contamination()` or `catmech_reference()`; omitting the outcome from a covariate imputation model attenuates the downstream regression slope toward zero.",
-        "Why must `outcome` be included in `predictors = c('age', 'sex', 'inflammation', 'outcome')` in Stage 4 when imputing `lab_value`? **Answer:** In multiple imputation of a predictor variable, conditioning on the analysis outcome is required for congeniality; omitting the outcome biases the downstream regression slope of `outcome ~ lab_value` toward zero.",
+        "Do not leave any downstream analysis outcome out of `predictors` when calling `catmech_contamination()` or `catmech_reference()` for a value that later serves as a predictor: include a continuous or binary outcome itself, and for a Cox model the event indicator and the Nelson-Aalen cumulative hazard. Omitting them biases the downstream coefficient toward zero (a hazard ratio toward 1).",
+        "Why do `adverse_event`, `event`, and `hazard` appear in `predictors` in Stage 4 when imputing `lab_value`? **Answer:** `lab_value` is a predictor in the logistic and Cox models of Stage 6, so the imputation model must condition on each analysis outcome; for the Cox model that means the event indicator and the Nelson-Aalen cumulative hazard (White and Royston 2009). Leaving them out biases the lab value's log odds ratio and log hazard ratio toward zero, and `catmech_pool_glm()` and `catmech_pool_coxph()` warn.",
     ),
     (
         "C18",
@@ -489,7 +501,7 @@ UNITS = [
         "Software architecture and illustrative 8-stage clinical workflow",
         174,
         210,
-        "8",
+        "7-8",
         "MODELED_LOCKED",
         "Section 4 code chunk (Stages 6-8) and console output",
         (
@@ -497,18 +509,22 @@ UNITS = [
             "binary (`catmech_pool_glm` with `family = binomial(link = 'logit')`, `cluster = 'site'`, `exponentiate = TRUE`), "
             "and survival (`catmech_pool_coxph` with `Surv(time, event) ~ lab_value + age + sex`, `cluster = 'site'`, "
             "`exponentiate = TRUE`) models; (7) comparing all four audit strategies via `catmech_compare_strategies()`; "
-            "and (8) generating a Markdown SHA-256 provenance record via `catmech_audit_trail()`. The printed console output "
-            "for `pool_survival` (`m = 10`, `n = 1000`, `Events: 735`) shows `lab_value` log-hazard `estimate = 0.1632`, "
-            "clustered Lin-Wei `std.error = 0.0314`, Barnard-Rubin `df = 6.5933` (bounded below `nu_com = C - 1 = 9`), "
-            "and exponentiated hazard ratio `estimate_exp = 1.1773` (95% CI `[1.0921, 1.2692]`).\n\n"
-            "Worked reasoning and R connection: Verify that `exp(0.1632) = 1.1773` and that with `df = 6.5933`, the critical "
-            "`t`-multiplier is `qt(0.975, df = 6.5933) = 2.395` (wider than `1.96`), giving `0.1632 +/- 2.395 * 0.0314 = [0.0881, 0.2384]` "
-            "and `exp([0.0881, 0.2384]) = [1.0921, 1.2692]`!"
+            "and (8) generating a Markdown provenance record with SHA-256 hashes of the data, the specification, and the "
+            "completions via `catmech_audit_trail()`. The printed console output "
+            "for `pool_survival` (`m = 10`, `n = 1000`, `Events: 735`) shows `lab_value` log-hazard `estimate = 0.1877`, "
+            "clustered Lin-Wei `std.error = 0.0386`, Barnard-Rubin `df = 6.0881` (bounded below `nu_com = C - 1 = 9`), "
+            "and exponentiated hazard ratio `estimate_exp = 1.2065` (95% CI `[1.0982, 1.3255]`). The simulation in Stage 1 "
+            "draws survival times with log hazard ratio `0.25` per unit of the true lab value, and the interval "
+            "`[0.0936, 0.2818]` contains it.\n\n"
+            "Worked reasoning and R connection: Verify that `exp(0.1877) = 1.2065` and that with `df = 6.0881`, the critical "
+            "`t`-multiplier is `qt(0.975, df = 6.0881) = 2.4384` (wider than `1.96`), giving `0.1877 +/- 2.4384 * 0.0386 = [0.0936, 0.2818]`. "
+            "Exponentiating those rounded limits gives `[1.0981, 1.3255]`, which matches the printed `[1.0982, 1.3255]` up to "
+            "rounding of the limits."
         ),
         "Steps six to eight pool three model types across ten sites. Then they compare all four methods and write the hash log.",
         "MODELED_LOCKED illustrative workflow output and ANALYTIC Barnard-Rubin `t`-interval exponentiation.",
-        "Do not conclude that `df = 6.5933` in the 1,000-patient, 735-event Cox model is a bug; because `cluster = 'site'` was specified across `C = 10` sites, `nu_com = C - 1 = 9`, so `df` is properly bounded below `9`.",
-        "From the printed Cox PH table (`estimate = 0.1632`, `std.error = 0.0314`, `df = 6.5933`), verify `estimate_exp` in R (`round(exp(0.1632), 4)`). **Answer:** `1.1773`.",
+        "Do not conclude that `df = 6.0881` in the 1,000-patient, 735-event Cox model is a bug; because `cluster = 'site'` was specified across `C = 10` sites, `nu_com = C - 1 = 9`, so `df` is properly bounded below `9`.",
+        "From the printed Cox PH table (`estimate = 0.1877`, `std.error = 0.0386`, `df = 6.0881`), verify `estimate_exp` in R (`round(exp(0.1877), 4)`). **Answer:** `1.2065`.",
     ),
     (
         "C19",
@@ -516,7 +532,7 @@ UNITS = [
         "Synthetic simulation studies and clustered variance benchmarks",
         211,
         218,
-        "8-9",
+        "8",
         "MODELED_LOCKED",
         "Section 5 opening and Section 5.1 introduction",
         (
@@ -542,7 +558,7 @@ UNITS = [
         "Synthetic simulation studies and clustered variance benchmarks",
         219,
         240,
-        "9-10",
+        "9",
         "MODELED_LOCKED",
         "Section 5.1 benchmark table and primary cell analysis",
         (
@@ -572,7 +588,7 @@ UNITS = [
         "Synthetic simulation studies and clustered variance benchmarks",
         241,
         249,
-        "10",
+        "9-10",
         "MODELED_LOCKED",
         "Section 5.1 stress-cell failure inventory",
         (
@@ -600,7 +616,7 @@ UNITS = [
         "Synthetic simulation studies and clustered variance benchmarks",
         250,
         258,
-        "10-11",
+        "10",
         "MEASURED_DATED",
         "Section 5.2",
         (
@@ -630,7 +646,7 @@ UNITS = [
         "Real-world empirical benchmarks and methodological decision framework",
         259,
         277,
-        "11-12",
+        "11",
         "MEASURED_DATED",
         "Section 6.1 and empirical benchmark table",
         (
@@ -659,7 +675,7 @@ UNITS = [
         "Real-world empirical benchmarks and methodological decision framework",
         278,
         279,
-        "12",
+        "11",
         "MEASURED_DATED",
         "Section 6.1 closing paragraph",
         (
@@ -686,7 +702,7 @@ UNITS = [
         "Real-world empirical benchmarks and methodological decision framework",
         280,
         289,
-        "12-13",
+        "12",
         "MEASURED_DATED",
         "Section 6.2",
         (
@@ -718,7 +734,7 @@ UNITS = [
         "Real-world empirical benchmarks and methodological decision framework",
         290,
         314,
-        "13",
+        "12-13",
         "INTERPRETIVE",
         "Section 7 decision tree and rules",
         (
@@ -778,26 +794,30 @@ UNITS = [
         "Section 9 Regulatory documentation and data governance",
         (
             "Section 9 defines the exact role of `catmech_audit_trail()` in regulated clinical trial workflows. FDA 21 CFR "
-            "Part 11 governs electronic records and audit trails, and ICH E9 requires that statistical data handling and "
+            "Part 11 governs electronic records and audit trails, and ICH E9 asks that statistical data handling and "
             "imputation methods be pre-specified and documented. `catmech_audit_trail()` supports that documentation by "
             "emitting a structured provenance report in Markdown, JSON, or standalone HTML containing: (1) execution metadata "
-            "(R version, OS platform, `catmech` version, UTC timestamp); (2) SHA-256 cryptographic hashes of the original "
-            "input data frame, the assumption specification, and each of the `m` completed datasets; (3) MCMC convergence "
+            "(R version, OS platform, `catmech` version, UTC timestamp); (2) SHA-256 hashes of the input data frame and of "
+            "each of the `m` completed datasets, computed over the serialized R data frames (so they can be recomputed only "
+            "in R, not with a file-hashing tool), and of the assumption specification as canonical JSON text; (3) MCMC convergence "
             "status (`convergence_passed` and `mcmc_iterations`, with full `R-hat` and bulk/tail ESS vectors in "
-            "`result$model_diagnostics`); and (4) pooled regression tables and sensitivity envelopes (`catmech_sensitivity()`).\n\n"
+            "`result$model_diagnostics`); and (4) pooled regression tables and sensitivity envelopes (`catmech_sensitivity()`). "
+            "A rerun can be compared with the hashes, but they do not cover the pooled results and do not make the record "
+            "tamper-evident, because anyone who edits the data can also regenerate the record.\n\n"
             "Worked reasoning and R connection: As enforced in `R/audit-trail.R` (`Lab C28`), the report is titled "
-            "`Catmech Audit Trail & Provenance Report` with footer `### Audit Trail & Provenance Record`: hashing a dataset "
-            "supports reproducibility and documentation, but regulatory compliance depends on the surrounding validated "
-            "system, access controls, and standard operating procedures."
+            "`Catmech Audit Trail & Provenance Report`, and its footer `### Audit Trail & Provenance Record` says the hashes do "
+            "not cover the pooled results or make the document tamper-evident. Hashing a dataset supports reproducibility and "
+            "documentation, but regulatory compliance depends on the surrounding validated system, access controls, and "
+            "standard operating procedures."
         ),
-        "The trail tool writes a log with SHA-256 data hashes, model settings, and chain checks. It aids record keeping but does not grant legal approval.",
+        "The trail tool logs SHA-256 hashes of the data and settings, plus chain checks. A rerun can be compared with it, but it cannot prove the data were untouched or grant legal approval.",
         "DEFINITION and SCOPE of `catmech_audit_trail()` provenance reports.",
-        "Do not claim that running `catmech_audit_trail()` certifies FDA 21 CFR Part 11 or ICH E9 compliance; compliance is a property of the institutional system, access controls, and procedures around the analysis.",
-        "Which three sets of SHA-256 cryptographic hashes does `catmech_audit_trail()` record inside its `integrity` block (`Lab C28`)? **Answer:** The original input data hash (`original_data_sha256`), the assumption specification hash (`assumption_specification_sha256`), and the list of `m` completed dataset hashes (`completed_datasets_sha256`).",
+        "Do not claim that running `catmech_audit_trail()` certifies FDA 21 CFR Part 11 or ICH E9 compliance or makes the record tamper-evident; compliance is a property of the institutional system, access controls, and procedures around the analysis, and anyone who edits the data can regenerate the record.",
+        "Which three sets of SHA-256 hashes does `catmech_audit_trail()` record inside its `integrity` block (`Lab C28`), and which one is taken over canonical JSON text rather than a serialized R data frame? **Answer:** The original input data hash (`original_data_sha256`), the assumption specification hash (`assumption_specification_sha256`), and the list of `m` completed dataset hashes (`completed_datasets_sha256`); the specification hash is of canonical JSON text, and the data and completion hashes are over serialized R data frames.",
     ),
     (
         "C29",
-        "Quality assurance and verification: 1,754 unit tests, R CMD check, and 500,000+ replicate checks",
+        "Quality assurance and verification: 1,812 test expectations, R CMD check, and 500,000+ replicate checks",
         "Discussion, regulatory provenance, verification, and availability",
         338,
         345,
@@ -805,8 +825,8 @@ UNITS = [
         "MEASURED_DATED",
         "Section 10 Quality assurance and verification",
         (
-            "Section 10 summarizes the three-layer verification harness backing `catmech` v1.0.0: (1) `1,754` unit tests "
-            "across `20` `testthat` files passing with `0` failures, `0` warnings, and `0` skips; (2) `R CMD check --as-cran` "
+            "Section 10 summarizes the three-layer verification harness backing `catmech` 1.0.1: (1) `199` `testthat` tests "
+            "with `1,812` expectations across `19` test files, passing with `0` failures, `0` warnings, and `0` skips; (2) `R CMD check --as-cran` "
             "reporting `0` errors and `0` warnings across macOS (`aarch64-apple-darwin23`), Ubuntu Linux (`x86_64-pc-linux-gnu`), "
             "and Windows Server (`x86_64-w64-mingw32`); and (3) independent Python verification scripts (`tools/verify-artifacts.py`, "
             "`tools/verify-release-archive.py`, `paper/verify_paper_numbers.py`, and `docs/case-study/fact_check.py`) that "
@@ -815,10 +835,10 @@ UNITS = [
             "Worked reasoning and R connection: Every claim in this educational companion is additionally verified by "
             "`education/verify_educational_companion.py`, `Rscript education/run_companion_labs.R`, and `g14_companion_gate.py`."
         ),
-        "The package passes 1,754 unit tests and CRAN checks with zero errors or warnings. Python scripts also re-check more than 500,000 benchmark fits.",
+        "The package passes 1,812 test checks and CRAN checks with zero errors or warnings. Python scripts also re-check more than 500,000 benchmark fits.",
         "MEASURED_DATED software quality assurance and artifact verification inventory.",
         "Do not conclude that passing `R CMD check --as-cran` and `verify-artifacts.py` establishes universal statistical validity on unmodeled data; as `verify-artifacts.py` prints on its final line, mechanical verification proves correspondence and repeatability, not inferential validity.",
-        "How many `testthat` unit tests ship in `catmech` v1.0.0, and what does `R CMD check --as-cran` report for errors and warnings? **Answer:** `1,754` unit tests (`0` failures, `0` warnings, `0` skips) and `0` errors and `0` warnings under `R CMD check --as-cran`.",
+        "How many `testthat` expectations does `catmech` 1.0.1 pass, and what does `R CMD check --as-cran` report for errors and warnings? **Answer:** `1,812` expectations in `199` tests (`0` failures, `0` warnings, `0` skips) and `0` errors and `0` warnings under `R CMD check --as-cran`.",
     ),
     (
         "C30",
@@ -826,7 +846,7 @@ UNITS = [
         "Discussion, regulatory provenance, verification, and availability",
         346,
         350,
-        "14-15",
+        "14-16",
         "DEFINITION",
         "Section 11 Availability and Section 12 References",
         (

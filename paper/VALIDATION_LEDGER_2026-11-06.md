@@ -8,8 +8,9 @@
 # Pre-Submission Validation Harness Ledger (`catmech` v1.0.0)
 
 - **Date**: 2026-11-07
+- **Later edits (2026-11-07, catmech 1.0.1)**: `paper/manuscript.Rmd`, its rendered `.tex`, `.pdf` and `.html`, `paper/paper.md` and `paper/paper.bib` were edited after these gates ran. The gate-basis hashes above name the versions this ledger checked, so its verdicts do not cover the edited files. What changed, which checks were re-run and which were not: [`G12_RESIGN_2026-11-07.md`](G12_RESIGN_2026-11-07.md).
 - **Target**: `catmech` v1.0.0 CRAN package & JSS / JOSS manuscripts (`paper/manuscript.Rmd`, `paper/manuscript.tex`, `paper/manuscript.pdf`, `paper/paper.md`, `paper/paper.bib`)
-- **Harness Specification**: `/Users/patrickiben/Documents/Documents - Patrick’s Mac Studio/Research_Validation_Harness/PRE_SUBMISSION_VALIDATION_HARNESS.md`
+- **Harness Specification**: `Research_Validation_Harness/PRE_SUBMISSION_VALIDATION_HARNESS.md` (the maintainer's separate validation harness, not part of this repository)
 - **specification_coverage**: `lines 1-590 (100%)`
 - **Total Gates in Specification**: `24` (`G0`–`G23`, verified via `grep -cE '^## G[0-9]+:' PRE_SUBMISSION_VALIDATION_HARNESS.md`)
 - **Execution Tier**: Full Deterministic Tier + 5-Agent Isolated Read-Only Lean Reader Wave (`G5` Persona A & B, `G12`, `G13`, `G18`)
@@ -80,7 +81,7 @@
 
 ## Companion Interactive Web Surfaces (`App_Validation_Harness`)
 
-- **Harness Specification**: `/Users/patrickiben/Documents/Documents - Patrick’s Mac Studio/App_Validation_Harness/HARNESS.md` (`web_gate.py`, gates `A0`–`A10`)
+- **Harness Specification**: `App_Validation_Harness/HARNESS.md` (`web_gate.py`, gates `A0`–`A10`; a separate harness, not part of this repository)
 - **`catmech_guide` (`docs/learn/index.html`, page hash `d94e13a7b66c865e`)**: All applicable gates (`A0`–`A5`, `A7`–`A10`) **GREEN**; `A0`, `A4`, and `A8` signed off (`approved (2026-11-07)`); **`OWNER-APPROVED: True`**.
 - **`catmech_simulator` (`docs/learn/simulator.html`, page hash `80cafcd68fec48c7`)**: All applicable gates (`A0`–`A5`, `A7`–`A9`) **GREEN**; `A0`, `A4`, and `A8` signed off (`approved (2026-11-07)`); **`OWNER-APPROVED: True`**.
 - **JS-to-R Numerical Cross-Checks**: `node docs/learn/qa/compare.js` (`140` studies + `6` negative controls: **PASS**) and `node docs/audit-planner/qa/check-k-port.js` (`3` browser test vectors + pool $\hat{k}$ to `1e-11`–`1e-15`: **PASS**).
