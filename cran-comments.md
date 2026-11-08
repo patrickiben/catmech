@@ -2,14 +2,19 @@
 
 * macOS (aarch64-apple-darwin23.6.0, Apple Silicon), R 4.6.0 (local)
 * macOS 15 (aarch64-apple-darwin23), R 4.6.2 (GitHub Actions)
-* Ubuntu Linux (x86_64-pc-linux-gnu), R 4.6.2 (GitHub Actions)
-* Windows Server (x86_64-w64-mingw32), R 4.6.2 ucrt (GitHub Actions)
+* Ubuntu 24.04 (x86_64-pc-linux-gnu), R-devel (2026-11-07 r90850), R 4.6.2 and
+  R 4.5.3 (GitHub Actions)
+* Windows Server (x86_64-w64-mingw32), R-devel (2026-11-07 r90850 ucrt) and
+  R 4.6.2 ucrt (GitHub Actions)
 
 ## R CMD check results
 
 0 errors | 0 warnings | 1 note
 
 * This is a new submission.
+* Words in DESCRIPTION that may be reported as possibly misspelled are the
+  surnames of cited authors (Barnard, Neyman, Rubin) or correctly spelled terms
+  (auditable, misspecification, unvalidated).
 
 ## Notes for the reviewer
 
