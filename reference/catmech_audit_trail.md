@@ -85,7 +85,7 @@ trail <- catmech_audit_trail(res, pooled = pooled)
 print(trail)
 #> # Catmech Audit Trail & Provenance Report
 #> 
-#> **Generated:** 2026-11-08T22:27:25Z UTC | **Catmech Version:** 1.0.1
+#> **Generated:** 2026-11-08T22:32:58Z UTC | **Catmech Version:** 1.0.1
 #> **R Version:** 4.6.2 | **Platform:** x86_64-pc-linux-gnu
 #> 
 #> ---
@@ -96,8 +96,8 @@ print(trail)
 #> - **Assumption Specification Hash:** `0d01fc948329eb1374ac3e7a605d2d654b5029a26059bf334c5523074d21396d`
 #> - **Completed Dataset Checksums:**
 #> 
-#>   - Completion `m=1`: `0570e2fd18a48e99f3aa7ea1ef3e104b472cbcf65b48597e62472e3659a386a2`
-#>   - Completion `m=2`: `6cafdeb838011ea1577187fe4336986947af709134fd4ad9ec6bdd16ee929d7f`
+#>   - Completion `m=1`: `66e25c1df2d231868f37c76cb6c2dc8ff51e6c6e4c2d15e86faedbaa713958f0`
+#>   - Completion `m=2`: `502dfc01798a93b727b4356ea205b8e8e44040933c474441e2fa40dd5fc5032f`
 #> 
 #> ## 2. Cohort Specification & Imputation Profile
 #> 
