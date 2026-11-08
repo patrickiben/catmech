@@ -64,6 +64,13 @@ submitted to CRAN.
   only as an experimental check when the audited value is the outcome.
   The validation records and the assessment that called 1.0.0
   production-ready now open with a dated correction.
+- The slowest tests now skip on CRAN with
+  [`testthat::skip_on_cran()`](https://testthat.r-lib.org/reference/skip.html),
+  which cut the test time on the maintainer’s Mac from 88 to 42 seconds;
+  the win-builder R-devel check of the earlier build took 796 seconds in
+  all, over CRAN’s 10-minute limit. GitHub Actions still runs the full
+  suite on every configuration except Windows R-devel, which checks as
+  CRAN does. No package code changed.
 
 ## catmech 1.0.0
 
