@@ -74,9 +74,9 @@ df <- data.frame(
 df$ref <- df$lab
 df$ref[11:30] <- NA
 res1 <- catmech_reference(df, value = "lab", reference = "ref",
-                          predictors = "age", m = 2, seed = 1)
+                          predictors = c("age", "y"), m = 2, seed = 1)
 res2 <- catmech_reference(df, value = "lab", reference = "ref",
-                          predictors = "age", use_recorded = TRUE, m = 2, seed = 2)
+                          predictors = c("age", "y"), use_recorded = TRUE, m = 2, seed = 2)
 sens <- catmech_sensitivity(
   list(standard = res1, recorded = res2),
   formula = y ~ lab + age, term = "lab"

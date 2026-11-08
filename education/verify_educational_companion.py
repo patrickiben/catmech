@@ -14,12 +14,12 @@ sys.dont_write_bytecode = True
 
 EDU_DIR = Path(__file__).resolve().parent
 ROOT = EDU_DIR.parent
-HARNESS_DIR = Path(
-    os.environ.get(
-        "RESEARCH_VALIDATION_HARNESS_DIR",
-        str(Path.home() / "Documents" / "Documents - Patrick’s Mac Studio" / "Research_Validation_Harness"),
-    )
-)
+# The spelling, prose, G14 and lock gates live in a separate validation harness that is
+# not part of this repository. Point RESEARCH_VALIDATION_HARNESS_DIR at it to run them;
+# without it they are reported as SKIPPED, and --require-harness turns a skip into a failure.
+_HARNESS_ENV = os.environ.get("RESEARCH_VALIDATION_HARNESS_DIR", "").strip()
+HARNESS_DIR = Path(_HARNESS_ENV) if _HARNESS_ENV else None
+REQUIRE_HARNESS = "--require-harness" in sys.argv[1:]
 
 REQUIRED_FILES = [
     "COMPANION.md",
@@ -65,6 +65,25 @@ def main() -> int:
     def fail(msg: str) -> None:
         print(f"  [FAIL] {msg}")
         failures.append(msg)
+
+    skipped: list[str] = []
+
+    def skip(msg: str) -> None:
+        if REQUIRE_HARNESS:
+            fail(f"{msg} (required by --require-harness)")
+        else:
+            print(f"  [SKIPPED] {msg}")
+            skipped.append(msg)
+
+    def harness_gate(name: str) -> Path | None:
+        if HARNESS_DIR is None:
+            skip(f"{name}: RESEARCH_VALIDATION_HARNESS_DIR is not set")
+            return None
+        gate = HARNESS_DIR / name
+        if not gate.exists():
+            skip(f"{name}: not found in RESEARCH_VALIDATION_HARNESS_DIR")
+            return None
+        return gate
 
     print("=== catmech v1.0.0 Multimodal Educational Companion Verifier ===")
 
@@ -148,10 +167,10 @@ def main() -> int:
     ok("All relative links in Markdown and HTML resolve; 0 em-dashes and 0 local paths in shipped artifacts")
 
     # 3b. Run G10 US spelling and prose style checks on all education/*.md files
-    spell_gate = HARNESS_DIR / "check_spelling_us.py"
-    prose_gate = HARNESS_DIR / "check_prose_style_v2.py"
+    spell_gate = harness_gate("check_spelling_us.py")
+    prose_gate = harness_gate("check_prose_style_v2.py")
     md_files = ["COMPANION.md", "STUDY_GUIDE.md", "ONE_PAGER.md", "COMPLETE_COVERAGE.md", "README.md", "G14_HUMAN_SIGNOFF.md"]
-    if spell_gate.exists() and prose_gate.exists():
+    if spell_gate is not None and prose_gate is not None:
         for md_name in md_files:
             sp = subprocess.run([sys.executable, str(spell_gate), f"education/{md_name}"], cwd=str(ROOT), capture_output=True, text=True)
             if sp.returncode != 0:
@@ -162,9 +181,9 @@ def main() -> int:
         ok("G10 US spelling (0 British spellings) and prose style (all categories [ok]) passed across all 6 Markdown files")
 
     # 4. Run G14 gate (--selftest and strict v2 evaluation) and check_companion_lock.py
-    g14_gate = HARNESS_DIR / "g14_companion_gate.py"
-    lock_gate = HARNESS_DIR / "check_companion_lock.py"
-    if g14_gate.exists():
+    g14_gate = harness_gate("g14_companion_gate.py")
+    lock_gate = harness_gate("check_companion_lock.py")
+    if g14_gate is not None:
         st = subprocess.run([sys.executable, str(g14_gate), "--selftest"], cwd=str(ROOT), capture_output=True, text=True)
         if st.returncode != 0:
             fail(f"g14_companion_gate.py --selftest failed:\n{st.stdout}\n{st.stderr}")
@@ -193,7 +212,7 @@ def main() -> int:
         else:
             ok("g14_companion_gate.py (schema-v2 MULTIMODAL: DOCUMENT, ONE_PAGER, INTERACTIVE) passed")
 
-    if lock_gate.exists():
+    if lock_gate is not None:
         lk = subprocess.run(
             [sys.executable, str(lock_gate), "education/g14_companion_manifest.json", "."],
             cwd=str(ROOT),
@@ -232,6 +251,9 @@ def main() -> int:
     if failures:
         print(f"\nFAILED: {len(failures)} check(s) failed.")
         return 1
+    if skipped:
+        print(f"\nPASSED WITH {len(skipped)} HARNESS GATE(S) SKIPPED; set RESEARCH_VALIDATION_HARNESS_DIR to run them.")
+        return 0
     print("\nALL EDUCATIONAL COMPANION VERIFICATION CHECKS PASSED (exit 0).")
     return 0
 

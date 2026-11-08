@@ -35,6 +35,11 @@
 #'   studies found material undercoverage even with random accurate references.
 #'   This package policy does not assert that every PMM application is invalid.
 #'   Only univariate linear models with at least one named coefficient are supported.
+#'
+#'   When the audited value is an analysis predictor, the analysis outcome must be among the
+#'   imputation `predictors`; otherwise its coefficient is biased toward zero and a warning
+#'   says so. When the audited value is the outcome, the analysis predictors belong in the
+#'   imputation model instead.
 #' @return A data.frame with term, estimate, std.error, df, lower, upper,
 #'   within_variance, between_variance, m, n and interpretation, plus clusters
 #'   when a cluster-robust variance was used.
@@ -48,8 +53,9 @@
 #' )
 #' df$lab_ref <- df$lab
 #' df$lab_ref[11:n] <- NA
+#' # lab is a predictor below, so the outcome joins the imputation model.
 #' res <- catmech_reference(df, value = "lab", reference = "lab_ref",
-#'                          predictors = "age", m = 2, seed = 1)
+#'                          predictors = c("age", "outcome"), m = 2, seed = 1)
 #' pooled <- catmech_pool_lm(res, outcome ~ lab + age)
 #' print(pooled)
 #' @export
@@ -119,15 +125,7 @@ catmech_pool_lm <- function(result, formula, conf_level = 0.95,
   reference_pmm_sensitivity <- identical(engine, "reference_pmm") && !no_imputation
   if (reference_pmm_sensitivity && !allow_sensitivity)
     stop("Partial-reference PMM is experimental and showed undercoverage in validation. Set allow_sensitivity=TRUE only for sensitivity calculations.", call. = FALSE)
-  if (!is.null(result[["spec"]][["cluster"]]) && !is.null(result[["spec"]][["value"]]) &&
-      result[["spec"]][["value"]] %in% all.vars(stats::delete.response(stats::terms(formula)))) {
-    if (identical(engine, "reference_marginal_cluster"))
-      warning("Joint clustered imputation has not been validated here with the audited value as an analysis predictor in catmech_pool_lm(); for direct population marginal regression when the outcome was included in predictors, use catmech_marginal_summary(result, formula = ...). See docs/JOINT_MARGINAL_METHOD.md.", call. = FALSE)
-    else if (identical(engine, "reference_joint_cluster"))
-      warning("Joint clustered imputation has not been validated here with the audited value as an analysis predictor. The earlier moment model showed slope attenuation in that role; joint sampling alone does not establish compatible inference. See docs/JOINT_CLUSTER_METHOD.md.", call. = FALSE)
-    else
-      warning("catmech_reference(cluster = ) gives an unaudited cluster a new intercept, which biased slopes toward zero in simulations when the audited value was a predictor. Prefer a fit without cluster, pooled with catmech_pool_lm(cluster = ). See validation/VARIANCE_MI_SYNTHESIS.md.", call. = FALSE)
-  }
+  catmech_analysis_role_checks(result, formula, engine, "catmech_pool_lm", no_imputation = no_imputation)
   cluster_name <- if (is.null(cluster)) result[["spec"]][["cluster"]] else cluster
   robust <- NULL
   if (!is.null(cluster_name)) {
@@ -225,7 +223,15 @@ print.catmech_pooled_lm <- function(x, digits = 4L, ...) {
 #'   ratios (for logistic regression) or incidence rate ratios (for Poisson regression).
 #' @param allow_sensitivity Explicitly allow pooled calculations for sensitivity output.
 #' @param cluster Optional name of a column identifying clusters for cluster-robust inference.
+#'   Each completed analysis then uses the CR1S sandwich, factor (G / (G - 1)) ((n - 1) / (n - p)),
+#'   built from the unscaled inverse information so that it does not depend on an estimated
+#'   dispersion, and pooling uses complete-data degrees of freedom of clusters minus one.
 #' @param ... Additional arguments passed to [stats::glm()] (e.g. `control = list(maxit = 50)`).
+#' @details When the audited value is an analysis predictor, include the analysis outcome
+#'   among the imputation `predictors`. Imputing a predictor without the outcome biases its
+#'   coefficient toward zero; a warning says so. In a check recorded in
+#'   `validation/REVIEW_FIXES_2026-11-07.md`, a logistic log odds ratio of 0.80 came out at
+#'   0.61, with 65\% coverage of nominal 95\% intervals, when the outcome was left out.
 #' @return A data frame of class `c("catmech_pooled_glm", "data.frame")` containing:
 #'   \item{term}{Model coefficient names.}
 #'   \item{estimate}{Pooled log-scale parameter estimate.}
@@ -248,8 +254,9 @@ print.catmech_pooled_lm <- function(x, digits = 4L, ...) {
 #' )
 #' df$lab_ref <- df$lab
 #' df$lab_ref[11:n] <- NA
+#' # lab is a predictor below, so the outcome y joins the imputation model.
 #' res <- catmech_reference(df, value = "lab", reference = "lab_ref",
-#'                          predictors = "age", m = 2, seed = 1)
+#'                          predictors = c("age", "y"), m = 2, seed = 1)
 #' pooled_glm <- catmech_pool_glm(res, y ~ lab + age, family = stats::binomial(),
 #'                                exponentiate = TRUE)
 #' print(pooled_glm)
@@ -321,6 +328,7 @@ catmech_pool_glm <- function(result, formula, family = stats::binomial(),
   reference_pmm_sensitivity <- identical(engine, "reference_pmm") && !no_imputation
   if (reference_pmm_sensitivity && !allow_sensitivity)
     stop("Partial-reference PMM is experimental and showed undercoverage in validation. Set allow_sensitivity=TRUE only for sensitivity calculations.", call. = FALSE)
+  catmech_analysis_role_checks(result, formula, engine, "catmech_pool_glm", no_imputation = no_imputation)
 
   cluster_name <- if (is.null(cluster)) result[["spec"]][["cluster"]] else cluster
   robust <- NULL
@@ -429,6 +437,12 @@ print.catmech_pooled_glm <- function(x, digits = 4L, ...) {
 #' @param allow_sensitivity Explicitly allow pooled calculations for sensitivity output.
 #' @param cluster Optional name of a column identifying clusters for cluster-robust inference.
 #' @param ... Additional arguments passed to [survival::coxph()] (e.g. `ties = "efron"`).
+#' @details When the audited value is an analysis predictor, the imputation model needs the
+#'   outcome: include the event indicator and the Nelson-Aalen cumulative hazard, which
+#'   [mice::nelsonaalen()] computes, among the imputation `predictors` (White and Royston,
+#'   2009, <doi:10.1002/sim.3618>). A warning is given when the event indicator is missing.
+#'   The complete-data degrees of freedom are events minus coefficients, the same default
+#'   that `mice::pool()` uses for Cox fits.
 #' @return A data frame of class `c("catmech_pooled_coxph", "data.frame")` containing:
 #'   \item{term}{Model coefficient names.}
 #'   \item{estimate}{Pooled log hazard ratio parameter estimate.}
@@ -451,8 +465,11 @@ print.catmech_pooled_glm <- function(x, digits = 4L, ...) {
 #' )
 #' df$lab_ref <- df$lab
 #' df$lab_ref[11:n] <- NA
+#' # lab is a predictor below, so the event indicator and the Nelson-Aalen
+#' # cumulative hazard join the imputation model.
+#' df$hazard <- mice::nelsonaalen(df, time, status)
 #' res <- catmech_reference(df, value = "lab", reference = "lab_ref",
-#'                          predictors = "age", m = 2, seed = 1)
+#'                          predictors = c("age", "status", "hazard"), m = 2, seed = 1)
 #' pooled_cox <- catmech_pool_coxph(res, survival::Surv(time, status) ~ lab + age,
 #'                                  exponentiate = TRUE)
 #' print(pooled_cox)
@@ -549,6 +566,8 @@ catmech_pool_coxph <- function(result, formula, conf_level = 0.95,
   reference_pmm_sensitivity <- identical(engine, "reference_pmm") && !no_imputation
   if (reference_pmm_sensitivity && !allow_sensitivity)
     stop("Partial-reference PMM is experimental and showed undercoverage in validation. Set allow_sensitivity=TRUE only for sensitivity calculations.", call. = FALSE)
+  catmech_analysis_role_checks(result, formula, engine, "catmech_pool_coxph", survival = TRUE,
+                               no_imputation = no_imputation)
 
   recorded_kept <- identical(result[["spec"]][["recorded_fit"]], "recorded_kept_all_calibration_rows_agree")
   if (recorded_kept)
@@ -733,8 +752,9 @@ plot_pooled_forest <- function(x, terms = NULL, intercept = FALSE, exponentiate 
 #' )
 #' df$lab_ref <- df$lab
 #' df$lab_ref[11:n] <- NA
+#' # lab is a predictor below, so the outcome y joins the imputation model.
 #' res <- catmech_reference(df, value = "lab", reference = "lab_ref",
-#'                          predictors = "age", m = 2, seed = 1)
+#'                          predictors = c("age", "y"), m = 2, seed = 1)
 #' pooled <- catmech_pool_glm(res, y ~ lab + age, family = stats::binomial())
 #' plot(pooled)
 #' @export
@@ -771,8 +791,9 @@ plot.catmech_pooled_glm <- function(x, terms = NULL, intercept = FALSE, exponent
 #' )
 #' df$lab_ref <- df$lab
 #' df$lab_ref[11:n] <- NA
+#' df$hazard <- mice::nelsonaalen(df, time, status)
 #' res <- catmech_reference(df, value = "lab", reference = "lab_ref",
-#'                          predictors = "age", m = 2, seed = 1)
+#'                          predictors = c("age", "status", "hazard"), m = 2, seed = 1)
 #' pooled <- catmech_pool_coxph(res, survival::Surv(time, status) ~ lab + age)
 #' plot(pooled)
 #' @export
@@ -811,7 +832,7 @@ plot.catmech_pooled_coxph <- function(x, terms = NULL, intercept = FALSE, expone
 #' df$lab_ref <- df$lab
 #' df$lab_ref[11:n] <- NA
 #' res <- catmech_reference(df, value = "lab", reference = "lab_ref",
-#'                          predictors = "age", m = 2, seed = 1)
+#'                          predictors = c("age", "y"), m = 2, seed = 1)
 #' pooled <- catmech_pool_lm(res, y ~ lab + age)
 #' plot(pooled)
 #' @export
@@ -839,7 +860,7 @@ plot.catmech_pooled_lm <- function(x, terms = NULL, intercept = FALSE, exponenti
 #' df$lab_ref <- df$lab
 #' df$lab_ref[11:n] <- NA
 #' res <- catmech_reference(df, value = "lab", reference = "lab_ref",
-#'                          predictors = "age", m = 2, seed = 1)
+#'                          predictors = c("age", "y"), m = 2, seed = 1)
 #' pooled <- catmech_pool_lm(res, y ~ lab + age)
 #' tidy(pooled)
 #' @export
@@ -861,7 +882,7 @@ tidy <- function(x, ...) UseMethod("tidy")
 #' df$lab_ref <- df$lab
 #' df$lab_ref[11:n] <- NA
 #' res <- catmech_reference(df, value = "lab", reference = "lab_ref",
-#'                          predictors = "age", m = 2, seed = 1)
+#'                          predictors = c("age", "y"), m = 2, seed = 1)
 #' pooled <- catmech_pool_lm(res, y ~ lab + age)
 #' glance(pooled)
 #' @export
@@ -955,29 +976,111 @@ glance.catmech_pooled_lm <- function(x, ...) {
   )
 }
 
+# Checks on the role of the audited value in a pooled analysis.
+# 1. When the audited value is an analysis predictor, the analysis outcome belongs in the
+#    imputation model. Imputing a predictor without the outcome biases its coefficient
+#    toward zero: in validation/REVIEW_FIXES_2026-11-07.md, a logistic slope of 0.80 came
+#    out at 0.61 with 65% coverage of nominal 95% intervals. For a Cox model the event
+#    indicator and the Nelson-Aalen cumulative hazard play the outcome's part (White and
+#    Royston 2009).
+# 2. The clustered imputation options were not validated with the audited value as a predictor.
+catmech_analysis_role_checks <- function(result, formula, engine, fun, survival = FALSE,
+                                         no_imputation = FALSE) {
+  spec <- result[["spec"]]
+  value <- if (is.list(spec)) spec[["value"]] else NULL
+  if (!is.character(value) || length(value) != 1L || is.na(value) || length(formula) != 3L)
+    return(invisible(NULL))
+  rhs <- tryCatch(all.vars(stats::delete.response(stats::terms(formula, data = result$completed[[1L]]))),
+                  error = function(e) character())
+  if (!value %in% rhs) return(invisible(NULL))
+  # Engines keep their imputation predictors in spec, except catmech_model() and the
+  # legacy engine, which keep them in the manifest.
+  used <- if ("predictors" %in% names(spec)) spec[["predictors"]] else result[["manifest"]][["predictors"]]
+  known <- "predictors" %in% names(spec) || "predictors" %in% names(result[["manifest"]])
+  if (known && !no_imputation) {
+    lhs <- formula[[2L]]
+    outcome <- if (survival) catmech_surv_event_vars(lhs) else all.vars(lhs)
+    missing <- setdiff(outcome, c(used, value))
+    if (length(missing)) {
+      if (survival)
+        warning(sprintf("The audited value '%s' is a predictor in this analysis, but the event indicator '%s' was not an imputation predictor. Imputing a predictor without the outcome biases its hazard ratio toward 1. Refit with the event indicator and the Nelson-Aalen cumulative hazard (mice::nelsonaalen()) in `predictors`.",
+          value, paste(missing, collapse = "', '")), call. = FALSE)
+      else
+        warning(sprintf("The audited value '%s' is a predictor in this analysis, but the outcome %s %s not an imputation predictor. Imputing a predictor without the outcome biases its coefficient toward zero. Refit with the outcome in `predictors`.",
+          value, paste0("'", missing, "'", collapse = ", "), if (length(missing) == 1L) "was" else "were"),
+          call. = FALSE)
+    }
+  }
+  if (!is.null(spec[["cluster"]])) {
+    if (identical(engine, "reference_marginal_cluster"))
+      warning(if (identical(fun, "catmech_pool_lm"))
+        "Joint clustered imputation has not been validated here with the audited value as an analysis predictor in catmech_pool_lm(); for direct population marginal regression when the outcome was included in predictors, use catmech_marginal_summary(result, formula = ...). See docs/JOINT_MARGINAL_METHOD.md." else
+        sprintf("Joint clustered imputation has not been validated here with the audited value as an analysis predictor in %s(). See docs/JOINT_MARGINAL_METHOD.md.", fun),
+        call. = FALSE)
+    else if (identical(engine, "reference_joint_cluster"))
+      warning("Joint clustered imputation has not been validated here with the audited value as an analysis predictor. The earlier moment model showed slope attenuation in that role; joint sampling alone does not establish compatible inference. See docs/JOINT_CLUSTER_METHOD.md.", call. = FALSE)
+    else
+      warning(sprintf("catmech_reference(cluster = ) gives an unaudited cluster a new intercept, which biased slopes toward zero in simulations when the audited value was a predictor. Prefer a fit without cluster, pooled with %s(cluster = ). See validation/VARIANCE_MI_SYNTHESIS.md.", fun), call. = FALSE)
+  }
+  invisible(NULL)
+}
+
+# Variables of the event indicator in a Surv() response: the event argument of
+# Surv(time, event), Surv(start, stop, event) or Surv(time, event == k), matched by name or
+# position. Other responses, such as a precomputed Surv column, cannot be checked.
+catmech_surv_event_vars <- function(lhs) {
+  if (!is.call(lhs)) return(character())
+  fun <- lhs[[1L]]
+  is_surv <- identical(fun, as.name("Surv")) ||
+    (is.call(fun) && length(fun) == 3L && identical(fun[[3L]], as.name("Surv")))
+  if (!is_surv) return(character())
+  matched <- tryCatch(match.call(survival::Surv, lhs), error = function(e) NULL)
+  if (is.null(matched)) return(character())
+  event <- if (!is.null(matched$event)) matched$event else matched$time2
+  if (is.null(event)) character() else all.vars(event)
+}
+
 catmech_glm_cluster_vcov <- function(fit, ids) {
   x <- stats::model.matrix(fit)
+  # Aliased columns are dropped, matching summary(fit)$cov.unscaled below.
+  x <- x[, !is.na(stats::coef(fit)), drop = FALSE]
   n <- nrow(x)
   k <- ncol(x)
   w <- fit$weights
   res_working <- stats::residuals(fit, type = "working")
+  # Working weights times working residuals are the score contributions without the
+  # dispersion, so the bread is the unscaled inverse information. vcov(fit) would carry
+  # the estimated dispersion twice into the sandwich for gaussian, Gamma and quasi
+  # families; binomial and poisson, with dispersion one, are unchanged.
   scores <- x * (w * res_working)
   sums <- rowsum(scores, as.character(ids), reorder = FALSE)
   g <- nrow(sums)
-  bread <- stats::vcov(fit)
+  bread <- summary(fit)$cov.unscaled
   meat <- crossprod(sums)
   out <- bread %*% meat %*% bread * (g / (g - 1)) * ((n - 1) / (n - k))
   dimnames(out) <- list(colnames(x), colnames(x))
   out
 }
 
+# Design and (X'X)^-1 of a linear fit over its estimable coefficients. Aliased columns
+# (NA coefficients) are dropped: the pivoted QR of a rank-deficient fit would otherwise
+# give a bread in the wrong order with a near-zero pivot. Full-rank fits are unchanged.
+catmech_lm_bread <- function(fit) {
+  x <- stats::model.matrix(fit)
+  keep <- !is.na(stats::coef(fit))
+  if (all(keep)) return(list(x = x, bread = chol2inv(qr.R(fit$qr))))
+  x <- x[, keep, drop = FALSE]
+  list(x = x, bread = chol2inv(qr.R(qr(x))))
+}
+
 # Delete-one-cluster jackknife covariance of one fitted linear model (CV3), by the closed
 # form for each deletion. A singular block, from a cluster that alone determines a
 # coefficient, uses a pseudoinverse.
 catmech_cluster_jackknife <- function(fit, ids) {
-  x <- stats::model.matrix(fit)
+  design <- catmech_lm_bread(fit)
+  x <- design$x
   e <- stats::residuals(fit)
-  bread <- chol2inv(qr.R(fit$qr))
+  bread <- design$bread
   units <- split(seq_len(nrow(x)), as.character(ids))
   out <- matrix(0, ncol(x), ncol(x), dimnames = list(colnames(x), colnames(x)))
   for (u in units) {
@@ -994,8 +1097,9 @@ catmech_cluster_jackknife <- function(fit, ids) {
 # Coefficients that a single cluster determines: deleting that cluster leaves them inestimable.
 # A zero eigenvalue v of the block gives the null direction (X'X)^-1 X_g' v of the design without it.
 catmech_cluster_alone <- function(fit, ids) {
-  x <- stats::model.matrix(fit)
-  bread <- chol2inv(qr.R(fit$qr))
+  design <- catmech_lm_bread(fit)
+  x <- design$x
+  bread <- design$bread
   flagged <- logical(ncol(x))
   for (u in split(seq_len(nrow(x)), as.character(ids))) {
     xg <- x[u, , drop = FALSE]
@@ -1005,16 +1109,17 @@ catmech_cluster_alone <- function(fit, ids) {
     direction <- bread %*% crossprod(xg, block$vectors[, zero, drop = FALSE])
     flagged <- flagged | apply(abs(direction), 1L, max) > 1e-8 * max(abs(direction))
   }
-  names(stats::coef(fit))[flagged]
+  colnames(x)[flagged]
 }
 
 # Cluster-robust covariance of one fitted linear model with factor (G / (G - 1)) ((n - 1) / (n - p)).
 catmech_cluster_vcov <- function(fit, ids) {
-  x <- stats::model.matrix(fit)
+  design <- catmech_lm_bread(fit)
+  x <- design$x
   n <- nrow(x); k <- ncol(x)
   sums <- rowsum(x * stats::residuals(fit), as.character(ids), reorder = FALSE)
   g <- nrow(sums)
-  bread <- chol2inv(qr.R(fit$qr))
+  bread <- design$bread
   out <- bread %*% crossprod(sums) %*% bread * (g / (g - 1)) * ((n - 1) / (n - k))
   dimnames(out) <- list(colnames(x), colnames(x))
   out
@@ -1065,9 +1170,9 @@ catmech_cluster_vcov <- function(fit, ids) {
 #' df$ref <- df$lab
 #' df$ref[11:30] <- NA
 #' res1 <- catmech_reference(df, value = "lab", reference = "ref",
-#'                           predictors = "age", m = 2, seed = 1)
+#'                           predictors = c("age", "y"), m = 2, seed = 1)
 #' res2 <- catmech_reference(df, value = "lab", reference = "ref",
-#'                           predictors = "age", use_recorded = TRUE, m = 2, seed = 2)
+#'                           predictors = c("age", "y"), use_recorded = TRUE, m = 2, seed = 2)
 #' sens <- catmech_sensitivity(
 #'   list(standard = res1, recorded = res2),
 #'   formula = y ~ lab + age, term = "lab"

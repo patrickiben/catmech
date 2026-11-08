@@ -14,8 +14,12 @@ test_that("plot, tidy and glance work on catmech_pooled_lm, glm and coxph", {
   audited <- sample.int(n, 20)
   d$reference[-audited] <- NA_real_
 
+  # recorded is a predictor in every analysis below, so each outcome joins the imputation
+  # model: y, y_bin, and for the Cox model the event indicator and Nelson-Aalen hazard.
+  d$hazard <- mice::nelsonaalen(d, time, status)
   res <- catmech_reference(d, value = "recorded", reference = "reference",
-                           predictors = "age", use_recorded = TRUE, m = 3L, seed = 123L)
+                           predictors = c("age", "y", "y_bin", "status", "hazard"),
+                           use_recorded = TRUE, m = 3L, seed = 123L)
 
   # Pooled LM
   pooled_lm <- catmech_pool_lm(res, y ~ recorded + age)

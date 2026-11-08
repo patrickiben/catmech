@@ -14,8 +14,8 @@ Description: Auditable completion of a continuous measurement using Gaussian
     retain-or-replace sensitivity engine. Implements multiple-imputation
     combining rules and finite-sample degrees of freedom following Rubin (1987)
     <doi:10.1002/9780470316696> and Barnard and Rubin (1999)
-    <doi:10.1093/biomet/86.4.948>, and audit-size planning from classical
-    two-phase sampling theory (Neyman 1938)
+    <doi:10.1093/biomet/86.4.948>, and an unvalidated audit-size planning aid
+    based on two-phase sampling theory (Neyman 1938)
     <doi:10.1080/01621459.1938.10503378>. Does not identify measurement error
     without assumptions or reference information, or guarantee coverage under
     misspecification.

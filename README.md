@@ -250,7 +250,7 @@ and [example](inst/examples/contamination.R).
 
 ## Compare audit strategies side by side
 
-To see how much precision is recovered and whether point estimates shift across different ways of handling un-audited records, compare all four core strategies directly on your data:
+To see how much precision is recovered and whether point estimates shift across different ways of handling un-audited records, compare all four core strategies directly on your data. By default the imputation uses every variable in the formula, outcome included, and `cluster =` gives every strategy the same cluster-robust variance:
 
 ```r
 comp <- catmech_compare_strategies(
@@ -283,10 +283,17 @@ Measurement Error Pattern
   ├── Gross or separable outliers (10x decimal slips, unit errors)
   │     └── catmech_contamination()                 [Mixture error model]
   ├── Clustered multi-center data
-  │     └── catmech_reference(cluster_model = "joint") + cluster = "site"
+  │     └── catmech_reference(use_recorded = TRUE) + catmech_pool_lm(cluster = "site")
+  │           [catmech_reference(cluster = ) only as an experimental check,
+  │            and only when the audited value is the outcome]
   └── Sensitivity check across all methods
         └── catmech_compare_strategies()            [Side-by-side comparison]
 ```
+
+Whichever method you pick, when the audited value is a predictor in your analysis, put the
+analysis outcome in `predictors` (for a Cox model, the event indicator and the Nelson-Aalen
+cumulative hazard from `mice::nelsonaalen()`). Leaving it out biases the value's
+coefficient toward zero, and the pooling functions warn when they see it.
 
 ## Clustered audits: experimental
 

@@ -63,6 +63,11 @@ When every audited row agreed and recorded values were kept, the interpretation
   studies found material undercoverage even with random accurate references.
   This package policy does not assert that every PMM application is invalid.
   Only univariate linear models with at least one named coefficient are supported.
+
+  When the audited value is an analysis predictor, the analysis outcome must be among the
+  imputation `predictors`; otherwise its coefficient is biased toward zero and a warning
+  says so. When the audited value is the outcome, the analysis predictors belong in the
+  imputation model instead.
 }
 \examples{
 set.seed(123)
@@ -74,8 +79,9 @@ df <- data.frame(
 )
 df$lab_ref <- df$lab
 df$lab_ref[11:n] <- NA
+# lab is a predictor below, so the outcome joins the imputation model.
 res <- catmech_reference(df, value = "lab", reference = "lab_ref",
-                         predictors = "age", m = 2, seed = 1)
+                         predictors = c("age", "outcome"), m = 2, seed = 1)
 pooled <- catmech_pool_lm(res, outcome ~ lab + age)
 print(pooled)
 }
