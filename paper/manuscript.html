@@ -1640,12 +1640,12 @@ attenuation bias, complete-case analysis of audited records inflates
 standard errors, and standard multiple imputation needlessly discards
 the precision of valid recordings. This paper presents
 <code>catmech</code>, an R package providing a unified, auditable
-framework for clinical measurement verification, two-phase prospective
-audit power planning, predictive calibration checking, downstream
-multi-endpoint regression pooling, and regulatory audit trail
-generation. We derive the analytical conditional posteriors for
-reference-calibrated contamination mixture models, formalize prospective
-power calculation using two-phase influence function expansions, and
+framework for clinical measurement verification, rough two-phase
+audit-size planning, predictive calibration checking, downstream
+multi-endpoint regression pooling, and provenance record generation. We
+derive the analytical conditional posteriors for reference-calibrated
+contamination mixture models, give a rough, unvalidated audit-size
+calculation based on two-phase influence function expansions, and
 establish cluster-robust covariance estimators with Barnard-Rubin
 finite-sample degrees of freedom for linear models (CV3 jackknife),
 generalized linear models (CR1S Huber-White-Liang-Zeger sandwich), and
@@ -1665,9 +1665,11 @@ and narrows confidence intervals by 44% relative to complete-case
 analysis under simulated gross, separable errors, whereas simple linear
 imputation is preferred under subtle, diffuse real-world discrepancies.
 Finally, <code>catmech_audit_trail()</code> records SHA-256 hashes of
-the input data, assumptions, and completed datasets to support
-documentation under FDA 21 CFR Part 11 and ICH E9; it does not by itself
-make an analysis system compliant.</p>
+the serialized input data and completed datasets, and of the model
+specification as canonical JSON, so that a rerun can be compared with
+the record; this can support documentation under FDA 21 CFR Part 11 and
+ICH E9, but compliance depends on the validated system and procedures
+around the analysis.</p>
 </div>
 
 </div>
@@ -1720,14 +1722,14 @@ treating recorded values as completely unobserved discards the valuable
 information present in records that were recorded accurately <span class="citation">(Rubin 1996)</span>.</li>
 </ol>
 <p>To overcome these limitations, we introduce <code>catmech</code>, an
-R package for auditable measurement verification, two-phase clinical
-audit power planning, predictive calibration diagnostics, and
+R package for auditable measurement verification, rough two-phase
+audit-size planning, predictive calibration diagnostics, and
 multi-endpoint model pooling. The package unites two-phase sampling
 theory <span class="citation">(Cochran 1977; Breslow et al. 2003; Robins
 et al. 1994)</span> with reference-calibrated Bayesian mixture modeling
 <span class="citation">(Huang and Wand 2013)</span>, Barnard-Rubin
 finite-sample inference <span class="citation">(Barnard and Rubin
-1999)</span>, and cryptographic data provenance <span class="citation">(U.S. Food and Drug Administration 2003)</span>.</p>
+1999)</span>, and SHA-256 provenance records for documentation <span class="citation">(U.S. Food and Drug Administration 2003)</span>.</p>
 </div>
 <div id="statistical-theory-and-methodology" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> Statistical theory and
@@ -1833,9 +1835,9 @@ with <code>use_recorded = FALSE</code> (the v0.3 default,
 discards <span class="math inline">\(W_i\)</span> on unaudited rows and
 imputes <span class="math inline">\(T_i\)</span> solely from <span class="math inline">\(X_i\)</span>.</p>
 </div>
-<div id="two-phase-audit-sample-size-and-power-planning" class="section level2" number="2.3">
+<div id="two-phase-audit-sample-size-planning" class="section level2" number="2.3">
 <h2><span class="header-section-number">2.3</span> Two-phase audit
-sample size and power planning</h2>
+sample size planning</h2>
 <p>Prior to re-abstracting medical charts or commissioning secondary lab
 assays, investigators must budget the audit sample size <span class="math inline">\(n_{\text{audit}}\)</span>. Using semiparametric
 influence function theory for two-phase estimators <span class="citation">(Neyman 1938; Cochran 1977; Breslow et al. 2003;
@@ -1854,20 +1856,30 @@ defined as the ratio of confidence interval width at audit fraction
 \mathbb{E}[\psi_i \mid G_i])}{\text{Var}(\psi_i)}\]</span> Because the
 noise parameter <span class="math inline">\(k\)</span> is estimated with
 uncertainty, the realized precision ratio <span class="math inline">\(\hat{\rho}(f)\)</span> is stochastic.
-<code>catmech_audit_power()</code> evaluates the statistical power to
-achieve a target precision ratio <span class="math inline">\(\rho \le
-\rho_{\text{target}}\)</span>: <span class="math display">\[\text{Power}(n_{\text{audit}}) =
+<code>catmech_audit_power()</code> is a rough, unvalidated planning aid:
+for each candidate audit fraction it reports the share of plausible
+values of <span class="math inline">\(k\)</span> for which the precision
+ratio meets a target <span class="math inline">\(\rho \le
+\rho_{\text{target}}\)</span>, <span class="math display">\[\text{Share}(n_{\text{audit}}) =
 \mathbb{P}\left(\sqrt{1 + \hat{k} \frac{1 - f}{f}} \le
-\rho_{\text{target}}\right)\]</span> by simulating log-normal Monte
-Carlo draws (<code>n_sim = 2000</code>) of <span class="math inline">\(\hat{k}\)</span>, either from prospective
-error-rate and correlation parameters or calibrated to the
-bias-corrected and accelerated (BCa) bootstrap interval bounds produced
-by <code>catmech_audit_plan()</code>. In pre-specified validation
-testing, <code>catmech_audit_plan()</code> returned a <code>NO-GO</code>
-verdict because its median error in predicting interval width at a 5%
-audit fraction was 11.3% to 16.8% (exceeding the pre-specified 10%
-tolerance); accordingly, <code>catmech_audit_plan()</code> is documented
-as an exploratory calculation rather than a validated sample-size
+\rho_{\text{target}}\right),\]</span> computed from log-normal Monte
+Carlo draws (<code>n_sim = 2000</code>) of <span class="math inline">\(\hat{k}\)</span>, either from assumed error-rate
+and correlation parameters or calibrated to the bias-corrected and
+accelerated (BCa) bootstrap interval bounds produced by
+<code>catmech_audit_plan()</code>. This share, labeled
+<code>power</code> in the output, reflects uncertainty about <span class="math inline">\(k\)</span>; it is not the power of a hypothesis
+test. Without a pilot plan, the default <span class="math inline">\(k\)</span> treats the unexplained variation as if
+it sat in erroneous records that the analysis can identify, which is
+optimistic, so the function also reports the audit size that linear
+imputation needs to meet the target under the double-sampling regression
+estimator <span class="citation">(Cochran 1977)</span> at the same
+correlation, which is often several times larger. No study has checked
+these recommendations. In pre-specified validation testing,
+<code>catmech_audit_plan()</code> returned a <code>NO-GO</code> verdict
+because its median error in predicting interval width at a 5% audit
+fraction was 11.3% to 16.8% (exceeding the pre-specified 10% tolerance);
+accordingly, <code>catmech_audit_plan()</code> is documented as an
+exploratory calculation rather than a validated sample-size
 guarantee.</p>
 </div>
 <div id="multi-endpoint-model-pooling-with-barnard-rubin-degrees-of-freedom" class="section level2" number="2.4">
@@ -1966,7 +1978,7 @@ validity.</p>
 and comparison with existing packages</h1>
 <p>The <code>catmech</code> package is structured into modular S3
 components designed for computational efficiency, numerical stability,
-and regulatory auditability:</p>
+and auditability:</p>
 <table>
 <colgroup>
 <col width="17%" />
@@ -1986,7 +1998,7 @@ and regulatory auditability:</p>
 <td align="left"><code>catmech_audit_plan()</code>,
 <code>catmech_audit_power()</code></td>
 <td align="left">Two-phase influence function ratio estimation
-(exploratory) and Monte Carlo power curves.</td>
+(exploratory) and rough, unvalidated audit-size curves.</td>
 </tr>
 <tr class="even">
 <td align="left"><strong>Data diagnostics</strong></td>
@@ -2016,15 +2028,15 @@ df, cluster-robust covariance, and strategy comparison.</td>
 <td align="left"><code>catmech_sensitivity()</code>,
 <code>catmech_audit_trail()</code></td>
 <td align="left">Multi-scenario sensitivity envelopes and SHA-256
-provenance reports for regulatory documentation.</td>
+provenance records.</td>
 </tr>
 </tbody>
 </table>
 <p>While several mature R packages address missing data or measurement
-error, none combine two-phase audit power planning, reference-calibrated
+error, none combine two-phase audit-size planning, reference-calibrated
 contamination mixture modeling, multi-endpoint pooling with
 cluster-robust covariance and Barnard-Rubin degrees of freedom, and
-cryptographic provenance tracking:</p>
+SHA-256 provenance records:</p>
 <table>
 <colgroup>
 <col width="22%" />
@@ -2066,8 +2078,8 @@ et al. 2011)</span></th>
 <td align="center">Partial (Priors)</td>
 </tr>
 <tr class="odd">
-<td align="left"><strong>Audit Power Planning</strong></td>
-<td align="center"><strong>Yes</strong> (MC)</td>
+<td align="left"><strong>Audit-Size Planning</strong></td>
+<td align="center"><strong>Yes</strong> (MC, unvalidated)</td>
 <td align="center">No</td>
 <td align="center">No</td>
 <td align="center">No</td>
@@ -2137,7 +2149,14 @@ trial workflow</h1>
 <p>The following reproducible R workflow illustrates the
 <code>catmech</code> pipeline across all eight analytical stages on a
 simulated 10-site clinical cohort (<span class="math inline">\(N =
-1,000\)</span>, 25% reference audit <span class="math inline">\(n_{\text{audit}} = 250\)</span>):</p>
+1,000\)</span>, 25% reference audit <span class="math inline">\(n_{\text{audit}} = 250\)</span>). Because the lab
+value is a predictor in every downstream analysis, the imputation model
+in stage 4 includes each analysis outcome: the continuous outcome, the
+binary adverse event, and, for the Cox model, the event indicator and
+the Nelson-Aalen cumulative hazard <span class="citation">(White and
+Royston 2009)</span>. Leaving an outcome out biases the lab value’s
+coefficient toward zero, and the pooling functions warn when one is
+missing:</p>
 <pre class="r"><code>library(catmech)
 library(survival)
 
@@ -2150,8 +2169,9 @@ cohort$lab_ref &lt;- ifelse(seq_len(nrow(cohort)) %in% audited, cohort$lab_true,
 cohort$adverse_event &lt;- as.integer(cohort$outcome &gt; median(cohort$outcome))
 cohort$time &lt;- rexp(nrow(cohort), rate = exp(0.25 * (cohort$lab_true - 6)))
 cohort$event &lt;- rbinom(nrow(cohort), 1, 0.75)
+cohort$hazard &lt;- mice::nelsonaalen(cohort, time, event)
 
-# 2. Prospective audit sample size and statistical power planning
+# 2. Rough audit-size planning aid (not validated)
 power_plan &lt;- catmech_audit_power(
   N = 1000, target_ratio = 1.25, power_target = 0.80,
   error_rate = 0.20, correlation = 0.85, fractions = seq(0.10, 0.50, by = 0.05)
@@ -2165,9 +2185,9 @@ audit_screen &lt;- catmech_recording_audit(
 
 # 4. Reference-calibrated contamination mixture model (or catmech_reference(use_recorded = TRUE))
 fit &lt;- catmech_contamination(
-  data = cohort, value = &quot;lab_value&quot;, reference = &quot;lab_ref&quot;,
-  predictors = c(&quot;age&quot;, &quot;sex&quot;, &quot;inflammation&quot;, &quot;outcome&quot;),
-  corruption_strata = &quot;outlier_flag&quot;, m = 10, seed = 2026
+  data = cohort, value = &quot;lab_value&quot;, reference = &quot;lab_ref&quot;, m = 10, seed = 2026,
+  predictors = c(&quot;age&quot;, &quot;sex&quot;, &quot;inflammation&quot;, &quot;outcome&quot;, &quot;adverse_event&quot;, &quot;event&quot;,
+                 &quot;hazard&quot;), corruption_strata = &quot;outlier_flag&quot;
 )
 
 # 5. Out-of-sample predictive calibration check (5-fold cross-validated rank PIT)
@@ -2192,7 +2212,7 @@ comp &lt;- catmech_compare_strategies(
   formula = outcome ~ lab_value + age + sex, m = 10, seed = 2026
 )
 
-# 8. SHA-256 provenance report (supports FDA 21 CFR Part 11 / ICH E9 documentation)
+# 8. Provenance record: SHA-256 hashes of the data, specification and completions
 report &lt;- catmech_audit_trail(
   object = fit, pooled = pool_survival, format = &quot;markdown&quot;, path = &quot;audit_trail.md&quot;
 )</code></pre>
@@ -2206,9 +2226,9 @@ confidence intervals:</p>
 Completions (m): 10 | Observations (n): 1000 | Events: 735
 
       term estimate std.error     df   lower  upper estimate_exp lower_exp upper_exp
- lab_value   0.1632    0.0314 6.5933  0.0881 0.2384       1.1773    1.0921    1.2692
-       age   0.0056    0.0041 7.4010 -0.0038 0.0151       1.0056    0.9962    1.0152
-      sexM  -0.0541    0.0433 7.3074 -0.1555 0.0474       0.9474    0.8560    1.0485</code></pre>
+ lab_value   0.1877    0.0386 6.0881  0.0936 0.2818       1.2065    1.0982    1.3255
+       age   0.0046    0.0042 7.2302 -0.0051 0.0144       1.0047    0.9949    1.0145
+      sexM  -0.0574    0.0443 7.3102 -0.1614 0.0465       0.9442    0.8510    1.0476</code></pre>
 </div>
 <div id="synthetic-simulation-studies-and-benchmarks" class="section level1" number="5">
 <h1><span class="header-section-number">5</span> Synthetic simulation
@@ -2918,9 +2938,12 @@ records in Markdown, JSON, or standalone HTML, capturing:</p>
 <ol style="list-style-type: decimal">
 <li>Full execution environment metadata (R version, operating system
 platform, package version, UTC timestamp).</li>
-<li>Cryptographic SHA-256 checksums of the raw input dataset, model
-specification, and each of the <span class="math inline">\(m\)</span>
-completed datasets.</li>
+<li>SHA-256 hashes of the input data and of each of the <span class="math inline">\(m\)</span> completed datasets, computed over the
+serialized R data frames (so they can be recomputed only in R, not with
+a file-hashing tool), and of the model specification as canonical JSON
+text. A rerun can be compared with these hashes; they do not cover the
+pooled results, and they do not make the record tamper-evident, because
+anyone who edits the data can also regenerate the record.</li>
 <li>MCMC convergence diagnostics recorded on the audit trail
 (<code>convergence_passed</code> pass/fail status and
 <code>mcmc_iterations</code> count, with full Gelman-Rubin <span class="math inline">\(\hat{R}\)</span> and bulk/tail effective sample
@@ -2935,9 +2958,8 @@ verification</h1>
 <p><code>catmech</code> has been developed under an automated software
 verification harness:</p>
 <ul>
-<li><strong>Unit tests</strong>: 1,754 unit tests executed via
-<code>testthat</code>, achieving 0 failures, 0 warnings, and 0
-skips.</li>
+<li><strong>Unit tests</strong>: 199 <code>testthat</code> tests with
+1,812 expectations, achieving 0 failures, 0 warnings, and 0 skips.</li>
 <li><strong>CRAN conformance</strong>:
 <code>R CMD check --as-cran</code> reports 0 errors and 0 warnings.</li>
 <li><strong>Automated artifact verification</strong>: Verified against
@@ -3086,6 +3108,11 @@ Years.”</span> <em>Journal of the American Statistical Association</em>
 U.S. Food and Drug Administration. 2003. <em>Guidance for Industry: Part
 11, Electronic Records; Electronic Signatures: Scope and
 Application</em>. U.S. Food; Drug Administration. <a href="https://www.fda.gov/regulatory-information/search-fda-guidance-documents/part-11-electronic-records-electronic-signatures-scope-and-application">https://www.fda.gov/regulatory-information/search-fda-guidance-documents/part-11-electronic-records-electronic-signatures-scope-and-application</a>.
+</div>
+<div id="ref-white2009imputing" class="csl-entry">
+White, Ian R., and Patrick Royston. 2009. <span>“Imputing Missing
+Covariate Values for the <span>Cox</span> Model.”</span> <em>Statistics
+in Medicine</em> 28 (15): 1982–98. <a href="https://doi.org/10.1002/sim.3618">https://doi.org/10.1002/sim.3618</a>.
 </div>
 <div id="ref-white2011multiple" class="csl-entry">
 White, Ian R., Patrick Royston, and Angela M. Wood. 2011.

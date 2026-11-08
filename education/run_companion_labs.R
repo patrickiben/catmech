@@ -73,14 +73,22 @@ rho_f <- sqrt(1 + k_val * (1 - f_val) / f_val)
 assert_true(round(rho_f, 4) == 1.3454,
             "Lab C08: Two-phase precision ratio sqrt(1 + 0.27 * 3) = 1.3454 at f = 0.25")
 
-# Lab C09: Prospective audit power via catmech_audit_power()
+# Lab C09: Rough, unvalidated audit-size planning aid via catmech_audit_power()
 pwr <- catmech_audit_power(
   N = 1000, target_ratio = 1.25, power_target = 0.80,
   error_rate = 0.20, correlation = 0.85,
   fractions = c(0.10, 0.25, 0.40), n_sim = 500L, seed = 42L
 )
-assert_true(inherits(pwr, "catmech_audit_power") && pwr$table$power[3] > pwr$table$power[1],
-            "Lab C09: catmech_audit_power() monotonic power curve across audit fractions")
+# The manuscript's workflow settings (Section 4, stage 2) with the default draws and seed
+pwr_ms <- catmech_audit_power(
+  N = 1000, target_ratio = 1.25, power_target = 0.80,
+  error_rate = 0.20, correlation = 0.85, fractions = seq(0.10, 0.50, by = 0.05)
+)
+assert_true(inherits(pwr, "catmech_audit_power") && identical(pwr$status, "not_validated") &&
+            pwr$table$power[3] > pwr$table$power[1] &&
+            round(pwr_ms$k_summary$estimate, 3) == 0.040 && pwr_ms$recommended$n_audit == 100L &&
+            round(pwr_ms$linear_mi$k, 3) == 0.194 && round(100 * pwr_ms$linear_mi$fraction, 1) == 25.7,
+            "Lab C09: catmech_audit_power() is labeled not validated; at the manuscript's settings it recommends n = 100 (k = 0.040) while linear imputation needs about 25.7% (k = 0.194)")
 
 # Lab C10 & C11: Rubin's combining rules and Barnard-Rubin finite-sample df
 m <- 5
@@ -108,6 +116,10 @@ cohort$lab_ref <- ifelse(seq_len(nrow(cohort)) %in% audited, cohort$lab_true, NA
 cohort$adverse_event <- as.integer(cohort$outcome > median(cohort$outcome))
 cohort$time <- rexp(nrow(cohort), rate = exp(0.20 * (cohort$lab_true - 6)))
 cohort$event <- rbinom(nrow(cohort), 1, 0.80)
+# The lab value is a predictor in every analysis below, so every analysis outcome enters the
+# imputation model; for the Cox model, the event indicator and the Nelson-Aalen hazard.
+cohort$hazard <- mice::nelsonaalen(cohort, time, event)
+outcome_predictors <- c("age", "sex", "inflammation", "outcome", "adverse_event", "event", "hazard")
 
 # Lab C15: Discrepancy screening with catmech_recording_audit()
 rec_audit <- catmech_recording_audit(
@@ -118,6 +130,7 @@ assert_true(inherits(rec_audit, "catmech_recording_audit") && nrow(rec_audit$by)
             "Lab C15: catmech_recording_audit() computes Jeffreys intervals across 8 sites")
 
 # Lab C16: Linear reference MI with use_recorded = TRUE (cole_mi) vs FALSE (reference_normal)
+# This lab pools only the linear model, whose outcome is among the imputation predictors.
 fit_rec <- catmech_reference(
   data = cohort, value = "lab_value", reference = "lab_ref",
   predictors = c("age", "sex", "inflammation", "outcome"),
@@ -136,18 +149,31 @@ assert_true(se_rec < se_disc,
             sprintf("Lab C16: use_recorded=TRUE lowers pooled SE (%.4f vs %.4f for use_recorded=FALSE)", se_rec, se_disc))
 
 # Lab C17 & C18: Multi-endpoint pooling (LM with CV3, GLM with CR1S, Cox PH with Lin-Wei) + broom generics
-pool_glm_res <- catmech_pool_glm(
-  fit_rec, adverse_event ~ lab_value + age + sex,
-  family = binomial(link = "logit"), cluster = "site", exponentiate = TRUE
+# The logistic and Cox analyses need their own outcomes in the imputation model too.
+fit_multi <- catmech_reference(
+  data = cohort, value = "lab_value", reference = "lab_ref",
+  predictors = outcome_predictors,
+  use_recorded = TRUE, m = 5, seed = 101
 )
-pool_cox_res <- catmech_pool_coxph(
-  fit_rec, Surv(time, event) ~ lab_value + age + sex,
-  cluster = "site", exponentiate = TRUE
-)
+pooling_warnings <- character()
+withCallingHandlers({
+  pool_glm_res <- catmech_pool_glm(
+    fit_multi, adverse_event ~ lab_value + age + sex,
+    family = binomial(link = "logit"), cluster = "site", exponentiate = TRUE
+  )
+  pool_cox_res <- catmech_pool_coxph(
+    fit_multi, Surv(time, event) ~ lab_value + age + sex,
+    cluster = "site", exponentiate = TRUE
+  )
+}, warning = function(w) {
+  pooling_warnings <<- c(pooling_warnings, conditionMessage(w))
+  invokeRestart("muffleWarning")
+})
 tidy_cox <- tidy(pool_cox_res)
 glance_cox <- glance(pool_cox_res)
-assert_true(all(pool_cox_res$df < 7.0) && nrow(tidy_cox) == 3L && glance_cox$m == 5L,
-            "Lab C17-C18: Clustered Cox PH pooling bounds Barnard-Rubin df < C-1 = 7 and supports tidy()/glance()")
+assert_true(all(pool_cox_res$df < 7.0) && nrow(tidy_cox) == 3L && glance_cox$m == 5L &&
+            length(pooling_warnings) == 0L,
+            "Lab C17-C18: Clustered Cox PH pooling bounds Barnard-Rubin df < C-1 = 7, supports tidy()/glance(), and with every outcome imputed the GLM and Cox pooling draw no warning")
 
 # Lab C26: Side-by-side strategy comparison via catmech_compare_strategies()
 comp_res <- catmech_compare_strategies(
@@ -160,10 +186,12 @@ assert_true(inherits(comp_res, "catmech_strategy_comparison") &&
             "Lab C26: catmech_compare_strategies() compares all 4 audit strategies side by side")
 
 # Lab C28: SHA-256 provenance record via catmech_audit_trail()
-trail_md <- catmech_audit_trail(fit_rec, pooled = pool_cox_res, format = "markdown")
+trail_md <- catmech_audit_trail(fit_multi, pooled = pool_cox_res, format = "markdown")
 assert_true(grepl("# Catmech Audit Trail & Provenance Report", as.character(trail_md)) &&
-            grepl("### Audit Trail & Provenance Record", as.character(trail_md)),
-            "Lab C28: catmech_audit_trail() emits SHA-256 provenance report with honest non-certification heading")
+            grepl("### Audit Trail & Provenance Record", as.character(trail_md)) &&
+            grepl("canonical JSON", as.character(trail_md)) &&
+            grepl("do not make this document tamper-evident", as.character(trail_md)),
+            "Lab C28: catmech_audit_trail() emits SHA-256 provenance report with honest non-certification heading and says its hashes are not tamper-evidence")
 
 # ------------------------------------------------------------------------------
 # Part 3: "When the Package Says No" — Refusal & Boundary Labs

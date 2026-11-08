@@ -1,6 +1,6 @@
 # Clinical Measurement Audits and Two-Phase Imputation: Concise Study Guide
 
-A twelve-lesson study guide to Patrick Iben's *Statistical Inference and Two-Phase Audit Design for Contaminated Measurements in Clinical Research: The catmech R Package*, canonical manuscript [paper/manuscript.Rmd](../paper/manuscript.Rmd) (`350` lines, SHA-256 `8152288b1c2af2a49103543db3c9324582177b1e842365b5c5ab83cdac8c1fd0`) and compiled 15-page PDF [paper/manuscript.pdf](../paper/manuscript.pdf) (SHA-256 `1d17480886d4f38c38e7cf5f900ea3c5f1ef48f3c4484fa801a72a83de05e0db`).
+A twelve-lesson study guide to Patrick Iben's *Statistical Inference and Two-Phase Audit Design for Contaminated Measurements in Clinical Research: The catmech R Package*, canonical manuscript [paper/manuscript.Rmd](../paper/manuscript.Rmd) (`350` lines, SHA-256 `e25e6b44561b4c5b8529d87867eda249665ab2269aa406e8217a90e3639c0758`) and compiled 16-page PDF [paper/manuscript.pdf](../paper/manuscript.pdf) (SHA-256 `79c865d1e4f4ef216599aeb7b4ce931c237bb89b2c525c5b97d50ea6f8b56df1`).
 
 This educational companion explains the statistical definitions, benchmark archives, and R workflows in the frozen catmech manuscript; it does not establish universal interval coverage under unmodeled misspecification, validate per-record error probabilities for individual patient adjudication on diffuse real-world data, or certify FDA 21 CFR Part 11 or ICH E9 regulatory compliance.
 
@@ -64,7 +64,7 @@ When `delta_i = 0` is drawn for an unaudited record in `catmech_contamination()`
 
 **Where we are**
 
-Section 2.2, manuscript lines 71-72 (PDF pages 3-4).
+Section 2.2, manuscript lines 71-72 (PDF page 3).
 
 **What the passage is doing**
 
@@ -86,19 +86,19 @@ Do not forget to pass `use_recorded = TRUE` explicitly when you want Simple Line
 
 In `Lab C16` (`education/run_companion_labs.R`), why does `use_recorded = TRUE` yield a smaller pooled standard error than `use_recorded = FALSE`? **Answer:** Because `W_i` explains substantial residual variance in `T_i` on unaudited rows.
 
-## S4. Prospective two-phase audit power planning and the NO-GO planner boundary
+## S4. Rough two-phase audit-size planning and the NO-GO planner boundary
 
 **Where we are**
 
-Section 2.3, manuscript lines 73-84 (PDF page 4).
+Section 2.3, manuscript lines 73-84 (PDF pages 3-4).
 
 **What the passage is doing**
 
-At audit fraction `f = n_audit / N`, the confidence interval width ratio relative to a 100% census audit is `rho(f) = sqrt(1 + k (1 - f) / f)`. `catmech_audit_power()` simulates `2,000` log-normal draws of `k_hat` to compute the power to achieve `rho <= rho_target`. In pre-specified validation (`validation/audit-plan-study`), `catmech_audit_plan()` received a `NO-GO` verdict (`11.3%-16.8%` median width error at `f = 5%`) and is documented as exploratory.
+At audit fraction `f = n_audit / N`, the confidence interval width ratio relative to a 100% census audit is `rho(f) = sqrt(1 + k (1 - f) / f)`. `catmech_audit_power()` is a rough, unvalidated planning aid: across `2,000` log-normal draws of `k_hat` it reports the share of plausible `k` values that meet `rho <= rho_target`. The output calls that share `power`, but it is not the power of a hypothesis test. Without a pilot plan its default `k` is optimistic, so it also reports the audit size that linear imputation needs at the same correlation, often several times larger. In pre-specified validation (`validation/audit-plan-study`), `catmech_audit_plan()` received a `NO-GO` verdict (`11.3%-16.8%` median width error at `f = 5%`) and is documented as exploratory.
 
 **In ordinary language**
 
-The power calculator sizes an audit by simulating uncertainty in the two-phase noise factor. The empirical pilot planner missed its 10% accuracy target and stays exploratory.
+The audit-size tool makes a rough guess from assumed error rates, and nobody has checked its answers. The empirical pilot planner missed its 10% accuracy target and stays exploratory.
 
 **Evidence status**
 
@@ -106,7 +106,7 @@ ANALYTIC influence-function ratio and MEASURED_DATED `NO-GO` boundary on `catmec
 
 **Do not accidentally conclude**
 
-Do not treat `catmech_audit_plan()` as a validated regulatory sample-size guarantee; its pre-specified status is `NO-GO`.
+Do not read the `power` column of `catmech_audit_power()` as the power of a test, and do not treat `catmech_audit_plan()` as a validated regulatory sample-size guarantee; its pre-specified status is `NO-GO`.
 
 **Try it**
 
@@ -116,7 +116,7 @@ Compute `rho(0.25) = sqrt(1 + 0.27 * (1 - 0.25) / 0.25)` in R (`round(sqrt(1 + 0
 
 **Where we are**
 
-Section 2.4, manuscript lines 85-94 (PDF pages 4-5).
+Section 2.4, manuscript lines 85-94 (PDF page 4).
 
 **What the passage is doing**
 
@@ -142,7 +142,7 @@ For `C = 10` clinical sites (`nu_com = 9`), `m = 5`, and `lambda_hat = 0.2308`, 
 
 **Where we are**
 
-Section 2.4, manuscript lines 95-100 (PDF pages 5-6).
+Section 2.4, manuscript lines 95-100 (PDF pages 4-5).
 
 **What the passage is doing**
 
@@ -168,7 +168,7 @@ In an unclustered Cox PH model with `N = 600` patients, `d = 45` events, and `p 
 
 **Where we are**
 
-Section 2.5, manuscript lines 101-106 (PDF page 6).
+Section 2.5, manuscript lines 101-106 (PDF page 5).
 
 **What the passage is doing**
 
@@ -194,7 +194,7 @@ Why does `catmech_holdout_check()` randomize exact ties (`T_{i,-k}^{(j)} = R_i^*
 
 **Where we are**
 
-Sections 3-5.1, manuscript lines 107-249 (PDF pages 6-10).
+Sections 3-5.1, manuscript lines 107-249 (PDF pages 5-10).
 
 **What the passage is doing**
 
@@ -220,7 +220,7 @@ What caused `catmech_contamination()` to under-cover (`87.3%`) in `heavy_tail_ta
 
 **Where we are**
 
-Section 5.2, manuscript lines 250-258 (PDF pages 10-11).
+Section 5.2, manuscript lines 250-258 (PDF page 10).
 
 **What the passage is doing**
 
@@ -246,7 +246,7 @@ What is the recommended two-step R call when an audited biomarker is a predictor
 
 **Where we are**
 
-Section 6.1, manuscript lines 259-279 (PDF pages 11-12).
+Section 6.1, manuscript lines 259-279 (PDF page 11).
 
 **What the passage is doing**
 
@@ -298,15 +298,15 @@ Under the Section 7 decision tree, what two checks must pass before trusting `ca
 
 **Where we are**
 
-Sections 9-12, manuscript lines 329-350 (PDF pages 14-15).
+Sections 9-12, manuscript lines 329-350 (PDF pages 14-16).
 
 **What the passage is doing**
 
-`catmech_audit_trail()` outputs a provenance record (Markdown, JSON, or HTML) recording R/OS metadata, SHA-256 hashes of the input data, assumption specification, and all `m` completed datasets, MCMC convergence status, and pooled tables. This supports documentation under FDA 21 CFR Part 11 and ICH E9 without certifying compliance. The package is MIT-licensed and verified by `1,754` unit tests (`0` failures/warnings/skips), `R CMD check --as-cran` (`0` errors/warnings), and `500,000+` replicate checks.
+`catmech_audit_trail()` outputs a provenance record (Markdown, JSON, or HTML) recording R/OS metadata; SHA-256 hashes of the input data and all `m` completed datasets, computed over the serialized R data frames, and of the assumption specification as canonical JSON text; MCMC convergence status; and pooled tables. A rerun can be compared with the hashes, but they do not cover the pooled results or make the record tamper-evident. This supports documentation under FDA 21 CFR Part 11 and ICH E9 without certifying compliance. The package is MIT-licensed and verified by `199` `testthat` tests with `1,812` expectations (`0` failures/warnings/skips), `R CMD check --as-cran` (`0` errors/warnings), and `500,000+` replicate checks.
 
 **In ordinary language**
 
-The audit trail function writes a report with SHA-256 data hashes, model settings, and convergence status. It supports documentation but does not certify legal compliance.
+The audit trail function writes a report with SHA-256 data hashes, model settings, and convergence status. A rerun can be compared with it, but it does not prove the data were untouched or certify legal compliance.
 
 **Evidence status**
 
@@ -314,7 +314,7 @@ DEFINITION, SCOPE, and MEASURED_DATED software verification summary.
 
 **Do not accidentally conclude**
 
-Do not represent `catmech_audit_trail()` as a legal compliance certification; regulatory compliance depends on the surrounding validated system, access controls, and procedures.
+Do not represent `catmech_audit_trail()` as a legal compliance certification or a tamper-evident record; regulatory compliance depends on the surrounding validated system, access controls, and procedures, and anyone who edits the data can regenerate the record.
 
 **Try it**
 

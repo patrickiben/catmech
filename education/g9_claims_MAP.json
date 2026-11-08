@@ -29,7 +29,7 @@
     {
       "id": "E2",
       "level": 2,
-      "title": "R/audit-power.R, R/audit-plan.R & R/holdout-check.R (MC power, NO-GO planner, rank-PIT screen)",
+      "title": "R/audit-power.R, R/audit-plan.R & R/holdout-check.R (rough unvalidated audit-size aid, NO-GO planner, rank-PIT screen)",
       "links": [
         "F2"
       ]

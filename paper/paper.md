@@ -9,7 +9,7 @@ tags:
   - audit planning
   - survival analysis
   - data integrity
-  - regulatory documentation
+  - data provenance
 authors:
   - name: Patrick Iben
     orcid: 0009-0005-2443-7973
@@ -25,7 +25,7 @@ bibliography: paper.bib
 
 In multicenter clinical trials, electronic health record (EHR) registries, and observational epidemiological cohorts, continuous biological and clinical measurements (such as circulating cardiac troponin, viral loads, blood pressure, serum creatinine, or tumor volume) are frequently compromised by measurement errors, transcription slips, assay lot shifts, and missing values. Traditional statistical packages handle missing data by assuming values are Missing at Random (MAR) [@rubin1987multiple; @little2019statistical] and applying standard multiple imputation algorithms [@vanbuuren2011mice; @honaker2011amelia; @white2011multiple]. However, in clinical data auditing and source-data verification (SDV), the central challenge is fundamentally different: recorded values are often present but untrusted, and an internal gold-standard reference measurement has been audited on only a fraction of records [@angelopoulos2023prediction; @robins1994estimation; @breslow2003semiparametric].
 
-`catmech` is an R package providing a mathematically rigorous, auditable framework for clinical data verification, two-phase audit sample size determination, predictive calibration checking, downstream multi-endpoint regression pooling, and provenance audit trail generation. By modeling either a reference-calibrated contamination mixture (`catmech_contamination()`) or a linear reference calibration model (`catmech_reference(use_recorded = TRUE)`) rather than discarding unaudited records or naively trusting recorded numbers, `catmech` retains the precision of verified recordings while correcting for contamination bias. The package also records SHA-256 hashes of the input data, assumptions, and completed datasets to support regulatory documentation (FDA 21 CFR Part 11 [@fda2003part11] and ICH E9 [@ich1998e9]); this supports, but does not by itself establish, compliance.
+`catmech` is an R package providing a mathematically rigorous, auditable framework for clinical data verification, rough two-phase audit-size planning, predictive calibration checking, downstream multi-endpoint regression pooling, and provenance audit trail generation. By modeling either a reference-calibrated contamination mixture (`catmech_contamination()`) or a linear reference calibration model (`catmech_reference(use_recorded = TRUE)`) rather than discarding unaudited records or naively trusting recorded numbers, `catmech` retains the precision of verified recordings while correcting for contamination bias. The package also records SHA-256 hashes of the serialized input data and completed datasets, and of the model specification as canonical JSON, so that a rerun can be compared with the record; this can support documentation under FDA 21 CFR Part 11 [@fda2003part11] and ICH E9 [@ich1998e9], but compliance depends on the validated system and procedures around the analysis.
 
 # Statement of need
 
@@ -35,19 +35,19 @@ When an internal audit reveals recording discrepancies in an observational or cl
 2. **Complete-case analysis (audited cases only)**: Restricting downstream analysis exclusively to audited records drastically reduces sample size, severely inflating standard errors and sacrificing statistical power [@neyman1938contribution].
 3. **Discarding recorded values and applying standard multiple imputation**: Treating all unaudited recorded entries as completely missing wastes the substantial information contained in records that were recorded accurately, leading to needlessly wide confidence intervals [@rubin1996multiple].
 
-`catmech` resolves this dilemma by formalizing the two-phase sampling relationship [@cochran1977sampling] between observed recorded values $W_i$, latent true values $T_i$, and audited reference measurements $R_i$. It addresses both pre-audit planning (calculating how many medical records must be audited to achieve a target precision ratio) and post-audit analysis (pooling regression estimates with calibrated finite-sample degrees of freedom).
+`catmech` resolves this dilemma by formalizing the two-phase sampling relationship [@cochran1977sampling] between observed recorded values $W_i$, latent true values $T_i$, and audited reference measurements $R_i$. It addresses both pre-audit planning (a rough, unvalidated estimate of how many medical records to audit for a target precision ratio) and post-audit analysis (pooling regression estimates with calibrated finite-sample degrees of freedom).
 
 In addition, `catmech` refuses to conceal model failures. If MCMC chains fail Gelman-Rubin convergence screens [@gelman1992inference] (`convergence_pass = FALSE`), downstream pooling via `catmech_pool_lm()`, `catmech_pool_glm()`, and `catmech_pool_coxph()` is visibly refused, while `catmech_holdout_check()` provides a standalone cross-validated predictive calibration screen on audited reference cases [@dawid1984present].
 
 # Comparison with existing software
 
-While several mature R packages address missing data or measurement error, none integrate prospective two-phase audit power planning, reference-calibrated contamination mixture modeling, multi-endpoint pooling with cluster-robust covariance and Barnard-Rubin small-sample degrees of freedom, and cryptographic provenance tracking:
+While several mature R packages address missing data or measurement error, none integrate rough two-phase audit-size planning, reference-calibrated contamination mixture modeling, multi-endpoint pooling with cluster-robust covariance and Barnard-Rubin small-sample degrees of freedom, and SHA-256 provenance records:
 
 | Capability | `catmech` | `mice` [@vanbuuren2011mice] | `simex` [@leeder2008simex] | `mecor` [@nab2021mecor] | `Amelia` [@honaker2011amelia] |
 | :------------------------ | :-----------------: | :--------------: | :--------------: | :--------------: | :----------------: |
 | **Contamination Mixture** | **Yes** (Gibbs) | No | No | No | No |
 | **Gold-Standard Audits** | **Yes** (Two-phase) | Partial (MAR) | No (Replicates) | Yes (Reg. Cal.) | Partial (Priors) |
-| **Audit Power Planning** | **Yes** (MC) | No | No | No | No |
+| **Audit-Size Planning** | **Yes** (MC, unvalidated) | No | No | No | No |
 | **Calibration Screen** | **Yes** (Rank PIT) | No | No | No | Partial (`overimpute`) |
 | **Linear Model Pooling** | **Yes** (BR + CV3) | Yes (BR df) | Yes (SIMEX) | Yes (Reg. Cal.) | Yes (Rubin df) |
 | **GLM (Logit/Poisson)** | **Yes** (Sandwich) | Yes (BR df) | Yes (SIMEX) | No | Yes (Rubin df) |
@@ -73,15 +73,15 @@ where $\phi(w; \, m, v)$ is the Gaussian density with mean $m$ and variance $v$.
 
 For diffuse discrepancies where a discrete mixture is unnecessary, `catmech_reference()` provides Gaussian reference multiple imputation accelerated in C++17 via `RcppArmadillo`. Setting `use_recorded = TRUE` (Simple Linear MI, `cole_mi`) includes $W_i$ as a continuous linear predictor alongside $X_i$ without a mixture indicator $\delta_i$, whereas `use_recorded = FALSE` (Discard Recorded MI, `reference_normal`) discards $W_i$ on unaudited rows.
 
-## 2. Prospective power and audit sample size planning
+## 2. Rough audit sample size planning
 
 Before committing clinical resources to chart re-abstraction, trialists must determine the necessary audit sample size $n_{\text{audit}}$. Using influence function expansions for efficient two-phase estimators [@neyman1938contribution; @cochran1977sampling; @breslow2003semiparametric], the ratio of the confidence interval width at audit fraction $f = n_{\text{audit}} / N$ relative to an ideal full audit ($f = 1$) is:
 $$\rho(f) = \frac{\text{Width}(f)}{\text{Width}(1)} = \sqrt{1 + k \frac{1 - f}{f}}, \quad k = \frac{\text{Var}(\psi_i - \mathbb{E}[\psi_i \mid G_i])}{\text{Var}(\psi_i)}$$
 where $\psi_i$ is the influence curve of the parameter of interest and $G_i = (W_i, Y_i, X_i)$ denotes the Phase I auxiliary variables.
 
-Because the pilot noise estimator $\hat{k}$ is subject to sampling variability, the realized precision ratio $\hat{\rho}(f)$ is stochastic. `catmech_audit_power()` computes the statistical power to achieve a target precision ratio $\rho \le \rho_{\text{target}}$ (e.g., $\rho_{\text{target}} = 1.25$):
-$$\text{Power}(n_{\text{audit}}) = \mathbb{P}\left(\sqrt{1 + \hat{k} \frac{1 - f}{f}} \le \rho_{\text{target}}\right)$$
-via log-normal Monte Carlo draws (`n_sim = 2000`) of $\hat{k}$, either from prospective error-rate and correlation parameters or calibrated to the BCa bootstrap interval bounds from `catmech_audit_plan()`, generating visual power curves via `plot()`. Note that `catmech_audit_plan()` returned a `NO-GO` verdict in pre-specified validation testing (its median error in predicting interval width at a 5% audit was 11.3% to 16.8%, missing the 10% limit) and is therefore provided as an exploratory calculation rather than a validated planning tool.
+Because the pilot noise estimator $\hat{k}$ is subject to sampling variability, the realized precision ratio $\hat{\rho}(f)$ is stochastic. `catmech_audit_power()` is a rough, unvalidated planning aid: for each candidate audit fraction it reports the share of plausible values of $k$ for which the precision ratio meets a target $\rho \le \rho_{\text{target}}$ (e.g., $\rho_{\text{target}} = 1.25$),
+$$\text{Share}(n_{\text{audit}}) = \mathbb{P}\left(\sqrt{1 + \hat{k} \frac{1 - f}{f}} \le \rho_{\text{target}}\right),$$
+computed from log-normal Monte Carlo draws (`n_sim = 2000`) of $\hat{k}$, either from assumed error-rate and correlation parameters or calibrated to the BCa bootstrap interval bounds from `catmech_audit_plan()`, with curves drawn by `plot()`. This share, labeled `power` in the output, reflects uncertainty about $k$; it is not the power of a hypothesis test. Without a pilot plan, the default $k$ treats the unexplained variation as if it sat in erroneous records that the analysis can identify, which is optimistic, so the function also reports the audit size that linear imputation needs to meet the target under the double-sampling regression estimator [@cochran1977sampling] at the same correlation, which is often several times larger. No study has checked these recommendations. Note that `catmech_audit_plan()` returned a `NO-GO` verdict in pre-specified validation testing (its median error in predicting interval width at a 5% audit was 11.3% to 16.8%, missing the 10% limit) and is therefore provided as an exploratory calculation rather than a validated planning tool.
 
 ## 3. Downstream multi-endpoint model pooling
 
@@ -109,7 +109,7 @@ where $\nu_{com}$ is the complete-data degrees of freedom. Downstream model pool
 
 # Illustrative clinical audit workflow
 
-The following complete workflow illustrates the `catmech` pipeline on a simulated multicenter clinical cohort:
+The following complete workflow illustrates the `catmech` pipeline on a simulated multicenter clinical cohort. Because the lab value is a predictor in every downstream analysis, the imputation model in step 4 includes each analysis outcome: the continuous outcome, the binary adverse event, and, for the Cox model, the event indicator and the Nelson-Aalen cumulative hazard [@white2009imputing]. Leaving an outcome out biases the lab value's coefficient toward zero, and the pooling functions warn when one is missing:
 
 ```r
 library(catmech)
@@ -124,8 +124,9 @@ cohort$lab_ref <- ifelse(seq_len(nrow(cohort)) %in% audited, cohort$lab_true, NA
 cohort$adverse_event <- as.integer(cohort$outcome > median(cohort$outcome))
 cohort$time <- rexp(nrow(cohort), rate = exp(0.25 * (cohort$lab_true - 6)))
 cohort$event <- rbinom(nrow(cohort), 1, 0.75)
+cohort$hazard <- mice::nelsonaalen(cohort, time, event)
 
-# 2. Prospective audit sample size and statistical power planning
+# 2. Rough audit-size planning aid (not validated)
 power_plan <- catmech_audit_power(
   N = 1000,
   target_ratio = 1.25,
@@ -151,7 +152,8 @@ fit <- catmech_contamination(
   data = cohort,
   value = "lab_value",
   reference = "lab_ref",
-  predictors = c("age", "sex", "inflammation", "outcome"),
+  predictors = c("age", "sex", "inflammation", "outcome",
+                 "adverse_event", "event", "hazard"),
   corruption_strata = "outlier_flag",
   m = 10,
   seed = 2026
@@ -205,7 +207,7 @@ comp <- catmech_compare_strategies(
 )
 plot(comp, term = "lab_value")
 
-# 8. SHA-256 provenance report (supports FDA 21 CFR Part 11 documentation)
+# 8. Provenance record: SHA-256 hashes of the data, specification and completions
 report <- catmech_audit_trail(
   object = fit,
   pooled = pool_survival,
@@ -221,9 +223,9 @@ The resulting pooled summary for the Cox proportional hazards model yields an au
 Completions (m): 10 | Observations (n): 1000 | Events: 735
 
       term estimate std.error     df   lower  upper estimate_exp lower_exp upper_exp
- lab_value   0.1632    0.0314 6.5933  0.0881 0.2384       1.1773    1.0921    1.2692
-       age   0.0056    0.0041 7.4010 -0.0038 0.0151       1.0056    0.9962    1.0152
-      sexM  -0.0541    0.0433 7.3074 -0.1555 0.0474       0.9474    0.8560    1.0485
+ lab_value   0.1877    0.0386 6.0881  0.0936 0.2818       1.2065    1.0982    1.3255
+       age   0.0046    0.0042 7.2302 -0.0051 0.0144       1.0047    0.9949    1.0145
+      sexM  -0.0574    0.0443 7.3102 -0.1614 0.0465       0.9442    0.8510    1.0476
 ```
 
 # Empirical validation and simulation benchmarks
@@ -288,14 +290,14 @@ A central methodological insight established by these empirical benchmarks is th
 * **Synthetic gross errors favor mixture modeling**: When data errors represent discrete, bimodal corruption events (e.g., transcription slips, decimal shifts, or assay calibration jumps) under Gaussian target residuals and ignorable audit selection, the Bayesian contamination mixture model eliminates severe attenuation bias (bias of $-0.0117$ vs. $-0.2354$ for linear MI in `error_gross_and_small`) and narrows confidence intervals by 44.3% over complete-case analysis in `missed_flags` (while remaining synthetic-only because real-world audits lacked separable gross errors).
 * **Real-world subtle or moderate errors favor linear multiple imputation**: In actual registry and facility audits where discrepancies are diffuse and continuous (e.g., self-report rounding, protocol differences, or moderate recount discrepancies), simple linear imputation (`catmech_reference(use_recorded = TRUE)`) matches or exceeds mixture modeling in predictive accuracy and interval coverage with fewer parametric assumptions and zero MCMC convergence overhead.
 
-This empirical divergence highlights why `catmech` incorporates prospective audit planning (`catmech_audit_power()`), diagnostic discrepancy auditing (`catmech_recording_audit()`), predictive cross-validation (`catmech_holdout_check()`), and automated strategy comparison (`catmech_compare_strategies()`), ensuring that trialists let empirical data guide the choice of model rather than relying on unverified assumptions.
+This empirical divergence highlights why `catmech` incorporates rough audit-size planning (`catmech_audit_power()`), diagnostic discrepancy auditing (`catmech_recording_audit()`), predictive cross-validation (`catmech_holdout_check()`), and automated strategy comparison (`catmech_compare_strategies()`), ensuring that trialists let empirical data guide the choice of model rather than relying on unverified assumptions.
 
 # Regulatory documentation and data governance
 
 Clinical trial analyses are expected to be documented and reproducible: FDA 21 CFR Part 11 [@fda2003part11] governs electronic records and audit trails, and ICH E9 [@ich1998e9] asks that data handling and statistical methods be prespecified and documented. `catmech_audit_trail()` supports that documentation; it does not certify compliance, which depends on the validated system, access controls, and procedures around the analysis. It generates provenance records in Markdown, JSON, or standalone HTML. The report documents:
 
 * Full execution environment metadata (R version, operating system platform, package version, UTC execution timestamp).
-* Cryptographic SHA-256 checksums of the raw input dataset, the mathematical assumption specification, and each of the $m$ completed datasets.
+* SHA-256 hashes of the input data and of each of the $m$ completed datasets, computed over the serialized R data frames (so they can be recomputed only in R, not with a file-hashing tool), and of the assumption specification as canonical JSON text. A rerun can be compared with these hashes; they do not cover the pooled results, and they do not make the record tamper-evident, because anyone who edits the data can also regenerate the record.
 * Model convergence diagnostics recorded on the audit trail (`convergence_passed` pass/fail status and `mcmc_iterations` count, with full Gelman-Rubin $\hat{R}$ and bulk/tail effective sample size vectors stored in `result$model_diagnostics`).
 * Downstream pooled parameter tables and multi-scenario sensitivity envelopes.
 
@@ -303,7 +305,7 @@ Clinical trial analyses are expected to be documented and reproducible: FDA 21 C
 
 `catmech` has been developed under an automated software verification harness:
 
-* **Unit tests**: 1,754 unit tests executed via `testthat`, achieving 0 failures, 0 warnings, and 0 skips.
+* **Unit tests**: 199 `testthat` tests with 1,812 expectations, achieving 0 failures, 0 warnings, and 0 skips.
 * **CRAN conformance**: `R CMD check --as-cran` reports 0 errors and 0 warnings.
 * **Independent artifact verification**: Verified against an independent Python verification suite (`verify-artifacts.py`, `verify-release-archive.py`, and `verify_paper_numbers.py`) confirming exact correspondence across 10 frozen simulation and empirical benchmark studies and over 500,000 replicate requests.
 
