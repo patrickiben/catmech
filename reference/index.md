@@ -2,11 +2,10 @@
 
 ## Audit Planning & Sample Size
 
-Calculate required audit sample sizes and prospective statistical power.
+Rough, unvalidated audit-size planning aids.
 
 - [`catmech_audit_power()`](https://patrickiben.github.io/catmech/reference/catmech_audit_power.md)
-  : Prospective sample size and statistical power calculation for
-  clinical data audits
+  : Rough audit-size planning aid (not validated)
 - [`catmech_audit_plan()`](https://patrickiben.github.io/catmech/reference/catmech_audit_plan.md)
   : Plan how many records to audit from a random pilot
 - [`plot(`*`<catmech_audit_power>`*`)`](https://patrickiben.github.io/catmech/reference/plot.catmech_audit_power.md)
@@ -99,8 +98,7 @@ Generate SHA-256 verified provenance reports and audit trails for
 regulatory filings.
 
 - [`catmech_audit_trail()`](https://patrickiben.github.io/catmech/reference/catmech_audit_trail.md)
-  : Generate an auditable provenance and integrity trail for a catmech
-  analysis
+  : Generate a provenance record for a catmech analysis
 - [`catmech_hash()`](https://patrickiben.github.io/catmech/reference/catmech_hash.md)
   : Compute a canonical assumption hash
 

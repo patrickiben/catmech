@@ -1,12 +1,81 @@
 # Changelog
 
+## catmech 1.0.1
+
+Fixes from a review of 1.0.0 on 2026-11-07; evidence and the scripts
+that reproduce it are in `validation/REVIEW_FIXES_2026-11-07.md`. Not
+submitted to CRAN.
+
+- [`catmech_compare_strategies()`](https://patrickiben.github.io/catmech/reference/catmech_compare_strategies.md)
+  now keeps the analysis outcome among the imputation predictors it
+  detects. It used to drop it, which biased the linear-imputation and
+  contamination-model slopes toward zero whenever the audited value was
+  a predictor: in 100 simulated data sets with a true slope of 0.80, its
+  linear-imputation estimate averaged 0.63. The `cluster` argument no
+  longer switches on the experimental clustered imputation; it now gives
+  every strategy, including the validation subsample and the naive
+  analysis, the same cluster-robust variance over the coefficients that
+  strategy can estimate. A failed contamination fit now warns with its
+  reason, and the predictors used are printed.
+- [`catmech_pool_lm()`](https://patrickiben.github.io/catmech/reference/catmech_pool_lm.md),
+  [`catmech_pool_glm()`](https://patrickiben.github.io/catmech/reference/catmech_pool_glm.md)
+  and
+  [`catmech_pool_coxph()`](https://patrickiben.github.io/catmech/reference/catmech_pool_coxph.md)
+  warn when the audited value is an analysis predictor but the outcome
+  (for a Cox model, the event indicator) was not an imputation
+  predictor. Leaving it out attenuated a logistic log odds ratio from
+  0.80 to 0.61, with 65% coverage of nominal 95% intervals, in 200
+  simulated data sets.
+  [`catmech_pool_glm()`](https://patrickiben.github.io/catmech/reference/catmech_pool_glm.md)
+  and
+  [`catmech_pool_coxph()`](https://patrickiben.github.io/catmech/reference/catmech_pool_coxph.md)
+  now also give the clustered-imputation warnings that
+  [`catmech_pool_lm()`](https://patrickiben.github.io/catmech/reference/catmech_pool_lm.md)
+  already gave. The examples and the clinical audit vignette now put the
+  outcome into the imputation model, and for Cox models the event
+  indicator and the Nelson-Aalen cumulative hazard.
+- The cluster-robust variance in
+  [`catmech_pool_glm()`](https://patrickiben.github.io/catmech/reference/catmech_pool_glm.md)
+  used the dispersion-scaled covariance as its bread, so for gaussian,
+  Gamma and quasi families its standard errors were multiplied by the
+  estimated dispersion: too wide when it was above 1 (three-fold in an
+  overdispersed count example) and too narrow when it was below 1, as in
+  most Gamma fits (2.5-fold too narrow in a Gamma example with
+  dispersion 0.41). Rerun such clustered fits. Binomial and Poisson
+  results are unchanged.
+- [`catmech_audit_power()`](https://patrickiben.github.io/catmech/reference/catmech_audit_power.md)
+  is now labeled a rough, unvalidated planning aid. Its documentation
+  states the assumption behind its default factor, and without `plan` it
+  also reports the audit size that linear imputation needs under the
+  double-sampling regression estimator at the same correlation, which is
+  often several times larger. “Power” there is the share of plausible
+  factors meeting the target, not the power of a test.
+- [`catmech_audit_trail()`](https://patrickiben.github.io/catmech/reference/catmech_audit_trail.md)
+  no longer calls its record tamper-evident or says the pooled intervals
+  are hashed. Its documentation now says which hashes are of serialized
+  R data frames and which of canonical JSON text, and that compliance
+  with FDA 21 CFR Part 11 or ICH E9 depends on the system around it. An
+  unknown package version is recorded as “unknown” rather than “1.0.0”,
+  and the HTML title is escaped.
+- The vignette, the README’s method guide and the help pages no longer
+  describe the package as production-ready, a compliance tool or a
+  source of guarantees, and they follow the evidence on clustered
+  audits: pool with `cluster =`, and use `catmech_reference(cluster = )`
+  only as an experimental check when the audited value is the outcome.
+  The validation records and the assessment that called 1.0.0
+  production-ready now open with a dated correction.
+
 ## catmech 1.0.0
 
-- First CRAN release. The public API is stable and backward-compatible
-  across model fitting, diagnostics, and downstream inference. The
-  clustered imputation option (`catmech_reference(cluster = )`) and the
-  joint-marginal engine remain experimental, and the audit-size planner
-  keeps its NO-GO validation status.
+Some descriptions in this entry were corrected on 2026-11-07; see 1.0.1
+above.
+
+- First 1.0 release (not submitted to CRAN). The public API is stable
+  and backward-compatible across model fitting, diagnostics, and
+  downstream inference. The clustered imputation option
+  (`catmech_reference(cluster = )`) and the joint-marginal engine remain
+  experimental, and the audit-size planner keeps its NO-GO validation
+  status.
 - Add Generalized Linear Model pooling
   ([`catmech_pool_glm()`](https://patrickiben.github.io/catmech/reference/catmech_pool_glm.md))
   supporting logistic and Poisson regressions with Rubin’s combining

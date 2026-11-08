@@ -13,7 +13,7 @@ It covers only the supplied finite set and inherits each member's limitations.">
 
     <a class="navbar-brand me-2" href="../index.html">catmech</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -139,9 +139,9 @@ Defaults to `stats::binomial()`.</p></dd>
 <span class="r-in"><span><span class="va">df</span><span class="op">$</span><span class="va">ref</span> <span class="op">&lt;-</span> <span class="va">df</span><span class="op">$</span><span class="va">lab</span></span></span>
 <span class="r-in"><span><span class="va">df</span><span class="op">$</span><span class="va">ref</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="fl">30</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span></span></span>
 <span class="r-in"><span><span class="va">res1</span> <span class="op">&lt;-</span> <span class="fu"><a href="catmech_reference.html">catmech_reference</a></span><span class="op">(</span><span class="va">df</span>, value <span class="op">=</span> <span class="st">"lab"</span>, reference <span class="op">=</span> <span class="st">"ref"</span>,</span></span>
-<span class="r-in"><span>                          predictors <span class="op">=</span> <span class="st">"age"</span>, m <span class="op">=</span> <span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                          predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"y"</span><span class="op">)</span>, m <span class="op">=</span> <span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu"><a href="catmech_reference.html">catmech_reference</a></span><span class="op">(</span><span class="va">df</span>, value <span class="op">=</span> <span class="st">"lab"</span>, reference <span class="op">=</span> <span class="st">"ref"</span>,</span></span>
-<span class="r-in"><span>                          predictors <span class="op">=</span> <span class="st">"age"</span>, use_recorded <span class="op">=</span> <span class="cn">TRUE</span>, m <span class="op">=</span> <span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                          predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"y"</span><span class="op">)</span>, use_recorded <span class="op">=</span> <span class="cn">TRUE</span>, m <span class="op">=</span> <span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>All 10 audited rows agree with their recorded values, so 20 unaudited recorded values were kept with no imputation uncertainty. An audit of this size cannot rule out an error rate of about 30.0%, and intervals here treat those records as correct.</span>
 <span class="r-in"><span><span class="va">sens</span> <span class="op">&lt;-</span> <span class="fu">catmech_sensitivity</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>standard <span class="op">=</span> <span class="va">res1</span>, recorded <span class="op">=</span> <span class="va">res2</span><span class="op">)</span>,</span></span>
@@ -151,11 +151,11 @@ Defaults to `stats::binomial()`.</p></dd>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">sens</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -- Catmech Sensitivity Analysis --</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Status:              unresolved_in_all_scenarios (complete: TRUE)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Successful envelope: [-0.114, 0.5184]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Successful envelope: [-7.3156, 7.4885]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Scenarios:           2 evaluated</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  scenario status estimate std.error   lower  upper          direction</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  standard     ok   0.2246    0.1256 -0.0692 0.5184 includes_reference</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  standard     ok   0.0865    0.3030 -7.3156 7.4885 includes_reference</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  recorded     ok   0.0564    0.0828 -0.1140 0.2268 includes_reference</span>
 </code></pre></div>
     </div>

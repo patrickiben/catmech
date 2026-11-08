@@ -2,7 +2,7 @@
 
 **An auditable R package for regression using error-prone recorded
 measurements and an independently checked reference subset. Version
-1.0.0.**
+1.0.1.**
 
 **Contextual site effects:** the explicit `joint_marginal` model
 estimates measurement and predictor variation together. Use
@@ -295,7 +295,7 @@ record](https://patrickiben.github.io/catmech/validation/VALIDATION.md).
 The [commands above](#try-it) install the dependencies and then the
 package. Run the second command from the repository directory, or build
 the source archive with `R CMD build .` and install it with
-`R CMD INSTALL catmech_1.0.0.tar.gz`. R 4.1 or later is required,
+`R CMD INSTALL catmech_1.0.1.tar.gz`. R 4.1 or later is required,
 although only R 4.6 has been tested locally. Building from source also
 requires a C++17 compiler and the platform toolchain for R packages.
 GitHub Actions checks Linux, macOS and Windows. See the [validation
@@ -467,7 +467,9 @@ and
 
 To see how much precision is recovered and whether point estimates shift
 across different ways of handling un-audited records, compare all four
-core strategies directly on your data:
+core strategies directly on your data. By default the imputation uses
+every variable in the formula, outcome included, and `cluster =` gives
+every strategy the same cluster-robust variance:
 
 ``` r
 comp <- catmech_compare_strategies(
@@ -499,9 +501,18 @@ plot(pooled_glm, exponentiate = TRUE)
       ├── Gross or separable outliers (10x decimal slips, unit errors)
       │     └── catmech_contamination()                 [Mixture error model]
       ├── Clustered multi-center data
-      │     └── catmech_reference(cluster_model = "joint") + cluster = "site"
+      │     └── catmech_reference(use_recorded = TRUE) + catmech_pool_lm(cluster = "site")
+      │           [catmech_reference(cluster = ) only as an experimental check,
+      │            and only when the audited value is the outcome]
       └── Sensitivity check across all methods
             └── catmech_compare_strategies()            [Side-by-side comparison]
+
+Whichever method you pick, when the audited value is a predictor in your
+analysis, put the analysis outcome in `predictors` (for a Cox model, the
+event indicator and the Nelson-Aalen cumulative hazard from
+[`mice::nelsonaalen()`](https://amices.org/mice/reference/nelsonaalen.html)).
+Leaving it out biases the value’s coefficient toward zero, and the
+pooling functions warn when they see it.
 
 ## Clustered audits: experimental
 
@@ -957,7 +968,7 @@ Existing specifications are not silently converted to the new model.
 Rscript -e 'install.packages(c("testthat", "pkgload", "roxygen2"))'
 Rscript -e 'testthat::test_local()'
 R CMD build .
-R CMD check --no-manual catmech_1.0.0.tar.gz
+R CMD check --no-manual catmech_1.0.1.tar.gz
 Rscript tools/check-v072-unchanged.R validation/my-v072-comparison.txt
 Rscript validation/run-joint-marginal.R confirmation validation/my-joint-marginal
 python3 -I tools/verify-joint-marginal.py validation/my-joint-marginal --tamper-tests
@@ -1069,11 +1080,10 @@ for sources, changes and terms of use.
 
 ## Audit Planning & Sample Size
 
-Calculate required audit sample sizes and prospective statistical power.
+Rough, unvalidated audit-size planning aids.
 
 - [`catmech_audit_power()`](https://patrickiben.github.io/catmech/reference/catmech_audit_power.md)
-  : Prospective sample size and statistical power calculation for
-  clinical data audits
+  : Rough audit-size planning aid (not validated)
 - [`catmech_audit_plan()`](https://patrickiben.github.io/catmech/reference/catmech_audit_plan.md)
   : Plan how many records to audit from a random pilot
 - [`plot(`*`<catmech_audit_power>`*`)`](https://patrickiben.github.io/catmech/reference/plot.catmech_audit_power.md)
@@ -1166,8 +1176,7 @@ Generate SHA-256 verified provenance reports and audit trails for
 regulatory filings.
 
 - [`catmech_audit_trail()`](https://patrickiben.github.io/catmech/reference/catmech_audit_trail.md)
-  : Generate an auditable provenance and integrity trail for a catmech
-  analysis
+  : Generate a provenance record for a catmech analysis
 - [`catmech_hash()`](https://patrickiben.github.io/catmech/reference/catmech_hash.md)
   : Compute a canonical assumption hash
 

@@ -35,15 +35,15 @@ df <- data.frame(
 df$lab_ref <- df$lab
 df$lab_ref[11:n] <- NA
 res <- catmech_reference(df, value = "lab", reference = "lab_ref",
-                         predictors = "age", m = 2, seed = 1)
+                         predictors = c("age", "y"), m = 2, seed = 1)
 pooled <- catmech_pool_lm(res, y ~ lab + age)
 tidy(pooled)
-#>          term    estimate  std.error  statistic       df      p.value
-#> 1 (Intercept)  5.48654328 0.97808156  5.6094947 25.86205 6.906928e-06
-#> 2         lab  0.01301963 0.07946479  0.1638415 15.12639 8.720251e-01
-#> 3         age -0.01208767 0.01447075 -0.8353171 35.09559 4.091900e-01
+#>          term     estimate  std.error  statistic       df     p.value
+#> 1 (Intercept)  4.955481037 1.37993451  3.5910987 10.37974 0.004638164
+#> 2         lab  0.049906412 0.08013362  0.6227900 15.47335 0.542493120
+#> 3         age -0.008163162 0.01731801 -0.4713683 15.73525 0.643846948
 #>      conf.low  conf.high
-#> 1  3.47554580 7.49754077
-#> 2 -0.15623237 0.18227163
-#> 3 -0.04146199 0.01728666
+#> 1  1.89597482 8.01498725
+#> 2 -0.12044039 0.22025321
+#> 3 -0.04492597 0.02859965
 ```

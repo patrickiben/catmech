@@ -59,8 +59,11 @@ catmech_compare_strategies(
 - predictors:
 
   Character vector of predictor column names to include in the
-  imputation models. If \`NULL\`, non-target predictors from \`formula\`
-  present in \`data\` are automatically detected.
+  imputation models. If \`NULL\`, every variable in \`formula\` other
+  than \`value\` and \`reference\` is used, including the outcome. When
+  the audited value is an analysis predictor, leaving the outcome out of
+  the imputation model biases its coefficient toward zero; a supplied
+  vector without the outcome draws a warning from the pooling step.
 
 - family:
 
@@ -86,11 +89,19 @@ catmech_compare_strategies(
 
 - cluster:
 
-  Optional cluster column name for cluster-robust pooling.
+  Optional complete cluster column. Every strategy then uses a
+  cluster-robust variance with complete-data degrees of freedom of
+  clusters minus one: the delete-one-cluster jackknife for linear
+  models, as in \[catmech_pool_lm()\], and the CR1S sandwich for other
+  families, as in \[catmech_pool_glm()\]. It is not passed to
+  \`catmech_reference(cluster = )\`, whose clustered imputation biased
+  slopes toward zero in simulations when the audited value was a
+  predictor (\`validation/VARIANCE_MI_SYNTHESIS.md\`); a formula term
+  naming the same column is still used as an ordinary predictor.
 
 - ...:
 
-  Additional arguments passed to model estimation.
+  Currently unused.
 
 ## Value
 
@@ -135,6 +146,10 @@ containing:
 
   Total observations and audited records count.
 
+The imputation predictors used are stored in the
+\`imputation_predictors\` attribute. If the contamination model fails,
+its rows are \`NA\` and a warning gives the reason.
+
 ## Examples
 
 ``` r
@@ -152,6 +167,7 @@ comp <- catmech_compare_strategies(df, value = "lab", reference = "ref",
 print(comp)
 #> -- Catmech Audit Strategy Comparison --
 #> Cohort Size (N): 50 | Audited Records (n): 15 (30.0% audit fraction)
+#> Imputation predictors: outcome, age
 #> 
 #>              strategy        term estimate std.error ci_width rel_efficiency
 #>  validation_subsample (Intercept)   7.5921    4.4095  19.2150         1.0000
@@ -160,10 +176,10 @@ print(comp)
 #>  naive_trust_recorded (Intercept)  10.1927    2.1990   8.8477         4.0209
 #>  naive_trust_recorded         lab  -0.0657    0.3017   1.2140         4.0128
 #>  naive_trust_recorded         age   0.0045    0.0276   0.1111         5.3562
-#>    linear_mi_recorded (Intercept)  10.4097    2.2997   9.2673         3.6766
-#>    linear_mi_recorded         lab  -0.1013    0.3163   1.2758         3.6523
-#>    linear_mi_recorded         age   0.0037    0.0279   0.1125         5.2390
-#>   contamination_model (Intercept)  10.4012    2.2959   9.2647         3.6887
-#>   contamination_model         lab  -0.1002    0.3192   1.2898         3.5863
-#>   contamination_model         age   0.0039    0.0277   0.1115         5.3264
+#>    linear_mi_recorded (Intercept)   9.8453    2.8575  15.3433         2.3813
+#>    linear_mi_recorded         lab  -0.0121    0.4368   2.8823         1.9145
+#>    linear_mi_recorded         age   0.0062    0.0278   0.1123         5.2680
+#>   contamination_model (Intercept)  10.1765    2.2185   8.9360         3.9505
+#>   contamination_model         lab  -0.0629    0.3059   1.2323         3.9030
+#>   contamination_model         age   0.0046    0.0276   0.1112         5.3567
 ```

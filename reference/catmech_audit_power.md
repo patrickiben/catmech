@@ -1,10 +1,10 @@
-# Prospective sample size and statistical power calculation for clinical data audits
+# Rough audit-size planning aid (not validated)
 
-Computes the statistical power and sample size required to achieve a
-target confidence interval precision ratio (\\\rho \le \rho\_{target}\\)
-in a two-phase clinical audit. Can evaluate power prospectively from
-prior clinical error parameters or empirically from a fitted
-\[catmech_audit_plan()\].
+Evaluates, over a grid of audit fractions, how often the expected
+interval width stays within a target ratio of a full audit's width
+(\\\rho \le \rho\_{target}\\), using the two-phase relation \\\rho =
+\sqrt{1 + k (1 - f) / f}\\. The factor \\k\\ comes from a fitted
+\[catmech_audit_plan()\] or from assumed error parameters.
 
 ## Usage
 
@@ -27,8 +27,9 @@ catmech_audit_power(
 
 - plan:
 
-  Optional fitted \`catmech_audit_plan\` object. If supplied, the
-  empirical distribution of \\k\\ is used to evaluate power.
+  Optional fitted \`catmech_audit_plan\` object. If supplied, \\k\\ is
+  drawn from a log-normal distribution fitted to the plan's estimate and
+  interval for \\k\\.
 
 - N:
 
@@ -42,7 +43,9 @@ catmech_audit_power(
 
 - power_target:
 
-  Desired statistical power (default 0.80).
+  Target share of plausible \\k\\ values whose width ratio meets
+  \`target_ratio\` (default 0.80); see Details for why this is not the
+  power of a test.
 
 - error_rate:
 
@@ -51,8 +54,8 @@ catmech_audit_power(
 
 - correlation:
 
-  Anticipated correlation between recorded and true values (default
-  0.85). Ignored if \`plan\` is supplied.
+  Anticipated correlation between recorded and true values over all
+  records (default 0.85). Ignored if \`plan\` is supplied.
 
 - r_squared:
 
@@ -66,12 +69,11 @@ catmech_audit_power(
 
 - n_sim:
 
-  Number of Monte Carlo draws for evaluating the sampling distribution
-  of the precision ratio (default 2000).
+  Number of Monte Carlo draws of \\k\\ (default 2000).
 
 - seed:
 
-  Optional integer seed for reproducible power evaluation.
+  Optional integer seed for reproducible draws.
 
 ## Value
 
@@ -79,21 +81,22 @@ An object of class \`catmech_audit_power\` containing:
 
 - table:
 
-  Data frame of evaluated audit fractions, audit sample sizes, expected
-  relative widths, and statistical power.
+  Data frame of evaluated audit fractions, audit sizes, expected width
+  ratios with 95% ranges, and \`power\`, the share of \\k\\ draws
+  meeting \`target_ratio\`.
 
 - recommended:
 
-  Recommended minimum audit fraction and sample size reaching
-  \`power_target\`.
+  Smallest evaluated audit fraction and size whose \`power\` reaches
+  \`power_target\`, or the largest fraction if none does.
 
 - target_ratio:
 
-  The target precision ratio evaluated.
+  The target width ratio evaluated.
 
 - power_target:
 
-  The target statistical power.
+  The target share of \\k\\ draws.
 
 - N:
 
@@ -104,15 +107,51 @@ An object of class \`catmech_audit_power\` containing:
   Point estimate and uncertainty bounds for the two-phase variance
   factor \\k\\.
 
+- linear_mi:
+
+  Without \`plan\`: the linear-imputation \\k\\ described above and the
+  audit fraction and size it needs to meet \`target_ratio\`; \`NULL\`
+  with \`plan\`.
+
+- status:
+
+  Always \`"not_validated"\`.
+
+## Details
+
+**Status: not validated.** No study has checked this function's
+recommendations, and the planner it builds on, \[catmech_audit_plan()\],
+returned NO-GO under a rule fixed in advance. Treat the output as a
+rough guide, not a sample-size guarantee.
+
+Without \`plan\`, \\k = q / (1 - q)\\ with \\q\\ = \`error_rate\` (1 -
+\`correlation\`^2) (1 - \`r_squared\`), where \`correlation\` is the
+correlation between recorded and true values over all records.
+Multiplying by the error rate treats the unexplained variation as if it
+sat in erroneous records the analysis can identify and correct. That is
+optimistic: on ClinicalTrials.gov and NHANES the contamination model
+could not tell which records were wrong (AUC 0.54 and 0.50). For linear
+imputation given the recorded value, the package's recommended start,
+the double-sampling regression estimator has \\k \approx (1 -
+\rho^2)(1 - R^2)\\ at the same correlation \\\rho\\, about 1 /
+\`error_rate\` times larger when errors are rare. The result reports the
+audit fraction that this \\k\\ needs (\`linear_mi\`), and the printout
+shows both. That figure ignores the uncertainty in \\k\\, so it can fall
+below the main recommendation, for example at very high error rates.
+
+"Power" here is the share of draws of \\k\\, from an assumed log-normal
+spread around its estimate, whose width ratio meets the target. It is
+not the power of a hypothesis test.
+
 ## Examples
 
 ``` r
 pwr <- catmech_audit_power(N = 500, target_ratio = 1.3, n_sim = 200, seed = 1)
 print(pwr)
-#> -- Catmech Audit Power & Sample Size Calculator --
+#> -- Catmech Audit-Size Planning Aid (not validated) --
 #> Cohort Size (N):    500
 #> Target Ratio:       <= 1.30 (within 30% of full audit width)
-#> Target Power:       80%
+#> Target share of k:  80%
 #> Two-Phase Factor k: 0.030 [0.010, 0.117] (prior_specification)
 #> 
 #>  fraction n_audit expected_ratio ratio_lower ratio_upper power
@@ -138,5 +177,8 @@ print(pwr)
 #>      0.40     200          1.027       1.008       1.084 1.000
 #> 
 #> Recommended Audit Size: n = 40 records (8.0% audit fraction)
-#> Achieves 86.0% power (expected ratio: 1.189)
+#> Meets the target in 86.0% of k draws (expected ratio: 1.189)
+#> Linear imputation (double-sampling regression, k = 0.194): about 22.0% (n = 110) for ratio <= 1.30, ignoring uncertainty in k.
+#> Power here is the share of plausible k values meeting the target, not the power of a test.
+#> Not validated; see ?catmech_audit_power for the assumptions.
 ```

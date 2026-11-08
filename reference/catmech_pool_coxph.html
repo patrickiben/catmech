@@ -11,7 +11,7 @@ Barnard &amp;amp; Rubin (1999) small-sample degrees of freedom based on event co
 
     <a class="navbar-brand me-2" href="../index.html">catmech</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -126,6 +126,15 @@ intervals (`estimate_exp`, `lower_exp`, `upper_exp`), representing Hazard Ratios
 <dd><p>Inference label.</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>When the audited value is an analysis predictor, the imputation model needs the
+  outcome: include the event indicator and the Nelson-Aalen cumulative hazard, which
+  [mice::nelsonaalen()] computes, among the imputation `predictors` (White and Royston,
+  2009, &lt;doi:10.1002/sim.3618&gt;). A warning is given when the event indicator is missing.
+  The complete-data degrees of freedom are events minus coefficients, the same default
+  that `mice::pool()` uses for Cox fits.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
@@ -139,20 +148,20 @@ intervals (`estimate_exp`, `lower_exp`, `upper_exp`), representing Hazard Ratios
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">df</span><span class="op">$</span><span class="va">lab_ref</span> <span class="op">&lt;-</span> <span class="va">df</span><span class="op">$</span><span class="va">lab</span></span></span>
 <span class="r-in"><span><span class="va">df</span><span class="op">$</span><span class="va">lab_ref</span><span class="op">[</span><span class="fl">11</span><span class="op">:</span><span class="va">n</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span></span></span>
+<span class="r-in"><span><span class="co"># lab is a predictor below, so the event indicator and the Nelson-Aalen</span></span></span>
+<span class="r-in"><span><span class="co"># cumulative hazard join the imputation model.</span></span></span>
+<span class="r-in"><span><span class="va">df</span><span class="op">$</span><span class="va">hazard</span> <span class="op">&lt;-</span> <span class="fu">mice</span><span class="fu">::</span><span class="fu"><a href="https://amices.org/mice/reference/nelsonaalen.html" class="external-link">nelsonaalen</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">time</span>, <span class="va">status</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="catmech_reference.html">catmech_reference</a></span><span class="op">(</span><span class="va">df</span>, value <span class="op">=</span> <span class="st">"lab"</span>, reference <span class="op">=</span> <span class="st">"lab_ref"</span>,</span></span>
-<span class="r-in"><span>                         predictors <span class="op">=</span> <span class="st">"age"</span>, m <span class="op">=</span> <span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                         predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"status"</span>, <span class="st">"hazard"</span><span class="op">)</span>, m <span class="op">=</span> <span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">pooled_cox</span> <span class="op">&lt;-</span> <span class="fu">catmech_pool_coxph</span><span class="op">(</span><span class="va">res</span>, <span class="fu">survival</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="va">lab</span> <span class="op">+</span> <span class="va">age</span>,</span></span>
 <span class="r-in"><span>                                 exponentiate <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">pooled_cox</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -- Catmech Pooled Cox PH Model --</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Completions (m): 2 | Observations (n): 50 | Events: 27</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  term estimate std.error      df   lower  upper estimate_exp lower_exp</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   lab   0.0701    0.0675 21.3470 -0.0701 0.2103       1.0726    0.9323</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   age   0.0203    0.0237 20.8258 -0.0290 0.0696       1.0205    0.9714</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  upper_exp</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1.2341</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     1.0721</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  term estimate std.error     df   lower  upper estimate_exp lower_exp upper_exp</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   lab   0.2459    0.2178 0.7791 -5.2787 5.7706       1.2788    0.0051  320.7235</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   age   0.0525    0.0866 0.6032 -5.6907 5.7957       1.0539    0.0034  328.8758</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

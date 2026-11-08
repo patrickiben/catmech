@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">catmech</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,7 +57,7 @@
                         <h4 data-toc-skip class="author">Patrick
 Iben</h4>
             
-            <h4 data-toc-skip class="date">2026-11-07</h4>
+            <h4 data-toc-skip class="date">2026-11-08</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/patrickiben/catmech/blob/main/vignettes/catmech-clinical-audit.Rmd" class="external-link"><code>vignettes/catmech-clinical-audit.Rmd</code></a></small>
       <div class="d-none name"><code>catmech-clinical-audit.Rmd</code></div>
@@ -85,12 +85,14 @@ conversion discrepancies.</li>
 gold-standard measurement is audited on a subset of patient
 records.</li>
 </ol>
-<p>The <strong><code>catmech</code></strong> package provides a
-mathematically sound, auditable framework for completing contaminated
-measurements, planning audit sample sizes, evaluating predictive
-calibration, and pooling downstream linear, generalized linear (GLM),
-and survival (Cox PH) regressions under Rubin’s rules with Barnard–Rubin
-degrees of freedom.</p>
+<p>The <strong><code>catmech</code></strong> package provides an
+auditable framework for completing contaminated measurements, checking
+predictive calibration, and pooling downstream linear, generalized
+linear (GLM), and survival (Cox PH) regressions under Rubin’s rules with
+Barnard–Rubin degrees of freedom. It also has a rough, unvalidated aid
+for planning audit sizes. The package has had no outside peer review or
+clinical validation; the <a href="https://github.com/patrickiben/catmech#readme" class="external-link">README</a> gives
+the evidence and its limits.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -167,13 +169,22 @@ event (<code>mace_30d</code>). - Time-to-event overall survival
 </h2>
 <p>We fit <code><a href="../reference/catmech_contamination.html">catmech_contamination()</a></code> using the audited subset
 to model both the probability of corruption and the measurement error
-mixture:</p>
+mixture.</p>
+<p>The biomarker is a <em>predictor</em> in every analysis below, so the
+imputation model must include each analysis outcome. Leaving an outcome
+out biases the biomarker’s coefficient toward zero; the pooling
+functions warn when they see that. For the survival analysis, the
+outcome enters as the event indicator and the Nelson–Aalen cumulative
+hazard (White and Royston, 2009), which <code><a href="https://amices.org/mice/reference/nelsonaalen.html" class="external-link">mice::nelsonaalen()</a></code>
+computes:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">fit_contam</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catmech_contamination.html">catmech_contamination</a></span><span class="op">(</span></span>
+<code class="sourceCode R"><span><span class="va">df</span><span class="op">$</span><span class="va">hazard</span> <span class="op">&lt;-</span> <span class="fu">mice</span><span class="fu">::</span><span class="fu"><a href="https://amices.org/mice/reference/nelsonaalen.html" class="external-link">nelsonaalen</a></span><span class="op">(</span><span class="va">df</span>, <span class="va">time</span>, <span class="va">death_event</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">fit_contam</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catmech_contamination.html">catmech_contamination</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">df</span>,</span>
 <span>  value <span class="op">=</span> <span class="st">"lab_value"</span>,</span>
 <span>  reference <span class="op">=</span> <span class="st">"lab_ref"</span>,</span>
-<span>  predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"cardiac_index"</span><span class="op">)</span>,</span>
+<span>  predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"cardiac_index"</span>, <span class="st">"mace_30d"</span>, <span class="st">"death_event"</span>, <span class="st">"hazard"</span><span class="op">)</span>,</span>
 <span>  m <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">42</span></span>
 <span><span class="op">)</span></span>
@@ -181,14 +192,14 @@ mixture:</p>
 <span><span class="co">#&gt; &lt;catmech_result: reference_contamination&gt;</span></span>
 <span><span class="co">#&gt;   Target value:      lab_value</span></span>
 <span><span class="co">#&gt;   Reference subset:  lab_ref (64/250 rows, 25.6%)</span></span>
-<span><span class="co">#&gt;   Predictors:        age, cardiac_index</span></span>
+<span><span class="co">#&gt;   Predictors:        age, cardiac_index, mace_30d, death_event, hazard</span></span>
 <span><span class="co">#&gt;   Completions (m):   4</span></span>
 <span><span class="co">#&gt;   Imputed rows:      186/250</span></span>
 <span><span class="co">#&gt;   Model convergence: passed</span></span></code></pre></div>
 <p>The MCMC sampler generates
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">m = 4</annotation></semantics></math>
-auditable completions of the target biomarker while properly reflecting
-parameter uncertainty.</p>
+completions of the target biomarker, reflecting parameter uncertainty.
+Four keeps this vignette fast; use 20 or more in practice.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -211,9 +222,9 @@ reference cases:</p>
 <span><span class="co">#&gt; -- Catmech Holdout Cross-Validation Check --</span></span>
 <span><span class="co">#&gt; Status:              no_miscalibration_detected</span></span>
 <span><span class="co">#&gt; Folds completed:     3 (holdout rows: 64, partitioned by: row)</span></span>
-<span><span class="co">#&gt; Predictive coverage: 0.9688 (nominal: 0.9) (uniform PIT KS p-value: 0.3318)</span></span>
-<span><span class="co">#&gt; Predictive RMSE:     model = 0.3997 vs recorded = 1.7378</span></span>
-<span><span class="co">#&gt; Mean interval width: 0.5483</span></span>
+<span><span class="co">#&gt; Predictive coverage: 0.9844 (nominal: 0.9) (uniform PIT KS p-value: 0.1135)</span></span>
+<span><span class="co">#&gt; Predictive RMSE:     model = 0.3086 vs recorded = 1.7378</span></span>
+<span><span class="co">#&gt; Mean interval width: 0.5999</span></span>
 <span><span class="co">#&gt; Flags:               none</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">holdout</span><span class="op">)</span></span></code></pre></div>
 <p><img src="catmech-clinical-audit_files/figure-html/holdout_check-1.png" class="r-plt" alt="" width="672"></p>
@@ -224,11 +235,16 @@ right panel verifies mean predictive calibration.</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="prospective-audit-sample-size-power-planning">4. Prospective Audit Sample Size &amp; Power Planning<a class="anchor" aria-label="anchor" href="#prospective-audit-sample-size-power-planning"></a>
+<h2 id="rough-audit-size-planning-not-validated">4. Rough Audit-Size Planning (Not Validated)<a class="anchor" aria-label="anchor" href="#rough-audit-size-planning-not-validated"></a>
 </h2>
-<p>Before undertaking a chart abstraction audit, investigators can
-prospectively compute the required sample size and statistical power
-using <code><a href="../reference/catmech_audit_power.html">catmech_audit_power()</a></code>:</p>
+<p>Before an audit, <code><a href="../reference/catmech_audit_power.html">catmech_audit_power()</a></code> gives a rough
+idea of its size. It is <strong>not validated</strong>, and the planner
+it builds on, <code><a href="../reference/catmech_audit_plan.html">catmech_audit_plan()</a></code>, returned NO-GO under a
+rule fixed in advance. Its default factor treats the unexplained
+variation as if it sat in erroneous records that can be identified,
+which is optimistic, so the printout also shows the audit that linear
+imputation needs under the double-sampling regression estimator at the
+same correlation:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pwr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catmech_audit_power.html">catmech_audit_power</a></span><span class="op">(</span></span>
 <span>  N <span class="op">=</span> <span class="fl">1000</span>,</span>
@@ -238,10 +254,10 @@ using <code><a href="../reference/catmech_audit_power.html">catmech_audit_power(
 <span>  correlation <span class="op">=</span> <span class="fl">0.82</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">pwr</span><span class="op">)</span></span>
-<span><span class="co">#&gt; -- Catmech Audit Power &amp; Sample Size Calculator --</span></span>
+<span><span class="co">#&gt; -- Catmech Audit-Size Planning Aid (not validated) --</span></span>
 <span><span class="co">#&gt; Cohort Size (N):    1000</span></span>
 <span><span class="co">#&gt; Target Ratio:       &lt;= 1.25 (within 25% of full audit width)</span></span>
-<span><span class="co">#&gt; Target Power:       80%</span></span>
+<span><span class="co">#&gt; Target share of k:  80%</span></span>
 <span><span class="co">#&gt; Two-Phase Factor k: 0.028 [0.010, 0.078] (prior_specification)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;  fraction n_audit expected_ratio ratio_lower ratio_upper power</span></span>
@@ -267,12 +283,16 @@ using <code><a href="../reference/catmech_audit_power.html">catmech_audit_power(
 <span><span class="co">#&gt;      0.40     400          1.024       1.007       1.057 1.000</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Recommended Audit Size: n = 80 records (8.0% audit fraction)</span></span>
-<span><span class="co">#&gt; Achieves 85.3% power (expected ratio: 1.168)</span></span>
+<span><span class="co">#&gt; Meets the target in 85.3% of k draws (expected ratio: 1.168)</span></span>
+<span><span class="co">#&gt; Linear imputation (double-sampling regression, k = 0.229): about 29.0% (n = 290) for ratio &lt;= 1.25, ignoring uncertainty in k.</span></span>
+<span><span class="co">#&gt; Power here is the share of plausible k values meeting the target, not the power of a test.</span></span>
+<span><span class="co">#&gt; Not validated; see ?catmech_audit_power for the assumptions.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pwr</span><span class="op">)</span></span></code></pre></div>
 <p><img src="catmech-clinical-audit_files/figure-html/audit_power-1.png" class="r-plt" alt="" width="672"></p>
-<p>The power curve highlights the minimum audit sample size needed to
-guarantee that the confidence interval width remains within 25% of an
-ideal full-cohort audit.</p>
+<p>The curve shows, for each audit size, the share of plausible values
+of the two-phase factor for which the expected interval width stays
+within 25% of a full audit’s. It guarantees nothing: treat it, and the
+linear-imputation figure, as a starting point for planning.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -296,9 +316,9 @@ Rubin’s combining rules and cluster-robust standard errors:</p>
 <span><span class="co">#&gt; Completions (m): 4 | Observations (n): 250</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;         term estimate std.error     df   lower   upper</span></span>
-<span><span class="co">#&gt;  (Intercept)   2.1940    0.4238 7.2184  1.1980  3.1899</span></span>
-<span><span class="co">#&gt;    lab_value  -0.1763    0.0272 4.9056 -0.2466 -0.1059</span></span>
-<span><span class="co">#&gt;          age   0.0025    0.0056 7.4906 -0.0105  0.0154</span></span>
+<span><span class="co">#&gt;  (Intercept)   2.1856    0.4084 7.4740  1.2321  3.1390</span></span>
+<span><span class="co">#&gt;    lab_value  -0.1739    0.0278 6.2173 -0.2414 -0.1065</span></span>
+<span><span class="co">#&gt;          age   0.0024    0.0057 7.3694 -0.0110  0.0157</span></span>
 <span><span class="co">#&gt;                                  interpretation</span></span>
 <span><span class="co">#&gt;  conditional_contamination_model_cluster_robust</span></span>
 <span><span class="co">#&gt;  conditional_contamination_model_cluster_robust</span></span>
@@ -323,13 +343,13 @@ completions, reporting odds ratios via
 <span><span class="co">#&gt; Completions (m): 4 | Observations (n): 250</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;         term estimate std.error       df    lower   upper estimate_exp</span></span>
-<span><span class="co">#&gt;  (Intercept)  -6.9522    1.7310 243.1987 -10.3619 -3.5426       0.0010</span></span>
-<span><span class="co">#&gt;    lab_value   0.2044    0.1618 230.2023  -0.1143  0.5231       1.2268</span></span>
-<span><span class="co">#&gt;          age   0.0576    0.0227 244.8982   0.0129  0.1024       1.0593</span></span>
+<span><span class="co">#&gt;  (Intercept)  -7.1721    1.8284 146.5547 -10.7855 -3.5588       0.0008</span></span>
+<span><span class="co">#&gt;    lab_value   0.2408    0.1842  50.3994  -0.1291  0.6107       1.2723</span></span>
+<span><span class="co">#&gt;          age   0.0575    0.0228 244.8883   0.0126  0.1024       1.0592</span></span>
 <span><span class="co">#&gt;  lower_exp upper_exp</span></span>
-<span><span class="co">#&gt;      0.000    0.0289</span></span>
-<span><span class="co">#&gt;      0.892    1.6872</span></span>
-<span><span class="co">#&gt;      1.013    1.1078</span></span></code></pre></div>
+<span><span class="co">#&gt;     0.0000    0.0285</span></span>
+<span><span class="co">#&gt;     0.8789    1.8417</span></span>
+<span><span class="co">#&gt;     1.0127    1.1078</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="c--survival-proportional-hazards-catmech_pool_coxph">C. Survival Proportional Hazards
@@ -350,11 +370,11 @@ Barnard–Rubin degrees of freedom:</p>
 <span><span class="co">#&gt; Completions (m): 4 | Observations (n): 250 | Events: 83</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;       term estimate std.error     df   lower  upper estimate_exp lower_exp</span></span>
-<span><span class="co">#&gt;  lab_value   0.3851    0.0990 4.1324  0.1135 0.6566       1.4697    1.1202</span></span>
-<span><span class="co">#&gt;        age   0.0209    0.0098 7.4755 -0.0019 0.0437       1.0211    0.9982</span></span>
+<span><span class="co">#&gt;  lab_value   0.4160    0.1066 3.1900  0.0881 0.7440       1.5159    1.0921</span></span>
+<span><span class="co">#&gt;        age   0.0214    0.0102 7.1523 -0.0027 0.0454       1.0216    0.9973</span></span>
 <span><span class="co">#&gt;  upper_exp</span></span>
-<span><span class="co">#&gt;     1.9283</span></span>
-<span><span class="co">#&gt;     1.0447</span></span></code></pre></div>
+<span><span class="co">#&gt;     2.1043</span></span>
+<span><span class="co">#&gt;     1.0464</span></span></code></pre></div>
 <hr>
 </div>
 </div>
@@ -369,7 +389,8 @@ the conclusion is robust across all scenarios:</p>
 <span>  data <span class="op">=</span> <span class="va">df</span>,</span>
 <span>  value <span class="op">=</span> <span class="st">"lab_value"</span>,</span>
 <span>  reference <span class="op">=</span> <span class="st">"lab_ref"</span>,</span>
-<span>  predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"cardiac_index"</span><span class="op">)</span>,</span>
+<span>  predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"age"</span>, <span class="st">"cardiac_index"</span>, <span class="st">"mace_30d"</span>, <span class="st">"death_event"</span>, <span class="st">"hazard"</span><span class="op">)</span>,</span>
+<span>  use_recorded <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  m <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>  seed <span class="op">=</span> <span class="fl">42</span></span>
 <span><span class="op">)</span></span>
@@ -384,22 +405,25 @@ the conclusion is robust across all scenarios:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">sens</span><span class="op">)</span></span>
 <span><span class="co">#&gt; -- Catmech Sensitivity Analysis --</span></span>
 <span><span class="co">#&gt; Status:              direction_stable_over_supplied_scenarios (complete: TRUE)</span></span>
-<span><span class="co">#&gt; Successful envelope: [-0.2772, -0.1058]</span></span>
+<span><span class="co">#&gt; Successful envelope: [-0.2307, -0.092]</span></span>
 <span><span class="co">#&gt; Scenarios:           2 evaluated</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;       scenario status estimate std.error   lower   upper direction</span></span>
-<span><span class="co">#&gt;  contamination     ok  -0.1763    0.0298 -0.2363 -0.1163     below</span></span>
-<span><span class="co">#&gt;      reference     ok  -0.1915    0.0384 -0.2772 -0.1058     below</span></span></code></pre></div>
+<span><span class="co">#&gt;  contamination     ok  -0.1739    0.0286 -0.2307 -0.1171     below</span></span>
+<span><span class="co">#&gt;      reference     ok  -0.1606    0.0326 -0.2291 -0.0920     below</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level2">
-<h2 id="tamper-evident-regulatory-audit-trail">7. Tamper-Evident Regulatory Audit Trail<a class="anchor" aria-label="anchor" href="#tamper-evident-regulatory-audit-trail"></a>
+<h2 id="provenance-record">7. Provenance Record<a class="anchor" aria-label="anchor" href="#provenance-record"></a>
 </h2>
-<p>To support regulatory documentation (such as under FDA 21 CFR Part 11
-and ICH E9), <code><a href="../reference/catmech_audit_trail.html">catmech_audit_trail()</a></code> outputs a record
-containing SHA-256 checksums of input data, assumptions, and all
-completions. The record supports, but does not by itself establish,
-compliance:</p>
+<p><code><a href="../reference/catmech_audit_trail.html">catmech_audit_trail()</a></code> writes a record of one run: R and
+package versions, SHA-256 hashes of the input data and every completion
+(taken over the serialized R data frames, so they can be recomputed only
+in R) and of the assumption specification’s canonical JSON text, the
+settings, the convergence status and the pooled results. A rerun can be
+compared with it. It is not tamper-evident, since anyone who edits the
+data can regenerate it, and it can support documentation under FDA 21
+CFR Part 11 or ICH E9 without making a system compliant:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">trail</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catmech_audit_trail.html">catmech_audit_trail</a></span><span class="op">(</span></span>
 <span>  object <span class="op">=</span> <span class="va">fit_contam</span>,</span>
@@ -410,21 +434,21 @@ compliance:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/substr.html" class="external-link">substr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span><span class="va">trail</span><span class="op">)</span>, <span class="fl">1</span>, <span class="fl">1200</span><span class="op">)</span>, <span class="st">"\n... [truncated for display]"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # Catmech Audit Trail &amp; Provenance Report</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; **Generated:** 2026-11-07T23:46:46Z UTC | **Catmech Version:** 1.0.0</span></span>
+<span><span class="co">#&gt; **Generated:** 2026-11-08T03:06:08Z UTC | **Catmech Version:** 1.0.1</span></span>
 <span><span class="co">#&gt; **R Version:** 4.6.2 | **Platform:** x86_64-pc-linux-gnu</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ## 1. Cryptographic Data &amp; Specification Integrity (SHA-256)</span></span>
+<span><span class="co">#&gt; ## 1. Data and Specification Hashes (SHA-256)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; - **Original Input Data Hash:** `337e3fda57c103ac827c23feadbc66452d323a0b938f245d78fd46bc1dc5e235`</span></span>
-<span><span class="co">#&gt; - **Assumption Specification Hash:** `bd63c8176604952318d2bc2124bbf603535d58a7cc5963191ed07da19eae4dcf`</span></span>
+<span><span class="co">#&gt; - **Original Input Data Hash:** `957b56100d7d74bdb322e9bc67803d15c53aeff694d92de87dd4688608879b2f`</span></span>
+<span><span class="co">#&gt; - **Assumption Specification Hash:** `67a39bb736d40bf6fbf1d0840fe417ba43247a444c6bf36b44dd1b3036019ce3`</span></span>
 <span><span class="co">#&gt; - **Completed Dataset Checksums:**</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;   - Completion `m=1`: `cf442c7284ea912c522aac649a584cf9613ad1fc1036d3f318f3d88d1f050785`</span></span>
-<span><span class="co">#&gt;   - Completion `m=2`: `f3f5b3eb2258fac7c17f74903c09a54522c157bd3751f03fab919d33c03abeb2`</span></span>
-<span><span class="co">#&gt;   - Completion `m=3`: `6e348ac7190dcb9f27b28265a1ea49e6cfcfdc2496021c8f9d1e959e702b29c9`</span></span>
-<span><span class="co">#&gt;   - Completion `m=4`: `1222dcd6aaa6f9e737d5da15df163b24ee6f87b1e53a22992a896d88b8f5a055`</span></span>
+<span><span class="co">#&gt;   - Completion `m=1`: `903e83fe60adcfbf37a2840bd6295217ee0036dc9127d9817ebf8a0ab8370215`</span></span>
+<span><span class="co">#&gt;   - Completion `m=2`: `89e1023d89b468818f78de32d42109e106d39ca141f19425f523822126d18662`</span></span>
+<span><span class="co">#&gt;   - Completion `m=3`: `786bc9c718e22db04a06174df041f19f620e0e0e9e89c702fba3fe6d9338a437`</span></span>
+<span><span class="co">#&gt;   - Completion `m=4`: `a166b5cfe3341f52803ba689e9876f09a3c690c77163bb517c5a99589ad19356`</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ## 2. Cohort Specification &amp; Imputation Profile</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -433,15 +457,15 @@ compliance:</p>
 <span><span class="co">#&gt; | Engine | `reference_contamination` |</span></span>
 <span><span class="co">#&gt; | Target Value Column | `lab_value` |</span></span>
 <span><span class="co">#&gt; | Reference Column | `lab_ref` |</span></span>
-<span><span class="co">#&gt; | Predictors | age, cardiac_index |</span></span>
+<span><span class="co">#&gt; | Predictors | age, cardiac_index, mace_30d, death_event, hazard |</span></span>
 <span><span class="co">#&gt; | Cluster Variable | `none` |</span></span>
 <span><span class="co">#&gt; | Total Observations | 250 |</span></span>
 <span><span class="co">#&gt; | Completions (m) | 4 |</span></span>
 <span><span class="co">#&gt; | Imputed Records | 186 (74.4%) |</span></span>
-<span><span class="co">#&gt; | Convergence Sta </span></span>
+<span><span class="co">#&gt; | </span></span>
 <span><span class="co">#&gt; ... [truncated for display]</span></span></code></pre></div>
-<p>The resulting audit trail guarantees complete transparency,
-traceability, and reproducibility.</p>
+<p>The record makes a rerun checkable; it does not by itself make an
+analysis reproducible or compliant.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -468,7 +492,8 @@ for all pooled regression models:</p>
 <p>To evaluate how much precision is recovered and whether point
 estimates shift across different ways of handling un-audited records,
 <code><a href="../reference/catmech_compare_strategies.html">catmech_compare_strategies()</a></code> evaluates all four core
-workflows side by side:</p>
+workflows side by side. By default its imputation uses every variable in
+the formula, the outcome included:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/catmech_compare_strategies.html">catmech_compare_strategies</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="va">df</span>,</span>
@@ -481,6 +506,7 @@ workflows side by side:</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">comp</span><span class="op">)</span></span>
 <span><span class="co">#&gt; -- Catmech Audit Strategy Comparison --</span></span>
 <span><span class="co">#&gt; Cohort Size (N): 250 | Audited Records (n): 64 (25.6% audit fraction)</span></span>
+<span><span class="co">#&gt; Imputation predictors: cardiac_index, age</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;              strategy        term estimate std.error ci_width rel_efficiency</span></span>
 <span><span class="co">#&gt;  validation_subsample (Intercept)   2.8243    0.5965   2.3854         1.0000</span></span>
@@ -489,12 +515,12 @@ workflows side by side:</p>
 <span><span class="co">#&gt;  naive_trust_recorded (Intercept)   1.5703    0.2416   0.9517         6.0957</span></span>
 <span><span class="co">#&gt;  naive_trust_recorded   lab_value  -0.0493    0.0171   0.0673         9.9663</span></span>
 <span><span class="co">#&gt;  naive_trust_recorded         age   0.0006    0.0036   0.0142         5.1305</span></span>
-<span><span class="co">#&gt;    linear_mi_recorded (Intercept)   1.8167    0.3464   1.4185         2.9658</span></span>
-<span><span class="co">#&gt;    linear_mi_recorded   lab_value  -0.0846    0.0350   0.1426         2.3752</span></span>
-<span><span class="co">#&gt;    linear_mi_recorded         age  -0.0002    0.0041   0.0166         3.9178</span></span>
-<span><span class="co">#&gt;   contamination_model (Intercept)   2.1324    0.2611   1.0304         5.2172</span></span>
-<span><span class="co">#&gt;   contamination_model   lab_value  -0.1642    0.0287   0.1134         3.5354</span></span>
-<span><span class="co">#&gt;   contamination_model         age   0.0022    0.0035   0.0137         5.4889</span></span>
+<span><span class="co">#&gt;    linear_mi_recorded (Intercept)   2.4496    0.2891   1.1722         4.2570</span></span>
+<span><span class="co">#&gt;    linear_mi_recorded   lab_value  -0.1976    0.0300   0.1231         3.2413</span></span>
+<span><span class="co">#&gt;    linear_mi_recorded         age   0.0008    0.0034   0.0136         5.6694</span></span>
+<span><span class="co">#&gt;   contamination_model (Intercept)   2.1943    0.2493   0.9821         5.7249</span></span>
+<span><span class="co">#&gt;   contamination_model   lab_value  -0.1760    0.0270   0.1063         4.0050</span></span>
+<span><span class="co">#&gt;   contamination_model         age   0.0024    0.0034   0.0134         5.7701</span></span>
 <span></span>
 <span><span class="co"># Forest plot comparing all 4 strategies for the target measurement</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">comp</span>, term <span class="op">=</span> <span class="st">"lab_value"</span>, main <span class="op">=</span> <span class="st">"Audit Strategy Comparison: Biomarker Effect on Cardiac Index"</span><span class="op">)</span></span></code></pre></div>
@@ -504,9 +530,8 @@ workflows side by side:</p>
 <div class="section level2">
 <h2 id="practitioner-decision-flowchart">10. Practitioner Decision Flowchart<a class="anchor" aria-label="anchor" href="#practitioner-decision-flowchart"></a>
 </h2>
-<p>When deciding which audit imputation model or downstream pooling
-approach to deploy, investigators should follow this evidence-based
-decision framework:</p>
+<p>This table summarizes what the package’s own tests found. The <a href="https://github.com/patrickiben/catmech#readme" class="external-link">README</a> gives
+the evidence, its limits and the cases where it was inconclusive.</p>
 <table class="table">
 <colgroup>
 <col width="33%">
@@ -524,9 +549,9 @@ decision framework:</p>
 <strong>Subtle or diffuse errors</strong> (transcription slips,
 calibration drift)</td>
 <td><code>catmech_reference(use_recorded = TRUE)</code></td>
-<td>Linear MI matches or beats complex models on real recording
-differences (ClinicalTrials.gov &amp; NHANES) with narrower intervals
-and fewer assumptions.</td>
+<td>On real recording differences (ClinicalTrials.gov and NHANES),
+linear MI matched or beat the contamination model, with fewer
+assumptions.</td>
 </tr>
 <tr class="even">
 <td>
@@ -540,32 +565,35 @@ under gross synthetic errors.</td>
 <tr class="odd">
 <td><strong>Multi-center / clustered sites</strong></td>
 <td>
-<code>catmech_reference(cluster_model = "joint")</code> +
-cluster-robust pooling</td>
-<td>Bivariate Gaussian site model handles mixed within-cluster recording
-patterns, with delete-one-cluster jackknife (<code>cv3</code>)
-variance.</td>
+<code>catmech_reference(use_recorded = TRUE)</code> +
+<code>cluster = "site"</code> in the pooling function</td>
+<td>The pooled variance is a delete-one-cluster jackknife
+(<code>cv3</code>) for linear models.
+<code>catmech_reference(cluster = )</code> is experimental, came out
+PARTIAL in its planned tests, and biased slopes when the audited value
+was a predictor, so use it only as a check when the audited value is the
+outcome.</td>
 </tr>
 <tr class="even">
-<td><strong>Prospective sample size planning</strong></td>
+<td><strong>Audit size planning</strong></td>
 <td><code>catmech_audit_power(N, target_ratio)</code></td>
-<td>Computes audit sample sizes to achieve desired relative interval
-width; recommend audit sizes of at least 10%–15%
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>≥</mo><mn>50</mn></mrow><annotation encoding="application/x-tex">n \ge 50</annotation></semantics></math>)
-for stable variance estimation.</td>
+<td>Rough and not validated; its default factor is optimistic, so also
+read its linear-imputation figure. <code><a href="../reference/catmech_audit_plan.html">catmech_audit_plan()</a></code>
+returned NO-GO.</td>
 </tr>
 <tr class="odd">
 <td><strong>Sensitivity check across strategies</strong></td>
 <td><code><a href="../reference/catmech_compare_strategies.html">catmech_compare_strategies()</a></code></td>
-<td>Directly compares validation subsample, naive analysis, linear MI,
-and contamination model side by side.</td>
+<td>Compares validation subsample, naive analysis, linear MI, and
+contamination model side by side, imputing with the outcome
+included.</td>
 </tr>
 <tr class="even">
-<td><strong>Regulatory submission</strong></td>
+<td><strong>Provenance</strong></td>
 <td><code><a href="../reference/catmech_audit_trail.html">catmech_audit_trail()</a></code></td>
-<td>Cryptographically documents input SHA-256 hashes, options, and
-pooled results for regulatory documentation (FDA 21 CFR Part 11 / ICH
-E9).</td>
+<td>Records SHA-256 hashes of the input data, settings and completions
+with the pooled results. Supports documentation; does not establish FDA
+21 CFR Part 11 or ICH E9 compliance.</td>
 </tr>
 </tbody>
 </table>

@@ -56,7 +56,10 @@ catmech_pool_glm(
 - cluster:
 
   Optional name of a column identifying clusters for cluster-robust
-  inference.
+  inference. Each completed analysis then uses the CR1S sandwich, factor
+  (G / (G - 1)) ((n - 1) / (n - p)), built from the unscaled inverse
+  information so that it does not depend on an estimated dispersion, and
+  pooling uses complete-data degrees of freedom of clusters minus one.
 
 - ...:
 
@@ -112,6 +115,15 @@ containing:
 
   Inference label.
 
+## Details
+
+When the audited value is an analysis predictor, include the analysis
+outcome among the imputation \`predictors\`. Imputing a predictor
+without the outcome biases its coefficient toward zero; a warning says
+so. In a check recorded in \`validation/REVIEW_FIXES_2026-11-07.md\`, a
+logistic log odds ratio of 0.80 came out at 0.61, with 65% coverage of
+nominal 95% intervals, when the outcome was left out.
+
 ## Examples
 
 ``` r
@@ -124,20 +136,21 @@ df <- data.frame(
 )
 df$lab_ref <- df$lab
 df$lab_ref[11:n] <- NA
+# lab is a predictor below, so the outcome y joins the imputation model.
 res <- catmech_reference(df, value = "lab", reference = "lab_ref",
-                         predictors = "age", m = 2, seed = 1)
+                         predictors = c("age", "y"), m = 2, seed = 1)
 pooled_glm <- catmech_pool_glm(res, y ~ lab + age, family = stats::binomial(),
                                exponentiate = TRUE)
 print(pooled_glm)
 #> -- Catmech Pooled GLM: binomial (logit link) --
 #> Completions (m): 2 | Observations (n): 50
 #> 
-#>         term estimate std.error      df   lower  upper estimate_exp lower_exp
-#>  (Intercept)  -1.2630    2.6105  3.8111 -8.6550 6.1289       0.2828    0.0002
-#>          lab   0.1023    0.1897  2.4596 -0.5839 0.7886       1.1078    0.5577
-#>          age  -0.0035    0.0367 44.8465 -0.0775 0.0705       0.9965    0.9254
-#>  upper_exp
-#>   458.9272
-#>     2.2004
-#>     1.0731
+#>         term estimate std.error     df    lower   upper estimate_exp lower_exp
+#>  (Intercept)  -8.5357    6.8331 1.6939 -43.6640 26.5926       0.0002    0.0000
+#>          lab   1.2050    0.8170 1.3122  -4.8278  7.2379       3.3369    0.0080
+#>          age  -0.0776    0.0624 4.0811  -0.2494  0.0942       0.9253    0.7792
+#>     upper_exp
+#>  3.540139e+11
+#>  1.391153e+03
+#>  1.098800e+00
 ```

@@ -1,9 +1,9 @@
-# Generate an auditable provenance and integrity trail for a catmech analysis
+# Generate a provenance record for a catmech analysis
 
-Extracts complete provenance, input and completion data hashes, model
-specifications, convergence monitors, imputation statistics, and
-downstream pooled analyses into a tamper-evident audit document.
-Supports Markdown, JSON, and standalone HTML formats.
+Collects the R and package versions, SHA-256 hashes of the input data,
+the assumption specification and each completed dataset, the imputation
+settings, the convergence status and any pooled or sensitivity results
+into one document, in Markdown, JSON or standalone HTML.
 
 ## Usage
 
@@ -54,6 +54,19 @@ catmech_audit_trail(
 A character vector of class \`c("catmech_audit_trail", "character")\`
 containing the generated audit document.
 
+## Details
+
+The input-data and completion hashes are taken by \[digest::digest()\]
+over the serialized R data frames, so they can be recomputed only in R,
+not with a file checksum tool. The specification hash is of its
+canonical JSON text, which \[write_catmech()\] saves as
+\`assumptions.canonical.json\`. The hashes let a rerun be compared with
+the record; they do not make the document tamper-evident, because anyone
+who edits the data can also regenerate the record. The record can
+support documentation, for example under FDA 21 CFR Part 11 or ICH E9,
+but compliance is a property of the validated system, access controls
+and procedures around it, not of this function.
+
 ## Examples
 
 ``` r
@@ -66,25 +79,25 @@ df <- data.frame(
 df$ref <- df$lab
 df$ref[11:30] <- NA
 res <- catmech_reference(df, value = "lab", reference = "ref",
-                         predictors = "age", m = 2, seed = 1)
+                         predictors = c("age", "y"), m = 2, seed = 1)
 pooled <- catmech_pool_lm(res, y ~ lab + age)
 trail <- catmech_audit_trail(res, pooled = pooled)
 print(trail)
 #> # Catmech Audit Trail & Provenance Report
 #> 
-#> **Generated:** 2026-11-07T23:46:21Z UTC | **Catmech Version:** 1.0.0
+#> **Generated:** 2026-11-08T03:05:48Z UTC | **Catmech Version:** 1.0.1
 #> **R Version:** 4.6.2 | **Platform:** x86_64-pc-linux-gnu
 #> 
 #> ---
 #> 
-#> ## 1. Cryptographic Data & Specification Integrity (SHA-256)
+#> ## 1. Data and Specification Hashes (SHA-256)
 #> 
 #> - **Original Input Data Hash:** `b0dbfaef433a8845a59cd2740963aae87c551da520912d26b69d94ebe24f9fe9`
-#> - **Assumption Specification Hash:** `7ba7a2acef9b95325ceacfeaf8413bd993aaeb6afe1e7c9de47e1e0c33f7a75d`
+#> - **Assumption Specification Hash:** `0d01fc948329eb1374ac3e7a605d2d654b5029a26059bf334c5523074d21396d`
 #> - **Completed Dataset Checksums:**
 #> 
-#>   - Completion `m=1`: `fd9e0211aa706a46d0e63e085181c831144480ec10b12580688cf67fbaa0dfa1`
-#>   - Completion `m=2`: `a833b76a6fae53ebab5588a3691804afd77f7583d7b151fc50167c287e726f42`
+#>   - Completion `m=1`: `0570e2fd18a48e99f3aa7ea1ef3e104b472cbcf65b48597e62472e3659a386a2`
+#>   - Completion `m=2`: `6cafdeb838011ea1577187fe4336986947af709134fd4ad9ec6bdd16ee929d7f`
 #> 
 #> ## 2. Cohort Specification & Imputation Profile
 #> 
@@ -93,7 +106,7 @@ print(trail)
 #> | Engine | `reference_normal` |
 #> | Target Value Column | `lab` |
 #> | Reference Column | `ref` |
-#> | Predictors | age |
+#> | Predictors | age, y |
 #> | Cluster Variable | `none` |
 #> | Total Observations | 30 |
 #> | Completions (m) | 2 |
@@ -106,14 +119,14 @@ print(trail)
 #> 
 #> | term | estimate | std.error | df | lower | upper | interpretation |
 #> | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-#> | (Intercept) |  7.6465 | 1.2881 |  9.1610 |  4.7404 | 10.5526 | conditional_reference_model |
-#> | lab |  0.2246 | 0.1256 |  7.4031 | -0.0692 |  0.5184 | conditional_reference_model |
-#> | age | -0.0915 | 0.0355 | 24.9164 | -0.1647 | -0.0184 | conditional_reference_model |
+#> | (Intercept) |  8.8500 | 4.0865 | 0.7515 | -107.8258 | 125.5258 | conditional_reference_model |
+#> | lab |  0.0865 | 0.3030 | 0.7883 |   -7.3156 |   7.4885 | conditional_reference_model |
+#> | age | -0.0873 | 0.1282 | 0.6015 |   -8.6900 |   8.5154 | conditional_reference_model |
 #> 
 #> ---
 #> 
 #> ### Audit Trail & Provenance Record
-#> > This document provides an auditable provenance record of data imputation and downstream analysis.
-#> > All completions and statistical intervals are tied via SHA-256 checksums to the recorded input hash and assumption specification.
+#> > This document records the data, settings and results of one imputation and analysis run.
+#> > The data and completion hashes are of the serialized R data frames, and the specification hash is of its canonical JSON text. A rerun can be compared with them. They do not cover the pooled results, and they do not make this document tamper-evident.
 #>  
 ```

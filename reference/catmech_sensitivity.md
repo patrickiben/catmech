@@ -101,9 +101,9 @@ df <- data.frame(
 df$ref <- df$lab
 df$ref[11:30] <- NA
 res1 <- catmech_reference(df, value = "lab", reference = "ref",
-                          predictors = "age", m = 2, seed = 1)
+                          predictors = c("age", "y"), m = 2, seed = 1)
 res2 <- catmech_reference(df, value = "lab", reference = "ref",
-                          predictors = "age", use_recorded = TRUE, m = 2, seed = 2)
+                          predictors = c("age", "y"), use_recorded = TRUE, m = 2, seed = 2)
 #> Warning: All 10 audited rows agree with their recorded values, so 20 unaudited recorded values were kept with no imputation uncertainty. An audit of this size cannot rule out an error rate of about 30.0%, and intervals here treat those records as correct.
 sens <- catmech_sensitivity(
   list(standard = res1, recorded = res2),
@@ -113,10 +113,10 @@ sens <- catmech_sensitivity(
 print(sens)
 #> -- Catmech Sensitivity Analysis --
 #> Status:              unresolved_in_all_scenarios (complete: TRUE)
-#> Successful envelope: [-0.114, 0.5184]
+#> Successful envelope: [-7.3156, 7.4885]
 #> Scenarios:           2 evaluated
 #> 
 #>  scenario status estimate std.error   lower  upper          direction
-#>  standard     ok   0.2246    0.1256 -0.0692 0.5184 includes_reference
+#>  standard     ok   0.0865    0.3030 -7.3156 7.4885 includes_reference
 #>  recorded     ok   0.0564    0.0828 -0.1140 0.2268 includes_reference
 ```

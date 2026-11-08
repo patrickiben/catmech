@@ -87,6 +87,12 @@ references. This package policy does not assert that every PMM
 application is invalid. Only univariate linear models with at least one
 named coefficient are supported.
 
+When the audited value is an analysis predictor, the analysis outcome
+must be among the imputation \`predictors\`; otherwise its coefficient
+is biased toward zero and a warning says so. When the audited value is
+the outcome, the analysis predictors belong in the imputation model
+instead.
+
 ## Examples
 
 ``` r
@@ -99,17 +105,18 @@ df <- data.frame(
 )
 df$lab_ref <- df$lab
 df$lab_ref[11:n] <- NA
+# lab is a predictor below, so the outcome joins the imputation model.
 res <- catmech_reference(df, value = "lab", reference = "lab_ref",
-                         predictors = "age", m = 2, seed = 1)
+                         predictors = c("age", "outcome"), m = 2, seed = 1)
 pooled <- catmech_pool_lm(res, outcome ~ lab + age)
 print(pooled)
 #> -- Catmech Pooled Linear Model --
 #> Completions (m): 2 | Observations (n): 40
 #> 
 #>         term estimate std.error      df   lower  upper
-#>  (Intercept)   5.4865    0.9781 25.8621  3.4755 7.4975
-#>          lab   0.0130    0.0795 15.1264 -0.1562 0.1823
-#>          age  -0.0121    0.0145 35.0956 -0.0415 0.0173
+#>  (Intercept)   4.9555    1.3799 10.3797  1.8960 8.0150
+#>          lab   0.0499    0.0801 15.4733 -0.1204 0.2203
+#>          age  -0.0082    0.0173 15.7352 -0.0449 0.0286
 #>               interpretation
 #>  conditional_reference_model
 #>  conditional_reference_model

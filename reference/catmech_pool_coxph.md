@@ -102,6 +102,16 @@ containing:
 
   Inference label.
 
+## Details
+
+When the audited value is an analysis predictor, the imputation model
+needs the outcome: include the event indicator and the Nelson-Aalen
+cumulative hazard, which \[mice::nelsonaalen()\] computes, among the
+imputation \`predictors\` (White and Royston, 2009,
+\<doi:10.1002/sim.3618\>). A warning is given when the event indicator
+is missing. The complete-data degrees of freedom are events minus
+coefficients, the same default that \`mice::pool()\` uses for Cox fits.
+
 ## Examples
 
 ``` r
@@ -115,18 +125,18 @@ df <- data.frame(
 )
 df$lab_ref <- df$lab
 df$lab_ref[11:n] <- NA
+# lab is a predictor below, so the event indicator and the Nelson-Aalen
+# cumulative hazard join the imputation model.
+df$hazard <- mice::nelsonaalen(df, time, status)
 res <- catmech_reference(df, value = "lab", reference = "lab_ref",
-                         predictors = "age", m = 2, seed = 1)
+                         predictors = c("age", "status", "hazard"), m = 2, seed = 1)
 pooled_cox <- catmech_pool_coxph(res, survival::Surv(time, status) ~ lab + age,
                                  exponentiate = TRUE)
 print(pooled_cox)
 #> -- Catmech Pooled Cox PH Model --
 #> Completions (m): 2 | Observations (n): 50 | Events: 27
 #> 
-#>  term estimate std.error      df   lower  upper estimate_exp lower_exp
-#>   lab   0.0701    0.0675 21.3470 -0.0701 0.2103       1.0726    0.9323
-#>   age   0.0203    0.0237 20.8258 -0.0290 0.0696       1.0205    0.9714
-#>  upper_exp
-#>     1.2341
-#>     1.0721
+#>  term estimate std.error     df   lower  upper estimate_exp lower_exp upper_exp
+#>   lab   0.2459    0.2178 0.7791 -5.2787 5.7706       1.2788    0.0051  320.7235
+#>   age   0.0525    0.0866 0.6032 -5.6907 5.7957       1.0539    0.0034  328.8758
 ```

@@ -14,11 +14,14 @@ data quality issues:
 3.  **Internal reference audits** where a secondary gold-standard
     measurement is audited on a subset of patient records.
 
-The **`catmech`** package provides a mathematically sound, auditable
-framework for completing contaminated measurements, planning audit
-sample sizes, evaluating predictive calibration, and pooling downstream
-linear, generalized linear (GLM), and survival (Cox PH) regressions
-under Rubin’s rules with Barnard–Rubin degrees of freedom.
+The **`catmech`** package provides an auditable framework for completing
+contaminated measurements, checking predictive calibration, and pooling
+downstream linear, generalized linear (GLM), and survival (Cox PH)
+regressions under Rubin’s rules with Barnard–Rubin degrees of freedom.
+It also has a rough, unvalidated aid for planning audit sizes. The
+package has had no outside peer review or clinical validation; the
+[README](https://github.com/patrickiben/catmech#readme) gives the
+evidence and its limits.
 
 ------------------------------------------------------------------------
 
@@ -95,14 +98,25 @@ head(df[, c("patient_id", "site", "age", "lab_value", "lab_ref", "mace_30d")])
 We fit
 [`catmech_contamination()`](https://patrickiben.github.io/catmech/reference/catmech_contamination.md)
 using the audited subset to model both the probability of corruption and
-the measurement error mixture:
+the measurement error mixture.
+
+The biomarker is a *predictor* in every analysis below, so the
+imputation model must include each analysis outcome. Leaving an outcome
+out biases the biomarker’s coefficient toward zero; the pooling
+functions warn when they see that. For the survival analysis, the
+outcome enters as the event indicator and the Nelson–Aalen cumulative
+hazard (White and Royston, 2009), which
+[`mice::nelsonaalen()`](https://amices.org/mice/reference/nelsonaalen.html)
+computes:
 
 ``` r
+df$hazard <- mice::nelsonaalen(df, time, death_event)
+
 fit_contam <- catmech_contamination(
   data = df,
   value = "lab_value",
   reference = "lab_ref",
-  predictors = c("age", "cardiac_index"),
+  predictors = c("age", "cardiac_index", "mace_30d", "death_event", "hazard"),
   m = 4,
   seed = 42
 )
@@ -110,14 +124,15 @@ print(fit_contam)
 #> <catmech_result: reference_contamination>
 #>   Target value:      lab_value
 #>   Reference subset:  lab_ref (64/250 rows, 25.6%)
-#>   Predictors:        age, cardiac_index
+#>   Predictors:        age, cardiac_index, mace_30d, death_event, hazard
 #>   Completions (m):   4
 #>   Imputed rows:      186/250
 #>   Model convergence: passed
 ```
 
-The MCMC sampler generates $m = 4$ auditable completions of the target
-biomarker while properly reflecting parameter uncertainty.
+The MCMC sampler generates $m = 4$ completions of the target biomarker,
+reflecting parameter uncertainty. Four keeps this vignette fast; use 20
+or more in practice.
 
 ------------------------------------------------------------------------
 
@@ -140,9 +155,9 @@ print(holdout)
 #> -- Catmech Holdout Cross-Validation Check --
 #> Status:              no_miscalibration_detected
 #> Folds completed:     3 (holdout rows: 64, partitioned by: row)
-#> Predictive coverage: 0.9688 (nominal: 0.9) (uniform PIT KS p-value: 0.3318)
-#> Predictive RMSE:     model = 0.3997 vs recorded = 1.7378
-#> Mean interval width: 0.5483
+#> Predictive coverage: 0.9844 (nominal: 0.9) (uniform PIT KS p-value: 0.1135)
+#> Predictive RMSE:     model = 0.3086 vs recorded = 1.7378
+#> Mean interval width: 0.5999
 #> Flags:               none
 plot(holdout)
 ```
@@ -155,12 +170,18 @@ right panel verifies mean predictive calibration.
 
 ------------------------------------------------------------------------
 
-## 4. Prospective Audit Sample Size & Power Planning
+## 4. Rough Audit-Size Planning (Not Validated)
 
-Before undertaking a chart abstraction audit, investigators can
-prospectively compute the required sample size and statistical power
-using
-[`catmech_audit_power()`](https://patrickiben.github.io/catmech/reference/catmech_audit_power.md):
+Before an audit,
+[`catmech_audit_power()`](https://patrickiben.github.io/catmech/reference/catmech_audit_power.md)
+gives a rough idea of its size. It is **not validated**, and the planner
+it builds on,
+[`catmech_audit_plan()`](https://patrickiben.github.io/catmech/reference/catmech_audit_plan.md),
+returned NO-GO under a rule fixed in advance. Its default factor treats
+the unexplained variation as if it sat in erroneous records that can be
+identified, which is optimistic, so the printout also shows the audit
+that linear imputation needs under the double-sampling regression
+estimator at the same correlation:
 
 ``` r
 pwr <- catmech_audit_power(
@@ -171,10 +192,10 @@ pwr <- catmech_audit_power(
   correlation = 0.82
 )
 print(pwr)
-#> -- Catmech Audit Power & Sample Size Calculator --
+#> -- Catmech Audit-Size Planning Aid (not validated) --
 #> Cohort Size (N):    1000
 #> Target Ratio:       <= 1.25 (within 25% of full audit width)
-#> Target Power:       80%
+#> Target share of k:  80%
 #> Two-Phase Factor k: 0.028 [0.010, 0.078] (prior_specification)
 #> 
 #>  fraction n_audit expected_ratio ratio_lower ratio_upper power
@@ -200,15 +221,19 @@ print(pwr)
 #>      0.40     400          1.024       1.007       1.057 1.000
 #> 
 #> Recommended Audit Size: n = 80 records (8.0% audit fraction)
-#> Achieves 85.3% power (expected ratio: 1.168)
+#> Meets the target in 85.3% of k draws (expected ratio: 1.168)
+#> Linear imputation (double-sampling regression, k = 0.229): about 29.0% (n = 290) for ratio <= 1.25, ignoring uncertainty in k.
+#> Power here is the share of plausible k values meeting the target, not the power of a test.
+#> Not validated; see ?catmech_audit_power for the assumptions.
 plot(pwr)
 ```
 
 ![](catmech-clinical-audit_files/figure-html/audit_power-1.png)
 
-The power curve highlights the minimum audit sample size needed to
-guarantee that the confidence interval width remains within 25% of an
-ideal full-cohort audit.
+The curve shows, for each audit size, the share of plausible values of
+the two-phase factor for which the expected interval width stays within
+25% of a full audit’s. It guarantees nothing: treat it, and the
+linear-imputation figure, as a starting point for planning.
 
 ------------------------------------------------------------------------
 
@@ -232,9 +257,9 @@ print(res_lm)
 #> Completions (m): 4 | Observations (n): 250
 #> 
 #>         term estimate std.error     df   lower   upper
-#>  (Intercept)   2.1940    0.4238 7.2184  1.1980  3.1899
-#>    lab_value  -0.1763    0.0272 4.9056 -0.2466 -0.1059
-#>          age   0.0025    0.0056 7.4906 -0.0105  0.0154
+#>  (Intercept)   2.1856    0.4084 7.4740  1.2321  3.1390
+#>    lab_value  -0.1739    0.0278 6.2173 -0.2414 -0.1065
+#>          age   0.0024    0.0057 7.3694 -0.0110  0.0157
 #>                                  interpretation
 #>  conditional_contamination_model_cluster_robust
 #>  conditional_contamination_model_cluster_robust
@@ -260,13 +285,13 @@ print(res_glm)
 #> Completions (m): 4 | Observations (n): 250
 #> 
 #>         term estimate std.error       df    lower   upper estimate_exp
-#>  (Intercept)  -6.9522    1.7310 243.1987 -10.3619 -3.5426       0.0010
-#>    lab_value   0.2044    0.1618 230.2023  -0.1143  0.5231       1.2268
-#>          age   0.0576    0.0227 244.8982   0.0129  0.1024       1.0593
+#>  (Intercept)  -7.1721    1.8284 146.5547 -10.7855 -3.5588       0.0008
+#>    lab_value   0.2408    0.1842  50.3994  -0.1291  0.6107       1.2723
+#>          age   0.0575    0.0228 244.8883   0.0126  0.1024       1.0592
 #>  lower_exp upper_exp
-#>      0.000    0.0289
-#>      0.892    1.6872
-#>      1.013    1.1078
+#>     0.0000    0.0285
+#>     0.8789    1.8417
+#>     1.0127    1.1078
 ```
 
 ### C. Survival Proportional Hazards (`catmech_pool_coxph`)
@@ -288,11 +313,11 @@ print(res_cox)
 #> Completions (m): 4 | Observations (n): 250 | Events: 83
 #> 
 #>       term estimate std.error     df   lower  upper estimate_exp lower_exp
-#>  lab_value   0.3851    0.0990 4.1324  0.1135 0.6566       1.4697    1.1202
-#>        age   0.0209    0.0098 7.4755 -0.0019 0.0437       1.0211    0.9982
+#>  lab_value   0.4160    0.1066 3.1900  0.0881 0.7440       1.5159    1.0921
+#>        age   0.0214    0.0102 7.1523 -0.0027 0.0454       1.0216    0.9973
 #>  upper_exp
-#>     1.9283
-#>     1.0447
+#>     2.1043
+#>     1.0464
 ```
 
 ------------------------------------------------------------------------
@@ -308,7 +333,8 @@ fit_ref <- catmech_reference(
   data = df,
   value = "lab_value",
   reference = "lab_ref",
-  predictors = c("age", "cardiac_index"),
+  predictors = c("age", "cardiac_index", "mace_30d", "death_event", "hazard"),
+  use_recorded = TRUE,
   m = 4,
   seed = 42
 )
@@ -323,24 +349,27 @@ sens <- catmech_sensitivity(
 print(sens)
 #> -- Catmech Sensitivity Analysis --
 #> Status:              direction_stable_over_supplied_scenarios (complete: TRUE)
-#> Successful envelope: [-0.2772, -0.1058]
+#> Successful envelope: [-0.2307, -0.092]
 #> Scenarios:           2 evaluated
 #> 
 #>       scenario status estimate std.error   lower   upper direction
-#>  contamination     ok  -0.1763    0.0298 -0.2363 -0.1163     below
-#>      reference     ok  -0.1915    0.0384 -0.2772 -0.1058     below
+#>  contamination     ok  -0.1739    0.0286 -0.2307 -0.1171     below
+#>      reference     ok  -0.1606    0.0326 -0.2291 -0.0920     below
 ```
 
 ------------------------------------------------------------------------
 
-## 7. Tamper-Evident Regulatory Audit Trail
+## 7. Provenance Record
 
-To support regulatory documentation (such as under FDA 21 CFR Part 11
-and ICH E9),
 [`catmech_audit_trail()`](https://patrickiben.github.io/catmech/reference/catmech_audit_trail.md)
-outputs a record containing SHA-256 checksums of input data,
-assumptions, and all completions. The record supports, but does not by
-itself establish, compliance:
+writes a record of one run: R and package versions, SHA-256 hashes of
+the input data and every completion (taken over the serialized R data
+frames, so they can be recomputed only in R) and of the assumption
+specification’s canonical JSON text, the settings, the convergence
+status and the pooled results. A rerun can be compared with it. It is
+not tamper-evident, since anyone who edits the data can regenerate it,
+and it can support documentation under FDA 21 CFR Part 11 or ICH E9
+without making a system compliant:
 
 ``` r
 trail <- catmech_audit_trail(
@@ -352,21 +381,21 @@ trail <- catmech_audit_trail(
 cat(substr(as.character(trail), 1, 1200), "\n... [truncated for display]")
 #> # Catmech Audit Trail & Provenance Report
 #> 
-#> **Generated:** 2026-11-07T23:46:46Z UTC | **Catmech Version:** 1.0.0
+#> **Generated:** 2026-11-08T03:06:08Z UTC | **Catmech Version:** 1.0.1
 #> **R Version:** 4.6.2 | **Platform:** x86_64-pc-linux-gnu
 #> 
 #> ---
 #> 
-#> ## 1. Cryptographic Data & Specification Integrity (SHA-256)
+#> ## 1. Data and Specification Hashes (SHA-256)
 #> 
-#> - **Original Input Data Hash:** `337e3fda57c103ac827c23feadbc66452d323a0b938f245d78fd46bc1dc5e235`
-#> - **Assumption Specification Hash:** `bd63c8176604952318d2bc2124bbf603535d58a7cc5963191ed07da19eae4dcf`
+#> - **Original Input Data Hash:** `957b56100d7d74bdb322e9bc67803d15c53aeff694d92de87dd4688608879b2f`
+#> - **Assumption Specification Hash:** `67a39bb736d40bf6fbf1d0840fe417ba43247a444c6bf36b44dd1b3036019ce3`
 #> - **Completed Dataset Checksums:**
 #> 
-#>   - Completion `m=1`: `cf442c7284ea912c522aac649a584cf9613ad1fc1036d3f318f3d88d1f050785`
-#>   - Completion `m=2`: `f3f5b3eb2258fac7c17f74903c09a54522c157bd3751f03fab919d33c03abeb2`
-#>   - Completion `m=3`: `6e348ac7190dcb9f27b28265a1ea49e6cfcfdc2496021c8f9d1e959e702b29c9`
-#>   - Completion `m=4`: `1222dcd6aaa6f9e737d5da15df163b24ee6f87b1e53a22992a896d88b8f5a055`
+#>   - Completion `m=1`: `903e83fe60adcfbf37a2840bd6295217ee0036dc9127d9817ebf8a0ab8370215`
+#>   - Completion `m=2`: `89e1023d89b468818f78de32d42109e106d39ca141f19425f523822126d18662`
+#>   - Completion `m=3`: `786bc9c718e22db04a06174df041f19f620e0e0e9e89c702fba3fe6d9338a437`
+#>   - Completion `m=4`: `a166b5cfe3341f52803ba689e9876f09a3c690c77163bb517c5a99589ad19356`
 #> 
 #> ## 2. Cohort Specification & Imputation Profile
 #> 
@@ -375,17 +404,17 @@ cat(substr(as.character(trail), 1, 1200), "\n... [truncated for display]")
 #> | Engine | `reference_contamination` |
 #> | Target Value Column | `lab_value` |
 #> | Reference Column | `lab_ref` |
-#> | Predictors | age, cardiac_index |
+#> | Predictors | age, cardiac_index, mace_30d, death_event, hazard |
 #> | Cluster Variable | `none` |
 #> | Total Observations | 250 |
 #> | Completions (m) | 4 |
 #> | Imputed Records | 186 (74.4%) |
-#> | Convergence Sta 
+#> | 
 #> ... [truncated for display]
 ```
 
-The resulting audit trail guarantees complete transparency,
-traceability, and reproducibility.
+The record makes a rerun checkable; it does not by itself make an
+analysis reproducible or compliant.
 
 ------------------------------------------------------------------------
 
@@ -419,7 +448,8 @@ plot(res_cox, exponentiate = TRUE, main = "Overall Survival Hazard Ratios (95% C
 To evaluate how much precision is recovered and whether point estimates
 shift across different ways of handling un-audited records,
 [`catmech_compare_strategies()`](https://patrickiben.github.io/catmech/reference/catmech_compare_strategies.md)
-evaluates all four core workflows side by side:
+evaluates all four core workflows side by side. By default its
+imputation uses every variable in the formula, the outcome included:
 
 ``` r
 comp <- catmech_compare_strategies(
@@ -433,6 +463,7 @@ comp <- catmech_compare_strategies(
 print(comp)
 #> -- Catmech Audit Strategy Comparison --
 #> Cohort Size (N): 250 | Audited Records (n): 64 (25.6% audit fraction)
+#> Imputation predictors: cardiac_index, age
 #> 
 #>              strategy        term estimate std.error ci_width rel_efficiency
 #>  validation_subsample (Intercept)   2.8243    0.5965   2.3854         1.0000
@@ -441,12 +472,12 @@ print(comp)
 #>  naive_trust_recorded (Intercept)   1.5703    0.2416   0.9517         6.0957
 #>  naive_trust_recorded   lab_value  -0.0493    0.0171   0.0673         9.9663
 #>  naive_trust_recorded         age   0.0006    0.0036   0.0142         5.1305
-#>    linear_mi_recorded (Intercept)   1.8167    0.3464   1.4185         2.9658
-#>    linear_mi_recorded   lab_value  -0.0846    0.0350   0.1426         2.3752
-#>    linear_mi_recorded         age  -0.0002    0.0041   0.0166         3.9178
-#>   contamination_model (Intercept)   2.1324    0.2611   1.0304         5.2172
-#>   contamination_model   lab_value  -0.1642    0.0287   0.1134         3.5354
-#>   contamination_model         age   0.0022    0.0035   0.0137         5.4889
+#>    linear_mi_recorded (Intercept)   2.4496    0.2891   1.1722         4.2570
+#>    linear_mi_recorded   lab_value  -0.1976    0.0300   0.1231         3.2413
+#>    linear_mi_recorded         age   0.0008    0.0034   0.0136         5.6694
+#>   contamination_model (Intercept)   2.1943    0.2493   0.9821         5.7249
+#>   contamination_model   lab_value  -0.1760    0.0270   0.1063         4.0050
+#>   contamination_model         age   0.0024    0.0034   0.0134         5.7701
 
 # Forest plot comparing all 4 strategies for the target measurement
 plot(comp, term = "lab_value", main = "Audit Strategy Comparison: Biomarker Effect on Cardiac Index")
@@ -458,15 +489,15 @@ plot(comp, term = "lab_value", main = "Audit Strategy Comparison: Biomarker Effe
 
 ## 10. Practitioner Decision Flowchart
 
-When deciding which audit imputation model or downstream pooling
-approach to deploy, investigators should follow this evidence-based
-decision framework:
+This table summarizes what the package’s own tests found. The
+[README](https://github.com/patrickiben/catmech#readme) gives the
+evidence, its limits and the cases where it was inconclusive.
 
-| Scenario / Error Pattern                                              | Recommended Method                                                                                              | Rationale & Benchmark Findings                                                                                                                                    |
-|-----------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Subtle or diffuse errors** (transcription slips, calibration drift) | `catmech_reference(use_recorded = TRUE)`                                                                        | Linear MI matches or beats complex models on real recording differences (ClinicalTrials.gov & NHANES) with narrower intervals and fewer assumptions.              |
-| **Gross / separable spikes** (10x decimal errors, unit confusion)     | [`catmech_contamination()`](https://patrickiben.github.io/catmech/reference/catmech_contamination.md)           | The contamination mixture model explicitly estimates per-record error probability, achieving 94.0% coverage vs. 64.7% for linear MI under gross synthetic errors. |
-| **Multi-center / clustered sites**                                    | `catmech_reference(cluster_model = "joint")` + cluster-robust pooling                                           | Bivariate Gaussian site model handles mixed within-cluster recording patterns, with delete-one-cluster jackknife (`cv3`) variance.                                |
-| **Prospective sample size planning**                                  | `catmech_audit_power(N, target_ratio)`                                                                          | Computes audit sample sizes to achieve desired relative interval width; recommend audit sizes of at least 10%–15% ($n \geq 50$) for stable variance estimation.   |
-| **Sensitivity check across strategies**                               | [`catmech_compare_strategies()`](https://patrickiben.github.io/catmech/reference/catmech_compare_strategies.md) | Directly compares validation subsample, naive analysis, linear MI, and contamination model side by side.                                                          |
-| **Regulatory submission**                                             | [`catmech_audit_trail()`](https://patrickiben.github.io/catmech/reference/catmech_audit_trail.md)               | Cryptographically documents input SHA-256 hashes, options, and pooled results for regulatory documentation (FDA 21 CFR Part 11 / ICH E9).                         |
+| Scenario / Error Pattern                                              | Recommended Method                                                                                              | Rationale & Benchmark Findings                                                                                                                                                                                                                                                                      |
+|-----------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Subtle or diffuse errors** (transcription slips, calibration drift) | `catmech_reference(use_recorded = TRUE)`                                                                        | On real recording differences (ClinicalTrials.gov and NHANES), linear MI matched or beat the contamination model, with fewer assumptions.                                                                                                                                                           |
+| **Gross / separable spikes** (10x decimal errors, unit confusion)     | [`catmech_contamination()`](https://patrickiben.github.io/catmech/reference/catmech_contamination.md)           | The contamination mixture model explicitly estimates per-record error probability, achieving 94.0% coverage vs. 64.7% for linear MI under gross synthetic errors.                                                                                                                                   |
+| **Multi-center / clustered sites**                                    | `catmech_reference(use_recorded = TRUE)` + `cluster = "site"` in the pooling function                           | The pooled variance is a delete-one-cluster jackknife (`cv3`) for linear models. `catmech_reference(cluster = )` is experimental, came out PARTIAL in its planned tests, and biased slopes when the audited value was a predictor, so use it only as a check when the audited value is the outcome. |
+| **Audit size planning**                                               | `catmech_audit_power(N, target_ratio)`                                                                          | Rough and not validated; its default factor is optimistic, so also read its linear-imputation figure. [`catmech_audit_plan()`](https://patrickiben.github.io/catmech/reference/catmech_audit_plan.md) returned NO-GO.                                                                               |
+| **Sensitivity check across strategies**                               | [`catmech_compare_strategies()`](https://patrickiben.github.io/catmech/reference/catmech_compare_strategies.md) | Compares validation subsample, naive analysis, linear MI, and contamination model side by side, imputing with the outcome included.                                                                                                                                                                 |
+| **Provenance**                                                        | [`catmech_audit_trail()`](https://patrickiben.github.io/catmech/reference/catmech_audit_trail.md)               | Records SHA-256 hashes of the input data, settings and completions with the pooled results. Supports documentation; does not establish FDA 21 CFR Part 11 or ICH E9 compliance.                                                                                                                     |

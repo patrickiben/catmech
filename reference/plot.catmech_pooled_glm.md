@@ -93,8 +93,9 @@ df <- data.frame(
 )
 df$lab_ref <- df$lab
 df$lab_ref[11:n] <- NA
+# lab is a predictor below, so the outcome y joins the imputation model.
 res <- catmech_reference(df, value = "lab", reference = "lab_ref",
-                         predictors = "age", m = 2, seed = 1)
+                         predictors = c("age", "y"), m = 2, seed = 1)
 pooled <- catmech_pool_glm(res, y ~ lab + age, family = stats::binomial())
 plot(pooled)
 ```

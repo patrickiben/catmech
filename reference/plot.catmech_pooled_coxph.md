@@ -92,8 +92,9 @@ df <- data.frame(
 )
 df$lab_ref <- df$lab
 df$lab_ref[11:n] <- NA
+df$hazard <- mice::nelsonaalen(df, time, status)
 res <- catmech_reference(df, value = "lab", reference = "lab_ref",
-                         predictors = "age", m = 2, seed = 1)
+                         predictors = c("age", "status", "hazard"), m = 2, seed = 1)
 pooled <- catmech_pool_coxph(res, survival::Surv(time, status) ~ lab + age)
 plot(pooled)
 ```

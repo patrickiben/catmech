@@ -1,7 +1,8 @@
 # Plot an audit power curve
 
-Displays statistical power versus audit sample size with reference
-threshold lines.
+Displays, against audit size, the share of plausible \\k\\ values whose
+width ratio meets the target, with reference lines. Not validated; see
+\[catmech_audit_power()\].
 
 ## Usage
 
